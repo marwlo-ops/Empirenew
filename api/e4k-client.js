@@ -135,6 +135,82 @@ export async function fetchAllianceRanking(start = "5", options = {}) {
   };
 }
 
+/** Pobiera stronę rankingu graczy PL1 (LT 1 = potęga, LT 2 = chwała). */
+export async function fetchPlayerRankingPage({ listType = 1, page = 1, pageSize = 100 } = {}, options = {}) {
+  if (![1, 2].includes(Number(listType))) throw new TypeError("listType musi wynosić 1 (potęga) lub 2 (chwała)");
+  if (!Number.isInteger(Number(page)) || Number(page) < 1) throw new TypeError("page musi być dodatnią liczbą całkowitą");
+  const params = { LT: Number(listType), LID: 1, SV: "1", page: Number(page), R: Number(pageSize) };
+  const payload = await request("hgh", params, options);
+  const root = payload.data ?? payload.content ?? payload;
+  const data = root.data ?? root;
+  let rows = data.highscoreList ?? data.HL ?? data.L ?? data.players ?? data.items ?? [];
+  if (!Array.isArray(rows) && rows && typeof rows === "object") rows = Object.values(rows);
+  if (!Array.isArray(rows)) throw new E4KApiError("hgh: odpowiedź rankingu graczy nie zawiera listy", {
+    params, keys: Object.keys(data || {})
+  });
+  return {
+    list_type: Number(listType), page: Number(page),
+    total_count: Number(data.totalCount ?? data.total_count ?? 0) || null,
+    rows, params
+  };
+}
+
+/** Pobiera do 1000 graczy z rankingu potęgi i uzupełnia ich rankingiem chwały. */
+export async function fetchServerPlayerRanking({ limit = 1000, pageSize = 100, maxPages = 10 } = {}, options = {}) {
+  const byId = new Map();
+  let totalCount = null, pagesFetched = 0;
+  for (let page = 1; page <= maxPages && byId.size < limit; page++) {
+    const result = await fetchPlayerRankingPage({ listType: 1, page, pageSize }, options);
+    pagesFetched++;
+    if (result.total_count !== null) totalCount = result.total_count;
+    for (const row of result.rows) {
+      const id = row.PID ?? row.playerId ?? row.player_id ?? row.id;
+      if (id === undefined || id === null) continue;
+      const key = String(id);
+      const previous = byId.get(key) || {};
+      byId.set(key, { ...previous, ...row, PID: id });
+    }
+    if (!result.rows.length || result.rows.length < pageSize || (totalCount !== null && byId.size >= totalCount)) break;
+  }
+  if (!byId.size) throw new E4KApiError("hgh LT=1: ranking nie zwrócił żadnych graczy", { pagesFetched });
+  // LT=2 dostarcza osobny ranking chwały; brak odpowiedzi nie unieważnia poprawnego rankingu potęgi.
+  try {
+    for (let page = 1; page <= maxPages && byId.size; page++) {
+      const result = await fetchPlayerRankingPage({ listType: 2, page, pageSize }, options);
+      for (const row of result.rows) {
+        const id = row.PID ?? row.playerId ?? row.player_id ?? row.id;
+        if (id === undefined || id === null) continue;
+        const current = byId.get(String(id));
+        if (current) current.glory_points = row.LT_points ?? row.P ?? row.POW ?? null;
+      }
+      if (!result.rows.length || result.rows.length < pageSize) break;
+    }
+  } catch (error) {
+    console.warn("hgh LT=2: ranking chwały niedostępny; zachowuję ranking potęgi:", error.message);
+  }
+  const players = [...byId.values()].slice(0, limit).map((row, index) => ({
+    player_id: Number(row.PID),
+    name: String(row.N ?? row.playerName ?? row.nick ?? ""),
+    alliance_id: Number(row.AID ?? row.allianceId ?? 0),
+    alliance_name: String(row.AN ?? row.allianceName ?? (Number(row.AID ?? 0) === 0 ? "Brak sojuszu" : "")),
+    rank: Number(row.rank ?? index + 1),
+    power: Number.isFinite(Number(row.P ?? row.POW ?? row.power)) ? Number(row.P ?? row.POW ?? row.power) : null,
+    glory_points: Number.isFinite(Number(row.glory_points)) ? Number(row.glory_points) : null,
+    loot: Number.isFinite(Number(row.loot ?? row.LOOT ?? row.loot_points)) ? Number(row.loot ?? row.LOOT ?? row.loot_points) : null,
+    level: Number.isFinite(Number(row.L)) ? Number(row.L) : null,
+    legend_level: Number.isFinite(Number(row.LL)) ? Number(row.LL) : null,
+    raw: row
+  })).filter(p => Number.isFinite(p.player_id) && p.player_id > 0 && p.name);
+  if (!players.length) throw new E4KApiError("hgh: rekordy nie zawierają poprawnego PID i nicku");
+  return {
+    schema_version: 1, server: options.server || DEFAULT_SERVER,
+    captured_at: new Date().toISOString(), source: "hgh",
+    query: { LT: 1, LID: 1, SV: "1", page_size: pageSize, limit },
+    total_count: totalCount, pages_fetched: pagesFetched,
+    player_count: players.length, players
+  };
+}
+
 /** Lekki test łączności dwóch potwierdzonych komend. Nie ukrywa błędów. */
 export async function testReadOnlyApi(options = {}) {
   const checks = [];

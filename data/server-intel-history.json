@@ -1,11 +1,11 @@
 {
   "schema_version": 2,
   "server": "EmpirefourkingdomsExGG2_3",
-  "updated_at": "2026-11-04T15:20:58.850Z",
-  "baseline_only": true,
+  "updated_at": "2026-11-04T15:28:34.735Z",
+  "baseline_only": false,
   "baseline_established_at": "2026-11-04T15:21:15.601Z",
-  "snapshot_sequence": 1,
-  "trends_available": false,
+  "snapshot_sequence": 2,
+  "trends_available": true,
   "alliances": [
     {
       "alliance_id": 0,
@@ -314,16 +314,32 @@
       "activity_known_count": 0
     }
   ],
-  "source_snapshot_at": "2026-11-04T15:21:15.601Z",
+  "source_snapshot_at": "2026-11-04T15:28:49.853Z",
   "player_count": 256,
-  "metrics_available": false,
+  "metrics_available": true,
   "metric_fields_detected": [
     "power",
     "glory_points"
   ],
-  "event_count": 0,
-  "new_events": 0,
-  "events": [],
+  "event_count": 1,
+  "new_events": 1,
+  "events": [
+    {
+      "id": "glory_delta:1964330:2026-11-04T15:28:49.853Z:0",
+      "detected_at": "2026-11-04T15:28:49.853Z",
+      "source": "hgh",
+      "server": "EmpirefourkingdomsExGG2_3",
+      "kind": "glory_delta",
+      "player_id": 1964330,
+      "player": "irek",
+      "alliance_id": 43045,
+      "alliance_name": "BRAVE HEART",
+      "previous_value": 50,
+      "current_value": 55,
+      "delta": 5,
+      "description": "Zmiana punktów chwały: +5"
+    }
+  ],
   "players": [
     {
       "player_id": 1963268,
@@ -398,10 +414,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 27755,
           "loot": null,
           "glory_points": 1850,
@@ -482,10 +498,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 29157,
           "loot": null,
           "glory_points": 1665,
@@ -554,10 +570,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25675,
           "loot": null,
           "glory_points": 1660,
@@ -645,10 +661,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1101,
           "loot": null,
           "glory_points": 1480,
@@ -717,10 +733,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1093,
           "loot": null,
           "glory_points": 625,
@@ -800,10 +816,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 6124,
           "loot": null,
           "glory_points": 575,
@@ -872,10 +888,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 458,
           "loot": null,
           "glory_points": 510,
@@ -963,10 +979,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1569,
           "loot": null,
           "glory_points": 395,
@@ -1054,10 +1070,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 26214,
           "loot": null,
           "glory_points": 385,
@@ -1126,10 +1142,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1273,
           "loot": null,
           "glory_points": 330,
@@ -1210,10 +1226,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 6599,
           "loot": null,
           "glory_points": 325,
@@ -1301,10 +1317,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2444,
           "loot": null,
           "glory_points": 305,
@@ -1373,10 +1389,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 936,
           "loot": null,
           "glory_points": 285,
@@ -1457,10 +1473,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 4313,
           "loot": null,
           "glory_points": 280,
@@ -1555,10 +1571,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3292,
           "loot": null,
           "glory_points": 275,
@@ -1627,10 +1643,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1470,
           "loot": null,
           "glory_points": 265,
@@ -1717,10 +1733,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 213,
           "loot": null,
           "glory_points": 250,
@@ -1808,10 +1824,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3211,
           "loot": null,
           "glory_points": 250,
@@ -1899,10 +1915,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3415,
           "loot": null,
           "glory_points": 245,
@@ -1990,10 +2006,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1755,
           "loot": null,
           "glory_points": 230,
@@ -2074,10 +2090,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2188,
           "loot": null,
           "glory_points": 195,
@@ -2146,10 +2162,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1332,
           "loot": null,
           "glory_points": 190,
@@ -2229,10 +2245,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 23082,
           "loot": null,
           "glory_points": 190,
@@ -2319,10 +2335,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1640,
           "loot": null,
           "glory_points": 180,
@@ -2403,10 +2419,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1233,
           "loot": null,
           "glory_points": 175,
@@ -2500,10 +2516,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2197,
           "loot": null,
           "glory_points": 175,
@@ -2598,10 +2614,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3551,
           "loot": null,
           "glory_points": 170,
@@ -2689,10 +2705,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2025,
           "loot": null,
           "glory_points": 155,
@@ -2761,10 +2777,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1398,
           "loot": null,
           "glory_points": 155,
@@ -2845,10 +2861,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3345,
           "loot": null,
           "glory_points": 155,
@@ -2917,10 +2933,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 578,
           "loot": null,
           "glory_points": 140,
@@ -2989,10 +3005,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 4202,
           "loot": null,
           "glory_points": 140,
@@ -3061,10 +3077,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 388,
           "loot": null,
           "glory_points": 130,
@@ -3159,10 +3175,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 514,
           "loot": null,
           "glory_points": 125,
@@ -3250,10 +3266,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1653,
           "loot": null,
           "glory_points": 115,
@@ -3334,10 +3350,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1930,
           "loot": null,
           "glory_points": 115,
@@ -3424,10 +3440,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1375,
           "loot": null,
           "glory_points": 110,
@@ -3496,10 +3512,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3477,
           "loot": null,
           "glory_points": 90,
@@ -3586,10 +3602,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 4210,
           "loot": null,
           "glory_points": 90,
@@ -3676,10 +3692,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2285,
           "loot": null,
           "glory_points": 90,
@@ -3748,10 +3764,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1269,
           "loot": null,
           "glory_points": 90,
@@ -3831,10 +3847,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 305,
           "loot": null,
           "glory_points": 90,
@@ -3903,10 +3919,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1606,
           "loot": null,
           "glory_points": 90,
@@ -3994,10 +4010,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1382,
           "loot": null,
           "glory_points": 90,
@@ -4085,10 +4101,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2107,
           "loot": null,
           "glory_points": 85,
@@ -4169,10 +4185,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 9393,
           "loot": null,
           "glory_points": 85,
@@ -4253,10 +4269,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1875,
           "loot": null,
           "glory_points": 80,
@@ -4325,10 +4341,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 23318,
           "loot": null,
           "glory_points": 80,
@@ -4415,10 +4431,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 834,
           "loot": null,
           "glory_points": 80,
@@ -4487,10 +4503,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 890,
           "loot": null,
           "glory_points": 80,
@@ -4559,10 +4575,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 918,
           "loot": null,
           "glory_points": 80,
@@ -4643,10 +4659,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2045,
           "loot": null,
           "glory_points": 75,
@@ -4715,10 +4731,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 590,
           "loot": null,
           "glory_points": 70,
@@ -4794,10 +4810,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 4924,
           "loot": null,
           "glory_points": 70,
@@ -4878,10 +4894,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1256,
           "loot": null,
           "glory_points": 70,
@@ -4969,10 +4985,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 822,
           "loot": null,
           "glory_points": 70,
@@ -5052,10 +5068,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 494,
           "loot": null,
           "glory_points": 70,
@@ -5135,10 +5151,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 4978,
           "loot": null,
           "glory_points": 65,
@@ -5226,10 +5242,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1555,
           "loot": null,
           "glory_points": 65,
@@ -5324,10 +5340,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 7751,
           "loot": null,
           "glory_points": 65,
@@ -5408,10 +5424,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 524,
           "loot": null,
           "glory_points": 65,
@@ -5480,10 +5496,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 788,
           "loot": null,
           "glory_points": 60,
@@ -5571,10 +5587,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1350,
           "loot": null,
           "glory_points": 60,
@@ -5643,10 +5659,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 790,
           "loot": null,
           "glory_points": 60,
@@ -5727,10 +5743,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1204,
           "loot": null,
           "glory_points": 60,
@@ -5811,10 +5827,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1791,
           "loot": null,
           "glory_points": 60,
@@ -5895,10 +5911,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 11256,
           "loot": null,
           "glory_points": 60,
@@ -5985,10 +6001,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 511,
           "loot": null,
           "glory_points": 55,
@@ -6057,10 +6073,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 55,
@@ -6069,11 +6085,95 @@
       ]
     },
     {
+      "player_id": 1964330,
+      "name": "irek",
+      "alliance_id": 43045,
+      "alliance_name": "BRAVE HEART",
+      "rank": 70,
+      "power": 1218,
+      "glory_points": 55,
+      "loot": null,
+      "level": 14,
+      "legend_level": 0,
+      "raw": {
+        "OID": 1964330,
+        "DUM": false,
+        "N": "irek",
+        "E": {
+          "BGT": 3,
+          "BGC1": 14408394,
+          "BGC2": 4006527,
+          "SPT": 1,
+          "S1": 0,
+          "SC1": 15708678,
+          "S2": 0,
+          "SC2": 15708678,
+          "IS": 0
+        },
+        "L": 14,
+        "LL": 0,
+        "H": 0,
+        "AVP": 55,
+        "CF": 0,
+        "HF": 0,
+        "PRE": 0,
+        "SUF": -1,
+        "TOPX": -1,
+        "MP": 1218,
+        "R": 0,
+        "AID": 43045,
+        "AR": 8,
+        "AN": "BRAVE HEART",
+        "aee": {
+          "ACCA": {
+            "ACLI": 2,
+            "ACCS": [
+              16,
+              3
+            ]
+          },
+          "ACFB": {}
+        },
+        "RPT": 0,
+        "AP": [
+          [
+            0,
+            2514440,
+            622,
+            689,
+            1
+          ]
+        ],
+        "VP": [],
+        "SA": 0,
+        "VF": 0,
+        "PF": 0,
+        "RRD": -1,
+        "TI": -1
+      },
+      "metrics_available": true,
+      "power_delta_24h": 0,
+      "loot_delta_24h": null,
+      "trend_available": false,
+      "activity_status": "unknown",
+      "activity_label": "Brak wystarczających danych aktywności",
+      "last_seen": "2026-11-04T15:28:49.853Z",
+      "metric_history": [
+        {
+          "captured_at": "2026-11-04T15:28:49.853Z",
+          "power": 1218,
+          "loot": null,
+          "glory_points": 55,
+          "rank": 70
+        }
+      ]
+    },
+    {
       "player_id": 1945173,
       "name": "Brolly11",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 70,
+      "rank": 71,
       "power": 512,
       "glory_points": 50,
       "loot": null,
@@ -6136,14 +6236,14 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 512,
           "loot": null,
           "glory_points": 50,
-          "rank": 70
+          "rank": 71
         }
       ]
     },
@@ -6152,7 +6252,7 @@
       "name": "Jolly",
       "alliance_id": 6843,
       "alliance_name": "Bractwo Chamów",
-      "rank": 71,
+      "rank": 72,
       "power": 1543,
       "glory_points": 50,
       "loot": null,
@@ -6226,14 +6326,14 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1543,
           "loot": null,
           "glory_points": 50,
-          "rank": 71
+          "rank": 72
         }
       ]
     },
@@ -6242,7 +6342,7 @@
       "name": "Zulu1",
       "alliance_id": 40285,
       "alliance_name": "S P A R T A",
-      "rank": 72,
+      "rank": 73,
       "power": 1979,
       "glory_points": 50,
       "loot": null,
@@ -6287,7 +6387,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 354721,
+        "RPT": 354265,
         "AP": [
           [
             0,
@@ -6324,14 +6424,14 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1979,
           "loot": null,
           "glory_points": 50,
-          "rank": 72
+          "rank": 73
         }
       ]
     },
@@ -6340,7 +6440,7 @@
       "name": "LunaSea",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 73,
+      "rank": 74,
       "power": 25,
       "glory_points": 50,
       "loot": null,
@@ -6396,14 +6496,14 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 50,
-          "rank": 73
+          "rank": 74
         }
       ]
     },
@@ -6412,7 +6512,7 @@
       "name": "Włodzimierz I",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 74,
+      "rank": 75,
       "power": 847,
       "glory_points": 50,
       "loot": null,
@@ -6468,14 +6568,14 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 847,
           "loot": null,
           "glory_points": 50,
-          "rank": 74
+          "rank": 75
         }
       ]
     },
@@ -6484,7 +6584,7 @@
       "name": "Nanjo",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 75,
+      "rank": 76,
       "power": 676,
       "glory_points": 50,
       "loot": null,
@@ -6517,7 +6617,7 @@
         "MP": 676,
         "R": 0,
         "AID": -1,
-        "RPT": 12731995,
+        "RPT": 12731539,
         "AP": [
           [
             0,
@@ -6540,14 +6640,14 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 676,
           "loot": null,
           "glory_points": 50,
-          "rank": 75
+          "rank": 76
         }
       ]
     },
@@ -6556,7 +6656,7 @@
       "name": "żAbSoN89",
       "alliance_id": 19152,
       "alliance_name": "TOP GUN",
-      "rank": 76,
+      "rank": 77,
       "power": 697,
       "glory_points": 50,
       "loot": null,
@@ -6631,14 +6731,14 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 697,
           "loot": null,
           "glory_points": 50,
-          "rank": 76
+          "rank": 77
         }
       ]
     },
@@ -6647,7 +6747,7 @@
       "name": "Dawid Szacht",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 77,
+      "rank": 78,
       "power": 470,
       "glory_points": 50,
       "loot": null,
@@ -6703,95 +6803,11 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 470,
-          "loot": null,
-          "glory_points": 50,
-          "rank": 77
-        }
-      ]
-    },
-    {
-      "player_id": 1964330,
-      "name": "irek",
-      "alliance_id": 43045,
-      "alliance_name": "BRAVE HEART",
-      "rank": 78,
-      "power": 1218,
-      "glory_points": 50,
-      "loot": null,
-      "level": 14,
-      "legend_level": 0,
-      "raw": {
-        "OID": 1964330,
-        "DUM": false,
-        "N": "irek",
-        "E": {
-          "BGT": 3,
-          "BGC1": 14408394,
-          "BGC2": 4006527,
-          "SPT": 1,
-          "S1": 0,
-          "SC1": 15708678,
-          "S2": 0,
-          "SC2": 15708678,
-          "IS": 0
-        },
-        "L": 14,
-        "LL": 0,
-        "H": 0,
-        "AVP": 50,
-        "CF": 0,
-        "HF": 0,
-        "PRE": 0,
-        "SUF": -1,
-        "TOPX": -1,
-        "MP": 1218,
-        "R": 0,
-        "AID": 43045,
-        "AR": 8,
-        "AN": "BRAVE HEART",
-        "aee": {
-          "ACCA": {
-            "ACLI": 2,
-            "ACCS": [
-              16,
-              3
-            ]
-          },
-          "ACFB": {}
-        },
-        "RPT": 0,
-        "AP": [
-          [
-            0,
-            2514440,
-            622,
-            689,
-            1
-          ]
-        ],
-        "VP": [],
-        "SA": 0,
-        "VF": 0,
-        "PF": 0,
-        "RRD": -1,
-        "TI": -1
-      },
-      "metrics_available": true,
-      "power_delta_24h": 0,
-      "loot_delta_24h": null,
-      "trend_available": false,
-      "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
-      "metric_history": [
-        {
-          "captured_at": "2026-11-04T15:21:15.601Z",
-          "power": 1218,
           "loot": null,
           "glory_points": 50,
           "rank": 78
@@ -6877,10 +6893,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 529,
           "loot": null,
           "glory_points": 45,
@@ -6967,10 +6983,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 5427,
           "loot": null,
           "glory_points": 45,
@@ -7051,10 +7067,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 818,
           "loot": null,
           "glory_points": 45,
@@ -7142,10 +7158,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1176,
           "loot": null,
           "glory_points": 45,
@@ -7214,10 +7230,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 40,
@@ -7286,10 +7302,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 384,
           "loot": null,
           "glory_points": 40,
@@ -7358,10 +7374,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 469,
           "loot": null,
           "glory_points": 40,
@@ -7430,10 +7446,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 40,
@@ -7527,10 +7543,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 648,
           "loot": null,
           "glory_points": 40,
@@ -7599,10 +7615,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 455,
           "loot": null,
           "glory_points": 35,
@@ -7689,10 +7705,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1567,
           "loot": null,
           "glory_points": 35,
@@ -7779,10 +7795,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2452,
           "loot": null,
           "glory_points": 35,
@@ -7851,10 +7867,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 777,
           "loot": null,
           "glory_points": 35,
@@ -7941,10 +7957,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1629,
           "loot": null,
           "glory_points": 35,
@@ -8031,10 +8047,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1185,
           "loot": null,
           "glory_points": 30,
@@ -8115,10 +8131,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3120,
           "loot": null,
           "glory_points": 30,
@@ -8205,10 +8221,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 847,
           "loot": null,
           "glory_points": 30,
@@ -8295,10 +8311,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 851,
           "loot": null,
           "glory_points": 30,
@@ -8367,10 +8383,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 893,
           "loot": null,
           "glory_points": 30,
@@ -8458,10 +8474,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1023,
           "loot": null,
           "glory_points": 30,
@@ -8530,10 +8546,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 711,
           "loot": null,
           "glory_points": 25,
@@ -8621,10 +8637,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1425,
           "loot": null,
           "glory_points": 25,
@@ -8704,10 +8720,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1447,
           "loot": null,
           "glory_points": 25,
@@ -8787,10 +8803,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1795,
           "loot": null,
           "glory_points": 25,
@@ -8877,10 +8893,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 806,
           "loot": null,
           "glory_points": 25,
@@ -8967,10 +8983,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 901,
           "loot": null,
           "glory_points": 25,
@@ -9058,10 +9074,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1165,
           "loot": null,
           "glory_points": 25,
@@ -9148,10 +9164,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 427,
           "loot": null,
           "glory_points": 20,
@@ -9220,10 +9236,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 350,
           "loot": null,
           "glory_points": 20,
@@ -9310,10 +9326,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1526,
           "loot": null,
           "glory_points": 20,
@@ -9393,10 +9409,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 434,
           "loot": null,
           "glory_points": 20,
@@ -9476,10 +9492,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 419,
           "loot": null,
           "glory_points": 20,
@@ -9560,10 +9576,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 616,
           "loot": null,
           "glory_points": 20,
@@ -9632,10 +9648,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 467,
           "loot": null,
           "glory_points": 20,
@@ -9715,10 +9731,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1518,
           "loot": null,
           "glory_points": 20,
@@ -9798,10 +9814,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3226,
           "loot": null,
           "glory_points": 20,
@@ -9881,10 +9897,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1537,
           "loot": null,
           "glory_points": 20,
@@ -9971,10 +9987,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2469,
           "loot": null,
           "glory_points": 20,
@@ -10054,10 +10070,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1508,
           "loot": null,
           "glory_points": 20,
@@ -10133,10 +10149,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 507,
           "loot": null,
           "glory_points": 20,
@@ -10223,10 +10239,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1424,
           "loot": null,
           "glory_points": 20,
@@ -10313,10 +10329,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2479,
           "loot": null,
           "glory_points": 20,
@@ -10392,10 +10408,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 394,
           "loot": null,
           "glory_points": 20,
@@ -10476,10 +10492,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 680,
           "loot": null,
           "glory_points": 20,
@@ -10548,10 +10564,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 421,
           "loot": null,
           "glory_points": 20,
@@ -10638,10 +10654,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 413,
           "loot": null,
           "glory_points": 20,
@@ -10728,10 +10744,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 788,
           "loot": null,
           "glory_points": 20,
@@ -10800,10 +10816,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 955,
           "loot": null,
           "glory_points": 20,
@@ -10890,10 +10906,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 830,
           "loot": null,
           "glory_points": 20,
@@ -10980,10 +10996,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 433,
           "loot": null,
           "glory_points": 20,
@@ -11052,10 +11068,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 415,
           "loot": null,
           "glory_points": 20,
@@ -11113,7 +11129,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 255930,
+        "RPT": 255475,
         "AP": [
           [
             0,
@@ -11136,10 +11152,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 388,
           "loot": null,
           "glory_points": 20,
@@ -11226,10 +11242,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 395,
           "loot": null,
           "glory_points": 15,
@@ -11298,10 +11314,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 15,
@@ -11370,10 +11386,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 478,
           "loot": null,
           "glory_points": 15,
@@ -11454,10 +11470,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 343,
           "loot": null,
           "glory_points": 15,
@@ -11537,10 +11553,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 576,
           "loot": null,
           "glory_points": 15,
@@ -11621,10 +11637,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 617,
           "loot": null,
           "glory_points": 15,
@@ -11712,10 +11728,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 578,
           "loot": null,
           "glory_points": 15,
@@ -11784,10 +11800,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 100,
           "loot": null,
           "glory_points": 15,
@@ -11867,10 +11883,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 3478,
           "loot": null,
           "glory_points": 15,
@@ -11950,10 +11966,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1497,
           "loot": null,
           "glory_points": 15,
@@ -12022,10 +12038,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 15,
@@ -12106,10 +12122,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 317,
           "loot": null,
           "glory_points": 15,
@@ -12196,10 +12212,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 392,
           "loot": null,
           "glory_points": 15,
@@ -12280,10 +12296,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 665,
           "loot": null,
           "glory_points": 15,
@@ -12363,10 +12379,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 337,
           "loot": null,
           "glory_points": 10,
@@ -12446,10 +12462,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 404,
           "loot": null,
           "glory_points": 10,
@@ -12507,7 +12523,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 3972778,
+        "RPT": 3972323,
         "AP": [
           [
             0,
@@ -12530,10 +12546,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 512,
           "loot": null,
           "glory_points": 10,
@@ -12602,10 +12618,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 398,
           "loot": null,
           "glory_points": 10,
@@ -12685,10 +12701,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 500,
           "loot": null,
           "glory_points": 10,
@@ -12757,10 +12773,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 10,
@@ -12829,10 +12845,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 10,
@@ -12912,10 +12928,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 514,
           "loot": null,
           "glory_points": 10,
@@ -13002,10 +13018,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1482,
           "loot": null,
           "glory_points": 10,
@@ -13092,10 +13108,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 636,
           "loot": null,
           "glory_points": 10,
@@ -13182,10 +13198,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 499,
           "loot": null,
           "glory_points": 10,
@@ -13266,10 +13282,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 347,
           "loot": null,
           "glory_points": 10,
@@ -13338,10 +13354,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 10,
@@ -13421,10 +13437,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2505,
           "loot": null,
           "glory_points": 10,
@@ -13504,10 +13520,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 2474,
           "loot": null,
           "glory_points": 10,
@@ -13576,10 +13592,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 100,
           "loot": null,
           "glory_points": 10,
@@ -13660,10 +13676,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 489,
           "loot": null,
           "glory_points": 10,
@@ -13751,10 +13767,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 383,
           "loot": null,
           "glory_points": 10,
@@ -13823,10 +13839,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 366,
           "loot": null,
           "glory_points": 10,
@@ -13907,10 +13923,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 320,
           "loot": null,
           "glory_points": 10,
@@ -13991,10 +14007,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 410,
           "loot": null,
           "glory_points": 10,
@@ -14063,10 +14079,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 368,
           "loot": null,
           "glory_points": 10,
@@ -14147,10 +14163,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 367,
           "loot": null,
           "glory_points": 10,
@@ -14219,10 +14235,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 828,
           "loot": null,
           "glory_points": 5,
@@ -14302,10 +14318,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 327,
           "loot": null,
           "glory_points": 5,
@@ -14385,10 +14401,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 340,
           "loot": null,
           "glory_points": 5,
@@ -14457,10 +14473,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 200,
           "loot": null,
           "glory_points": 5,
@@ -14529,10 +14545,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 296,
           "loot": null,
           "glory_points": 5,
@@ -14601,10 +14617,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 100,
           "loot": null,
           "glory_points": 5,
@@ -14673,10 +14689,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 337,
           "loot": null,
           "glory_points": 5,
@@ -14745,10 +14761,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 299,
           "loot": null,
           "glory_points": 5,
@@ -14817,10 +14833,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 298,
           "loot": null,
           "glory_points": 5,
@@ -14889,10 +14905,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 5,
@@ -14973,10 +14989,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 338,
           "loot": null,
           "glory_points": 5,
@@ -15045,10 +15061,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 286,
           "loot": null,
           "glory_points": 5,
@@ -15117,10 +15133,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 1028,
           "loot": null,
           "glory_points": 5,
@@ -15189,10 +15205,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 314,
           "loot": null,
           "glory_points": 5,
@@ -15261,10 +15277,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 5,
@@ -15333,10 +15349,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 488,
           "loot": null,
           "glory_points": 5,
@@ -15405,10 +15421,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 383,
           "loot": null,
           "glory_points": 5,
@@ -15489,10 +15505,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 324,
           "loot": null,
           "glory_points": 5,
@@ -15572,10 +15588,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 742,
           "loot": null,
           "glory_points": 5,
@@ -15644,10 +15660,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 297,
           "loot": null,
           "glory_points": 5,
@@ -15716,10 +15732,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 5,
@@ -15788,10 +15804,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 321,
           "loot": null,
           "glory_points": 5,
@@ -15837,7 +15853,7 @@
         "MP": 34,
         "R": 0,
         "AID": -1,
-        "RPT": 21618,
+        "RPT": 21164,
         "AP": [
           [
             0,
@@ -15860,10 +15876,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 34,
           "loot": null,
           "glory_points": 5,
@@ -15909,7 +15925,7 @@
         "MP": 32,
         "R": 0,
         "AID": -1,
-        "RPT": 285079,
+        "RPT": 284625,
         "AP": [
           [
             0,
@@ -15932,10 +15948,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 32,
           "loot": null,
           "glory_points": 5,
@@ -16023,10 +16039,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 665,
           "loot": null,
           "glory_points": 5,
@@ -16095,10 +16111,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -16167,10 +16183,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -16239,10 +16255,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 275,
           "loot": null,
           "glory_points": 0,
@@ -16311,10 +16327,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 43,
           "loot": null,
           "glory_points": 0,
@@ -16383,10 +16399,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 275,
           "loot": null,
           "glory_points": 0,
@@ -16455,10 +16471,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -16527,10 +16543,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 118,
           "loot": null,
           "glory_points": 0,
@@ -16599,10 +16615,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 100,
           "loot": null,
           "glory_points": 0,
@@ -16671,10 +16687,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 0,
@@ -16720,7 +16736,7 @@
         "MP": 118,
         "R": 1,
         "AID": -1,
-        "RPT": 352107529,
+        "RPT": 352107074,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -16735,10 +16751,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 118,
           "loot": null,
           "glory_points": 0,
@@ -16807,10 +16823,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -16879,10 +16895,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -16951,10 +16967,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 300,
           "loot": null,
           "glory_points": 0,
@@ -17023,10 +17039,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 299,
           "loot": null,
           "glory_points": 0,
@@ -17095,10 +17111,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 0,
@@ -17167,10 +17183,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 299,
           "loot": null,
           "glory_points": 0,
@@ -17239,10 +17255,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 39,
           "loot": null,
           "glory_points": 0,
@@ -17323,10 +17339,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 338,
           "loot": null,
           "glory_points": 0,
@@ -17407,10 +17423,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 313,
           "loot": null,
           "glory_points": 0,
@@ -17491,10 +17507,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 338,
           "loot": null,
           "glory_points": 0,
@@ -17575,10 +17591,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 300,
           "loot": null,
           "glory_points": 0,
@@ -17639,10 +17655,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 0,
@@ -17711,10 +17727,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 44,
           "loot": null,
           "glory_points": 0,
@@ -17783,10 +17799,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 553,
           "loot": null,
           "glory_points": 0,
@@ -17855,10 +17871,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 43,
           "loot": null,
           "glory_points": 0,
@@ -17939,10 +17955,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 361,
           "loot": null,
           "glory_points": 0,
@@ -18011,10 +18027,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 419,
           "loot": null,
           "glory_points": 0,
@@ -18095,10 +18111,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 342,
           "loot": null,
           "glory_points": 0,
@@ -18167,10 +18183,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 51,
           "loot": null,
           "glory_points": 0,
@@ -18239,10 +18255,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 0,
@@ -18311,10 +18327,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 301,
           "loot": null,
           "glory_points": 0,
@@ -18383,10 +18399,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -18467,10 +18483,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 360,
           "loot": null,
           "glory_points": 0,
@@ -18551,10 +18567,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 316,
           "loot": null,
           "glory_points": 0,
@@ -18623,10 +18639,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 33,
           "loot": null,
           "glory_points": 0,
@@ -18695,10 +18711,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 0,
@@ -18767,10 +18783,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 0,
@@ -18839,10 +18855,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -18911,10 +18927,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -18983,10 +18999,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 0,
           "loot": null,
           "glory_points": 0,
@@ -19032,7 +19048,7 @@
         "MP": 33,
         "R": 1,
         "AID": -1,
-        "RPT": 352107527,
+        "RPT": 352107072,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -19047,10 +19063,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 33,
           "loot": null,
           "glory_points": 0,
@@ -19119,10 +19135,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 100,
           "loot": null,
           "glory_points": 0,
@@ -19191,10 +19207,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 297,
           "loot": null,
           "glory_points": 0,
@@ -19263,10 +19279,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 714,
           "loot": null,
           "glory_points": 0,
@@ -19335,10 +19351,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 25,
           "loot": null,
           "glory_points": 0,
@@ -19407,10 +19423,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 100,
           "loot": null,
           "glory_points": 0,
@@ -19491,10 +19507,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 303,
           "loot": null,
           "glory_points": 0,
@@ -19563,10 +19579,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 320,
           "loot": null,
           "glory_points": 0,
@@ -19635,10 +19651,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 320,
           "loot": null,
           "glory_points": 0,
@@ -19707,10 +19723,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 320,
           "loot": null,
           "glory_points": 0,
@@ -19791,10 +19807,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 300,
           "loot": null,
           "glory_points": 0,
@@ -19863,10 +19879,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 314,
           "loot": null,
           "glory_points": 0,
@@ -19935,10 +19951,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 33,
           "loot": null,
           "glory_points": 0,
@@ -20007,10 +20023,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 321,
           "loot": null,
           "glory_points": 0,
@@ -20079,10 +20095,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 323,
           "loot": null,
           "glory_points": 0,
@@ -20151,10 +20167,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 321,
           "loot": null,
           "glory_points": 0,
@@ -20223,10 +20239,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 314,
           "loot": null,
           "glory_points": 0,
@@ -20295,10 +20311,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 314,
           "loot": null,
           "glory_points": 0,
@@ -20367,10 +20383,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 313,
           "loot": null,
           "glory_points": 0,
@@ -20439,10 +20455,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 314,
           "loot": null,
           "glory_points": 0,
@@ -20511,10 +20527,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 314,
           "loot": null,
           "glory_points": 0,
@@ -20583,10 +20599,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 314,
           "loot": null,
           "glory_points": 0,
@@ -20667,10 +20683,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 346,
           "loot": null,
           "glory_points": 0,
@@ -20739,10 +20755,10 @@
       "trend_available": false,
       "activity_status": "unknown",
       "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T15:21:15.601Z",
+      "last_seen": "2026-11-04T15:28:49.853Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T15:21:15.601Z",
+          "captured_at": "2026-11-04T15:28:49.853Z",
           "power": 46,
           "loot": null,
           "glory_points": 0,

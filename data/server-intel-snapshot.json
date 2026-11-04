@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "server": "EmpirefourkingdomsExGG2_3",
-  "captured_at": "2026-11-04T15:21:15.601Z",
+  "captured_at": "2026-11-04T15:28:49.853Z",
   "source": "hgh",
   "query": {
     "LT": 1,
@@ -4654,11 +4654,79 @@
       }
     },
     {
+      "player_id": 1964330,
+      "name": "irek",
+      "alliance_id": 43045,
+      "alliance_name": "BRAVE HEART",
+      "rank": 70,
+      "power": 1218,
+      "glory_points": 55,
+      "loot": null,
+      "level": 14,
+      "legend_level": 0,
+      "raw": {
+        "OID": 1964330,
+        "DUM": false,
+        "N": "irek",
+        "E": {
+          "BGT": 3,
+          "BGC1": 14408394,
+          "BGC2": 4006527,
+          "SPT": 1,
+          "S1": 0,
+          "SC1": 15708678,
+          "S2": 0,
+          "SC2": 15708678,
+          "IS": 0
+        },
+        "L": 14,
+        "LL": 0,
+        "H": 0,
+        "AVP": 55,
+        "CF": 0,
+        "HF": 0,
+        "PRE": 0,
+        "SUF": -1,
+        "TOPX": -1,
+        "MP": 1218,
+        "R": 0,
+        "AID": 43045,
+        "AR": 8,
+        "AN": "BRAVE HEART",
+        "aee": {
+          "ACCA": {
+            "ACLI": 2,
+            "ACCS": [
+              16,
+              3
+            ]
+          },
+          "ACFB": {}
+        },
+        "RPT": 0,
+        "AP": [
+          [
+            0,
+            2514440,
+            622,
+            689,
+            1
+          ]
+        ],
+        "VP": [],
+        "SA": 0,
+        "VF": 0,
+        "PF": 0,
+        "RRD": -1,
+        "TI": -1
+      }
+    },
+    {
       "player_id": 1945173,
       "name": "Brolly11",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 70,
+      "rank": 71,
       "power": 512,
       "glory_points": 50,
       "loot": null,
@@ -4721,7 +4789,7 @@
       "name": "Jolly",
       "alliance_id": 6843,
       "alliance_name": "Bractwo Chamów",
-      "rank": 71,
+      "rank": 72,
       "power": 1543,
       "glory_points": 50,
       "loot": null,
@@ -4795,7 +4863,7 @@
       "name": "Zulu1",
       "alliance_id": 40285,
       "alliance_name": "S P A R T A",
-      "rank": 72,
+      "rank": 73,
       "power": 1979,
       "glory_points": 50,
       "loot": null,
@@ -4840,7 +4908,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 354721,
+        "RPT": 354265,
         "AP": [
           [
             0,
@@ -4877,7 +4945,7 @@
       "name": "LunaSea",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 73,
+      "rank": 74,
       "power": 25,
       "glory_points": 50,
       "loot": null,
@@ -4933,7 +5001,7 @@
       "name": "Włodzimierz I",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 74,
+      "rank": 75,
       "power": 847,
       "glory_points": 50,
       "loot": null,
@@ -4989,7 +5057,7 @@
       "name": "Nanjo",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 75,
+      "rank": 76,
       "power": 676,
       "glory_points": 50,
       "loot": null,
@@ -5022,7 +5090,7 @@
         "MP": 676,
         "R": 0,
         "AID": -1,
-        "RPT": 12731995,
+        "RPT": 12731539,
         "AP": [
           [
             0,
@@ -5045,7 +5113,7 @@
       "name": "żAbSoN89",
       "alliance_id": 19152,
       "alliance_name": "TOP GUN",
-      "rank": 76,
+      "rank": 77,
       "power": 697,
       "glory_points": 50,
       "loot": null,
@@ -5120,7 +5188,7 @@
       "name": "Dawid Szacht",
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
-      "rank": 77,
+      "rank": 78,
       "power": 470,
       "glory_points": 50,
       "loot": null,
@@ -5160,74 +5228,6 @@
             2506017,
             623,
             660,
-            1
-          ]
-        ],
-        "VP": [],
-        "SA": 0,
-        "VF": 0,
-        "PF": 0,
-        "RRD": -1,
-        "TI": -1
-      }
-    },
-    {
-      "player_id": 1964330,
-      "name": "irek",
-      "alliance_id": 43045,
-      "alliance_name": "BRAVE HEART",
-      "rank": 78,
-      "power": 1218,
-      "glory_points": 50,
-      "loot": null,
-      "level": 14,
-      "legend_level": 0,
-      "raw": {
-        "OID": 1964330,
-        "DUM": false,
-        "N": "irek",
-        "E": {
-          "BGT": 3,
-          "BGC1": 14408394,
-          "BGC2": 4006527,
-          "SPT": 1,
-          "S1": 0,
-          "SC1": 15708678,
-          "S2": 0,
-          "SC2": 15708678,
-          "IS": 0
-        },
-        "L": 14,
-        "LL": 0,
-        "H": 0,
-        "AVP": 50,
-        "CF": 0,
-        "HF": 0,
-        "PRE": 0,
-        "SUF": -1,
-        "TOPX": -1,
-        "MP": 1218,
-        "R": 0,
-        "AID": 43045,
-        "AR": 8,
-        "AN": "BRAVE HEART",
-        "aee": {
-          "ACCA": {
-            "ACLI": 2,
-            "ACCS": [
-              16,
-              3
-            ]
-          },
-          "ACFB": {}
-        },
-        "RPT": 0,
-        "AP": [
-          [
-            0,
-            2514440,
-            622,
-            689,
             1
           ]
         ],
@@ -8738,7 +8738,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 255930,
+        "RPT": 255475,
         "AP": [
           [
             0,
@@ -9860,7 +9860,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 3972778,
+        "RPT": 3972323,
         "AP": [
           [
             0,
@@ -12502,7 +12502,7 @@
         "MP": 34,
         "R": 0,
         "AID": -1,
-        "RPT": 21618,
+        "RPT": 21164,
         "AP": [
           [
             0,
@@ -12558,7 +12558,7 @@
         "MP": 32,
         "R": 0,
         "AID": -1,
-        "RPT": 285079,
+        "RPT": 284625,
         "AP": [
           [
             0,
@@ -13193,7 +13193,7 @@
         "MP": 118,
         "R": 1,
         "AID": -1,
-        "RPT": 352107529,
+        "RPT": 352107074,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -15009,7 +15009,7 @@
         "MP": 33,
         "R": 1,
         "AID": -1,
-        "RPT": 352107527,
+        "RPT": 352107072,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -16345,5 +16345,5 @@
     }
   ],
   "baseline_established_at": "2026-11-04T15:21:15.601Z",
-  "snapshot_sequence": 1
+  "snapshot_sequence": 2
 }

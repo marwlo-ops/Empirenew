@@ -251,6 +251,7 @@ export async function fetchServerPlayerRanking({ limit = 1000 } = {}, options = 
       rank,
       power:powerValue != null && Number.isFinite(Number(powerValue)) ? Number(powerValue) : null,
       glory_points:(row.AVP ?? row.GP) != null && Number.isFinite(Number(row.AVP ?? row.GP)) ? Number(row.AVP ?? row.GP) : null,
+      honor_points:(row.H ?? row.HONOR ?? row.HONOUR) != null && Number.isFinite(Number(row.H ?? row.HONOR ?? row.HONOUR)) ? Number(row.H ?? row.HONOR ?? row.HONOUR) : null,
       loot:(row.loot ?? row.LOOT ?? row.loot_points) != null && Number.isFinite(Number(row.loot ?? row.LOOT ?? row.loot_points)) ? Number(row.loot ?? row.LOOT ?? row.loot_points) : null,
       level:row.L != null && Number.isFinite(Number(row.L)) ? Number(row.L) : null,
       legend_level:row.LL != null && Number.isFinite(Number(row.LL)) ? Number(row.LL) : null,

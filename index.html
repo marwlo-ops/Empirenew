@@ -2,66 +2,53 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#101827">
-<meta name="description" content="Empirenew — interaktywna mapa graczy sojuszu ReBorN w Goodgame Empire.">
-<title>Empirenew — mapa świata i gracze RB</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1422">
+<meta name="description" content="Empirenew — Mapa, Szpiegowanie i narzędzia społeczności Goodgame Empire / E4K.">
+<title>Empirenew — centrum narzędzi GGE</title>
 <style>
-:root{color-scheme:dark;--bg:#080f1b;--panel:#111d2e;--line:#263951;--text:#edf4ff;--muted:#9aacc3;--gold:#e8bd68;--blue:#70baff;--green:#6be0ad}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#234268 0,transparent 52%),var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
-a{color:inherit}.wrap{width:min(1100px,calc(100% - 32px));margin:auto}
-header{padding:22px 0;border-bottom:1px solid var(--line);background:#091321d9}
-.brand{font-weight:850;letter-spacing:.08em;font-size:14px;color:var(--gold)}nav{float:right;display:flex;gap:20px;font-size:14px;color:var(--muted)}nav a{text-decoration:none}nav a:hover{color:var(--gold)}
-.hero{padding:64px 0 38px}.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
-h1{font-size:clamp(36px,7vw,64px);line-height:1.04;letter-spacing:-.055em;margin:12px 0 18px;max-width:800px}
-.lead{font-size:clamp(17px,2.5vw,21px);color:#bdcce0;max-width:760px;margin:0 0 26px}
-.cta{display:inline-flex;align-items:center;gap:12px;padding:14px 20px;border-radius:12px;background:linear-gradient(120deg,#f0ca7c,#c9953e);color:#17130b;text-decoration:none;font-weight:850;box-shadow:0 10px 35px #d49e3b30}.cta span{font-size:20px}
-.secondary{display:inline-block;margin-left:16px;color:#c7d6e8;text-decoration:none;font-weight:650}
-.section-title{font-size:24px;letter-spacing:-.025em;margin:28px 0 14px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 34px}.stat,.card{border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#15243a,#101a29)}
-.stat{padding:16px 18px}.stat strong{display:block;font-size:30px;line-height:1.2;color:var(--gold)}.stat span{font-size:12px;color:var(--muted);letter-spacing:.08em}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{padding:20px}.card h3{margin:0 0 7px;font-size:18px}.card p{color:var(--muted);margin:0 0 12px;font-size:14px}.card a{color:var(--blue);font-weight:700;text-decoration:none}.card a:hover{text-decoration:underline}
-.map-card{border-color:#8b6a35;background:linear-gradient(130deg,#292619,#132238 72%);padding:24px}.map-card h2{font-size:25px;margin:0 0 8px}.map-card p{color:#c5c8c8;max-width:720px}.pill{display:inline-block;border:1px solid #8b6a35;border-radius:999px;padding:4px 10px;color:#f2d28f;font-size:12px;margin-bottom:12px}
-footer{margin-top:38px;padding:22px 0 35px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
-@media(max-width:620px){nav{gap:12px;font-size:12px}.hero{padding:44px 0 25px}.stats{gap:7px}.stat{padding:12px 9px}.stat strong{font-size:24px}.stat span{font-size:10px}.grid{grid-template-columns:1fr}.secondary{display:block;margin:14px 0 0}.section-title{font-size:22px}}
+:root{color-scheme:dark;--bg:#080f1b;--panel:#111e30;--line:#2a3c54;--text:#edf4ff;--muted:#9aacc3;--gold:#e8bd68;--green:#66d9a5;--blue:#78baff}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:radial-gradient(ellipse at 50% -20%,#25466a 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{position:sticky;top:0;z-index:30;background:#091321f2;border-bottom:1px solid var(--line);backdrop-filter:blur(14px);padding:10px max(14px,env(safe-area-inset-left))}
+.head{max-width:1500px;margin:auto;display:flex;align-items:center;gap:18px;flex-wrap:wrap}.brand{font-weight:900;letter-spacing:.14em;color:var(--gold);font-size:14px;white-space:nowrap}.nav{display:flex;gap:7px;flex:1;overflow-x:auto;padding:2px}.nav button{border:1px solid #35465d;border-radius:11px;padding:10px 16px;background:#15243a;color:#dce8f8;font:700 14px system-ui;white-space:nowrap;cursor:pointer}.nav button.active{border-color:#63dca9;background:linear-gradient(120deg,#174638,#49391f);color:#fff0c5;box-shadow:0 4px 18px #0005}
+main{max-width:1500px;margin:auto;padding:16px}.view{display:none}.view.active{display:block}.frame-shell{height:calc(100dvh - 102px);min-height:620px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#0d1726}.frame-shell iframe{display:block;width:100%;height:100%;border:0;background:#0d1726}
+.extras-intro{padding:20px 4px 15px}.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--green);font-weight:850}.extras-intro h1{font-size:clamp(26px,4vw,40px);line-height:1.1;margin:8px 0;color:#f3d28f}.extras-intro p{max-width:850px;color:#b7c7dc;margin:0}
+.resource-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.resource{min-width:0;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,#172940,#101a29);overflow:hidden;box-shadow:0 10px 32px #0003}.resource.wide{grid-column:1/-1}.resource-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:15px 16px 12px}.resource h2{font-size:18px;margin:0 0 4px;color:#f2d28f}.resource p{font-size:13px;color:var(--muted);margin:0}.tag{font-size:10px;font-weight:800;letter-spacing:.08em;color:#a8f2cb;border:1px solid #396b58;border-radius:99px;padding:4px 8px;white-space:nowrap}.open-link{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;border:1px solid #6c5932;border-radius:9px;padding:9px 12px;background:linear-gradient(120deg,#f0ca7c,#c9953e);color:#17130b;text-decoration:none;font-size:13px;font-weight:850}.open-link.secondary{background:#182d44;color:#c9e4ff;border-color:#3c6388}.iframe-wrap{height:clamp(360px,62vh,720px);border-top:1px solid var(--line);background:#0b1420}.iframe-wrap iframe{width:100%;height:100%;border:0;display:block;background:#fff}.frame-fallback{padding:8px 16px 14px;color:var(--muted);font-size:12px}.gacha-body{padding:4px 16px 18px}.gacha-visual{min-height:150px;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(ellipse,#5b4523 0,#1b2735 48%,#111a28 75%);border-top:1px solid var(--line);color:#f3d28f;font-size:30px;font-weight:900;letter-spacing:.05em}.gacha-visual span{display:block;font-size:12px;letter-spacing:.12em;color:#b6c6d9;margin-top:6px}
+footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
+@media(max-width:760px){header{padding:8px max(8px,env(safe-area-inset-left))}.head{gap:7px}.brand{width:100%;padding:2px 4px}.nav{width:100%;flex:none}.nav button{flex:1;padding:10px 9px;font-size:12px}.frame-shell{height:calc(100dvh - 124px);min-height:500px;border-radius:10px}main{padding:9px}.resource-grid{grid-template-columns:1fr;gap:11px}.resource.wide{grid-column:auto}.resource-head{padding:13px}.iframe-wrap{height:58dvh;min-height:340px;max-height:650px}.extras-intro{padding:14px 3px}.extras-intro h1{font-size:28px}.open-link{width:100%}.gacha-body{padding:4px 13px 15px}}
 </style>
 </head>
 <body>
-<header><div class="wrap"><span class="brand">EMPIRENEW</span><nav><a href="#mapa">Mapa RB</a><a href="#opracowania">Opracowania</a><a href="#zasady">Zasady</a></nav></div></header>
-<main class="wrap">
-<section class="hero">
-<div class="eyebrow">Repetytorium Goodgame Empire</div>
-<h1>Świat gry.<br><span style="color:var(--gold)">Dane, mapa, sojusze.</span></h1>
-<p class="lead">Projekt badawczy poświęcony lokalizacjom graczy, sojuszom i danym serwera. Zaczynamy od interaktywnej mapy członków ReBorN (RB) i MADDEVILS (MD).</p>
-<a class="cta" href="./mapa-rb.html">Otwórz mapę graczy RB + MD <span>→</span></a>
-<a class="secondary" href="#opracowania">Zobacz pozostałe opracowania ↓</a>
-</section>
-<section id="mapa">
-<div class="map-card card">
-<span class="pill">GŁÓWNY MODUŁ · REBORN</span>
-<h2>Interaktywna mapa graczy RB + MD</h2>
-<p>Przeglądaj punkty AP i VP obu sojuszy. RB jest oznaczony na czerwono, MD na zielono. Wybieraj sojusz lub oba naraz, krainę, wyszukuj graczy po nicku i sprawdzaj zapisane lokalizacje.</p>
-<a class="cta" href="./mapa-rb.html">Przejdź do mapy <span>↗</span></a>
+<header><div class="head"><div class="brand">EMPIRENEW</div><nav class="nav" aria-label="Główna nawigacja"><button type="button" data-view="map">🗺️ Mapa</button><button type="button" data-view="spy">🕵️ Szpiegowanie</button><button type="button" data-view="extras">🔗 Dodatkowe</button></nav></div></header>
+<main>
+<section class="view" id="view-map" aria-label="Mapa"><div class="frame-shell"><iframe id="map-frame" title="Empirenew — Mapa RB i MD" loading="eager"></iframe></div></section>
+<section class="view" id="view-spy" aria-label="Szpiegowanie"><div class="frame-shell"><iframe id="spy-frame" title="Empirenew — Szpiegowanie PL1" loading="eager"></iframe></div></section>
+<section class="view" id="view-extras" aria-label="Dodatkowe">
+<div class="extras-intro"><div class="eyebrow">Empire tools · community hub</div><h1>Dodatkowe narzędzia</h1><p>Zewnętrzne rankingi, narzędzia społeczności oraz oficjalne informacje o wydarzeniach Goodgame Empire. Jeśli dostawca blokuje osadzanie strony, skorzystaj z przycisku otwarcia w nowej karcie.</p></div>
+<div class="resource-grid">
+<article class="resource wide"><div class="resource-head"><div><h2>Empire Rankings &amp; Tools</h2><p>Rankingi i narzędzia społecznościowe dla graczy GGE / E4K.</p><a class="open-link" href="https://danadum.github.io/empire-rankings/" target="_blank" rel="noopener noreferrer">Otwórz pełny widok ↗</a></div><span class="tag">COMMUNITY TOOL</span></div><div class="iframe-wrap"><iframe src="https://danadum.github.io/empire-rankings/" title="Empire Rankings &amp; Tools" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin"></iframe></div><div class="frame-fallback">Nie widzisz zawartości? Strona zewnętrzna może blokować iframe — użyj przycisku „Otwórz pełny widok”.</div></article>
+<article class="resource"><div class="resource-head"><div><h2>Goodgame Empire Newshub &amp; Calendar</h2><p>Oficjalny hub wiadomości, ogłoszeń twórców i kalendarza wydarzeń.</p><a class="open-link" href="https://communityhub.goodgamestudios.com/newshubempire/" target="_blank" rel="noopener noreferrer">Otwórz Newshub ↗</a></div><span class="tag">OFFICIAL</span></div><div class="iframe-wrap"><iframe src="https://communityhub.goodgamestudios.com/newshubempire/" title="Goodgame Empire Newshub &amp; Calendar" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin"></iframe></div><div class="frame-fallback">Jeśli kalendarz nie ładuje się w osadzeniu, otwórz oficjalny Newshub bezpośrednio.</div></article>
+<article class="resource"><div class="resource-head"><div><h2>Gacha Events Overview</h2><p>Szczegółowy przegląd wydarzeń Gacha przygotowany przez społeczność.</p><a class="open-link secondary" href="https://generalsforum.com/overviews/gacha_events/#135" target="_blank" rel="noopener noreferrer">Przejdź do przeglądu Gacha ↗</a></div><span class="tag">EVENT GUIDE</span></div><div class="gacha-visual">GACHA<span>EVENTS OVERVIEW · COMMUNITY GUIDE</span></div><div class="gacha-body"><p style="color:var(--muted);font-size:13px">Otwórz pełny poradnik, aby przejrzeć opis i zestawienie wydarzeń.</p></div></article>
 </div>
-<div class="stats">
-<div class="stat"><strong>65</strong><span>GRACZY RB</span></div>
-<div class="stat"><strong>423</strong><span>POZYCJE AP</span></div>
-<div class="stat"><strong>832</strong><span>POZYCJE VP</span></div>
-</div>
-</section>
-<section id="opracowania">
-<h2 class="section-title">Pozostałe opracowania</h2>
-<div class="grid">
-<article class="card"><h3>Dane sojuszu ReBorN (RB)</h3><p>Źródło API, identyfikator sojuszu i zapis odczytanych danych lokalizacji.</p><a href="./research/RB.md">Otwórz opracowanie →</a></article>
-<article class="card"><h3>Fortece baronów</h3><p>Rozpoznawanie obiektów i odróżnianie zwykłych fortec od innych lochów.</p><a href="./research/fortece-barona.md">Otwórz opracowanie →</a></article>
-<article class="card"><h3>Skanowanie fortec</h3><p>Notatki dotyczące skanowania obiektów w trzech krainach.</p><a href="./research/fortece-barona-skanowanie.md">Otwórz opracowanie →</a></article>
-<article class="card"><h3>Dane fortec — JSON</h3><p>Szablon danych przygotowany do późniejszego uzupełniania potwierdzonymi rekordami.</p><a href="./data/baron-fortresses.json">Otwórz plik JSON →</a></article>
-</div>
-</section>
-<section id="zasady">
-<h2 class="section-title">Zasady projektu</h2>
-<div class="card"><p>• Zapisujemy datę pobrania i źródło danych.<br>• Oddzielamy wartości zwrócone przez API od ich interpretacji.<br>• Nie zgadujemy znaczenia niezweryfikowanych kodów krain i typów obiektów.<br>• Współrzędne X/Y są współrzędnymi mapy gry, a nie GPS.</p></div>
+<footer>Empirenew · Zewnętrzne serwisy pozostają własnością ich wydawców. Ich dostępność i możliwość osadzania zależą od polityki tych stron.</footer>
 </section>
 </main>
-<footer><div class="wrap">Empirenew · Serwer: <code>EmpirefourkingdomsExGG2_3</code> · Sojusz: ReBorN (RB), AID 115</div></footer>
-</body></html>
+<script>
+(function(){
+ const mapFrame=document.getElementById('map-frame'),spyFrame=document.getElementById('spy-frame');
+ mapFrame.src='./mapa-rb.html';
+ spyFrame.src='./mapa-rb.html#intel';
+ function activate(view,writeHash){
+  if(!['map','spy','extras'].includes(view))view='map';
+  document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='view-'+view));
+  document.querySelectorAll('[data-view]').forEach(el=>{const on=el.dataset.view===view;el.classList.toggle('active',on);el.setAttribute('aria-current',on?'page':'false')});
+  if(writeHash&&location.hash!=='#'+(view==='map'?'map':view==='spy'?'intel':'extras'))history.replaceState(null,'','#'+(view==='map'?'map':view==='spy'?'intel':'extras'));
+  document.title='Empirenew — '+(view==='map'?'Mapa':view==='spy'?'Szpiegowanie':'Dodatkowe');
+ }
+ document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>activate(btn.dataset.view,true)));
+ function fromHash(){const h=location.hash.toLowerCase();activate(h==='#extras'?'extras':h==='#intel'||h==='#spy'?'spy':'map',false)}
+ window.addEventListener('hashchange',fromHash);fromHash();
+})();
+</script>
+</body>
+</html>

@@ -4,7 +4,9 @@ Repetytorium Goodgame Empire – mapa, lokalizacje, sojusze i dane serwera.
 
 ## Aktualne opracowania
 - [Sojusz ReBorN (RB) — dane z API](research/RB.md)
-- [Fortecę baronów — rozpoznawanie i skanowanie map krain](research/fortece-barona.md)
+- [Fortecę baronów — rozpoznawanie obiektów](research/fortece-barona.md)
+- [Skanowanie fortec w trzech krainach](research/fortece-barona-skanowanie.md)
+- [Dane fortec — szablon JSON](data/baron-fortresses.json)
 
 ## Zakres badania RB
 - Serwer: `EmpirefourkingdomsExGG2_3`

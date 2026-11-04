@@ -202,7 +202,7 @@ function setMainView(view,writeHash=true){
  mainTabs.map.classList.toggle('active',!intel);mainTabs.intel.classList.toggle('active',intel);
  mainTabs.map.setAttribute('aria-selected',String(!intel));mainTabs.intel.setAttribute('aria-selected',String(intel));
  if(writeHash&&location.hash!==(intel?'#intel':'#map'))history.replaceState(null,'',intel?'#intel':'#map');
- if(intel&&!intelLoaded)loadIntel();
+ if(intel){intelLoaded=false;loadIntel();}
 }
 mainTabs.map.onclick=()=>setMainView('map');mainTabs.intel.onclick=()=>setMainView('intel');
 window.addEventListener('hashchange',()=>setMainView(location.hash==='#intel'?'intel':'map',false));
@@ -304,6 +304,7 @@ function renderIntel(){
 }
 ['intelSearch','intelAlliance','intelEventType'].forEach(id=>$(id).addEventListener(id==='intelSearch'?'input':'change',renderIntel));
 $('intelRefresh').onclick=()=>{intelLoaded=false;loadIntel()};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&location.hash==='#intel'){intelLoaded=false;loadIntel()}});
 
 /* Full-scope intelligence tools */
 const INTEL_WATCH_KEY='empirenew_intel_watch_v1';

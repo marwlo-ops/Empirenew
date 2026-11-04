@@ -10,7 +10,7 @@ const paths = {
 const ALLIANCES = [{ aid: 115, minMembers: 20 }, { aid: 41343, minMembers: 15 }];
 const now = new Date().toISOString();
 const read = async (url, fallback) => { try { return JSON.parse(await fs.readFile(url, "utf8")); } catch (e) { if (e.code === "ENOENT") return fallback; throw e; } };
-const write = async (url, value) => fs.writeFile(url, JSON.stringify(value, null, 2) + "\n");
+const write = async (url, value) => fs.writeFile(url, JSON.stringify(value) + "\n");
 const fail = message => { console.error("TRACKER FAIL-SAFE:", message); process.exit(1); };
 
 function flatten(payloads) {

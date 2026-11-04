@@ -338,8 +338,10 @@ function renderIntelRadar(){
  $('intelRadarRows').querySelectorAll('[data-radar-player]').forEach(el=>el.onclick=()=>{intelProfile(el.dataset.radarPlayer);switchIntelTab('profile')});
 }
 function renderIntelReport(){
+ const cutoff24=Date.now()-86400000,cutoff7=Date.now()-7*86400000;
+ const recent24=intelFeed.filter(e=>Date.parse(e.detected_at)>=cutoff24),recent7=intelFeed.filter(e=>Date.parse(e.detected_at)>=cutoff7);
  const gains=intelFeed.filter(e=>e.kind==='power_gain'),losses=intelFeed.filter(e=>e.kind==='power_drop'),moves=intelFeed.filter(e=>e.kind==='alliance_changed'),nicks=intelFeed.filter(e=>e.kind==='nick_changed');
- const lines=['EMPIRENEW · RAPORT SYTUACYJNY PL1','Wygenerowano: '+new Date().toLocaleString('pl-PL'),'Snapshot: '+(intelPlayers.length)+' graczy · pełny ranking zweryfikowany','Sekwencja danych: '+(intelSnapshotSequence||'—'),'','SOJUSZE W MONITOROWANYM RANKINGU'];
+ const lines=['EMPIRENEW · RAPORT SYTUACYJNY PL1','Wygenerowano: '+new Date().toLocaleString('pl-PL'),'Snapshot: '+(intelPlayers.length)+' graczy · pełny ranking zweryfikowany','Sekwencja danych: '+(intelSnapshotSequence||'—'),'Zdarzenia ostatnie 24 h: '+recent24.length,'Zdarzenia ostatnie 7 dni: '+recent7.length,'','SOJUSZE W MONITOROWANYM RANKINGU'];
  allianceAggregates().slice(0,15).forEach(g=>lines.push(g.name+' — '+g.members.length+' profili TOP; potęga z dostępnych profili: '+fmtNum(g.power)));
  lines.push('','ZDARZENIA W HISTORII','Przyrost potęgi: '+gains.length,'Spadek potęgi: '+losses.length,'Zmiany sojuszu: '+moves.length,'Zmiany nicku: '+nicks.length,'','OSTATNIE ZDARZENIA');
  intelFeed.slice(0,30).forEach(e=>lines.push(new Date(e.detected_at).toLocaleString('pl-PL')+' · '+(e.player||'Gracz')+' · '+(e.description||e.kind)));

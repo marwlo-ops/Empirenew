@@ -6,6 +6,7 @@ const historyPath = new URL("../data/server-intel-history.json", import.meta.url
 const now = new Date().toISOString();
 const MAX_EVENTS = 20000;
 const POWER_DELTA_THRESHOLD = 500;
+const hasNumber = value => value !== null && value !== undefined && value !== "" && Number.isFinite(Number(value));
 const read = async (url, fallback) => {
   try { return JSON.parse(await fs.readFile(url, "utf8")); }
   catch (error) { if (error.code === "ENOENT") return fallback; throw error; }
@@ -37,7 +38,7 @@ const players = snapshot.players.map(player => {
       current_alliance_id: player.alliance_id, current_alliance: player.alliance_name,
       description: `Zmiana sojuszu: ${old.alliance_name || "Brak"} → ${player.alliance_name || "Brak"}`
     });
-    if (Number.isFinite(Number(old.power)) && Number.isFinite(Number(player.power))) {
+    if (hasNumber(old.power) && hasNumber(player.power)) {
       const delta = player.power - old.power;
       if (Math.abs(delta) >= POWER_DELTA_THRESHOLD) events.push({
         kind: delta > 0 ? "power_gain" : "power_drop", player_id: player.player_id,
@@ -46,7 +47,7 @@ const players = snapshot.players.map(player => {
         description: `${delta > 0 ? "Przyrost" : "Spadek"} potęgi o ${Math.abs(delta).toLocaleString("pl-PL")} pkt.`
       });
     }
-    if (Number.isFinite(Number(old.loot)) && Number.isFinite(Number(player.loot))) {
+    if (hasNumber(old.loot) && hasNumber(player.loot)) {
       const delta = player.loot - old.loot;
       if (delta !== 0) events.push({
         kind: "loot_delta", player_id: player.player_id, player: player.name,
@@ -55,7 +56,7 @@ const players = snapshot.players.map(player => {
         description: `Zmiana punktów łupów: ${delta > 0 ? "+" : ""}${delta.toLocaleString("pl-PL")}`
       });
     }
-    if (Number.isFinite(Number(old.glory_points)) && Number.isFinite(Number(player.glory_points))) {
+    if (hasNumber(old.glory_points) && hasNumber(player.glory_points)) {
       const delta = player.glory_points - old.glory_points;
       if (delta !== 0) events.push({
         kind: "glory_delta", player_id: player.player_id, player: player.name,
@@ -71,8 +72,8 @@ const players = snapshot.players.map(player => {
   if (!last || ["power", "loot", "glory_points", "rank"].some(k => last[k] !== point[k])) metricHistory.push(point);
   const last24 = metricHistory.filter(p => Date.parse(p.captured_at) >= Date.now() - 86400000);
   const first = last24[0], end = last24.at(-1);
-  const powerDelta24h = first && end && Number.isFinite(Number(first.power)) && Number.isFinite(Number(end.power)) ? Number(end.power) - Number(first.power) : null;
-  const lootDelta24h = first && end && Number.isFinite(Number(first.loot)) && Number.isFinite(Number(end.loot)) ? Number(end.loot) - Number(first.loot) : null;
+  const powerDelta24h = first && end && hasNumber(first.power) && hasNumber(end.power) ? Number(end.power) - Number(first.power) : null;
+  const lootDelta24h = first && end && hasNumber(first.loot) && hasNumber(end.loot) ? Number(end.loot) - Number(first.loot) : null;
   return {
     ...player, metrics_available: player.power !== null || player.loot !== null || player.glory_points !== null,
     power_delta_24h: powerDelta24h, loot_delta_24h: lootDelta24h,

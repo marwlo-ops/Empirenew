@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "server": "EmpirefourkingdomsExGG2_3",
-  "captured_at": "2026-11-04T16:53:55.935Z",
+  "captured_at": "2026-11-04T16:57:10.245Z",
   "source": "ain",
   "alliances": [
     {
       "aid": 115,
       "name": "- ReBorN -",
-      "captured_at": "2026-11-04T16:53:56.205Z",
+      "captured_at": "2026-11-04T16:57:10.602Z",
       "members": [
         {
           "member_id": 60811,
@@ -5431,6 +5431,13 @@
               "x": 665,
               "y": 618,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 765,
+              "x": 661,
+              "y": 691,
+              "type_code": 24
             }
           ],
           "vp": [
@@ -9409,7 +9416,7 @@
     {
       "aid": 41343,
       "name": "MADDEVILS",
-      "captured_at": "2026-11-04T16:53:56.344Z",
+      "captured_at": "2026-11-04T16:57:10.762Z",
       "members": [
         {
           "member_id": 1524565,

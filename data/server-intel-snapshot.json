@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "server": "EmpirefourkingdomsExGG2_3",
-  "captured_at": "2026-11-04T16:54:11.733Z",
+  "captured_at": "2026-11-04T16:57:27.693Z",
   "source": "hgh",
   "query": {
     "LT": 1,
@@ -965,7 +965,7 @@
       "alliance_id": 43045,
       "alliance_name": "BRAVE HEART",
       "rank": 15,
-      "power": 3292,
+      "power": 3295,
       "glory_points": 275,
       "honor_points": 788,
       "loot": null,
@@ -995,7 +995,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 3292,
+        "MP": 3295,
         "R": 0,
         "AID": 43045,
         "AR": 8,
@@ -2656,7 +2656,7 @@
       "alliance_id": 43045,
       "alliance_name": "BRAVE HEART",
       "rank": 39,
-      "power": 2773,
+      "power": 2778,
       "glory_points": 105,
       "honor_points": 148,
       "loot": null,
@@ -2686,7 +2686,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 2773,
+        "MP": 2778,
         "R": 0,
         "AID": 43045,
         "AR": 8,
@@ -5074,7 +5074,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 349144,
+        "RPT": 348949,
         "AP": [
           [
             0,
@@ -5259,7 +5259,7 @@
         "MP": 676,
         "R": 0,
         "AID": -1,
-        "RPT": 12726418,
+        "RPT": 12726223,
         "AP": [
           [
             0,
@@ -7694,7 +7694,7 @@
       "alliance_id": 0,
       "alliance_name": "Brak sojuszu",
       "rank": 113,
-      "power": 527,
+      "power": 525,
       "glory_points": 20,
       "honor_points": 0,
       "loot": null,
@@ -7724,7 +7724,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 527,
+        "MP": 525,
         "R": 0,
         "AID": -1,
         "RPT": 0,
@@ -8961,7 +8961,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 250353,
+        "RPT": 250158,
         "AP": [
           [
             0,
@@ -10100,7 +10100,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 3967201,
+        "RPT": 3967006,
         "AP": [
           [
             0,
@@ -12728,7 +12728,7 @@
         "MP": 34,
         "R": 0,
         "AID": -1,
-        "RPT": 16042,
+        "RPT": 15846,
         "AP": [
           [
             0,
@@ -12785,7 +12785,7 @@
         "MP": 32,
         "R": 0,
         "AID": -1,
-        "RPT": 279503,
+        "RPT": 279307,
         "AP": [
           [
             0,
@@ -13431,7 +13431,7 @@
         "MP": 118,
         "R": 1,
         "AID": -1,
-        "RPT": 352101952,
+        "RPT": 352101756,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -15197,7 +15197,7 @@
         "MP": 33,
         "R": 1,
         "AID": -1,
-        "RPT": 352101950,
+        "RPT": 352101754,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -16556,5 +16556,5 @@
     }
   ],
   "baseline_established_at": "2026-11-04T15:21:15.601Z",
-  "snapshot_sequence": 4
+  "snapshot_sequence": 5
 }

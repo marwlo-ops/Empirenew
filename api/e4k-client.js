@@ -167,7 +167,12 @@ async function fetchHighscoreBlock(listType, frameRank, options = {}) {
 function extractRankedProfile(entry) {
   if (!Array.isArray(entry) || entry.length < 3) return null;
   const rank = Number(entry[0]);
-  const profile = entry.findLast(value => value && typeof value === "object" && !Array.isArray(value));
+  let profile = entry.findLast(value => value && typeof value === "object" && !Array.isArray(value));
+  if (!profile) {
+    const tuple = entry.find(value => Array.isArray(value) && value.length >= 2 &&
+      Number.isFinite(Number(value[0])) && typeof value[1] === "string");
+    if (tuple) profile = { AID: tuple[0], AN: tuple[1], member_count: tuple[2] ?? null, raw: tuple };
+  }
   if (!Number.isInteger(rank) || rank < 1 || !profile) return null;
   const id = profile.OID ?? profile.PID ?? profile.ID ?? profile.AID;
   const name = profile.N ?? profile.PN ?? profile.NAME ?? profile.AN;

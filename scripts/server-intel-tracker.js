@@ -87,7 +87,7 @@ const players = snapshot.players.map(player => {
       });
     }
   }
-  const metricHistory = isBaseline ? [] : (Array.isArray(old?.metric_history) ? old.metric_history.slice(-287) : []);
+  const metricHistory = isBaseline ? [] : (Array.isArray(old?.metric_history) ? old.metric_history.slice(-288) : []);
   const point = { captured_at: snapshot.captured_at, power: player.power, loot: player.loot, honor_points: player.honor_points ?? player.raw?.H ?? null, rank: player.rank };
   const last = metricHistory.at(-1);
   if (!last || last.captured_at !== point.captured_at) metricHistory.push(point);
@@ -100,8 +100,8 @@ const players = snapshot.players.map(player => {
     ...player, metrics_available: player.power !== null || player.loot !== null || player.glory_points !== null || player.honor_points !== null,
     power_delta_24h: powerDelta24h, loot_delta_24h: lootDelta24h, honor_delta_24h: honorDelta24h,
     trend_available: metricHistory.length >= 2,
-    activity_status: metricHistory.length >= 2 && powerDelta24h !== null && powerDelta24h !== 0 ? "active" : "unknown",
-    activity_label: metricHistory.length >= 2 && powerDelta24h !== null && powerDelta24h !== 0 ? "Zmiana potęgi w ostatnich 24 h" : "Brak wystarczających danych aktywności",
+    activity_status: metricHistory.length >= 2 && ((powerDelta24h !== null && powerDelta24h !== 0) || (honorDelta24h !== null && honorDelta24h !== 0)) ? "active" : "unknown",
+    activity_label: metricHistory.length < 2 ? "Zbieranie historii" : (honorDelta24h !== null && honorDelta24h !== 0 ? "Zmiana honoru w ostatnich 24 h" : (powerDelta24h !== null && powerDelta24h !== 0 ? "Zmiana potęgi w ostatnich 24 h" : "Brak wykrytej zmiany w ostatnich 24 h")),
     last_seen: snapshot.captured_at, metric_history: metricHistory
   };
 });

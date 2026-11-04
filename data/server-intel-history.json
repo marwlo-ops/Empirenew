@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
   "server": "EmpirefourkingdomsExGG2_3",
-  "updated_at": "2026-11-04T16:57:10.808Z",
+  "updated_at": "2026-11-04T17:01:49.342Z",
   "baseline_only": false,
   "baseline_established_at": "2026-11-04T15:21:15.601Z",
-  "snapshot_sequence": 5,
+  "snapshot_sequence": 6,
   "trends_available": true,
   "alliances": [
     {
@@ -38,7 +38,7 @@
       "alliance_id": 19152,
       "name": "TOP GUN",
       "member_count": 8,
-      "total_power": 31533,
+      "total_power": 31534,
       "power_known_count": 8,
       "active_count": 0,
       "activity_known_count": 0
@@ -92,7 +92,7 @@
       "alliance_id": 43045,
       "name": "BRAVE HEART",
       "member_count": 7,
-      "total_power": 10763,
+      "total_power": 10790,
       "power_known_count": 7,
       "active_count": 0,
       "activity_known_count": 0
@@ -323,7 +323,7 @@
       "activity_known_count": 0
     }
   ],
-  "source_snapshot_at": "2026-11-04T16:57:27.693Z",
+  "source_snapshot_at": "2026-11-04T17:02:04.344Z",
   "player_count": 255,
   "metrics_available": true,
   "metric_fields_detected": [
@@ -570,11 +570,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 27755,
           "loot": null,
           "honor_points": 302,
@@ -656,11 +656,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 29157,
           "loot": null,
           "honor_points": 215,
@@ -730,11 +730,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25675,
           "loot": null,
           "honor_points": 436,
@@ -823,11 +823,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1101,
           "loot": null,
           "honor_points": 0,
@@ -897,11 +897,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1093,
           "loot": null,
           "honor_points": 0,
@@ -982,11 +982,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 6125,
           "loot": null,
           "honor_points": 388,
@@ -1056,11 +1056,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 458,
           "loot": null,
           "honor_points": 0,
@@ -1149,11 +1149,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1569,
           "loot": null,
           "honor_points": 0,
@@ -1242,11 +1242,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 26214,
           "loot": null,
           "honor_points": 257,
@@ -1328,11 +1328,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1273,
           "loot": null,
           "honor_points": 525,
@@ -1414,11 +1414,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 6599,
           "loot": null,
           "honor_points": 0,
@@ -1507,11 +1507,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2512,
           "loot": null,
           "honor_points": 1052,
@@ -1581,11 +1581,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 936,
           "loot": null,
           "honor_points": 512,
@@ -1667,11 +1667,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 4347,
           "loot": null,
           "honor_points": 0,
@@ -1767,11 +1767,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 3295,
           "loot": null,
           "honor_points": 788,
@@ -1853,11 +1853,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 5892,
           "loot": null,
           "honor_points": 0,
@@ -1927,11 +1927,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1470,
           "loot": null,
           "honor_points": 0,
@@ -2019,11 +2019,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 213,
           "loot": null,
           "honor_points": 0,
@@ -2112,11 +2112,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 3211,
           "loot": null,
           "honor_points": 490,
@@ -2205,11 +2205,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 3565,
           "loot": null,
           "honor_points": 525,
@@ -2298,11 +2298,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1755,
           "loot": null,
           "honor_points": 457,
@@ -2384,11 +2384,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2188,
           "loot": null,
           "honor_points": 0,
@@ -2458,11 +2458,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1332,
           "loot": null,
           "honor_points": 0,
@@ -2543,11 +2543,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 23082,
           "loot": null,
           "honor_points": 0,
@@ -2635,11 +2635,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1640,
           "loot": null,
           "honor_points": 269,
@@ -2721,11 +2721,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1233,
           "loot": null,
           "honor_points": 0,
@@ -2820,11 +2820,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2197,
           "loot": null,
           "honor_points": 0,
@@ -2920,11 +2920,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 3551,
           "loot": null,
           "honor_points": 0,
@@ -3013,11 +3013,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2025,
           "loot": null,
           "honor_points": 117,
@@ -3087,11 +3087,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1398,
           "loot": null,
           "honor_points": 0,
@@ -3173,11 +3173,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2032,
           "loot": null,
           "honor_points": 194,
@@ -3247,11 +3247,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 578,
           "loot": null,
           "honor_points": 165,
@@ -3321,11 +3321,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 4202,
           "loot": null,
           "honor_points": 624,
@@ -3395,11 +3395,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 388,
           "loot": null,
           "honor_points": 0,
@@ -3495,11 +3495,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 514,
           "loot": null,
           "honor_points": 0,
@@ -3588,11 +3588,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1710,
           "loot": null,
           "honor_points": 0,
@@ -3674,11 +3674,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1930,
           "loot": null,
           "honor_points": 0,
@@ -3766,11 +3766,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1375,
           "loot": null,
           "honor_points": 129,
@@ -3784,11 +3784,11 @@
       "alliance_id": 43045,
       "alliance_name": "BRAVE HEART",
       "rank": 39,
-      "power": 2778,
+      "power": 2804,
       "glory_points": 105,
       "honor_points": 148,
       "loot": null,
-      "level": 16,
+      "level": 17,
       "legend_level": 0,
       "raw": {
         "OID": 1964355,
@@ -3805,7 +3805,7 @@
           "SC2": 39783,
           "IS": 1
         },
-        "L": 16,
+        "L": 17,
         "LL": 0,
         "H": 148,
         "AVP": 105,
@@ -3814,7 +3814,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 2778,
+        "MP": 2804,
         "R": 0,
         "AID": 43045,
         "AR": 8,
@@ -3859,12 +3859,12 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
-          "power": 2778,
+          "captured_at": "2026-11-04T17:02:04.344Z",
+          "power": 2804,
           "loot": null,
           "honor_points": 148,
           "rank": 39
@@ -3933,11 +3933,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 3477,
           "loot": null,
           "honor_points": 0,
@@ -4025,11 +4025,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 4210,
           "loot": null,
           "honor_points": 0,
@@ -4117,11 +4117,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2285,
           "loot": null,
           "honor_points": 0,
@@ -4191,11 +4191,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1269,
           "loot": null,
           "honor_points": 0,
@@ -4276,11 +4276,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 305,
           "loot": null,
           "honor_points": 0,
@@ -4350,11 +4350,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1606,
           "loot": null,
           "honor_points": 0,
@@ -4443,11 +4443,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1382,
           "loot": null,
           "honor_points": 107,
@@ -4529,11 +4529,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1407,
           "loot": null,
           "honor_points": 0,
@@ -4615,11 +4615,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 9393,
           "loot": null,
           "honor_points": 107,
@@ -4701,11 +4701,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1875,
           "loot": null,
           "honor_points": 0,
@@ -4775,11 +4775,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 23318,
           "loot": null,
           "honor_points": 0,
@@ -4867,11 +4867,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 834,
           "loot": null,
           "honor_points": 0,
@@ -4941,11 +4941,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 890,
           "loot": null,
           "honor_points": 0,
@@ -5027,11 +5027,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2045,
           "loot": null,
           "honor_points": 0,
@@ -5101,11 +5101,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 590,
           "loot": null,
           "honor_points": 0,
@@ -5182,11 +5182,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 4924,
           "loot": null,
           "honor_points": 0,
@@ -5268,11 +5268,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1256,
           "loot": null,
           "honor_points": 0,
@@ -5361,11 +5361,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 969,
           "loot": null,
           "honor_points": 212,
@@ -5446,11 +5446,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 494,
           "loot": null,
           "honor_points": 557,
@@ -5532,11 +5532,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1794,
           "loot": null,
           "honor_points": 105,
@@ -5617,11 +5617,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 4978,
           "loot": null,
           "honor_points": 0,
@@ -5710,11 +5710,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1555,
           "loot": null,
           "honor_points": 0,
@@ -5810,11 +5810,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 7751,
           "loot": null,
           "honor_points": 0,
@@ -5896,11 +5896,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 524,
           "loot": null,
           "honor_points": 100,
@@ -5970,11 +5970,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 788,
           "loot": null,
           "honor_points": 0,
@@ -6063,11 +6063,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1350,
           "loot": null,
           "honor_points": 0,
@@ -6137,11 +6137,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 790,
           "loot": null,
           "honor_points": 0,
@@ -6223,11 +6223,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1204,
           "loot": null,
           "honor_points": 0,
@@ -6309,11 +6309,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 11273,
           "loot": null,
           "honor_points": 0,
@@ -6327,7 +6327,7 @@
       "alliance_id": 43045,
       "alliance_name": "BRAVE HEART",
       "rank": 69,
-      "power": 1374,
+      "power": 1375,
       "glory_points": 60,
       "honor_points": 0,
       "loot": null,
@@ -6357,7 +6357,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 1374,
+        "MP": 1375,
         "R": 0,
         "AID": 43045,
         "AR": 8,
@@ -6395,12 +6395,12 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
-          "power": 1374,
+          "captured_at": "2026-11-04T17:02:04.344Z",
+          "power": 1375,
           "loot": null,
           "honor_points": 0,
           "rank": 69
@@ -6487,11 +6487,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 511,
           "loot": null,
           "honor_points": 0,
@@ -6561,11 +6561,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -6642,11 +6642,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 512,
           "loot": null,
           "honor_points": 0,
@@ -6734,11 +6734,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1543,
           "loot": null,
           "honor_points": 0,
@@ -6797,7 +6797,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 348949,
+        "RPT": 348671,
         "AP": [
           [
             0,
@@ -6834,11 +6834,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1979,
           "loot": null,
           "honor_points": 0,
@@ -6908,11 +6908,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -6982,11 +6982,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 847,
           "loot": null,
           "honor_points": 0,
@@ -7033,7 +7033,7 @@
         "MP": 676,
         "R": 0,
         "AID": -1,
-        "RPT": 12726223,
+        "RPT": 12725945,
         "AP": [
           [
             0,
@@ -7056,11 +7056,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 676,
           "loot": null,
           "honor_points": 0,
@@ -7149,11 +7149,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 710,
           "loot": null,
           "honor_points": 0,
@@ -7223,11 +7223,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 470,
           "loot": null,
           "honor_points": 0,
@@ -7315,11 +7315,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 529,
           "loot": null,
           "honor_points": 0,
@@ -7407,11 +7407,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 5427,
           "loot": null,
           "honor_points": 0,
@@ -7493,11 +7493,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 818,
           "loot": null,
           "honor_points": 0,
@@ -7586,11 +7586,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1176,
           "loot": null,
           "honor_points": 0,
@@ -7660,11 +7660,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -7734,11 +7734,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 384,
           "loot": null,
           "honor_points": 0,
@@ -7808,11 +7808,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 469,
           "loot": null,
           "honor_points": 0,
@@ -7882,11 +7882,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -7981,11 +7981,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 648,
           "loot": null,
           "honor_points": 0,
@@ -8055,11 +8055,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 455,
           "loot": null,
           "honor_points": 333,
@@ -8147,11 +8147,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1567,
           "loot": null,
           "honor_points": 0,
@@ -8239,11 +8239,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2452,
           "loot": null,
           "honor_points": 0,
@@ -8313,11 +8313,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 777,
           "loot": null,
           "honor_points": 0,
@@ -8405,11 +8405,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1629,
           "loot": null,
           "honor_points": 0,
@@ -8497,11 +8497,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1185,
           "loot": null,
           "honor_points": 0,
@@ -8583,11 +8583,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 3120,
           "loot": null,
           "honor_points": 0,
@@ -8675,11 +8675,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 847,
           "loot": null,
           "honor_points": 0,
@@ -8767,11 +8767,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 851,
           "loot": null,
           "honor_points": 0,
@@ -8841,11 +8841,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 893,
           "loot": null,
           "honor_points": 0,
@@ -8934,11 +8934,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1023,
           "loot": null,
           "honor_points": 0,
@@ -9008,11 +9008,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 711,
           "loot": null,
           "honor_points": 0,
@@ -9101,11 +9101,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1425,
           "loot": null,
           "honor_points": 0,
@@ -9186,11 +9186,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1447,
           "loot": null,
           "honor_points": 0,
@@ -9271,11 +9271,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1795,
           "loot": null,
           "honor_points": 0,
@@ -9363,11 +9363,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 806,
           "loot": null,
           "honor_points": 0,
@@ -9455,11 +9455,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 901,
           "loot": null,
           "honor_points": 0,
@@ -9548,11 +9548,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1165,
           "loot": null,
           "honor_points": 0,
@@ -9640,11 +9640,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 427,
           "loot": null,
           "honor_points": 0,
@@ -9714,11 +9714,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 350,
           "loot": null,
           "honor_points": 0,
@@ -9806,11 +9806,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1526,
           "loot": null,
           "honor_points": 0,
@@ -9891,11 +9891,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 434,
           "loot": null,
           "honor_points": 0,
@@ -9976,11 +9976,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 419,
           "loot": null,
           "honor_points": 0,
@@ -10062,11 +10062,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 616,
           "loot": null,
           "honor_points": 0,
@@ -10136,11 +10136,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 525,
           "loot": null,
           "honor_points": 0,
@@ -10221,11 +10221,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1518,
           "loot": null,
           "honor_points": 0,
@@ -10306,11 +10306,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 3226,
           "loot": null,
           "honor_points": 0,
@@ -10391,11 +10391,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1537,
           "loot": null,
           "honor_points": 0,
@@ -10483,11 +10483,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2469,
           "loot": null,
           "honor_points": 0,
@@ -10568,11 +10568,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1508,
           "loot": null,
           "honor_points": 0,
@@ -10649,11 +10649,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 507,
           "loot": null,
           "honor_points": 0,
@@ -10741,11 +10741,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1424,
           "loot": null,
           "honor_points": 0,
@@ -10833,11 +10833,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2479,
           "loot": null,
           "honor_points": 0,
@@ -10914,11 +10914,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 394,
           "loot": null,
           "honor_points": 0,
@@ -11000,11 +11000,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 680,
           "loot": null,
           "honor_points": 0,
@@ -11074,11 +11074,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 421,
           "loot": null,
           "honor_points": 0,
@@ -11166,11 +11166,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 413,
           "loot": null,
           "honor_points": 0,
@@ -11258,11 +11258,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 788,
           "loot": null,
           "honor_points": 0,
@@ -11332,11 +11332,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 955,
           "loot": null,
           "honor_points": 0,
@@ -11424,11 +11424,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 830,
           "loot": null,
           "honor_points": 0,
@@ -11516,11 +11516,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 433,
           "loot": null,
           "honor_points": 0,
@@ -11590,11 +11590,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 415,
           "loot": null,
           "honor_points": 0,
@@ -11653,7 +11653,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 250158,
+        "RPT": 249881,
         "AP": [
           [
             0,
@@ -11676,11 +11676,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 388,
           "loot": null,
           "honor_points": 0,
@@ -11768,11 +11768,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 395,
           "loot": null,
           "honor_points": 0,
@@ -11842,11 +11842,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -11916,11 +11916,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 478,
           "loot": null,
           "honor_points": 0,
@@ -12002,11 +12002,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 343,
           "loot": null,
           "honor_points": 0,
@@ -12087,11 +12087,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 576,
           "loot": null,
           "honor_points": 0,
@@ -12173,11 +12173,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 617,
           "loot": null,
           "honor_points": 0,
@@ -12266,11 +12266,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 578,
           "loot": null,
           "honor_points": 0,
@@ -12340,11 +12340,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 100,
           "loot": null,
           "honor_points": 0,
@@ -12425,11 +12425,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 3478,
           "loot": null,
           "honor_points": 0,
@@ -12510,11 +12510,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1497,
           "loot": null,
           "honor_points": 0,
@@ -12584,11 +12584,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -12670,11 +12670,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 317,
           "loot": null,
           "honor_points": 0,
@@ -12762,11 +12762,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 392,
           "loot": null,
           "honor_points": 0,
@@ -12848,11 +12848,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 665,
           "loot": null,
           "honor_points": 0,
@@ -12933,11 +12933,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 337,
           "loot": null,
           "honor_points": 0,
@@ -13018,11 +13018,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 404,
           "loot": null,
           "honor_points": 0,
@@ -13081,7 +13081,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 3967006,
+        "RPT": 3966729,
         "AP": [
           [
             0,
@@ -13104,11 +13104,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 512,
           "loot": null,
           "honor_points": 0,
@@ -13178,11 +13178,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 398,
           "loot": null,
           "honor_points": 0,
@@ -13263,11 +13263,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 500,
           "loot": null,
           "honor_points": 0,
@@ -13337,11 +13337,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -13411,11 +13411,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -13496,11 +13496,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 514,
           "loot": null,
           "honor_points": 0,
@@ -13588,11 +13588,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1482,
           "loot": null,
           "honor_points": 0,
@@ -13680,11 +13680,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 636,
           "loot": null,
           "honor_points": 0,
@@ -13772,11 +13772,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 499,
           "loot": null,
           "honor_points": 0,
@@ -13858,11 +13858,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 347,
           "loot": null,
           "honor_points": 0,
@@ -13932,11 +13932,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -14017,11 +14017,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2505,
           "loot": null,
           "honor_points": 0,
@@ -14102,11 +14102,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 2474,
           "loot": null,
           "honor_points": 0,
@@ -14176,11 +14176,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 100,
           "loot": null,
           "honor_points": 0,
@@ -14262,11 +14262,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 489,
           "loot": null,
           "honor_points": 0,
@@ -14355,11 +14355,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 383,
           "loot": null,
           "honor_points": 0,
@@ -14429,11 +14429,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 366,
           "loot": null,
           "honor_points": 0,
@@ -14515,11 +14515,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 320,
           "loot": null,
           "honor_points": 0,
@@ -14601,11 +14601,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 410,
           "loot": null,
           "honor_points": 0,
@@ -14675,11 +14675,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 368,
           "loot": null,
           "honor_points": 0,
@@ -14693,7 +14693,7 @@
       "alliance_id": 19152,
       "alliance_name": "TOP GUN",
       "rank": 168,
-      "power": 5443,
+      "power": 5444,
       "glory_points": 10,
       "honor_points": 0,
       "loot": null,
@@ -14723,7 +14723,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 5443,
+        "MP": 5444,
         "R": 0,
         "AID": 19152,
         "AR": 9,
@@ -14761,12 +14761,12 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
-          "power": 5443,
+          "captured_at": "2026-11-04T17:02:04.344Z",
+          "power": 5444,
           "loot": null,
           "honor_points": 0,
           "rank": 168
@@ -14835,11 +14835,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 828,
           "loot": null,
           "honor_points": 0,
@@ -14920,11 +14920,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 327,
           "loot": null,
           "honor_points": 0,
@@ -15005,11 +15005,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 340,
           "loot": null,
           "honor_points": 0,
@@ -15079,11 +15079,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 200,
           "loot": null,
           "honor_points": 0,
@@ -15153,11 +15153,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 296,
           "loot": null,
           "honor_points": 0,
@@ -15227,11 +15227,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 100,
           "loot": null,
           "honor_points": 0,
@@ -15301,11 +15301,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 337,
           "loot": null,
           "honor_points": 0,
@@ -15375,11 +15375,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 299,
           "loot": null,
           "honor_points": 0,
@@ -15449,11 +15449,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 298,
           "loot": null,
           "honor_points": 0,
@@ -15523,11 +15523,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -15609,11 +15609,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 338,
           "loot": null,
           "honor_points": 0,
@@ -15683,11 +15683,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 286,
           "loot": null,
           "honor_points": 0,
@@ -15757,11 +15757,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 1028,
           "loot": null,
           "honor_points": 0,
@@ -15831,11 +15831,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -15905,11 +15905,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 488,
           "loot": null,
           "honor_points": 0,
@@ -15979,11 +15979,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 383,
           "loot": null,
           "honor_points": 0,
@@ -16065,11 +16065,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 324,
           "loot": null,
           "honor_points": 0,
@@ -16150,11 +16150,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 742,
           "loot": null,
           "honor_points": 0,
@@ -16224,11 +16224,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 297,
           "loot": null,
           "honor_points": 0,
@@ -16298,11 +16298,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -16372,11 +16372,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 321,
           "loot": null,
           "honor_points": 0,
@@ -16423,7 +16423,7 @@
         "MP": 34,
         "R": 0,
         "AID": -1,
-        "RPT": 15846,
+        "RPT": 15569,
         "AP": [
           [
             0,
@@ -16446,11 +16446,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 34,
           "loot": null,
           "honor_points": 0,
@@ -16497,7 +16497,7 @@
         "MP": 32,
         "R": 0,
         "AID": -1,
-        "RPT": 279307,
+        "RPT": 279030,
         "AP": [
           [
             0,
@@ -16520,11 +16520,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 32,
           "loot": null,
           "honor_points": 0,
@@ -16613,11 +16613,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 665,
           "loot": null,
           "honor_points": 0,
@@ -16687,11 +16687,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -16761,11 +16761,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -16835,11 +16835,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 275,
           "loot": null,
           "honor_points": 0,
@@ -16909,11 +16909,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 43,
           "loot": null,
           "honor_points": 0,
@@ -16983,11 +16983,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 275,
           "loot": null,
           "honor_points": 0,
@@ -17057,11 +17057,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -17131,11 +17131,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 118,
           "loot": null,
           "honor_points": 0,
@@ -17205,11 +17205,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 100,
           "loot": null,
           "honor_points": 0,
@@ -17279,11 +17279,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -17330,7 +17330,7 @@
         "MP": 118,
         "R": 1,
         "AID": -1,
-        "RPT": 352101756,
+        "RPT": 352101479,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -17345,11 +17345,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 118,
           "loot": null,
           "honor_points": 0,
@@ -17419,11 +17419,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -17493,11 +17493,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -17567,11 +17567,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 300,
           "loot": null,
           "honor_points": 0,
@@ -17641,11 +17641,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 299,
           "loot": null,
           "honor_points": 0,
@@ -17715,11 +17715,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -17789,11 +17789,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 299,
           "loot": null,
           "honor_points": 0,
@@ -17863,11 +17863,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 39,
           "loot": null,
           "honor_points": 0,
@@ -17937,11 +17937,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 338,
           "loot": null,
           "honor_points": 0,
@@ -18023,11 +18023,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 313,
           "loot": null,
           "honor_points": 0,
@@ -18109,11 +18109,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 338,
           "loot": null,
           "honor_points": 0,
@@ -18195,11 +18195,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 300,
           "loot": null,
           "honor_points": 0,
@@ -18261,11 +18261,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -18335,11 +18335,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 44,
           "loot": null,
           "honor_points": 0,
@@ -18409,11 +18409,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 553,
           "loot": null,
           "honor_points": 0,
@@ -18483,11 +18483,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 43,
           "loot": null,
           "honor_points": 0,
@@ -18557,11 +18557,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 419,
           "loot": null,
           "honor_points": 0,
@@ -18643,11 +18643,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 342,
           "loot": null,
           "honor_points": 0,
@@ -18717,11 +18717,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 51,
           "loot": null,
           "honor_points": 0,
@@ -18791,11 +18791,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -18865,11 +18865,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 301,
           "loot": null,
           "honor_points": 0,
@@ -18939,11 +18939,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -19025,11 +19025,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 360,
           "loot": null,
           "honor_points": 0,
@@ -19111,11 +19111,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 316,
           "loot": null,
           "honor_points": 0,
@@ -19185,11 +19185,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 33,
           "loot": null,
           "honor_points": 0,
@@ -19259,11 +19259,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -19333,11 +19333,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -19407,11 +19407,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -19481,11 +19481,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -19555,11 +19555,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 0,
           "loot": null,
           "honor_points": 0,
@@ -19606,7 +19606,7 @@
         "MP": 33,
         "R": 1,
         "AID": -1,
-        "RPT": 352101754,
+        "RPT": 352101478,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -19621,11 +19621,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 33,
           "loot": null,
           "honor_points": 0,
@@ -19695,11 +19695,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 100,
           "loot": null,
           "honor_points": 0,
@@ -19769,11 +19769,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 297,
           "loot": null,
           "honor_points": 0,
@@ -19843,11 +19843,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 714,
           "loot": null,
           "honor_points": 0,
@@ -19917,11 +19917,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 25,
           "loot": null,
           "honor_points": 0,
@@ -19991,11 +19991,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 100,
           "loot": null,
           "honor_points": 0,
@@ -20077,11 +20077,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 303,
           "loot": null,
           "honor_points": 0,
@@ -20151,11 +20151,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 320,
           "loot": null,
           "honor_points": 0,
@@ -20225,11 +20225,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 320,
           "loot": null,
           "honor_points": 0,
@@ -20299,11 +20299,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 320,
           "loot": null,
           "honor_points": 0,
@@ -20385,11 +20385,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 300,
           "loot": null,
           "honor_points": 0,
@@ -20459,11 +20459,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 314,
           "loot": null,
           "honor_points": 0,
@@ -20533,11 +20533,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 33,
           "loot": null,
           "honor_points": 0,
@@ -20607,11 +20607,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 321,
           "loot": null,
           "honor_points": 0,
@@ -20681,11 +20681,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 323,
           "loot": null,
           "honor_points": 0,
@@ -20755,11 +20755,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 321,
           "loot": null,
           "honor_points": 0,
@@ -20829,11 +20829,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 314,
           "loot": null,
           "honor_points": 0,
@@ -20903,11 +20903,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 314,
           "loot": null,
           "honor_points": 0,
@@ -20977,11 +20977,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 313,
           "loot": null,
           "honor_points": 0,
@@ -21051,11 +21051,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 314,
           "loot": null,
           "honor_points": 0,
@@ -21125,11 +21125,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 314,
           "loot": null,
           "honor_points": 0,
@@ -21199,11 +21199,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 314,
           "loot": null,
           "honor_points": 0,
@@ -21285,11 +21285,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 346,
           "loot": null,
           "honor_points": 0,
@@ -21359,11 +21359,11 @@
       "honor_delta_24h": 0,
       "trend_available": false,
       "activity_status": "unknown",
-      "activity_label": "Brak wystarczających danych aktywności",
-      "last_seen": "2026-11-04T16:57:27.693Z",
+      "activity_label": "Zbieranie historii",
+      "last_seen": "2026-11-04T17:02:04.344Z",
       "metric_history": [
         {
-          "captured_at": "2026-11-04T16:57:27.693Z",
+          "captured_at": "2026-11-04T17:02:04.344Z",
           "power": 322,
           "loot": null,
           "honor_points": 0,

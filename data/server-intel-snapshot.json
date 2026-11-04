@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "server": "EmpirefourkingdomsExGG2_3",
-  "captured_at": "2026-11-04T16:57:27.693Z",
+  "captured_at": "2026-11-04T17:02:04.344Z",
   "source": "hgh",
   "query": {
     "LT": 1,
@@ -2656,11 +2656,11 @@
       "alliance_id": 43045,
       "alliance_name": "BRAVE HEART",
       "rank": 39,
-      "power": 2778,
+      "power": 2804,
       "glory_points": 105,
       "honor_points": 148,
       "loot": null,
-      "level": 16,
+      "level": 17,
       "legend_level": 0,
       "raw": {
         "OID": 1964355,
@@ -2677,7 +2677,7 @@
           "SC2": 39783,
           "IS": 1
         },
-        "L": 16,
+        "L": 17,
         "LL": 0,
         "H": 148,
         "AVP": 105,
@@ -2686,7 +2686,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 2778,
+        "MP": 2804,
         "R": 0,
         "AID": 43045,
         "AR": 8,
@@ -4689,7 +4689,7 @@
       "alliance_id": 43045,
       "alliance_name": "BRAVE HEART",
       "rank": 69,
-      "power": 1374,
+      "power": 1375,
       "glory_points": 60,
       "honor_points": 0,
       "loot": null,
@@ -4719,7 +4719,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 1374,
+        "MP": 1375,
         "R": 0,
         "AID": 43045,
         "AR": 8,
@@ -5074,7 +5074,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 348949,
+        "RPT": 348671,
         "AP": [
           [
             0,
@@ -5259,7 +5259,7 @@
         "MP": 676,
         "R": 0,
         "AID": -1,
-        "RPT": 12726223,
+        "RPT": 12725945,
         "AP": [
           [
             0,
@@ -8961,7 +8961,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 250158,
+        "RPT": 249881,
         "AP": [
           [
             0,
@@ -10100,7 +10100,7 @@
           },
           "ACFB": {}
         },
-        "RPT": 3967006,
+        "RPT": 3966729,
         "AP": [
           [
             0,
@@ -11372,7 +11372,7 @@
       "alliance_id": 19152,
       "alliance_name": "TOP GUN",
       "rank": 168,
-      "power": 5443,
+      "power": 5444,
       "glory_points": 10,
       "honor_points": 0,
       "loot": null,
@@ -11402,7 +11402,7 @@
         "PRE": 0,
         "SUF": -1,
         "TOPX": -1,
-        "MP": 5443,
+        "MP": 5444,
         "R": 0,
         "AID": 19152,
         "AR": 9,
@@ -12728,7 +12728,7 @@
         "MP": 34,
         "R": 0,
         "AID": -1,
-        "RPT": 15846,
+        "RPT": 15569,
         "AP": [
           [
             0,
@@ -12785,7 +12785,7 @@
         "MP": 32,
         "R": 0,
         "AID": -1,
-        "RPT": 279307,
+        "RPT": 279030,
         "AP": [
           [
             0,
@@ -13431,7 +13431,7 @@
         "MP": 118,
         "R": 1,
         "AID": -1,
-        "RPT": 352101756,
+        "RPT": 352101479,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -15197,7 +15197,7 @@
         "MP": 33,
         "R": 1,
         "AID": -1,
-        "RPT": 352101754,
+        "RPT": 352101478,
         "AP": [],
         "VP": [],
         "SA": 0,
@@ -16556,5 +16556,5 @@
     }
   ],
   "baseline_established_at": "2026-11-04T15:21:15.601Z",
-  "snapshot_sequence": 5
+  "snapshot_sequence": 6
 }

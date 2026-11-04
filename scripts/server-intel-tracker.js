@@ -3,6 +3,8 @@ import { fetchServerCompleteRoster, DEFAULT_SERVER } from "../api/e4k-client.js"
 
 const snapshotPath = new URL("../data/server-intel-snapshot.json", import.meta.url);
 const historyPath = new URL("../data/server-intel-history.json", import.meta.url);
+const rbTrackerPath = new URL("../data/tracker-rb.json", import.meta.url);
+const RB_ALLIANCE_ID = 115;
 const now = new Date().toISOString();
 const MAX_EVENTS = 20000;
 const POWER_DELTA_THRESHOLD = 500;
@@ -137,6 +139,28 @@ const history = {
 // Atomic-ish order: history first, then snapshot. A failed history write leaves previous snapshot in place.
 await write(historyPath, history);
 await write(snapshotPath, snapshot);
+const rbPlayers = players.filter(player => Number(player.alliance_id) === RB_ALLIANCE_ID);
+const rbIds = new Set(rbPlayers.map(player => Number(player.player_id)));
+const rbEvents = merged.filter(event => rbIds.has(Number(event.player_id))).slice(0, 5000);
+const rbTracker = {
+  schema_version: 1, server: DEFAULT_SERVER, alliance_id: RB_ALLIANCE_ID,
+  alliance_name: rbPlayers[0]?.alliance_name || "- ReBorN -",
+  updated_at: now, source_snapshot_at: snapshot.captured_at,
+  source_sequence: snapshot.snapshot_sequence, baseline_only: isBaseline,
+  player_count: rbPlayers.length, event_count: rbEvents.length,
+  metrics_available: rbPlayers.some(player => player.metrics_available),
+  metric_fields_detected: history.metric_fields_detected,
+  players: rbPlayers.map(player => ({
+    player_id: player.player_id, name: player.name, alliance_id: player.alliance_id,
+    alliance_name: player.alliance_name, rank: player.rank, power: player.power,
+    glory_points: player.glory_points, honor_points: player.honor_points,
+    loot: player.loot, level: player.level, legend_level: player.legend_level,
+    metrics_available: player.metrics_available, last_seen: player.last_seen,
+    metric_history: player.metric_history
+  })),
+  events: rbEvents
+};
+await write(rbTrackerPath, rbTracker);
 console.log(JSON.stringify({
   ok: true, server: DEFAULT_SERVER, players: snapshot.player_count,
   total_count: snapshot.total_count, pages_fetched: snapshot.pages_fetched,

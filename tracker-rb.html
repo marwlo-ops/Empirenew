@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#091321"><title>Tracker RB — Empirenew</title>
+<style>
+:root{color-scheme:dark;--bg:#091321;--panel:#14243a;--panel2:#192d46;--line:#30455f;--text:#edf4ff;--muted:#9fb1c8;--gold:#efc875;--green:#72ddb0;--red:#ff8f8f;--blue:#91caff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#294a6b 0,transparent 48%),var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1450px;margin:auto;padding:17px}.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;padding:8px 2px 16px;border-bottom:1px solid var(--line)}.eyebrow{font-size:11px;letter-spacing:.17em;text-transform:uppercase;color:var(--green);font-weight:900}.hero h1{margin:5px 0;color:var(--gold);font-size:clamp(26px,4vw,38px);line-height:1.1}.hero p{margin:4px 0 0;color:var(--muted)}.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.toolbar label{font-size:12px;color:var(--muted)}select,input,button{font:inherit;color:var(--text);background:#102036;border:1px solid #3a506b;border-radius:9px;padding:9px 11px}button{cursor:pointer;font-weight:750;background:linear-gradient(120deg,#614a25,#29364a);border-color:#98733c;color:#ffe2a0}button:disabled{opacity:.6}.meta{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}.pill{border:1px solid #354c66;background:#14263c;border-radius:99px;padding:5px 10px;color:#c8d8e9;font-size:11px}.pill.good{border-color:#39765c;color:#a7f0c8}.pill.warn{border-color:#80663b;color:#f3d69a}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.stat{border:1px solid var(--line);background:linear-gradient(145deg,#192d46,#111e30);border-radius:12px;padding:12px}.stat strong{display:block;color:var(--gold);font-size:24px}.stat span{color:var(--muted);font-size:10px;letter-spacing:.08em;text-transform:uppercase}.layout{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:13px;margin-top:13px}.panel{min-width:0;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#172940,#101b2b);overflow:hidden}.panel-head{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:9px}.panel-head h2{font-size:16px;margin:0;color:#f0d18f}.search{width:100%;margin:11px 12px 0;width:calc(100% - 24px)}.filters{display:flex;gap:6px;padding:9px 12px;flex-wrap:wrap}.filter{font-size:11px;padding:6px 9px;background:#14263b;border:1px solid #354a62;border-radius:99px;color:#c4d5e8}.filter.active{border-color:#67cfa0;color:#a9f2cc}.player-list{max-height:calc(100dvh - 340px);min-height:360px;overflow:auto;padding:5px 8px 10px}.player{width:100%;text-align:left;display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px;margin:3px 0;border:1px solid transparent;border-radius:10px;background:#112137;color:var(--text)}.player.selected{border-color:#d6aa57;background:#26364a}.pname{font-weight:800;display:block;overflow-wrap:anywhere}.sub{font-size:11px;color:var(--muted)}.status{font-size:10px;white-space:nowrap;border-radius:99px;padding:4px 7px;border:1px solid #586a7c;color:#c7d3df}.status.active{border-color:#3a8c65;color:#a8f2c8;background:#15382e}.status.recent{border-color:#92713d;color:#f5d89c}.status.unknown{color:#b8c6d7}.detail{padding:15px}.empty{padding:35px 15px;text-align:center;color:var(--muted)}.profile-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.profile-top h2{margin:0;color:var(--gold);font-size:24px;overflow-wrap:anywhere}.profile-id{color:var(--muted);font-size:11px}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:14px 0}.metric{background:#0d1a2b;border:1px solid #2d4159;border-radius:10px;padding:10px;min-width:0}.metric b{display:block;font-size:19px;color:#f2d28f;overflow-wrap:anywhere}.metric span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.section{border-top:1px solid var(--line);padding-top:13px;margin-top:14px}.section h3{font-size:14px;color:#dce9f8;margin:0 0 9px}.notice{border-left:3px solid var(--blue);background:#10263a;padding:10px 12px;border-radius:0 8px 8px 0;color:#d5e8fb;font-size:12px;margin:10px 0}.notice.warn{border-left-color:var(--gold);background:#302719;color:#f3e3c1}.notice.good{border-left-color:var(--green);background:#102b25;color:#d6f4e5}.event{display:grid;grid-template-columns:100px minmax(0,1fr);gap:9px;padding:9px 0;border-bottom:1px solid #293e55}.event time{font-size:11px;color:var(--muted)}.event b{font-size:12px;color:#e4edf8}.event p{font-size:12px;margin:2px 0;color:#bdcde0}.history{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.history-item{border:1px solid #2b4057;background:#0e1b2b;border-radius:8px;padding:8px;font-size:11px}.history-item b{color:#e8cf95}.history-item span{display:block;color:var(--muted)}.small{font-size:11px;color:var(--muted)}.hidden{display:none!important}.footer{padding:16px 2px;color:#71859d;font-size:11px}
+@media(max-width:850px){.wrap{padding:11px}.layout{grid-template-columns:1fr}.player-list{max-height:340px;min-height:150px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{width:100%}.toolbar label{width:100%}.toolbar select{flex:1}.event{grid-template-columns:82px minmax(0,1fr)}}
+</style></head><body><div class="wrap">
+<header class="hero"><div><div class="eyebrow">EmpirefourkingdomsExGG2_3 · AID 115</div><h1>Tracker RB</h1><p>Lista członków ReBorN, orientacyjna aktywność, honor i historia zdarzeń.</p></div><div class="toolbar"><label for="refreshRate">Automatyczne odświeżanie danych</label><select id="refreshRate"><option value="5">Co 5 minut</option><option value="10">Co 10 minut</option><option value="20">Co 20 minut</option><option value="60">Co 60 minut</option></select><button id="refreshNow">Odśwież teraz</button></div></header>
+<div class="meta"><span class="pill" id="updated">Oczekiwanie na dane…</span><span class="pill" id="sourceFreshness">Źródło: —</span><span class="pill" id="dataState">Ładowanie</span><span class="pill">Aktywność = zmiana łupu lub honoru</span></div>
+<div class="stats"><div class="stat"><strong id="countPlayers">—</strong><span>Gracze RB</span></div><div class="stat"><strong id="countActive">—</strong><span>Aktywni ≤ 5 min</span></div><div class="stat"><strong id="countRecent">—</strong><span>Zmiana ≤ 60 min</span></div><div class="stat"><strong id="countEvents">—</strong><span>Zapisane eventy</span></div></div>
+<div class="layout"><section class="panel"><div class="panel-head"><h2>Członkowie ReBorN</h2><span class="small" id="listCount">—</span></div><input class="search" id="search" placeholder="Szukaj nicku lub PID…"><div class="filters"><button class="filter active" data-filter="all">Wszyscy</button><button class="filter" data-filter="active">Aktywni</button><button class="filter" data-filter="recent">Ostatnia godzina</button><button class="filter" data-filter="unknown">Brak sygnału</button></div><div class="player-list" id="playerList"><div class="empty">Pobieranie listy RB…</div></div></section>
+<section class="panel"><div class="panel-head"><h2>Karta gracza</h2><span class="small">Szczegóły i historia</span></div><div class="detail" id="detail"><div class="empty">Wybierz gracza z listy, aby zobaczyć jego kartę.</div></div></section></div>
+<div class="notice warn">Status aktywności jest wskaźnikiem orientacyjnym, a nie dowodem zalogowania. Dane API są odświeżane przez serwer zwykle co 5 minut; wybrany interwał określa, jak często ta strona sprawdza nowy plik. Brak zmiany łupu lub honoru nie oznacza automatycznie, że gracz jest offline.</div>
+<div class="footer">Tracker RB · Źródło: zweryfikowany roster AID 115 oraz snapshoty API. Historia rozpoczyna się od pierwszego poprawnego pomiaru; nie odtwarza wcześniejszej aktywności.</div>
+</div>
+<script>
+(()=> {
+ const $=id=>document.getElementById(id),DATA='./data/tracker-rb.json';
+ let data=null,selectedId=null,filter='all',timer=null,loading=false;
+ const fmt=v=>v===null||v===undefined||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('pl-PL');
+ const date=v=>v?new Date(v).toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+ const age=v=>v?Math.max(0,Math.round((Date.now()-Date.parse(v))/60000)):Infinity;
+ const metric=(p,key)=>p[key]??p.raw?.[key]??null;
+ function activity(p){
+  const h=Array.isArray(p.metric_history)?p.metric_history:[];
+  let last=null,reason='';
+  for(let i=1;i<h.length;i++){
+   const a=h[i-1],b=h[i],t=Date.parse(b.captured_at);
+   if(!Number.isFinite(t))continue;
+   for(const k of ['loot','honor_points']){
+    if(a[k]!==null&&a[k]!==undefined&&b[k]!==null&&b[k]!==undefined&&Number(a[k])!==Number(b[k])){
+     if(!last||t>last.at){last={at:t,kind:k,delta:Number(b[k])-Number(a[k])};reason=k==='loot'?'Zmiana łupu':'Zmiana honoru';}
+    }
+   }
+  }
+  const minutes=last?Math.max(0,(Date.now()-last.at)/60000):Infinity;
+  return {last,minutes,reason,status:minutes<=5?'active':minutes<=60?'recent':'unknown'};
+ }
+ function protectionHint(p){
+  const h=(p.metric_history||[]).filter(x=>x.honor_points!==null&&x.honor_points!==undefined);
+  const l=(p.metric_history||[]).filter(x=>x.loot!==null&&x.loot!==undefined);
+  if(h.length<2||l.length<2)return {label:'Brak danych do oceny',kind:'warn',desc:'API nie dostarczyło wystarczającej historii honoru i łupu.'};
+  const honorDelta=Number(h.at(-1).honor_points)-Number(h[0].honor_points);
+  const lootDelta=Number(l.at(-1).loot)-Number(l[0].loot);
+  const span=Date.parse(h.at(-1).captured_at)-Date.parse(h[0].captured_at);
+  if(span>=6*3600000&&honorDelta===0&&lootDelta>0)return {label:'Możliwa ochrona lub brak walk PvP',kind:'warn',desc:'Gracz zdobywał łup, ale honor pozostawał bez zmian przez zebrany okres. To słaba przesłanka, nie potwierdzenie tarczy.'};
+  if(honorDelta!==0)return {label:'Brak przesłanki ochrony',kind:'good',desc:'W historii wystąpiła zmiana honoru, więc nie widać stabilnego wzorca sugerującego ochronę.'};
+  return {label:'Nie można rozpoznać ochrony',kind:'warn',desc:'Brak zmian honoru nie pozwala odróżnić ochrony, braku walk, nieaktywności ani ograniczeń API.'};
+ }
+ function statusMarkup(p){
+  const a=activity(p);
+  if(a.status==='active')return '<span class="status active">● Aktywny ≤5 min</span>';
+  if(a.status==='recent')return '<span class="status recent">◷ Zmiana ≤60 min</span>';
+  return '<span class="status unknown">? Brak świeżego sygnału</span>';
+ }
+ function renderList(){
+  const q=$('search').value.trim().toLocaleLowerCase('pl');
+  let rows=(data?.players||[]).map(p=>({...p,_activity:activity(p)})).filter(p=>(p.name+' '+p.player_id).toLocaleLowerCase('pl').includes(q));
+  if(filter==='active')rows=rows.filter(p=>p._activity.status==='active');
+  if(filter==='recent')rows=rows.filter(p=>p._activity.status!=='unknown');
+  if(filter==='unknown')rows=rows.filter(p=>p._activity.status==='unknown');
+  rows.sort((a,b)=>a._activity.minutes-b._activity.minutes||a.name.localeCompare(b.name,'pl'));
+  $('listCount').textContent=rows.length+' / '+(data?.players?.length||0);
+  $('playerList').innerHTML=rows.length?rows.map(p=>'<button class="player '+(Number(p.player_id)===Number(selectedId)?'selected':'')+'" data-id="'+p.player_id+'"><span><span class="pname">'+esc(p.name)+'</span><span class="sub">PID '+p.player_id+' · Honor '+fmt(p.honor_points)+'</span></span>'+statusMarkup(p)+'</button>').join(''):'<div class="empty">Brak graczy dla wybranego filtra.</div>';
+  $('playerList').querySelectorAll('[data-id]').forEach(btn=>btn.addEventListener('click',()=>{selectedId=Number(btn.dataset.id);renderList();renderDetail();}));
+ }
+ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+ function renderDetail(){
+  const p=(data?.players||[]).find(x=>Number(x.player_id)===Number(selectedId));
+  if(!p){$('detail').innerHTML='<div class="empty">Wybierz gracza z listy, aby zobaczyć jego kartę.</div>';return;}
+  const a=activity(p),pro=protectionHint(p);
+  const events=(data.events||[]).filter(e=>Number(e.player_id)===Number(p.player_id)).sort((x,y)=>String(y.detected_at).localeCompare(String(x.detected_at))).slice(0,30);
+  const history=(p.metric_history||[]).slice(-12).reverse();
+  const eventLabel={honor_delta:'Zmiana honoru',loot_delta:'Zmiana łupu',power_gain:'Wzrost potęgi',power_drop:'Spadek potęgi',nick_changed:'Zmiana nicku',alliance_changed:'Zmiana sojuszu'};
+  $('detail').innerHTML='<div class="profile-top"><div><h2>'+esc(p.name)+'</h2><div class="profile-id">PID '+p.player_id+' · '+esc(p.alliance_name||'ReBorN')+' · AID '+p.alliance_id+'</div></div>'+statusMarkup(p)+'</div>'+
+   '<div class="metric-grid"><div class="metric"><b>'+fmt(p.honor_points)+'</b><span>Honor</span></div><div class="metric"><b>'+fmt(p.loot)+'</b><span>Łup</span></div><div class="metric"><b>'+fmt(p.power)+'</b><span>Potęga</span></div><div class="metric"><b>'+fmt(p.glory_points)+'</b><span>Chwała</span></div><div class="metric"><b>'+fmt(p.level)+'</b><span>Poziom</span></div><div class="metric"><b>'+fmt(p.legend_level)+'</b><span>Poziom legendarny</span></div></div>'+
+   '<div class="notice '+(a.status==='active'?'good':'')+'"><b>Ostatni sygnał aktywności:</b> '+(a.last?esc(a.reason)+' ('+Math.round(a.minutes)+' min temu, zmiana '+(a.last.delta>0?'+':'')+fmt(a.last.delta)+')':'brak wykrytej zmiany w historii')+'.<br><span class="small">Ostatni pomiar źródłowy: '+date(p.last_seen||data.source_snapshot_at)+'.</span></div>'+
+   '<div class="notice '+pro.kind+'"><b>Ochrona przed atakami: '+esc(pro.label)+'</b><br>'+esc(pro.desc)+'<br><span class="small">API nie udostępnia w potwierdzonym kontrakcie flagi aktywnej tarczy ani stanu uczestnictwa w Krwawych Krukach / Inwazji Obcych. Nie da się tego stwierdzić na pewno.</span></div>'+
+   '<div class="section"><h3>Ostatnie eventy gracza ('+events.length+')</h3>'+(events.length?events.map(e=>'<div class="event"><time>'+date(e.detected_at)+'</time><div><b>'+esc(eventLabel[e.kind]||e.kind)+'</b><p>'+esc(e.description||'Zarejestrowane zdarzenie')+'</p></div></div>').join(''):'<p class="small">Brak zapisanych eventów dla tego gracza. Historia zaczyna się od uruchomienia trackera.</p>')+'</div>'+
+   '<div class="section"><h3>Ostatnie pomiary API</h3><div class="history">'+(history.length?history.map(x=>'<div class="history-item"><b>'+date(x.captured_at)+'</b><span>Łup: '+fmt(x.loot)+' · Honor: '+fmt(x.honor_points)+'</span></div>').join(''):'<div class="small">Brak historii pomiarów.</div>')+'</div></div>';
+ }
+ function renderStats(){
+  const players=data.players||[],states=players.map(activity);
+  $('countPlayers').textContent=players.length;
+  $('countActive').textContent=states.filter(x=>x.status==='active').length;
+  $('countRecent').textContent=states.filter(x=>x.minutes<=60).length;
+  $('countEvents').textContent=data.event_count??(data.events||[]).length;
+  $('updated').textContent='Dane: '+date(data.updated_at);
+  const sourceAge=age(data.source_snapshot_at);
+  $('sourceFreshness').textContent='Snapshot: '+(Number.isFinite(sourceAge)?sourceAge+' min temu':'—');
+  $('dataState').textContent=data.baseline_only?'Budowanie historii':(data.metrics_available?'Metryki dostępne':'Metryki częściowo niedostępne');
+  $('dataState').className='pill '+(data.metrics_available?'good':'warn');
+ }
+ async function load(force=false){
+  if(loading)return;loading=true;$('refreshNow').disabled=true;
+  try{
+   const res=await fetch(DATA+(force?'?t='+Date.now():'?t='+Math.floor(Date.now()/60000)),{cache:'no-store'});
+   if(!res.ok)throw new Error('HTTP '+res.status);
+   const next=await res.json();
+   if(!Array.isArray(next.players)||Number(next.alliance_id)!==115)throw new Error('Plik nie zawiera poprawnego rosteru RB (AID 115).');
+   const prior=selectedId;data=next;
+   if(!data.players.some(p=>Number(p.player_id)===Number(prior)))selectedId=data.players[0]?.player_id??null;
+   renderStats();renderList();renderDetail();
+  }catch(e){$('dataState').textContent='Błąd danych: '+e.message;$('dataState').className='pill warn';}
+  finally{loading=false;$('refreshNow').disabled=false;}
+ }
+ function schedule(){if(timer)clearInterval(timer);const minutes=Number($('refreshRate').value)||5;timer=setInterval(()=>{if(!document.hidden)load();},minutes*60000);try{localStorage.setItem('trackerRBRefresh',String(minutes));}catch{}}
+ $('refreshRate').addEventListener('change',schedule);
+ $('refreshNow').addEventListener('click',()=>load(true));
+ $('search').addEventListener('input',renderList);
+ document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));renderList();}));
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)load();});
+ try{const saved=localStorage.getItem('trackerRBRefresh');if(['5','10','20','60'].includes(saved))$('refreshRate').value=saved;}catch{}
+ schedule();load();
+})();
+</script></body></html>

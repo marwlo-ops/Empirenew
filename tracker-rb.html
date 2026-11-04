@@ -7,7 +7,7 @@
 </style></head><body><div class="wrap">
 <header class="hero"><div><div class="eyebrow">EmpirefourkingdomsExGG2_3 · AID 115</div><h1>Tracker RB</h1><p>Lista członków ReBorN, orientacyjna aktywność, honor i historia zdarzeń.</p></div><div class="toolbar"><label for="refreshRate">Automatyczne odświeżanie danych</label><select id="refreshRate"><option value="5">Co 5 minut</option></select><button id="refreshNow">Odśwież teraz</button></div></header>
 <div class="meta"><span class="pill" id="updated">Oczekiwanie na dane…</span><span class="pill" id="sourceFreshness">Źródło: —</span><span class="pill" id="dataState">Ładowanie</span><span class="pill">Sygnały: honor/łup = mocne · potęga = słabe</span></div>
-<div class="stats"><div class="stat"><strong id="countPlayers">—</strong><span>Gracze RB</span></div><div class="stat"><strong id="countActive">—</strong><span>Potwierdzony sygnał ≤ 5 min</span></div><div class="stat"><strong id="countRecent">—</strong><span>Sygnał pośredni / ostatnia godzina</span></div><div class="stat"><strong id="countEvents">—</strong><span>Zapisane eventy</span></div></div>
+<div class="stats"><div class="stat"><strong id="countPlayers">—</strong><span>Gracze RB</span></div><div class="stat"><strong id="countActive">—</strong><span>Potwierdzony sygnał ≤ 5 min</span></div><div class="stat"><strong id="countRecent">—</strong><span>Sygnał starszy niż 5 min · do 1 h</span></div><div class="stat"><strong id="countEvents">—</strong><span>Zapisane eventy</span></div></div>
 <section class="panel" style="margin:12px 0"><div class="panel-head"><h2>Ostatnie alerty RB</h2><span class="small">Ostatnie 24 godziny</span></div><div class="detail" id="alerts"><div class="empty">Ładowanie alertów…</div></div></section><section class="panel" style="margin:12px 0"><div class="panel-head"><h2>Ostatnie alerty sojuszu</h2><span class="small" id="alertCount">—</span></div><div class="detail" id="alertFeed"><div class="empty">Ładowanie zdarzeń…</div></div></section>
 <div class="layout"><section class="panel"><div class="panel-head"><h2>Członkowie ReBorN</h2><span class="small" id="listCount">—</span></div><input class="search" id="search" placeholder="Szukaj nicku lub PID…"><div class="filters"><button class="filter active" data-filter="all">Wszyscy</button><button class="filter" data-filter="active">Potwierdzeni</button><button class="filter" data-filter="recent">Sygnały ostatniej godziny</button><button class="filter" data-filter="unknown">Brak potwierdzenia</button></div><div class="player-list" id="playerList"><div class="empty">Pobieranie listy RB…</div></div></section>
 <section class="panel"><div class="panel-head"><h2>Karta gracza</h2><span class="small">Szczegóły i historia</span></div><div class="detail" id="detail"><div class="empty">Wybierz gracza z listy, aby zobaczyć jego kartę.</div></div></section></div>
@@ -39,7 +39,7 @@
   }
   const minutes=x=>x?Math.max(0,(Date.now()-x.at)/60000):Infinity;
   const directAge=minutes(direct),indirectAge=minutes(indirect);
-  const status=directAge<=5?"confirmed":indirectAge<=5?"possible":directAge<=60?"recent":"unknown";
+  const status=directAge<=5?"confirmed":indirectAge<=5?"possible":Math.min(directAge,indirectAge)<=60?"recent":"unknown";
   return {direct,indirect,directAge,indirectAge,status,last:direct&&directAge<=indirectAge?direct:indirect,minutes:Math.min(directAge,indirectAge)};
  }
  function protectionHint(p){

@@ -34,7 +34,8 @@ jobs:
             ["filtr potwierdzonych używa statusu confirmed", script.includes("p._activity.status==='confirmed'")],
             ["panel ostatnich alertów jest zasilany danymi", script.includes('$("alerts").innerHTML=')],
             ["snapshot RB v2 jest walidowany", script.includes("next.schema_version!==2")],
-            ["świeżość snapshotu ma próg ostrzegawczy", script.includes("sourceAge<=15")]
+            ["świeżość snapshotu ma próg ostrzegawczy", script.includes("sourceAge<=15")],
+            ["sygnał pośredni do 60 min trafia do statusu recent", script.includes("Math.min(directAge,indirectAge)<=60")]
           ];
           for (const [name, ok] of checks) {
             console.log((ok ? "PASS " : "FAIL ") + name);

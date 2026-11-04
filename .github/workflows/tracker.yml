@@ -39,8 +39,11 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/location-snapshots.json data/location-history.json data/outpost-history.json data/server-intel-snapshot.json data/server-intel-history.json data/tracker-rb.json
             git commit -m "chore: update shared location history"
-            git pull --rebase origin main
-            git push
+            git fetch origin main
+            git reset --mixed origin/main
+            git add data/location-snapshots.json data/location-history.json data/outpost-history.json data/server-intel-snapshot.json data/server-intel-history.json data/tracker-rb.json
+            git commit -m "chore: publish latest tracker snapshots" || echo "No data changes after refresh"
+            git push origin HEAD:main
           else
             echo "No location changes."
           fi

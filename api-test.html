@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
+<title>Empirenew — test API E4K</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#131e30;--line:#26364d;--txt:#edf4ff;--muted:#91a4bd;--gold:#e5b85c;--green:#55d6a0;--red:#ff727a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1e3553 0,transparent 55%),var(--bg);color:var(--txt);font:15px/1.55 system-ui,sans-serif}.wrap{max-width:850px;margin:auto;padding:28px 16px}h1{font-size:clamp(26px,5vw,38px);margin:0 0 8px}p{color:var(--muted)}.panel{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#17243a,#101a2a)}button{border:1px solid #a87e35;border-radius:10px;background:#493719;color:#ffe3a2;padding:12px 16px;font-weight:750;font-size:15px}button:disabled{opacity:.55}.result{padding:12px;margin:9px 0;border:1px solid var(--line);border-radius:10px;background:#0e1929}.ok{color:var(--green)}.bad{color:var(--red)}pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#c6d5e8;font-size:12px}.note{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body><main class="wrap">
+<a href="./mapa-rb.html" style="color:#e5b85c">← Wróć do mapy</a>
+<h1>Test połączenia API E4K</h1>
+<p>Testuje wyłącznie dwa rozpoznane odczyty: roster sojuszu ReBorN (AID 115) przez <code>ain</code> i ranking sojuszy przez <code>hgh</code>. Nie używa danych logowania.</p>
+<section class="panel">
+<button id="run">Uruchom test API</button>
+<p class="note">Test wykonuje żądania z przeglądarki. Jeśli serwer nie zezwala na CORS, wynik pokaże błąd przeglądarki — nie oznacza to automatycznie, że sam endpoint API nie działa.</p>
+<div id="status" aria-live="polite">Oczekiwanie na uruchomienie testu.</div>
+<pre id="details"></pre>
+</section>
+</main>
+<script type="module">
+import {testReadOnlyApi} from "./api/e4k-client.js";
+const button=document.getElementById("run"),status=document.getElementById("status"),details=document.getElementById("details");
+button.addEventListener("click",async()=>{
+ button.disabled=true;status.textContent="Testuję ain i hgh…";details.textContent="";
+ try{
+  const report=await testReadOnlyApi();
+  const good=report.checks.filter(x=>x.ok).length;
+  status.textContent=good+"/"+report.checks.length+" testów zakończonych powodzeniem · "+report.tested_at;
+  status.className=good===report.checks.length?"ok":good?"":"bad";
+  details.textContent=JSON.stringify(report,null,2);
+ }catch(error){status.textContent="Błąd uruchomienia testu: "+error.message;status.className="bad"}
+ finally{button.disabled=false}
+});
+</script></body></html>

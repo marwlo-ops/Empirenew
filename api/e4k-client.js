@@ -193,15 +193,27 @@ async function fetchCompleteHighscore(listType, options = {}) {
     const expectedEnd = Math.min(expectedStart + 5, total);
     const pageEntries = page.rows.map(extractRankedProfile).filter(Boolean);
     const pageRanks = pageEntries.map(item => item.rank).sort((a,b)=>a-b);
-    const expectedRanks = Array.from({length: expectedEnd - expectedStart + 1}, (_,i)=>expectedStart+i);
-    if (JSON.stringify(pageRanks) !== JSON.stringify(expectedRanks)) {
+    // The server anchors the final six-row frame to LR, so the last request
+    // can overlap the previous frame by up to five ranks. Overlap is expected;
+    // gaps are not. Validate the actual six-rank frame then merge by rank.
+    const actualFrameStart = Math.max(1, Math.min(frameRank - 2, total - 5));
+    const actualFrameEnd = Math.min(total, actualFrameStart + 5);
+    const expectedFrameRanks = Array.from({length:actualFrameEnd-actualFrameStart+1},(_,i)=>actualFrameStart+i);
+    if (JSON.stringify(pageRanks) !== JSON.stringify(expectedFrameRanks) ||
+        pageRanks[0] > expectedStart || pageRanks.at(-1) < expectedEnd) {
       throw new E4KApiError("hgh: luka lub nadmiar pozycji w bloku rankingu", {
-        listType, expectedStart, expectedEnd, frameRank, returnedRanks: pageRanks,
-        expectedRanks, FR: page.frame_rank, LR: page.total
+        listType, expectedStart, expectedEnd, frameRank, returnedRanks:pageRanks,
+        expectedFrameRanks, FR:page.frame_rank, LR:page.total
       });
     }
     for (const item of pageEntries) {
-      if (byRank.has(item.rank)) throw new E4KApiError("hgh: powtórzona pozycja rankingu", { rank:item.rank, listType });
+      if (byRank.has(item.rank)) {
+        const prior = extractRankedProfile([item.rank, null, byRank.get(item.rank)]);
+        if (prior?.id !== item.id) throw new E4KApiError("hgh: zmienił się profil w nakładającym się fragmencie", {
+          rank:item.rank, previousId:prior?.id, currentId:item.id, listType
+        });
+        continue;
+      }
       if (byId.has(item.id)) throw new E4KApiError("hgh: ten sam OID występuje pod różnymi pozycjami", {
         id:item.id, previousRank:byId.get(item.id), rank:item.rank, listType
       });

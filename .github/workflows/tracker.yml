@@ -1,5 +1,10 @@
 name: Empirenew location tracker
 on:
+  push:
+    paths:
+      - "api/e4k-client.js"
+      - "scripts/server-intel-tracker.js"
+      - ".github/workflows/tracker.yml"
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:

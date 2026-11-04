@@ -193,7 +193,7 @@ async function loadIntel(){
   const failed=responses.find(r=>!r.ok);if(failed)throw Error('HTTP '+failed.status);
   const [history,snapshot]=await Promise.all(responses.map(r=>r.json()));
   if(!Array.isArray(history.events)||!Array.isArray(history.players)||!Array.isArray(snapshot.players))throw Error('Niepoprawny format server-intel-*.json');
-  intelFeed=history.events;intelActivity=history.players;intelPlayers=snapshot.players;
+  intelFeed=history.events.map(e=>({...e,alliance_id:e.alliance_id??e.current_alliance_id??e.previous_alliance_id??0}));intelActivity=history.players.map(p=>({...p,player:p.name||p.player,player_id:p.player_id??p.member_id}));intelPlayers=snapshot.players.map(p=>({...p,player:p.name,member_id:p.player_id}));
   const allianceSelect=$('intelAlliance'),selectedAlliance=allianceSelect.value;
   const alliances=[...new Map(intelPlayers.filter(p=>Number(p.alliance_id)>0).map(p=>[String(p.alliance_id),{id:String(p.alliance_id),name:p.alliance_name||('AID '+p.alliance_id)}])).values()].sort((a,b)=>a.name.localeCompare(b.name,'pl'));
   allianceSelect.innerHTML='<option value="all">Cały serwer PL1</option>'+alliances.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join('');
@@ -221,7 +221,6 @@ function intelProfile(playerId){
  const events=intelFeed.filter(e=>String(e.player_id||e.member_id)===selectedIntelId).sort((a,b)=>String(b.detected_at).localeCompare(String(a.detected_at)));
  const activity=intelActivity.find(p=>String(p.player_id)===selectedIntelId),positions=[];
  const changes=events.filter(e=>['nick_changed','alliance_changed'].includes(e.kind));
- const changes=events.filter(e=>['nick_changed','alliance_changed'].includes(e.kind));
  $('intelProfileBody').innerHTML='<div class="intel-profile"><h3>'+esc(player.name)+'</h3><div>'+esc(player.alliance_name||'Brak sojuszu')+' · PID '+esc(player.player_id)+'</div><div class="muted">Ranking: #'+fmtNum(player.rank)+' · poziom '+fmtNum(player.level)+' · legendarny '+fmtNum(player.legend_level)+'</div><div class="muted">Potęga: '+fmtNum(player.power)+' · chwała: '+fmtNum(player.glory_points)+' · łupy: '+fmtNum(player.loot)+'</div><div class="muted">Aktywność: '+(activity?.activity_label||'Brak wystarczających danych')+' · odczyt: '+(activity?.last_seen?new Date(activity.last_seen).toLocaleString('pl-PL'):'—')+'</div></div><div class="intel-cards"><div><b>Historia zmian profilu</b>'+(changes.length?changes.map(e=>'<div class="history-row">'+esc(intelLabels[e.kind]||e.kind)+'<small>'+new Date(e.detected_at).toLocaleString('pl-PL')+' · '+esc(e.description||'')+'</small></div>').join(''):'<div class="muted">Brak zapisanych zmian nicku lub sojuszu.</div>')+'</div><div><b>Zmiany metryk</b><div class="muted">Potęga Δ 24 h: '+fmtNum(activity?.power_delta_24h)+' · łupy Δ 24 h: '+fmtNum(activity?.loot_delta_24h)+'</div></div></div>';
 }
 function renderIntel(){
@@ -230,7 +229,7 @@ function renderIntel(){
  $('intelFeedRows').querySelectorAll('[data-profile]').forEach(el=>el.onclick=()=>{intelProfile(el.dataset.profile);switchIntelTab('profile')});
  const query=$('intelSearch').value.trim().toLowerCase(),aid=$('intelAlliance').value;
  const activity=intelActivity.filter(p=>(!query||String(p.player||'').toLowerCase().includes(query)||String(p.alliance_name||'').toLowerCase().includes(query))&&(aid==='all'||String(p.alliance_id)===aid));
- $('intelActivityRows').innerHTML=activity.length?'<table class="intel-table"><thead><tr><th>Gracz</th><th>Sojusz</th><th>Łupy Δ 1h</th><th>Status</th></tr></thead><tbody>'+activity.map(p=>'<tr data-activity="'+esc(p.player_id)+'"><td>'+esc(p.player)+'</td><td>'+esc(p.alliance_name)+'</td><td>'+fmtNum(p.loot_delta_1h)+'</td><td><span class="intel-pill '+(p.status==='high'?'high':p.status==='medium'?'medium':p.status==='low'?'low':'')+'">'+esc(p.status_label||'Brak danych')+'</span></td></tr>').join('')+'</tbody></table>':'<div class="intel-empty">Brak danych łupów z API.</div>';
+ $('intelActivityRows').innerHTML=activity.length?'<table class="intel-table"><thead><tr><th>Gracz</th><th>Sojusz</th><th>Łupy Δ 1h</th><th>Status</th></tr></thead><tbody>'+activity.map(p=>'<tr data-activity="'+esc(p.player_id)+'"><td>'+esc(p.player)+'</td><td>'+esc(p.alliance_name)+'</td><td>'+fmtNum(p.loot_delta_24h)+'</td><td><span class="intel-pill '+(p.activity_status==='active'?'high':'')+'">'+esc(p.activity_label||'Brak danych')+'</span></td></tr>').join('')+'</tbody></table>':'<div class="intel-empty">Brak wystarczających danych o zmianach łupów.</div>';
  $('intelActivityRows').querySelectorAll('[data-activity]').forEach(el=>el.onclick=()=>{intelProfile(el.dataset.activity);switchIntelTab('profile')});
  const power=intelActivity.filter(p=>p.power_delta_24h!==null&&p.power_delta_24h!==undefined);
  $('topPowerGain').innerHTML=power.filter(p=>p.power_delta_24h>0).sort((a,b)=>b.power_delta_24h-a.power_delta_24h).slice(0,10).map(p=>'<div class="history-row">'+esc(p.player)+' <b>+'+fmtNum(p.power_delta_24h)+'</b></div>').join('')||'<div class="intel-empty">Brak potwierdzonych danych potęgi.</div>';

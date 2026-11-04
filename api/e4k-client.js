@@ -22,7 +22,7 @@ function assertSuccess(payload, command) {
   if (!payload || typeof payload !== "object") {
     throw new E4KApiError(`${command}: odpowiedź nie jest obiektem JSON`, { payload });
   }
-  if (String(payload.return_code) !== "0") {
+  if (String(payload.return_code ?? payload.status) !== "0") {
     throw new E4KApiError(`${command}: API zwróciło return_code=${payload.return_code ?? "brak"}`, {
       command, return_code: payload.return_code, error: payload.error
     });
@@ -194,9 +194,9 @@ export async function fetchServerPlayerRanking({ limit = 1000, pageSize = 100, m
     alliance_id: Number(row.AID ?? row.allianceId ?? 0),
     alliance_name: String(row.AN ?? row.allianceName ?? (Number(row.AID ?? 0) === 0 ? "Brak sojuszu" : "")),
     rank: Number(row.rank ?? index + 1),
-    power: Number.isFinite(Number(row.P ?? row.POW ?? row.power)) ? Number(row.P ?? row.POW ?? row.power) : null,
-    glory_points: Number.isFinite(Number(row.glory_points)) ? Number(row.glory_points) : null,
-    loot: Number.isFinite(Number(row.loot ?? row.LOOT ?? row.loot_points)) ? Number(row.loot ?? row.LOOT ?? row.loot_points) : null,
+    power: (row.P ?? row.POW ?? row.power) !== null && (row.P ?? row.POW ?? row.power) !== undefined && Number.isFinite(Number(row.P ?? row.POW ?? row.power)) ? Number(row.P ?? row.POW ?? row.power) : null,
+    glory_points: row.glory_points !== null && row.glory_points !== undefined && Number.isFinite(Number(row.glory_points)) ? Number(row.glory_points) : null,
+    loot: (row.loot ?? row.LOOT ?? row.loot_points) !== null && (row.loot ?? row.LOOT ?? row.loot_points) !== undefined && Number.isFinite(Number(row.loot ?? row.LOOT ?? row.loot_points)) ? Number(row.loot ?? row.LOOT ?? row.loot_points) : null,
     level: Number.isFinite(Number(row.L)) ? Number(row.L) : null,
     legend_level: Number.isFinite(Number(row.LL)) ? Number(row.LL) : null,
     raw: row

@@ -30,10 +30,15 @@ try {
   fail("Nie udało się pobrać rankingu graczy; poprzedni snapshot i historia pozostają bez zmian.");
 }
 if (snapshot.player_count < 50) fail(`Ranking zwrócił podejrzanie mało graczy: ${snapshot.player_count}; pliki nie zostaną nadpisane.`);
+// A trusted baseline must come from a previous full hgh harvest, never from the RB/MD map seed.
+const hasTrustedBaseline = oldSnapshot?.source === "hgh" && oldSnapshot?.player_count >= 50 && Boolean(oldSnapshot?.baseline_established_at);
+const isBaseline = !hasTrustedBaseline;
+snapshot.baseline_established_at = isBaseline ? snapshot.captured_at : oldSnapshot.baseline_established_at;
+snapshot.snapshot_sequence = isBaseline ? 1 : Number(oldSnapshot.snapshot_sequence || 1) + 1;
 if (oldSnapshot?.players?.length && snapshot.player_count < Math.floor(oldSnapshot.players.length * 0.7)) {
   fail(`Podejrzany spadek liczby graczy: ${oldSnapshot.players.length} → ${snapshot.player_count}; zachowuję poprzedni snapshot.`);
 }
-const previous = new Map((oldSnapshot?.players || []).map(p => [String(p.player_id), p]));
+const previous = new Map((isBaseline ? [] : (oldSnapshot?.players || [])).map(p => [String(p.player_id), p]));
 const events = [];
 const players = snapshot.players.map(player => {
   const old = previous.get(String(player.player_id));
@@ -78,10 +83,10 @@ const players = snapshot.players.map(player => {
       });
     }
   }
-  const metricHistory = Array.isArray(old?.metric_history) ? old.metric_history.slice(-287) : [];
+  const metricHistory = isBaseline ? [] : (Array.isArray(old?.metric_history) ? old.metric_history.slice(-287) : []);
   const point = { captured_at: snapshot.captured_at, power: player.power, loot: player.loot, glory_points: player.glory_points, rank: player.rank };
   const last = metricHistory.at(-1);
-  if (!last || ["power", "loot", "glory_points", "rank"].some(k => last[k] !== point[k])) metricHistory.push(point);
+  if (!last || last.captured_at !== point.captured_at) metricHistory.push(point);
   const last24 = metricHistory.filter(p => Date.parse(p.captured_at) >= Date.now() - 86400000);
   const first = last24[0], end = last24.at(-1);
   const powerDelta24h = first && end && hasNumber(first.power) && hasNumber(end.power) ? Number(end.power) - Number(first.power) : null;
@@ -89,8 +94,9 @@ const players = snapshot.players.map(player => {
   return {
     ...player, metrics_available: player.power !== null || player.loot !== null || player.glory_points !== null,
     power_delta_24h: powerDelta24h, loot_delta_24h: lootDelta24h,
-    activity_status: powerDelta24h !== null && powerDelta24h !== 0 ? "active" : "unknown",
-    activity_label: powerDelta24h !== null && powerDelta24h !== 0 ? "Zmiana potęgi w ostatnich 24 h" : "Brak wystarczających danych aktywności",
+    trend_available: metricHistory.length >= 2,
+    activity_status: metricHistory.length >= 2 && powerDelta24h !== null && powerDelta24h !== 0 ? "active" : "unknown",
+    activity_label: metricHistory.length >= 2 && powerDelta24h !== null && powerDelta24h !== 0 ? "Zmiana potęgi w ostatnich 24 h" : "Brak wystarczających danych aktywności",
     last_seen: snapshot.captured_at, metric_history: metricHistory
   };
 });
@@ -101,10 +107,25 @@ const stamped = events.map((event, index) => ({
 const merged = [...stamped, ...oldHistory.events]
   .sort((a, b) => String(b.detected_at).localeCompare(String(a.detected_at)))
   .slice(0, MAX_EVENTS);
+const allianceMap = new Map();
+for (const player of players) {
+  const aid = Number(player.alliance_id || 0);
+  const key = String(aid);
+  if (!allianceMap.has(key)) allianceMap.set(key, { alliance_id: aid, name: player.alliance_name || (aid ? `Sojusz #${aid}` : "Brak sojuszu"), member_count: 0, total_power: 0, power_known_count: 0, active_count: 0, activity_known_count: 0 });
+  const alliance = allianceMap.get(key);
+  alliance.member_count += 1;
+  if (hasNumber(player.power)) { alliance.total_power += Number(player.power); alliance.power_known_count += 1; }
+  if (player.activity_status === "active") alliance.active_count += 1;
+  if (player.trend_available) alliance.activity_known_count += 1;
+}
 const history = {
-  schema_version: 1, server: DEFAULT_SERVER, updated_at: now,
+  schema_version: 2, server: DEFAULT_SERVER, updated_at: now,
+  baseline_only: isBaseline, baseline_established_at: snapshot.baseline_established_at,
+  snapshot_sequence: snapshot.snapshot_sequence,
+  trends_available: !isBaseline && snapshot.snapshot_sequence >= 2,
+  alliances: [...allianceMap.values()].sort((a, b) => b.total_power - a.total_power),
   source_snapshot_at: snapshot.captured_at, player_count: players.length,
-  metrics_available: players.some(p => p.metrics_available),
+  metrics_available: !isBaseline && snapshot.snapshot_sequence >= 2 && players.some(p => p.metrics_available),
   metric_fields_detected: ["power", "loot", "glory_points"].filter(k => players.some(p => p[k] !== null)),
   event_count: merged.length, new_events: stamped.length, events: merged, players
 };
@@ -114,6 +135,7 @@ await write(snapshotPath, snapshot);
 console.log(JSON.stringify({
   ok: true, server: DEFAULT_SERVER, players: snapshot.player_count,
   total_count: snapshot.total_count, pages_fetched: snapshot.pages_fetched,
-  new_events: stamped.length, total_events: merged.length,
+  new_events: stamped.length, total_events: merged.length, baseline_only: isBaseline,
+  snapshot_sequence: snapshot.snapshot_sequence, alliance_count: allianceMap.size,
   metrics_available: history.metrics_available, metric_fields_detected: history.metric_fields_detected
 }));

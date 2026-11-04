@@ -83,7 +83,9 @@ for (const cfg of ALLIANCES) {
     fail(`AID ${cfg.aid}: podejrzany spadek liczby graczy ${prev.members.length} → ${data.members.length}`);
   }
   const pos=data.members.reduce((n,m)=>n+(m.ap?.length||0),0);
+  const previousPositions=prev?.members?.reduce((n,m)=>n+(m.ap?.length||0),0);
   if (pos < cfg.minMembers) fail(`AID ${cfg.aid}: zbyt mało pozycji AP (${pos})`);
+  if (previousPositions && pos < Math.floor(previousPositions * 0.75)) fail(`AID ${cfg.aid}: podejrzany spadek lokalizacji AP ${previousPositions} → ${pos}`);
   payloads.push(data);
 }
 const current=flatten(payloads);

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "server": "EmpirefourkingdomsExGG2_3",
-  "updated_at": "2026-11-04T15:28:34.217Z",
+  "updated_at": "2026-11-04T16:06:27.750Z",
   "events": [
     {
       "id": "appeared:941700:3:12:2026-11-04T14:08:50.510Z:1382554",
@@ -1760,6 +1760,22 @@
       "object_id": 2352370,
       "x": 611,
       "y": 556,
+      "type_code": 12,
+      "object_type": "castle"
+    },
+    {
+      "id": "appeared:1671423:4:12:2026-11-04T16:06:27.750Z:1895",
+      "kind": "appeared",
+      "detected_at": "2026-11-04T16:06:27.750Z",
+      "source": "ain",
+      "member_id": 1671423,
+      "player": "BloodLine",
+      "alliance_id": 41343,
+      "alliance_name": "MADDEVILS",
+      "kingdom_code": 4,
+      "object_id": 1895,
+      "x": 587,
+      "y": 574,
       "type_code": 12,
       "object_type": "castle"
     }

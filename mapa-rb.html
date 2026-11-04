@@ -221,7 +221,7 @@ async function loadIntel(){
   if(snapshot.complete!==true||snapshot.ranking_validated!==true||snapshot.roster_validated!==true||!Number.isInteger(snapshot.total_count)||snapshot.player_count!==snapshot.total_count||snapshot.players.length!==snapshot.total_count)throw Error('Snapshot nie przeszedł walidacji kompletności — odmawiam wyświetlenia niepełnych danych.');
   if(history.player_count!==snapshot.player_count||Number(history.snapshot_sequence)!==Number(snapshot.snapshot_sequence))throw Error('Snapshot i historia pochodzą z różnych przebiegów — odśwież później.');
   intelSnapshotSequence=snapshot.snapshot_sequence;
-  const spyPowerDelta=e=>{const direct=Number(e.delta);if(Number.isFinite(direct))return direct;const previous=Number(e.previous_value),current=Number(e.current_value);return Number.isFinite(previous)&&Number.isFinite(current)?current-previous:null;};
+  const spyPowerDelta=e=>{const direct=e.delta==null?NaN:Number(e.delta);if(Number.isFinite(direct))return direct;const previous=e.previous_value==null?NaN:Number(e.previous_value),current=e.current_value==null?NaN:Number(e.current_value);return Number.isFinite(previous)&&Number.isFinite(current)?current-previous:null;};
   intelFeed=history.events.filter(e=>e.kind!=='glory_delta').filter(e=>!['power_gain','power_drop'].includes(e.kind)||Math.abs(spyPowerDelta(e)??0)>=10000).map(e=>({...e,alliance_id:e.alliance_id??e.current_alliance_id??e.previous_alliance_id??0}));
   intelActivity=history.players.map(p=>{const d=Number(p.power_delta_24h);return {...p,power_delta_24h:Number.isFinite(d)&&Math.abs(d)>=10000?d:null,player:p.name||p.player,player_id:p.player_id??p.member_id};});
   intelPlayers=snapshot.players.map(p=>({...p,player:p.name,member_id:p.player_id}));

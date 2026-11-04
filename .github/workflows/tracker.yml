@@ -34,7 +34,7 @@ jobs:
         run: node scripts/server-intel-tracker.js
       - name: Commit shared history
         run: |
-          if [[ -n "$(git status --porcelain data/location-snapshots.json data/location-history.json data/outpost-history.json data/server-intel-snapshot.json data/server-intel-history.json)" ]]; then
+          if [[ -n "$(git status --porcelain data/location-snapshots.json data/location-history.json data/outpost-history.json data/server-intel-snapshot.json data/server-intel-history.json data/tracker-rb.json)" ]]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/location-snapshots.json data/location-history.json data/outpost-history.json data/server-intel-snapshot.json data/server-intel-history.json

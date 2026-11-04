@@ -31,6 +31,25 @@ svg{width:100%;height:100%;display:block}.dot{cursor:pointer;stroke:#08111d;stro
 
 /* Intel center navigation and responsive panels */
 .main-tabs{display:flex;gap:8px;padding:12px 0 4px;position:sticky;top:0;z-index:20;background:#0b1220ed;backdrop-filter:blur(12px)}.main-tab{flex:1;border:1px solid var(--line);border-radius:12px;padding:12px;background:#142239;color:var(--txt);font-weight:800}.main-tab.active{border-color:#c99a45;background:linear-gradient(120deg,#59401c,#26334a);color:#ffe3a2;box-shadow:0 8px 26px #0004}.main-view[hidden],.intel-subview[hidden]{display:none!important}.intel-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 0}.intel-heading h2{margin:0;font-size:clamp(22px,4vw,30px)}.intel-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.intel-stat{padding:13px;border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#192942,#101a29)}.intel-stat b{display:block;font-size:24px;color:var(--gold)}.intel-stat span{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}.intel-filters,.intel-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.intel-filters .control{flex:1;min-width:145px}.intel-tabs button{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:#142239;color:var(--txt)}.intel-tabs button.active{border-color:#c99a45;color:#ffe3a2;background:#3a2b18}.intel-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.intel-row{padding:12px;border:1px solid var(--line);border-radius:11px;background:#101b2b;margin:8px 0;cursor:pointer}.intel-row:hover{border-color:#718ba9}.intel-row strong{color:#ffe0a0}.intel-row small{display:block;color:var(--muted);margin-top:4px;line-height:1.5}.intel-pill{display:inline-block;padding:3px 8px;border-radius:99px;font-size:11px;border:1px solid var(--line);color:var(--muted)}.intel-pill.high{color:#7de4ae;border-color:#27764e}.intel-pill.medium{color:#f4d078;border-color:#84652b}.intel-pill.low{color:#ff858a;border-color:#8b3840}.intel-table{width:100%;border-collapse:collapse;font-size:13px}.intel-table th,.intel-table td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--line)}.intel-table th{color:var(--muted);font-size:11px;text-transform:uppercase}.intel-empty{padding:18px;color:var(--muted);border:1px dashed var(--line);border-radius:10px}.alliance-card{padding:12px;border:1px solid var(--line);border-radius:11px;background:#101b2b;margin:8px 0;cursor:pointer}.alliance-card:hover,.alliance-card.active{border-color:var(--gold);background:#18263a}.alliance-card strong{color:#ffe0a0}.alliance-card small{display:block;color:var(--muted);margin-top:4px}.dossier-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.dossier-actions button{border:1px solid var(--line);border-radius:9px;background:#17263b;color:var(--txt);padding:9px 12px}.trend-chart{width:100%;height:110px;background:#0c1726;border:1px solid var(--line);border-radius:9px;margin-top:8px}.intel-member{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border-bottom:1px solid var(--line)}.intel-member button{border:1px solid var(--line);border-radius:8px;background:#17263b;color:var(--txt);padding:7px 10px}.intel-profile{padding:14px;border:1px solid #8b6a35;border-radius:12px;background:linear-gradient(120deg,#302719,#142239);margin:12px 0}@media(max-width:760px){.intel-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.intel-cards{grid-template-columns:1fr}.main-tabs{margin:0 -4px}.main-tab{padding:11px 6px;font-size:13px}.intel-table{font-size:12px}}
+
+/* Spy Center · hybrid command UI */
+.intel-command{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}.intel-command input{flex:1;min-width:190px}
+.intel-subnav{display:flex;gap:7px;overflow:auto;padding:4px 0 10px;position:sticky;top:54px;z-index:15;background:#0b1220ed}
+.intel-subnav button{white-space:nowrap;border:1px solid #35465d;border-radius:10px;padding:9px 12px;background:#15243a;color:#dce8f8;font-weight:700}
+.intel-subnav button.active{border-color:#55d6a0;background:linear-gradient(120deg,#174638,#47371d);color:#fff1c6}
+.intel-feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.intel-action{border:1px solid #55745f;border-radius:8px;background:#183b32;color:#c8ffe2;padding:8px 11px;font-weight:700}
+.intel-action.warn{border-color:#8b6531;background:#3b2c18;color:#ffe2a3}
+.intel-player-search{display:grid;grid-template-columns:1fr auto;gap:8px;margin:10px 0}
+.intel-watch-card{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:11px;border:1px solid var(--line);border-radius:10px;background:#101b2b;margin:7px 0}
+.intel-watch-card small{display:block;color:var(--muted);margin-top:4px}
+.intel-map-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.intel-map-point{padding:10px;border:1px solid var(--line);border-radius:9px;background:#101b2b}
+.intel-map-point b{color:#ffe0a0}
+.intel-risk{display:inline-block;border-radius:20px;padding:3px 8px;font-size:11px;font-weight:800}
+.intel-risk.high{background:#51252b;color:#ffb6ba}.intel-risk.medium{background:#4a391d;color:#ffe0a3}.intel-risk.low{background:#193b30;color:#a8f2cb}
+.intel-report{white-space:pre-wrap;background:#0d1928;border:1px solid var(--line);border-radius:10px;padding:14px;line-height:1.55;font-size:13px}
+@media(max-width:760px){.intel-feature-grid,.intel-map-list{grid-template-columns:1fr}.intel-subnav{top:52px}.intel-command{display:grid;grid-template-columns:1fr 1fr}.intel-command input{grid-column:1/-1}}
 </style></head>
 <body>
 <header><h1>EMPIRENEW <span style="color:#e5b85c">/ MAPA SOJUSZY</span></h1><p>ReBorN · MADDEVILS · EmpirefourkingdomsExGG2_3 · panel lokalizacji graczy</p></header>
@@ -58,12 +77,16 @@ svg{width:100%;height:100%;display:block}.dot{cursor:pointer;stroke:#08111d;stro
 <div class="intel-heading"><div><div class="eyebrow" style="color:#55d6a0;font-size:11px;font-weight:800;letter-spacing:.14em">INTELLIGENCE CENTER · PL1</div><h2>Szpiegowanie</h2><div class="muted">Monitoring zmian rosteru i dostępnych metryk ze snapshotów API</div></div><span class="intel-pill" id="intelUpdated">Ładowanie…</span></div>
 <div class="intel-grid"><div class="intel-stat"><b id="intelEventsN">—</b><span>Zdarzenia</span></div><div class="intel-stat"><b id="intelPlayersN">—</b><span>Monitorowani gracze</span></div><div class="intel-stat"><b id="intelRankedN">—</b><span>Gracze z metrykami</span></div><div class="intel-stat"><b id="intelFreshN">—</b><span>Ostatni snapshot</span></div></div>
 <div class="intel-filters"><input class="control" id="intelSearch" placeholder="Szukaj nicku lub sojuszu…"><select class="control" id="intelAlliance"><option value="all">RB + MD</option><option value="115">RB</option><option value="41343">MD</option></select><select class="control" id="intelEventType"><option value="all">Wszystkie typy zdarzeń</option><option value="nick_changed">Zmiana nicku</option><option value="alliance_changed">Zmiana sojuszu</option><option value="power_drop">Spadek potęgi</option><option value="power_gain">Przyrost potęgi</option><option value="loot_delta">Zmiana łupów</option><option value="glory_delta">Zmiana chwały</option></select><button class="action" id="intelRefresh" type="button">Odśwież</button></div>
-<div class="intel-tabs" role="tablist" aria-label="Sekcje szpiegowania"><button type="button" class="active" data-intel-tab="feed">📡 Dziennik zdarzeń</button><button type="button" data-intel-tab="alliances">🏰 Sojusze</button><button type="button" data-intel-tab="activity">⚡ Aktywność</button><button type="button" data-intel-tab="delta">📈 Przyrosty / straty</button><button type="button" data-intel-tab="profile">🧑‍💻 Profil gracza</button></div>
+<div class="intel-subnav" role="tablist" aria-label="Centrum szpiegowania"><button type="button" class="active" data-intel-tab="feed">📡 Centrum</button><button type="button" data-intel-tab="profile">🧑‍💻 Dossier</button><button type="button" data-intel-tab="watch">⭐ Obserwowani</button><button type="button" data-intel-tab="alliances">🏰 Sojusze</button><button type="button" data-intel-tab="radar">📡 Radar</button><button type="button" data-intel-tab="reports">📑 Raporty</button><button type="button" data-intel-tab="map">🗺️ Mapa wywiadu</button><button type="button" data-intel-tab="activity">⚡ Metryki</button><button type="button" data-intel-tab="delta">📈 Zmiany</button></div><div class="intel-command"><input class="control" id="intelPlayerLookup" placeholder="Znajdź gracza po nicku lub PID…"><button class="action" id="intelPlayerLookupBtn" type="button">Szukaj w PL1</button></div><div id="intelPlayerLookupResults"></div>
 <section class="intel-subview" id="intelFeed"><div class="panel"><h2>Live Feed</h2><div class="muted" id="feedMeta">Zdarzenia są wykrywane na podstawie poprawnych snapshotów.</div><div id="intelFeedRows"></div></div></section>
 <section class="intel-subview" id="intelActivity" hidden><div class="panel"><h2>Loot & Farm Tracker</h2><p class="muted">Status wyliczany wyłącznie z kolejnych odczytów licznika łupów. Bez rozpoznanej metryki status = brak danych.</p><div id="intelActivityRows"></div></div></section>
 <section class="intel-subview" id="intelDelta" hidden><div class="intel-cards"><div class="panel"><h2>Top przyrost mocy · 24h</h2><div id="topPowerGain"></div></div><div class="panel"><h2>Top straty mocy · 24h</h2><div id="topPowerLoss"></div></div></div><div class="panel" style="margin-top:12px"><h2>Bilans honoru</h2><div class="muted">Zestawienie aktywuje się po rozpoznaniu rankingu honoru.</div><div id="honorLedger"></div></div></section>
 <section class="intel-subview" id="intelAlliances" hidden><div class="panel"><h2>Katalog sojuszy PL1</h2><p class="muted">Agregacja członków z aktualnego rankingu hgh. Potęga i liczba graczy dotyczą wyłącznie monitorowanego TOP.</p><div class="intel-filters"><input class="control" id="allianceSearch" placeholder="Szukaj sojuszu…"><select class="control" id="allianceSort"><option value="power">Sortuj: potęga</option><option value="members">Sortuj: liczba graczy</option><option value="events">Sortuj: zdarzenia 24 h</option><option value="name">Sortuj: nazwa A–Z</option></select></div><div id="allianceDirectory"></div><div id="allianceInspector" class="detail"><div class="muted">Wybierz sojusz, aby zobaczyć jego członków i roszady.</div></div></div></section>
 <section class="intel-subview" id="intelProfile" hidden><div class="panel"><h2>Profil szpiegowski</h2><p class="muted">Wybierz gracza z dziennika lub listy aktywności.</p><div id="intelProfileBody" class="intel-empty">Nie wybrano gracza.</div></div></section>
+<section class="intel-subview" id="intelWatch" hidden><div class="panel"><h2>Obserwowani gracze</h2><p class="muted">Lista i notatki są prywatne dla tej przeglądarki/urządzenia. To nie zmienia danych serwera.</p><div id="intelWatchRows"></div></div></section>
+<section class="intel-subview" id="intelRadar" hidden><div class="panel"><h2>Radar zmian</h2><p class="muted">Wykrywa wyłącznie potwierdzone zmiany w kolejnych pełnych snapshotach. Wskaźnik nie oznacza zamiaru ataku.</p><div class="intel-feature-grid" id="intelRadarStats"></div><div id="intelRadarRows"></div></div></section>
+<section class="intel-subview" id="intelReports" hidden><div class="panel"><h2>Raport sytuacyjny PL1</h2><div class="dossier-actions"><button class="intel-action" id="intelReportRefresh" type="button">Odśwież raport</button><button class="intel-action warn" id="intelReportPrint" type="button">Drukuj / Zapisz PDF</button></div><div id="intelReportBody" class="intel-report"></div></div></section>
+<section class="intel-subview" id="intelMap" hidden><div class="panel"><h2>Mapa wywiadu · potwierdzone lokalizacje RB / MD</h2><p class="muted">To katalog znanych pozycji z istniejących plików mapy sojuszy. Nie pokazuje lokalizacji pozostałych graczy PL1, ponieważ nie mamy potwierdzonego źródła takich współrzędnych.</p><div class="intel-filters"><select class="control" id="intelMapAlliance"><option value="all">RB + MD</option><option value="115">RB</option><option value="41343">MD</option></select><select class="control" id="intelMapKingdom"><option value="all">Wszystkie krainy</option><option value="0">Wielkie Cesarstwo</option><option value="1">Płonące Piaski</option><option value="2">Wieczny Lód</option><option value="3">Ogniste Szczyty</option></select><input class="control" id="intelMapSearch" placeholder="Szukaj gracza…"></div><div class="muted" id="intelMapMeta"></div><div id="intelMapRows" class="intel-map-list"></div></div></section>
 <div class="notice" id="intelStatus">Dane pobierane ze wspólnych snapshotów repozytorium.</div>
 </section>
 <div class="notice">Mapa prezentuje punkty na podstawie współrzędnych X/Y zwróconych przez API. To wizualizacja rozmieszczenia, nie oryginalna tekstura świata gry. Widok filtruje typy obiektów: w Wielkim Cesarstwie pokazuje zamki (typ 1) i posterunki (typ 4), a w krainach 1–3 tylko zamki (typ 12). Pozostałe typy są ukryte.</div>
@@ -183,7 +206,7 @@ function setMainView(view,writeHash=true){
 }
 mainTabs.map.onclick=()=>setMainView('map');mainTabs.intel.onclick=()=>setMainView('intel');
 window.addEventListener('hashchange',()=>setMainView(location.hash==='#intel'?'intel':'map',false));
-let intelFeed=[],intelActivity=[],intelPlayers=[],intelMapMembers=[],selectedIntelId=null,selectedAllianceId=null,intelLoaded=false;
+let intelFeed=[],intelActivity=[],intelPlayers=[],intelMapMembers=[],selectedIntelId=null,selectedAllianceId=null,intelLoaded=false,intelSnapshotSequence=null;
 const intelLabels={nick_changed:'ZMIANA NICKU',alliance_changed:'ZMIANA SOJUSZU',power_drop:'SPADEK POTĘGI',power_gain:'PRZYROST POTĘGI',loot_delta:'ZMIANA ŁUPÓW',glory_delta:'ZMIANA CHWAŁY'};
 const intelKingdom=code=>kingdomNames[String(code)]||('Kraina '+code),fmtNum=n=>Number.isFinite(Number(n))?Number(n).toLocaleString('pl-PL'):'—';
 async function loadIntel(){
@@ -194,7 +217,9 @@ async function loadIntel(){
   const failed=responses.find(r=>!r.ok);if(failed)throw Error('HTTP '+failed.status);
   const [history,snapshot]=await Promise.all(responses.map(r=>r.json()));
   if(!Array.isArray(history.events)||!Array.isArray(history.players)||!Array.isArray(snapshot.players))throw Error('Niepoprawny format server-intel-*.json');
-  intelFeed=history.events.map(e=>({...e,alliance_id:e.alliance_id??e.current_alliance_id??e.previous_alliance_id??0}));
+  if(snapshot.complete!==true||snapshot.ranking_validated!==true||!Number.isInteger(snapshot.total_count)||snapshot.player_count!==snapshot.total_count||snapshot.players.length!==snapshot.total_count)throw Error('Snapshot nie przeszedł walidacji kompletności — odmawiam wyświetlenia niepełnych danych.');
+  if(history.player_count!==snapshot.player_count||Number(history.snapshot_sequence)!==Number(snapshot.snapshot_sequence))throw Error('Snapshot i historia pochodzą z różnych przebiegów — odśwież później.');
+  intelSnapshotSequence=snapshot.snapshot_sequence;intelFeed=history.events.map(e=>({...e,alliance_id:e.alliance_id??e.current_alliance_id??e.previous_alliance_id??0}));
   intelActivity=history.players.map(p=>({...p,player:p.name||p.player,player_id:p.player_id??p.member_id}));
   intelPlayers=snapshot.players.map(p=>({...p,player:p.name,member_id:p.player_id}));
   const mapFiles=await Promise.all(['rb-player-map.json','maddevils-player-map.json'].map(path=>fetch(base+path+'?v='+v,{cache:'no-store'})));
@@ -279,6 +304,80 @@ function renderIntel(){
 }
 ['intelSearch','intelAlliance','intelEventType'].forEach(id=>$(id).addEventListener(id==='intelSearch'?'input':'change',renderIntel));
 $('intelRefresh').onclick=()=>{intelLoaded=false;loadIntel()};
+
+/* Full-scope intelligence tools */
+const INTEL_WATCH_KEY='empirenew_intel_watch_v1';
+let intelWatch=(()=>{try{return JSON.parse(localStorage.getItem(INTEL_WATCH_KEY)||'{}')}catch{return {}}})();
+if(!intelWatch||typeof intelWatch!=='object'||Array.isArray(intelWatch))intelWatch={};
+const saveIntelWatch=()=>localStorage.setItem(INTEL_WATCH_KEY,JSON.stringify(intelWatch));
+function lookupIntelPlayers(){
+ const q=$('intelPlayerLookup').value.trim().toLocaleLowerCase('pl-PL');
+ const rows=q?intelPlayers.filter(p=>String(p.name||'').toLocaleLowerCase('pl-PL').includes(q)||String(p.player_id)===q).slice(0,30):[];
+ $('intelPlayerLookupResults').innerHTML=rows.length?rows.map(p=>'<div class="intel-watch-card"><div><b>'+esc(p.name)+'</b><small>PID '+esc(p.player_id)+' · '+esc(p.alliance_name||'Bez sojuszu')+' · potęga '+fmtNum(p.power)+'</small></div><button class="intel-action" data-open-player="'+esc(p.player_id)+'">Otwórz dossier</button></div>').join(''):('<div class="intel-empty">'+(q?'Brak wyników w aktualnym rankingu PL1.':'Wpisz nick lub PID, aby wyszukać gracza w pełnym rankingu.')+'</div>');
+ $('intelPlayerLookupResults').querySelectorAll('[data-open-player]').forEach(b=>b.onclick=()=>{intelProfile(b.dataset.openPlayer);switchIntelTab('profile')});
+}
+$('intelPlayerLookupBtn').onclick=lookupIntelPlayers;
+$('intelPlayerLookup').addEventListener('keydown',e=>{if(e.key==='Enter')lookupIntelPlayers()});
+function watchPlayer(pid){
+ const p=intelPlayers.find(x=>String(x.player_id)===String(pid));if(!p)return;
+ if(intelWatch[String(pid)])delete intelWatch[String(pid)];
+ else intelWatch[String(pid)]={added_at:new Date().toISOString(),note:'',tag:'Obserwowany'};
+ saveIntelWatch();renderIntelWatch();if(selectedIntelId===String(pid))intelProfile(pid);
+}
+function renderIntelWatch(){
+ const entries=Object.entries(intelWatch).map(([id,v])=>({id,...v,player:intelPlayers.find(p=>String(p.player_id)===id)}));
+ $('intelWatchRows').innerHTML=entries.length?entries.map(x=>'<div class="intel-watch-card"><div><b>'+esc(x.player?.name||('PID '+x.id))+'</b><small>'+(x.player?esc(x.player.alliance_name||'Bez sojuszu')+' · potęga '+fmtNum(x.player.power):'Brak w bieżącym rankingu')+' · dodano '+new Date(x.added_at).toLocaleDateString('pl-PL')+'</small><small>Notatka: '+esc(x.note||'—')+'</small></div><div class="dossier-actions"><button class="intel-action" data-watch-open="'+esc(x.id)+'">Dossier</button><button class="intel-action warn" data-watch-remove="'+esc(x.id)+'">Usuń</button></div></div>').join(''):'<div class="intel-empty">Nie obserwujesz jeszcze żadnego gracza. Dodaj go z dossier.</div>';
+ $('intelWatchRows').querySelectorAll('[data-watch-open]').forEach(b=>b.onclick=()=>{intelProfile(b.dataset.watchOpen);switchIntelTab('profile')});
+ $('intelWatchRows').querySelectorAll('[data-watch-remove]').forEach(b=>b.onclick=()=>watchPlayer(b.dataset.watchRemove));
+}
+function renderIntelRadar(){
+ const events=intelFeed.filter(e=>['power_gain','power_drop','alliance_changed','nick_changed','glory_delta'].includes(e.kind)).sort((a,b)=>String(b.detected_at).localeCompare(String(a.detected_at)));
+ const gains=events.filter(e=>e.kind==='power_gain').length,losses=events.filter(e=>e.kind==='power_drop').length,moves=events.filter(e=>e.kind==='alliance_changed').length;
+ $('intelRadarStats').innerHTML=[['Zmiany potęgi',gains+losses],['Zmiany sojuszu',moves],['Zdarzenia w historii',events.length]].map(x=>'<div class="intel-stat"><b>'+fmtNum(x[1])+'</b><span>'+x[0]+'</span></div>').join('');
+ $('intelRadarRows').innerHTML=events.length?events.slice(0,100).map(e=>{const risk=e.kind==='alliance_changed'?'medium':Math.abs(Number(e.delta||0))>=5000?'high':'low';return '<div class="intel-row" data-radar-player="'+esc(e.player_id)+'"><span class="intel-risk '+risk+'">'+(risk==='high'?'DUŻA ZMIANA':risk==='medium'?'ROszADA':'ZMIANA')+'</span> <b>'+esc(e.player||'Gracz')+'</b><small>'+esc(intelLabels[e.kind]||e.kind)+' · '+esc(e.description||'')+' · '+new Date(e.detected_at).toLocaleString('pl-PL')+'</small></div>'}).join(''):'<div class="intel-empty">Brak zarejestrowanych anomalii. Radar nie generuje alarmów z samej nieobecności zmian.</div>';
+ $('intelRadarRows').querySelectorAll('[data-radar-player]').forEach(el=>el.onclick=()=>{intelProfile(el.dataset.radarPlayer);switchIntelTab('profile')});
+}
+function renderIntelReport(){
+ const gains=intelFeed.filter(e=>e.kind==='power_gain'),losses=intelFeed.filter(e=>e.kind==='power_drop'),moves=intelFeed.filter(e=>e.kind==='alliance_changed'),nicks=intelFeed.filter(e=>e.kind==='nick_changed');
+ const lines=['EMPIRENEW · RAPORT SYTUACYJNY PL1','Wygenerowano: '+new Date().toLocaleString('pl-PL'),'Snapshot: '+(intelPlayers.length)+' graczy · pełny ranking zweryfikowany','Sekwencja danych: '+(intelSnapshotSequence||'—'),'','SOJUSZE W MONITOROWANYM RANKINGU'];
+ allianceAggregates().slice(0,15).forEach(g=>lines.push(g.name+' — '+g.members.length+' profili TOP; potęga z dostępnych profili: '+fmtNum(g.power)));
+ lines.push('','ZDARZENIA W HISTORII','Przyrost potęgi: '+gains.length,'Spadek potęgi: '+losses.length,'Zmiany sojuszu: '+moves.length,'Zmiany nicku: '+nicks.length,'','OSTATNIE ZDARZENIA');
+ intelFeed.slice(0,30).forEach(e=>lines.push(new Date(e.detected_at).toLocaleString('pl-PL')+' · '+(e.player||'Gracz')+' · '+(e.description||e.kind)));
+ lines.push('','Uwaga: agregaty sojuszy dotyczą wyłącznie graczy obecnych w monitorowanym rankingu hgh. Brak danych nie oznacza braku aktywności. Radar opisuje zmiany, nie intencje graczy.');
+ $('intelReportBody').textContent=lines.join('\n');
+}
+function renderIntelMap(){
+ const aid=$('intelMapAlliance').value,king=$('intelMapKingdom').value,q=$('intelMapSearch').value.trim().toLocaleLowerCase('pl-PL');
+ const rows=intelMapMembers.filter(m=>(aid==='all'||String(m.alliance_id)===aid)&&(!q||String(m.name||'').toLocaleLowerCase('pl-PL').includes(q))).flatMap(m=>(m.ap||[]).filter(p=>[1,4,12].includes(Number(p.type_code))&&(king==='all'||String(p.kingdom_code)===king)).map(p=>({m,p})));
+ $('intelMapMeta').textContent=rows.length+' potwierdzonych pozycji · źródło: pliki mapy RB / MD';
+ $('intelMapRows').innerHTML=rows.length?rows.map(({m,p})=>'<div class="intel-map-point"><b>'+esc(m.name)+'</b><small>'+esc(m.alliance_name)+' · '+esc(p.type_code===4?'Posterunek':'Zamek')+' · '+esc(intelKingdom(p.kingdom_code))+' · X '+fmtNum(p.x)+' / Y '+fmtNum(p.y)+'</small><button class="intel-action" data-map-player="'+esc(m.member_id)+'" data-map-aid="'+esc(m.alliance_id)+'">Pokaż na Mapie RB/MD</button></div>').join(''):'<div class="intel-empty">Brak lokalizacji zgodnych z filtrami. Nie uzupełniamy braków szacunkami.</div>';
+ $('intelMapRows').querySelectorAll('[data-map-player]').forEach(b=>b.onclick=()=>{setMainView('map');$('alliance').value=String(b.dataset.mapAid);$('kingdom').value='all';loadAlliance();selectPlayer(Number(b.dataset.mapPlayer),null,Number(b.dataset.mapAid))});
+}
+['intelMapAlliance','intelMapKingdom','intelMapSearch'].forEach(id=>$(id).addEventListener(id==='intelMapSearch'?'input':'change',renderIntelMap));
+$('intelReportRefresh').onclick=renderIntelReport;$('intelReportPrint').onclick=()=>window.print();
+const _oldIntelProfile=intelProfile;
+intelProfile=function(playerId){
+ _oldIntelProfile(playerId);
+ const p=intelPlayers.find(x=>String(x.player_id)===String(playerId));if(!p)return;
+ const watch=intelWatch[String(playerId)];
+ const oldBody=$('intelProfileBody').innerHTML;
+ $('intelProfileBody').innerHTML=oldBody+'<div class="panel" style="margin-top:10px"><h3>Obserwacja i notatki</h3><div class="dossier-actions"><button type="button" class="intel-action" id="intelWatchToggle">'+(watch?'Usuń z obserwowanych':'Dodaj do obserwowanych')+'</button></div><textarea class="control" id="intelWatchNote" rows="3" placeholder="Prywatna notatka do gracza…">'+esc(watch?.note||'')+'</textarea><div class="dossier-actions"><button type="button" class="intel-action" id="intelWatchSaveNote">Zapisz notatkę</button></div><small class="muted">PID jest identyfikatorem profilu; zmiana nicku nie tworzy nowej osoby.</small></div>';
+ $('intelWatchToggle').onclick=()=>watchPlayer(playerId);
+ $('intelWatchSaveNote').onclick=()=>{if(!intelWatch[String(playerId)])intelWatch[String(playerId)]={added_at:new Date().toISOString(),note:'',tag:'Obserwowany'};intelWatch[String(playerId)].note=$('intelWatchNote').value;saveIntelWatch();renderIntelWatch();$('intelStatus').textContent='Zapisano notatkę lokalnie na tym urządzeniu.'};
+};
+const _oldSwitchIntelTab=switchIntelTab;
+switchIntelTab=function(tab){
+ document.querySelectorAll('[data-intel-tab]').forEach(b=>b.classList.toggle('active',b.dataset.intelTab===tab));
+ ['feed','activity','delta','profile','alliances','watch','radar','reports','map'].forEach(key=>{const el=$('intel'+key[0].toUpperCase()+key.slice(1));if(el)el.hidden=key!==tab});
+ if(tab==='alliances')renderAllianceDirectory();
+ if(tab==='watch')renderIntelWatch();
+ if(tab==='radar')renderIntelRadar();
+ if(tab==='reports')renderIntelReport();
+ if(tab==='map')renderIntelMap();
+};
+const _oldRenderIntel=renderIntel;
+renderIntel=function(){_oldRenderIntel();renderIntelWatch();renderIntelRadar();renderIntelReport();};
+
 if(location.hash==='#intel')setMainView('intel',false);else setMainView('map',false);
 
 function render(){renderList();renderMap()}

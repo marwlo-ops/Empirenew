@@ -163,35 +163,46 @@ export async function fetchPlayerRankingPage({ listType = 1 } = {}, options = {}
   return { list_type: Number(listType), rows, params, response_keys: Object.keys(data || {}) };
 }
 
-/** Na tym etapie pobieramy tylko pierwszą odpowiedź. Nie zgadujemy paginacji. */
+/** Pobiera ranking graczy. hgh zwraca rekordy jako krotki [typ, wynik, profil]. */
 export async function fetchServerPlayerRanking({ limit = 1000 } = {}, options = {}) {
   const result = await fetchPlayerRankingPage({ listType: 1 }, options);
+  const records = result.rows.map((entry, index) => {
+    if (Array.isArray(entry)) {
+      const profile = [...entry].reverse().find(value => value && typeof value === "object" && !Array.isArray(value));
+      return profile ? { ...profile, _ranking_position: index + 1, _ranking_tuple: entry.slice(0, -1) } : null;
+    }
+    return entry && typeof entry === "object" ? { ...entry, _ranking_position: index + 1 } : null;
+  }).filter(Boolean);
   const byId = new Map();
-  for (const row of result.rows) {
-    const id = row.PID ?? row.playerId ?? row.player_id ?? row.id;
+  for (const row of records) {
+    const id = row.PID ?? row.OID ?? row.playerId ?? row.player_id ?? row.id;
     if (id === undefined || id === null) continue;
     byId.set(String(id), { ...row, PID: id });
   }
-  const players = [...byId.values()].slice(0, limit).map((row, index) => ({
-    player_id: Number(row.PID),
-    name: String(row.N ?? row.playerName ?? row.nick ?? ""),
-    alliance_id: Number(row.AID ?? row.allianceId ?? 0),
-    alliance_name: String(row.AN ?? row.allianceName ?? (Number(row.AID ?? 0) === 0 ? "Brak sojuszu" : "")),
-    rank: Number(row.rank ?? row.RANK ?? index + 1),
-    power: (row.P ?? row.POW ?? row.power) != null && Number.isFinite(Number(row.P ?? row.POW ?? row.power)) ? Number(row.P ?? row.POW ?? row.power) : null,
-    glory_points: (row.glory_points ?? row.GP) != null && Number.isFinite(Number(row.glory_points ?? row.GP)) ? Number(row.glory_points ?? row.GP) : null,
-    loot: (row.loot ?? row.LOOT ?? row.loot_points) != null && Number.isFinite(Number(row.loot ?? row.LOOT ?? row.loot_points)) ? Number(row.loot ?? row.LOOT ?? row.loot_points) : null,
-    level: Number.isFinite(Number(row.L)) ? Number(row.L) : null,
-    legend_level: Number.isFinite(Number(row.LL)) ? Number(row.LL) : null,
-    raw: row
-  })).filter(p => Number.isFinite(p.player_id) && p.player_id > 0 && p.name);
-  if (!players.length) throw new E4KApiError("hgh: odpowiedź zawiera wiersze, ale nie rozpoznano PID i nicku", {
-    params: result.params, rowKeys: Object.keys(result.rows[0] || {}),
-    firstRowPreview: JSON.stringify(result.rows[0] || {}).slice(0, 2000)
+  const players = [...byId.values()].slice(0, limit).map((row, index) => {
+    const aid = Number(row.AID ?? row.allianceId ?? 0);
+    const powerValue = row.MP ?? row.P ?? row.POW ?? row.power;
+    return {
+      player_id: Number(row.PID),
+      name: String(row.N ?? row.PN ?? row.playerName ?? row.nick ?? ""),
+      alliance_id: Number.isFinite(aid) && aid > 0 ? aid : 0,
+      alliance_name: String(row.AN ?? row.allianceName ?? (aid > 0 ? `Sojusz #${aid}` : "Brak sojuszu")),
+      rank: Number(row.rank ?? row.RANK ?? row._ranking_position ?? index + 1),
+      power: powerValue != null && Number.isFinite(Number(powerValue)) ? Number(powerValue) : null,
+      glory_points: (row.glory_points ?? row.GP) != null && Number.isFinite(Number(row.glory_points ?? row.GP)) ? Number(row.glory_points ?? row.GP) : null,
+      loot: (row.loot ?? row.LOOT ?? row.loot_points) != null && Number.isFinite(Number(row.loot ?? row.LOOT ?? row.loot_points)) ? Number(row.loot ?? row.LOOT ?? row.loot_points) : null,
+      level: row.L != null && Number.isFinite(Number(row.L)) ? Number(row.L) : null,
+      legend_level: row.LL != null && Number.isFinite(Number(row.LL)) ? Number(row.LL) : null,
+      raw: row
+    };
+  }).filter(p => Number.isFinite(p.player_id) && p.player_id > 0 && p.name);
+  if (!players.length) throw new E4KApiError("hgh: odpowiedź zawiera wiersze, ale nie rozpoznano PID/OID i nicku", {
+    params: result.params, rowCount: result.rows.length, rowKeys: Object.keys(records[0] || {}),
+    firstRowPreview: JSON.stringify(result.rows[0] || {}).slice(0, 2500)
   });
   return { schema_version: 1, server: options.server || DEFAULT_SERVER, captured_at: new Date().toISOString(),
-    source: "hgh", query: result.params, pages_fetched: 1, player_count: players.length, players,
-    raw_row_count: result.rows.length, response_keys: result.response_keys };
+    source: "hgh", query: result.params, pages_fetched: 1, player_count: players.length,
+    total_count: players.length, players, raw_row_count: result.rows.length, response_keys: result.response_keys };
 }
 /** Lekki test łączności dwóch potwierdzonych komend. Nie ukrywa błędów. */
 export async function testReadOnlyApi(options = {}) {

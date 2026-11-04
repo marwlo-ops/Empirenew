@@ -42,7 +42,8 @@ snapshot.snapshot_sequence = isBaseline ? 1 : Number(oldSnapshot.snapshot_sequen
 if (oldSnapshot?.players?.length && snapshot.player_count < Math.floor(oldSnapshot.players.length * 0.7)) {
   fail(`Podejrzany spadek liczby graczy: ${oldSnapshot.players.length} → ${snapshot.player_count}; zachowuję poprzedni snapshot.`);
 }
-const previous = new Map((isBaseline ? [] : (oldSnapshot?.players || [])).map(p => [String(p.player_id), p]));
+const priorPlayers = isBaseline ? [] : (Array.isArray(oldHistory.players) && oldHistory.players.length ? oldHistory.players : (oldSnapshot?.players || []));
+const previous = new Map(priorPlayers.map(p => [String(p.player_id), p]));
 const events = [];
 const players = snapshot.players.map(player => {
   const old = previous.get(String(player.player_id));
@@ -138,6 +139,8 @@ const history = {
 };
 // Atomic-ish order: history first, then snapshot. A failed history write leaves previous snapshot in place.
 await write(historyPath, history);
+// Persist enriched player rows so the next run can compare against prior metric_history.
+snapshot.players = players;
 await write(snapshotPath, snapshot);
 const rbPlayers = players.filter(player => Number(player.alliance_id) === RB_ALLIANCE_ID);
 const rbIds = new Set(rbPlayers.map(player => Number(player.player_id)));
@@ -150,12 +153,18 @@ const rbTracker = {
   player_count: rbPlayers.length, event_count: rbEvents.length,
   metrics_available: rbPlayers.some(player => player.metrics_available),
   metric_fields_detected: history.metric_fields_detected,
+  activity_window_minutes: 5, metric_history_window_hours: 24,
+  activity_signal_policy: { honor: "strong", loot: "strong", power: "weak", direct_online_status: false },
+  protection_evidence: { direct_api_flag_available: false, loot_metric_available: rbPlayers.some(player => hasNumber(player.loot)) },
   players: rbPlayers.map(player => ({
     player_id: player.player_id, name: player.name, alliance_id: player.alliance_id,
     alliance_name: player.alliance_name, rank: player.rank, power: player.power,
     glory_points: player.glory_points, honor_points: player.honor_points,
     loot: player.loot, level: player.level, legend_level: player.legend_level,
     metrics_available: player.metrics_available, last_seen: player.last_seen,
+    power_delta_24h: player.power_delta_24h, honor_delta_24h: player.honor_delta_24h,
+    loot_delta_24h: player.loot_delta_24h, trend_available: player.trend_available,
+    activity_status: player.activity_status, activity_label: player.activity_label,
     metric_history: player.metric_history
   })),
   events: rbEvents

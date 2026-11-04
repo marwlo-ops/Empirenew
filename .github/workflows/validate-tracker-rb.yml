@@ -31,11 +31,13 @@ jobs:
           const script = html.slice(start + "<script>".length, end);
           fs.writeFileSync("/tmp/tracker-rb-inline.js", script);
           const checks = [
-            ["filtr potwierdzonych używa statusu confirmed", script.includes("p._activity.status==='confirmed'")],
+            ["lista RB filtruje aktywnych, złotych i czerwonych", script.includes("p._activity.status==='active'") && script.includes("p._activity.status==='idle'") && script.includes("p._activity.status==='inactive'")],
+            ["lista pokazuje moc, zmianę 24 h, honor, łup i chwałę", script.includes("Zmiana mocy · 24 h") && script.includes("fmt(p.honor_points)") && script.includes("fmt(p.loot)") && script.includes("fmt(p.glory_points)")],
+            ["Tracker RB nie ma progu minimalnej zmiany mocy", script.includes('Number(a.power)!==Number(b.power)')],
             ["panel ostatnich alertów jest zasilany danymi", script.includes('$("alerts").innerHTML=')],
             ["snapshot RB v2 jest walidowany", script.includes("next.schema_version!==2")],
             ["świeżość snapshotu ma próg ostrzegawczy", script.includes("sourceAge<=15")],
-            ["sygnał pośredni do 60 min trafia do statusu recent", script.includes("Math.min(directAge,indirectAge)<=60")]
+            ["brak historii nie jest zgadywany jako aktywność", script.includes("monitoringAge>=30") && script.includes(':"unknown"')]
           ];
           for (const [name, ok] of checks) {
             console.log((ok ? "PASS " : "FAIL ") + name);

@@ -24,10 +24,11 @@ jobs:
           node --input-type=commonjs <<'NODE'
           const fs = require("node:fs");
           const html = fs.readFileSync("tracker-rb.html", "utf8");
-          const scripts = [...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)];
+          const start = html.lastIndexOf("<script>");
+          const end = html.indexOf("</script>", start);
           if (!html.includes('id="alerts"')) throw new Error("Brak panelu alertów RB");
-          if (!scripts.length) throw new Error("Tracker RB nie zawiera skryptu");
-          const script = scripts.at(-1)[1];
+          if (start < 0 || end < 0) throw new Error("Tracker RB nie zawiera poprawnego skryptu");
+          const script = html.slice(start + "<script>".length, end);
           fs.writeFileSync("/tmp/tracker-rb-inline.js", script);
           const checks = [
             ["filtr potwierdzonych używa statusu confirmed", script.includes("p._activity.status==='confirmed'")],

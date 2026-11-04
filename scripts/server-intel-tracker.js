@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { fetchServerPlayerRanking, DEFAULT_SERVER } from "../api/e4k-client.js";
+import { fetchServerCompleteRoster, DEFAULT_SERVER } from "../api/e4k-client.js";
 
 const snapshotPath = new URL("../data/server-intel-snapshot.json", import.meta.url);
 const historyPath = new URL("../data/server-intel-history.json", import.meta.url);
@@ -19,7 +19,7 @@ if (!Array.isArray(oldHistory.events) || !Array.isArray(oldHistory.players)) fai
 
 let snapshot;
 try {
-  snapshot = await fetchServerPlayerRanking({ limit: 1000 }, { server: DEFAULT_SERVER });
+  snapshot = await fetchServerCompleteRoster({ server: DEFAULT_SERVER });
 } catch (error) {
   console.error("SERVER INTEL API DIAGNOSTICS:", JSON.stringify({
     message: error.message,
@@ -29,11 +29,11 @@ try {
   }, null, 2));
   fail("Nie udało się pobrać rankingu graczy; poprzedni snapshot i historia pozostają bez zmian.");
 }
-if (snapshot.complete !== true || snapshot.ranking_validated !== true) fail("Ranking nie przeszedł walidacji kompletności; pliki nie zostaną nadpisane.");
+if (snapshot.complete !== true || snapshot.ranking_validated !== true || snapshot.roster_validated !== true) fail("Ranking nie przeszedł walidacji kompletności; pliki nie zostaną nadpisane.");
 if (!Number.isInteger(snapshot.total_count) || snapshot.player_count !== snapshot.total_count) fail(`Niezgodność liczby profili i LR: ${snapshot.player_count}/${snapshot.total_count}; pliki nie zostaną nadpisane.`);
 if (snapshot.player_count < 50) fail(`Ranking zwrócił podejrzanie mało graczy: ${snapshot.player_count}; pliki nie zostaną nadpisane.`);
 // A trusted baseline must come from a previous full hgh harvest, never from the RB/MD map seed.
-const hasTrustedBaseline = oldSnapshot?.source === "hgh" && oldSnapshot?.player_count >= 50 && Boolean(oldSnapshot?.baseline_established_at);
+const hasTrustedBaseline = ["hgh", "alliance-roster+hgh"].includes(oldSnapshot?.source) && oldSnapshot?.player_count >= 50 && Boolean(oldSnapshot?.baseline_established_at);
 const isBaseline = !hasTrustedBaseline;
 snapshot.baseline_established_at = isBaseline ? snapshot.captured_at : oldSnapshot.baseline_established_at;
 snapshot.snapshot_sequence = isBaseline ? 1 : Number(oldSnapshot.snapshot_sequence || 1) + 1;
@@ -140,6 +140,8 @@ await write(snapshotPath, snapshot);
 console.log(JSON.stringify({
   ok: true, server: DEFAULT_SERVER, players: snapshot.player_count,
   total_count: snapshot.total_count, pages_fetched: snapshot.pages_fetched,
+  alliances: snapshot.alliance_count, roster_alliances_fetched: snapshot.roster_alliances_fetched,
+  ranked_player_count: snapshot.ranked_player_count, unallied_ranked_count: snapshot.unallied_ranked_count,
   new_events: stamped.length, total_events: merged.length, baseline_only: isBaseline,
   snapshot_sequence: snapshot.snapshot_sequence, alliance_count: allianceMap.size,
   metrics_available: history.metrics_available, metric_fields_detected: history.metric_fields_detected

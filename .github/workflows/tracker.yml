@@ -29,8 +29,6 @@ jobs:
         run: node --check scripts/location-tracker.js && node --check scripts/server-intel-tracker.js && node --check api/e4k-client.js
       - name: Fetch and compare alliance locations
         run: node scripts/location-tracker.js
-      - name: Probe PL1 ranking pagination without writing data
-        run: node scripts/probe-server-ranking.js
       - name: Build server-wide intelligence snapshots
         run: node scripts/server-intel-tracker.js
       - name: Commit shared history

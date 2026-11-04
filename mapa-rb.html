@@ -50,7 +50,7 @@ svg{width:100%;height:100%;display:block}.dot{cursor:pointer;stroke:#08111d;stro
 .intel-risk.high{background:#51252b;color:#ffb6ba}.intel-risk.medium{background:#4a391d;color:#ffe0a3}.intel-risk.low{background:#193b30;color:#a8f2cb}
 .intel-report{white-space:pre-wrap;background:#0d1928;border:1px solid var(--line);border-radius:10px;padding:14px;line-height:1.55;font-size:13px}
 @media(max-width:760px){.intel-feature-grid,.intel-map-list{grid-template-columns:1fr}.intel-subnav{top:52px}.intel-command{display:grid;grid-template-columns:1fr 1fr}.intel-command input{grid-column:1/-1}}
-</style></head>
+.embedded>header,.embedded>.main-tabs{display:none!important}.embedded>main{padding-top:8px}.embedded .main-view{padding-top:0}</style></head>
 <body>
 <header><h1>EMPIRENEW <span style="color:#e5b85c">/ MAPA SOJUSZY</span></h1><p>ReBorN · MADDEVILS · EmpirefourkingdomsExGG2_3 · panel lokalizacji graczy</p></header>
 <main>
@@ -92,6 +92,7 @@ svg{width:100%;height:100%;display:block}.dot{cursor:pointer;stroke:#08111d;stro
 <div class="notice">Mapa prezentuje punkty na podstawie współrzędnych X/Y zwróconych przez API. To wizualizacja rozmieszczenia, nie oryginalna tekstura świata gry. Widok filtruje typy obiektów: w Wielkim Cesarstwie pokazuje zamki (typ 1) i posterunki (typ 4), a w krainach 1–3 tylko zamki (typ 12). Pozostałe typy są ukryte.</div>
 </main>
 <script>
+if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embedded');
 const DATA_URLS={'115':'./data/rb-player-map.json','41343':'./data/maddevils-player-map.json'};
 const kingdomNames={'0':'Wielkie Cesarstwo','1':'Płonące Piaski','2':'Wieczny Lód','3':'Ogniste Szczyty','4':'Nieustalony (kod 4)'};
 let datasets={},data=null,selected=null,showAP=true,showVP=true;const BARON_KEY='empirenew_baron_tracker_v2';let baronCatalog=[],baronRecords=JSON.parse(localStorage.getItem(BARON_KEY)||'{}');
@@ -202,7 +203,7 @@ function setMainView(view,writeHash=true){
  mainTabs.map.classList.toggle('active',!intel);mainTabs.intel.classList.toggle('active',intel);
  mainTabs.map.setAttribute('aria-selected',String(!intel));mainTabs.intel.setAttribute('aria-selected',String(intel));
  if(writeHash&&location.hash!==(intel?'#intel':'#map'))history.replaceState(null,'',intel?'#intel':'#map');
- if(intel){intelLoaded=false;loadIntel();}
+ if(intel&&!intelLoaded)loadIntel();
 }
 mainTabs.map.onclick=()=>setMainView('map');mainTabs.intel.onclick=()=>setMainView('intel');
 window.addEventListener('hashchange',()=>setMainView(location.hash==='#intel'?'intel':'map',false));
@@ -312,7 +313,7 @@ function renderIntel(){
 }
 ['intelSearch','intelAlliance','intelEventType'].forEach(id=>$(id).addEventListener(id==='intelSearch'?'input':'change',renderIntel));
 $('intelRefresh').onclick=()=>{intelLoaded=false;loadIntel()};
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&location.hash==='#intel'){intelLoaded=false;loadIntel()}});
+// Nie pobieraj ponownie wielkich snapshotów po powrocie do karty; odświeżenie jest dostępne ręcznie.
 
 /* Full-scope intelligence tools */
 const INTEL_WATCH_KEY='empirenew_intel_watch_v1';

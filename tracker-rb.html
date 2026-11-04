@@ -7,11 +7,11 @@
 </style></head><body><div class="wrap">
 <header class="hero"><div><div class="eyebrow">EmpirefourkingdomsExGG2_3 · AID 115</div><h1>Tracker RB</h1><p>Lista członków ReBorN, orientacyjna aktywność, honor i historia zdarzeń.</p></div><div class="toolbar"><label for="refreshRate">Automatyczne odświeżanie danych</label><select id="refreshRate"><option value="5">Co 5 minut</option><option value="10">Co 10 minut</option><option value="20">Co 20 minut</option><option value="60">Co 60 minut</option></select><button id="refreshNow">Odśwież teraz</button></div></header>
 <div class="meta"><span class="pill" id="updated">Oczekiwanie na dane…</span><span class="pill" id="sourceFreshness">Źródło: —</span><span class="pill" id="dataState">Ładowanie</span><span class="pill">Sygnały: honor/łup = mocne · potęga = słabe</span></div>
-<div class="stats"><div class="stat"><strong id="countPlayers">—</strong><span>Gracze RB</span></div><div class="stat"><strong id="countActive">—</strong><span>Aktywni ≤ 5 min</span></div><div class="stat"><strong id="countRecent">—</strong><span>Zmiana ≤ 60 min</span></div><div class="stat"><strong id="countEvents">—</strong><span>Zapisane eventy</span></div></div>
-<section class="panel" style="margin:12px 0"><div class="panel-head"><h2>Ostatnie alerty RB</h2><span class="small">Ostatnie 24 godziny</span></div><div class="detail" id="alerts"><div class="empty">Ładowanie alertów…</div></div></section><div class="layout"><section class="panel"><div class="panel-head"><h2>Członkowie ReBorN</h2><span class="small" id="listCount">—</span></div><input class="search" id="search" placeholder="Szukaj nicku lub PID…"><div class="filters"><button class="filter active" data-filter="all">Wszyscy</button><button class="filter" data-filter="active">Aktywni</button><button class="filter" data-filter="recent">Ostatnia godzina</button><button class="filter" data-filter="unknown">Brak sygnału</button></div><div class="player-list" id="playerList"><div class="empty">Pobieranie listy RB…</div></div></section>
+<div class="stats"><div class="stat"><strong id="countPlayers">—</strong><span>Gracze RB</span></div><div class="stat"><strong id="countActive">—</strong><span>Potwierdzony sygnał ≤ 5 min</span></div><div class="stat"><strong id="countRecent">—</strong><span>Sygnał pośredni / ostatnia godzina</span></div><div class="stat"><strong id="countEvents">—</strong><span>Zapisane eventy</span></div></div>
+<section class="panel" style="margin:12px 0"><div class="panel-head"><h2>Ostatnie alerty RB</h2><span class="small">Ostatnie 24 godziny</span></div><div class="detail" id="alerts"><div class="empty">Ładowanie alertów…</div></div></section><div class="layout"><section class="panel"><div class="panel-head"><h2>Członkowie ReBorN</h2><span class="small" id="listCount">—</span></div><input class="search" id="search" placeholder="Szukaj nicku lub PID…"><div class="filters"><button class="filter active" data-filter="all">Wszyscy</button><button class="filter" data-filter="active">Potwierdzeni</button><button class="filter" data-filter="recent">Sygnały ostatniej godziny</button><button class="filter" data-filter="unknown">Brak potwierdzenia</button></div><div class="player-list" id="playerList"><div class="empty">Pobieranie listy RB…</div></div></section>
 <section class="panel"><div class="panel-head"><h2>Karta gracza</h2><span class="small">Szczegóły i historia</span></div><div class="detail" id="detail"><div class="empty">Wybierz gracza z listy, aby zobaczyć jego kartę.</div></div></section></div>
-<div class="notice warn">Status aktywności jest wskaźnikiem orientacyjnym, a nie dowodem zalogowania. Dane API są odświeżane przez serwer zwykle co 5 minut; wybrany interwał określa, jak często ta strona sprawdza nowy plik. Brak zmiany łupu lub honoru nie oznacza automatycznie, że gracz jest offline.</div>
-<div class="footer">Tracker RB · Źródło: zweryfikowany roster AID 115 oraz snapshoty API. Historia rozpoczyna się od pierwszego poprawnego pomiaru; nie odtwarza wcześniejszej aktywności.</div>
+<div class="notice warn">Status potwierdzony oznacza zmianę honoru lub łupu wykrytą w kolejnych pomiarach. Zmiana potęgi jest wyłącznie sygnałem pośrednim i nie potwierdza zalogowania. Dane źródłowe są pobierane co 5 minut; strona może je odczytywać rzadziej zgodnie z ustawieniem. Brak zmian nie oznacza, że gracz jest offline.</div>
+<div class="footer">Tracker RB · Źródło: zweryfikowany roster AID 115 oraz snapshoty API. Historia pomiarów: ostatnie 24 godziny (do 288 punktów). Dane historyczne sprzed wdrożenia naprawy nie są odtwarzane wstecz.</div>
 </div>
 <script>
 (()=> {
@@ -20,45 +20,43 @@
  const fmt=v=>v===null||v===undefined||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('pl-PL');
  const date=v=>v?new Date(v).toLocaleString('pl-PL',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
  const age=v=>v?Math.max(0,Math.round((Date.now()-Date.parse(v))/60000)):Infinity;
- const metric=(p,key)=>p[key]??p.raw?.[key]??null;
+ 
  function activity(p){
   const h=Array.isArray(p.metric_history)?p.metric_history:[];
-  let strong=null,weak=null;
+  let direct=null,indirect=null;
   for(let i=1;i<h.length;i++){
-   const a=h[i-1],b=h[i],t=Date.parse(b.captured_at);
-   if(!Number.isFinite(t))continue;
-   for(const k of ['honor_points','loot','power']){
-    if(a[k]!==null&&a[k]!==undefined&&b[k]!==null&&b[k]!==undefined&&Number(a[k])!==Number(b[k])){
-     const item={at:t,kind:k,delta:Number(b[k])-Number(a[k]),confidence:k==='power'?'weak':'strong'};
-     if(k==='power'){if(!weak||t>weak.at)weak=item;}
-     else if(!strong||t>strong.at)strong=item;
+   const a=h[i-1],b=h[i],at=Date.parse(b.captured_at);
+   if(!Number.isFinite(at))continue;
+   for(const key of ["honor_points","loot"]){
+    if(a[key]!==null&&a[key]!==undefined&&b[key]!==null&&b[key]!==undefined&&Number(a[key])!==Number(b[key])){
+     if(!direct||at>direct.at)direct={at,key,delta:Number(b[key])-Number(a[key])};
     }
    }
+   if(a.power!==null&&a.power!==undefined&&b.power!==null&&b.power!==undefined&&Number(a.power)!==Number(b.power)){
+    if(!indirect||at>indirect.at)indirect={at,key:"power",delta:Number(b.power)-Number(a.power)};
+   }
   }
-  const last=strong&&(!weak||strong.at>=weak.at)?strong:(weak||strong);
-  const minutes=last?Math.max(0,(Date.now()-last.at)/60000):Infinity;
-  const status=strong&&Date.now()-strong.at<=5*60000?'active':(last&&minutes<=60?'recent':'unknown');
-  const reason=last?(last.kind==='honor_points'?'Zmiana honoru':last.kind==='loot'?'Zmiana łupu':'Zmiana potęgi (sygnał słaby)'):'brak wykrytej zmiany';
-  return {last,minutes,reason,status,strong,weak};
+  const minutes=x=>x?Math.max(0,(Date.now()-x.at)/60000):Infinity;
+  const directAge=minutes(direct),indirectAge=minutes(indirect);
+  const status=directAge<=5?"confirmed":indirectAge<=5?"possible":directAge<=60?"recent":"unknown";
+  return {direct,indirect,directAge,indirectAge,status,last:direct&&directAge<=indirectAge?direct:indirect,minutes:Math.min(directAge,indirectAge)};
  }
  function protectionHint(p){
-  const h=(p.metric_history||[]).filter(x=>x.honor_points!==null&&x.honor_points!==undefined);
-  const l=(p.metric_history||[]).filter(x=>x.loot!==null&&x.loot!==undefined);
-  const honorChanged=h.some((x,i)=>i>0&&Number(x.honor_points)!==Number(h[i-1].honor_points));
-  if(honorChanged)return {label:'Wykryto zmianę honoru',kind:'good',desc:'To dowód zmiany punktów honoru w okresie obserwacji i przesłanka przeciw utrzymującej się ochronie. Nie potwierdza jednak statusu tarczy.'};
-  if(l.length>=2&&h.length>=2){
-   const lootChanged=l.some((x,i)=>i>0&&Number(x.loot)!==Number(l[i-1].loot));
-   const span=Date.parse(h.at(-1).captured_at)-Date.parse(h[0].captured_at);
-   if(lootChanged&&span>=6*3600000)return {label:'Niejednoznaczne dane',kind:'warn',desc:'Wystąpiła zmiana łupu bez zmiany honoru. Może to wynikać z ochrony, aktywności PvE albo innych mechanik. Nie jest to dowód tarczy.'};
+  const raw=p.raw||{};
+  const keys=Object.keys(raw).filter(k=>/shield|protection|protect|peace|safe|bubble|truce/i.test(k));
+  const explicit=keys.find(k=>typeof raw[k]==="boolean"||[0,1].includes(Number(raw[k])));
+  if(explicit){
+   const value=raw[explicit]===true||Number(raw[explicit])===1;
+   return {label:value?"Ochrona potwierdzona w polu API":"Brak ochrony w polu API",kind:value?"good":"warn",desc:"Pole źródłowe: "+explicit+". Wartość: "+String(raw[explicit])+"."};
   }
-  return {label:'Brak dowodów na ochronę',kind:'warn',desc:'API nie udostępnia flagi tarczy, a łup nie jest dostępny w danych RB. Sam brak zmiany honoru nie pozwala ocenić ochrony.'};
+  return {label:"Nieustalone – brak pola API",kind:"warn",desc:"W dostępnych danych profilu nie znaleziono potwierdzonej flagi ochrony. Sam brak zmian honoru lub eventów nie jest dowodem aktywnej tarczy."};
  }
  function statusMarkup(p){
   const a=activity(p);
-  if(a.status==='active')return '<span class="status active">● Sygnał honoru ≤5 min</span>';
-  if(a.status==='recent'&&a.last?.confidence==='weak'&&a.minutes<=5)return '<span class="status recent">◷ Potęga ≤5 min (słaby)</span>';
-  if(a.status==='recent')return '<span class="status recent">◷ Sygnał ≤60 min</span>';
-  return '<span class="status unknown">? Brak świeżego sygnału</span>';
+  if(a.status==="confirmed")return '<span class="status active">● Potwierdzony sygnał</span>';
+  if(a.status==="possible")return '<span class="status recent">◷ Sygnał pośredni</span>';
+  if(a.status==="recent")return '<span class="status recent">◷ Ostatnia godzina</span>';
+  return '<span class="status unknown">? Brak potwierdzenia</span>';
  }
  function renderList(){
   const q=$('search').value.trim().toLocaleLowerCase('pl');
@@ -74,42 +72,46 @@
  function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
  function renderDetail(){
   const p=(data?.players||[]).find(x=>Number(x.player_id)===Number(selectedId));
-  if(!p){$('detail').innerHTML='<div class="empty">Wybierz gracza z listy, aby zobaczyć jego kartę.</div>';return;}
+  if(!p){$("detail").innerHTML='<div class="empty">Wybierz gracza z listy, aby zobaczyć jego kartę.</div>';return;}
   const a=activity(p),pro=protectionHint(p);
-  const events=(data.events||[]).filter(e=>Number(e.player_id)===Number(p.player_id)).sort((x,y)=>String(y.detected_at).localeCompare(String(x.detected_at))).slice(0,30);
-  const history=(p.metric_history||[]).slice(-12).reverse();
-  const eventLabel={honor_delta:'Zmiana honoru',loot_delta:'Zmiana łupu',power_gain:'Wzrost potęgi · słaby sygnał aktywności',power_drop:'Spadek potęgi · słaby sygnał aktywności',nick_changed:'Zmiana nicku',alliance_changed:'Zmiana sojuszu'};
-  const trend=(key)=>{const vals=(p.metric_history||[]).filter(x=>x[key]!==null&&x[key]!==undefined).slice(-24).map(x=>Number(x[key]));if(vals.length<2)return '<div class="small">Za mało pomiarów do wykresu.</div>';const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;const pts=vals.map((v,i)=>((i/(vals.length-1))*280)+','+(42-((v-min)/range)*36)).join(' ');return '<svg viewBox="0 0 280 48" width="100%" height="48" role="img" aria-label="Trend '+key+'"><polyline fill="none" stroke="#72ddb0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="'+pts+'"/></svg>';};
-  const events24=(data.events||[]).filter(e=>Number(e.player_id)===Number(p.player_id)&&Date.now()-Date.parse(e.detected_at)<=86400000).length;
-  $('detail').innerHTML='<div class="profile-top"><div><h2>'+esc(p.name)+'</h2><div class="profile-id">PID '+p.player_id+' · '+esc(p.alliance_name||'ReBorN')+' · AID '+p.alliance_id+'</div></div>'+statusMarkup(p)+'</div>'+
+  const events=(data.events||[]).filter(e=>Number(e.player_id)===Number(p.player_id)).sort((x,y)=>String(y.detected_at).localeCompare(String(x.detected_at))).slice(0,40);
+  const history=(p.metric_history||[]).slice(-48);
+  const latest=history.at(-1)||{};
+  const first=history[0]||{};
+  const delta=(key)=>first[key]!=null&&latest[key]!=null?Number(latest[key])-Number(first[key]):null;
+  const chart=(key,label)=>{
+   const pts=history.filter(x=>x[key]!==null&&x[key]!==undefined&&Number.isFinite(Number(x[key])));
+   if(pts.length<2)return '<div class="small">Za mało punktów do wykresu '+label+'.</div>';
+   const vals=pts.map(x=>Number(x[key])),min=Math.min(...vals),max=Math.max(...vals),span=max-min||1;
+   const coords=vals.map((v,i)=>({x:8+i*284/(vals.length-1),y:78-(v-min)*62/span}));
+   const points=coords.map(x=>x.x.toFixed(1)+","+x.y.toFixed(1)).join(" ");
+   return '<div class="small">'+label+' · '+fmt(vals[0])+' → '+fmt(vals.at(-1))+'</div><svg viewBox="0 0 300 92" width="100%" role="img" aria-label="Wykres '+label+' z ostatnich pomiarów"><path d="M8 80 H292" stroke="#344b63" fill="none"/><polyline points="'+points+'" fill="none" stroke="#efc875" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="'+coords.at(-1).x+'" cy="'+coords.at(-1).y+'" r="3.5" fill="#72ddb0"/></svg>';
+  };
+  const eventLabel={honor_delta:"Zmiana honoru",loot_delta:"Zmiana łupu",power_gain:"Wzrost potęgi",power_drop:"Spadek potęgi",nick_changed:"Zmiana nicku",alliance_changed:"Zmiana sojuszu"};
+  const direct=a.direct?((a.direct.key==="honor_points"?"Honor":"Łup")+" · "+Math.round(a.directAge)+" min temu · "+(a.direct.delta>0?"+":"")+fmt(a.direct.delta)):"brak wykrytej zmiany honoru/łupu";
+  const indirect=a.indirect?("Potęga · "+Math.round(a.indirectAge)+" min temu · "+(a.indirect.delta>0?"+":"")+fmt(a.indirect.delta)):"brak zmiany potęgi";
+  $("detail").innerHTML='<div class="profile-top"><div><h2>'+esc(p.name)+'</h2><div class="profile-id">PID '+p.player_id+' · '+esc(p.alliance_name||"ReBorN")+' · AID '+p.alliance_id+'</div></div>'+statusMarkup(p)+'</div>'+
    '<div class="metric-grid"><div class="metric"><b>'+fmt(p.honor_points)+'</b><span>Honor</span></div><div class="metric"><b>'+fmt(p.loot)+'</b><span>Łup</span></div><div class="metric"><b>'+fmt(p.power)+'</b><span>Potęga</span></div><div class="metric"><b>'+fmt(p.glory_points)+'</b><span>Chwała</span></div><div class="metric"><b>'+fmt(p.level)+'</b><span>Poziom</span></div><div class="metric"><b>'+fmt(p.legend_level)+'</b><span>Poziom legendarny</span></div></div>'+
-   '<div class="notice '+(a.status==='active'?'good':'')+'"><b>Ostatni sygnał aktywności:</b> '+(a.last?esc(a.reason)+' ('+Math.round(a.minutes)+' min temu, zmiana '+(a.last.delta>0?'+':'')+fmt(a.last.delta)+')':'brak wykrytej zmiany w historii')+'.<br><span class="small">Ostatni pomiar źródłowy: '+date(p.last_seen||data.source_snapshot_at)+'.</span></div>'+
-   '<div class="notice '+pro.kind+'"><b>Ochrona przed atakami: '+esc(pro.label)+'</b><br>'+esc(pro.desc)+'<br><span class="small">API nie udostępnia w potwierdzonym kontrakcie flagi aktywnej tarczy ani stanu uczestnictwa w Krwawych Krukach / Inwazji Obcych. Nie da się tego stwierdzić na pewno.</span></div>'+
-   '<div class="section"><h3>Ostatnie eventy gracza ('+events.length+')</h3>'+(events.length?events.map(e=>'<div class="event"><time>'+date(e.detected_at)+'</time><div><b>'+esc(eventLabel[e.kind]||e.kind)+'</b><p>'+esc(e.description||'Zarejestrowane zdarzenie')+'</p></div></div>').join(''):'<p class="small">Brak zapisanych eventów dla tego gracza. Historia zaczyna się od uruchomienia trackera.</p>')+'</div>'+
-   '<div class="section"><h3>Zmiana w ostatnich 24 godzinach</h3><div class="metric-grid"><div class="metric"><b>'+(p.power_delta_24h===null?'—':(p.power_delta_24h>0?'+':'')+fmt(p.power_delta_24h))+'</b><span>Potęga</span></div><div class="metric"><b>'+(p.honor_delta_24h===null?'—':(p.honor_delta_24h>0?'+':'')+fmt(p.honor_delta_24h))+'</b><span>Honor</span></div><div class="metric"><b>'+events24+'</b><span>Eventy / 24 h</span></div></div><h3>Trend potęgi · ostatnie 24 pomiary</h3>'+trend('power')+'<h3>Trend honoru · ostatnie 24 pomiary</h3>'+trend('honor_points')+'</div>'+
-   '<div class="section"><h3>Ostatnie pomiary API</h3><div class="history">'+(history.length?history.map(x=>'<div class="history-item"><b>'+date(x.captured_at)+'</b><span>Łup: '+fmt(x.loot)+' · Honor: '+fmt(x.honor_points)+' · Potęga: '+fmt(x.power)+'</span></div>').join(''):'<div class="small">Brak historii pomiarów.</div>')+'</div></div>';
- }
- function renderAlerts(){
-  const cutoff=Date.now()-86400000;
-  const recent=(data.events||[]).filter(e=>Date.parse(e.detected_at)>=cutoff&&Number(e.alliance_id)===115).slice(0,12);
-  const labels={honor_delta:'Honor',loot_delta:'Łup',power_gain:'Wzrost potęgi · sygnał słaby',power_drop:'Spadek potęgi · sygnał słaby',nick_changed:'Zmiana nicku',alliance_changed:'Zmiana sojuszu'};
-  $('alerts').innerHTML=recent.length?recent.map(e=>'<div class="event"><time>'+date(e.detected_at)+'</time><div><b>'+esc(e.player||'Gracz')+' · '+esc(labels[e.kind]||e.kind)+'</b><p>'+esc(e.description||'Zarejestrowane zdarzenie')+'</p></div></div>').join(''):'<p class="small">Brak nowych alertów w ostatnich 24 godzinach.</p>';
+   '<div class="notice '+(a.status==="confirmed"?"good":"")+'"><b>Aktywność – dowody z pomiarów</b><br>Potwierdzona zmiana honoru/łupu: '+esc(direct)+'.<br>Sygnał pośredni potęgi: '+esc(indirect)+'.<br><span class="small">Zmiana potęgi nie jest traktowana jako potwierdzenie zalogowania. Ostatni pomiar: '+date(p.last_seen||data.source_snapshot_at)+'.</span></div>'+
+   '<div class="notice '+pro.kind+'"><b>Ochrona przed atakami: '+esc(pro.label)+'</b><br>'+esc(pro.desc)+'<br><span class="small">Nie wnioskujemy o tarczy na podstawie samego braku honoru ani braku udziału w wydarzeniach.</span></div>'+
+   '<div class="section"><h3>Zmiany z ostatnich 24 godzin</h3><div class="metric-grid"><div class="metric"><b>'+(delta("power")===null?"—":(delta("power")>0?"+":"")+fmt(delta("power")))+'</b><span>Zmiana potęgi</span></div><div class="metric"><b>'+(delta("honor_points")===null?"—":(delta("honor_points")>0?"+":"")+fmt(delta("honor_points")))+'</b><span>Zmiana honoru</span></div><div class="metric"><b>'+(delta("loot")===null?"—":(delta("loot")>0?"+":"")+fmt(delta("loot")))+'</b><span>Zmiana łupu</span></div></div></div>'+
+   '<div class="section"><h3>Wykresy historii · ostatnie 48 pomiarów</h3>'+chart("power","Potęga")+chart("honor_points","Honor")+'</div>'+
+   '<div class="section"><h3>Ostatnie eventy gracza ('+events.length+')</h3>'+(events.length?events.map(e=>'<div class="event"><time>'+date(e.detected_at)+'</time><div><b>'+esc(eventLabel[e.kind]||e.kind)+'</b><p>'+esc(e.description||"Zarejestrowane zdarzenie")+'</p></div></div>').join(""):'<p class="small">Brak zapisanych eventów dla tego gracza. Eventy pojawią się po wykryciu różnicy w kolejnych snapshotach.</p>')+'</div>'+
+   '<div class="section"><h3>Ostatnie pomiary API</h3><div class="history">'+(history.slice().reverse().slice(0,12).map(x=>'<div class="history-item"><b>'+date(x.captured_at)+'</b><span>Potęga: '+fmt(x.power)+' · Honor: '+fmt(x.honor_points)+' · Łup: '+fmt(x.loot)+'</span></div>').join("")||'<div class="small">Brak historii pomiarów.</div>')+'</div></div>';
  }
  function renderStats(){
   const players=data.players||[],states=players.map(activity);
-  $('countPlayers').textContent=players.length;
-  $('countActive').textContent=states.filter(x=>x.status==='active').length;
-  $('countRecent').textContent=states.filter(x=>x.minutes<=60).length;
-  $('countEvents').textContent=data.event_count??(data.events||[]).length;
-  renderAlerts();
-  $('updated').textContent='Dane: '+date(data.updated_at);
+  $("countPlayers").textContent=players.length;
+  $("countActive").textContent=states.filter(x=>x.status==="confirmed").length;
+  $("countRecent").textContent=states.filter(x=>x.status==="possible"||x.status==="recent").length;
+  $("countEvents").textContent=data.event_count??(data.events||[]).length;
+  $("updated").textContent="Dane: "+date(data.updated_at);
   const sourceAge=age(data.source_snapshot_at);
-  $('sourceFreshness').textContent='Snapshot: '+(Number.isFinite(sourceAge)?sourceAge+' min temu':'—');
-  $('dataState').textContent=data.baseline_only?'Budowanie historii':(data.metrics_available?'Metryki dostępne':'Metryki częściowo niedostępne');
-  $('sourceFreshness').textContent='Snapshot: '+(Number.isFinite(sourceAge)?sourceAge+' min temu':'—')+' · interwał serwera 5 min';
-  $('dataState').className='pill '+(data.metrics_available?'good':'warn');
+  $("sourceFreshness").textContent="Snapshot: "+(Number.isFinite(sourceAge)?sourceAge+" min temu":"—");
+  $("dataState").textContent=data.baseline_only?"Budowanie historii":(data.metrics_available?"Metryki dostępne":"Metryki częściowo niedostępne");
+  $("dataState").className="pill "+(data.metrics_available?"good":"warn");
  }
- async function load(force=false){
+ function load(force=false){
   if(loading)return;loading=true;$('refreshNow').disabled=true;
   try{
    const res=await fetch(DATA+(force?'?t='+Date.now():'?t='+Math.floor(Date.now()/60000)),{cache:'no-store'});

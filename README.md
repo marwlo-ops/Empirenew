@@ -32,3 +32,20 @@ Repetytorium Goodgame Empire — mapa świata, lokalizacje graczy, sojusze i dan
 - Kierunki osi mapy: X rośnie w prawo, Y rośnie w dół.
 - Tracker baronów sortuje dostępne fortyfikacje przed oczekującymi; ponowny atak po 24 godzinach od zapisanego pokonania. Czasy zapisują się lokalnie w przeglądarce.
 - Katalog współrzędnych fortec jest obecnie pusty. Publiczny przekaźnik API nie potwierdził zgodnego skanowania mapy E4K; nie wpisujemy fikcyjnych lokalizacji.
+
+
+## Wspólna historia lokalizacji (RB + MD)
+
+Historia zmian lokalizacji jest przechowywana centralnie w katalogu `data/`, a nie wyłącznie w pamięci przeglądarki:
+
+- `data/location-snapshots.json` — ostatni poprawny snapshot sojuszy.
+- `data/location-history.json` — zdarzenia dotyczące zamków.
+- `data/outpost-history.json` — zdarzenia dotyczące posterunków.
+- `scripts/location-tracker.js` — odczyt potwierdzonej komendy `ain`, walidacja, porównanie i dopisywanie zdarzeń.
+- `.github/workflows/tracker.yml` — harmonogram GitHub Actions co 15 minut oraz uruchomienie ręczne.
+
+Pierwszy snapshot w repozytorium został utworzony na podstawie aktualnych plików mapy (RB AID 115, MD AID 41343). Nie generuje on zdarzeń historycznych wstecz. Pierwsze uruchomienie trackera porównuje bieżące dane API z tym punktem odniesienia.
+
+**Fail-safe:** błąd HTTP/JSON, nieznana lista członków, zbyt mała liczba graczy lub podejrzany spadek liczby lokalizacji kończy zadanie błędem. W takim przypadku snapshot i historia nie są zapisywane. Zmiana liczby posterunków nie jest automatycznie klasyfikowana jako przeniesienie; przeniesienie jest rozpoznawane tylko przy tej samej liczbie obiektów danego gracza, krainy i typu.
+
+Widok `mapa-rb.html` pobiera wspólne pliki historii i oferuje filtry nicku, sojuszu, krainy, rodzaju obiektu i rodzaju zdarzenia. Lokalna historia w `localStorage` pozostaje osobnym, pomocniczym archiwum.

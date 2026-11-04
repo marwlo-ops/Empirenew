@@ -203,7 +203,8 @@ async function fetchCompleteHighscore(listType, options = {}) {
         pageRanks[0] > expectedStart || pageRanks.at(-1) < expectedEnd) {
       throw new E4KApiError("hgh: luka lub nadmiar pozycji w bloku rankingu", {
         listType, expectedStart, expectedEnd, frameRank, returnedRanks:pageRanks,
-        expectedFrameRanks, FR:page.frame_rank, LR:page.total
+        expectedFrameRanks, FR:page.frame_rank, LR:page.total,
+        rowsPreview: JSON.stringify(page.rows.slice(0, 3)).slice(0, 5000), contentShape: Object.keys(page.rows[0] || {})
       });
     }
     for (const item of pageEntries) {

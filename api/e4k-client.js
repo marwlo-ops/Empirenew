@@ -229,8 +229,10 @@ export async function testReadOnlyApi(options = {}) {
  */
 export async function probePlayerRankingRanges(options = {}) {
   const probes = [];
-  for (const lt of [1, 2, 3, 11]) {
-    for (const sv of ["1", "2", "3", "5"]) {
+  // Focus on player and alliance rankings. SV values deliberately include
+  // adjacent steps and large jumps; do not assume SV is a page number.
+  for (const lt of [1, 11]) {
+    for (const sv of ["1", "2", "3", "4", "5", "6", "7", "8", "10", "13", "20", "50", "100", "200", "284"]) {
       probes.push({ name: `hgh-LT${lt}-SV${sv}`, command: "hgh", params: { LT: lt, LID: 1, SV: sv } });
     }
   }
@@ -249,8 +251,20 @@ export async function probePlayerRankingRanges(options = {}) {
         if (typeof value === "object") for (const [key, child] of Object.entries(value)) visit(child, path + "." + key, depth + 1);
       };
       visit(content);
-      results.push({ name: probe.name, ok: true, return_code: payload.return_code, arrays,
-        preview: JSON.stringify(content).slice(0, 500) });
+      const firstArray = arrays.find(item => item.first != null);
+      const firstTuple = firstArray?.first;
+      const lastTuple = firstArray && Array.isArray(firstArray.first) ? null : null;
+      const metadata = {
+        FR: content.FR ?? payload.FR ?? null,
+        LR: content.LR ?? payload.LR ?? null,
+        SV: content.SV ?? payload.SV ?? null
+      };
+      const tuplePosition = tuple => Array.isArray(tuple) && tuple.length
+        ? Number(tuple[0]) : null;
+      results.push({ name: probe.name, ok: true, return_code: payload.return_code,
+        metadata, arrays,
+        first_record_position: tuplePosition(firstTuple),
+        preview: JSON.stringify(content).slice(0, 900) });
     } catch (error) {
       results.push({ name: probe.name, ok: false, error: error.message, details: error.details || null });
     }

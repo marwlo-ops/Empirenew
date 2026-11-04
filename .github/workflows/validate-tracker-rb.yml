@@ -21,5 +21,5 @@ jobs:
         run: node --check scripts/server-intel-tracker.js && node --check api/e4k-client.js
       - name: Extract and validate Tracker RB browser script
         run: |
-          node --input-type=commonjs -e 'const fs=require("node:fs"); const html=fs.readFileSync("tracker-rb.html","utf8"); const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)]; if(!scripts.length) throw new Error("Tracker RB nie zawiera skryptu"); fs.writeFileSync("/tmp/tracker-rb-inline.js",scripts.at(-1)[1]);'
+          node --input-type=commonjs -e 'const fs=require("node:fs"); const html=fs.readFileSync("tracker-rb.html","utf8"); const re=new RegExp("<script>([\\\\s\\\\S]*?)</script>","g"); const scripts=[...html.matchAll(re)]; if(!scripts.length) throw new Error("Tracker RB nie zawiera skryptu"); fs.writeFileSync("/tmp/tracker-rb-inline.js",scripts.at(-1)[1]);'
           node --check /tmp/tracker-rb-inline.js

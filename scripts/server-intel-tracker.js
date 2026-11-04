@@ -29,6 +29,7 @@ const players = snapshot.players.map(player => {
   if (old) {
     if (old.name && old.name !== player.name) events.push({
       kind: "nick_changed", player_id: player.player_id, player: player.name,
+      alliance_id: player.alliance_id, alliance_name: player.alliance_name,
       previous_nick: old.name, current_nick: player.name,
       description: `Zmiana nicku: ${old.name} → ${player.name}`
     });

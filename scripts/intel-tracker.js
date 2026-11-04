@@ -119,7 +119,7 @@ const players = current.map(player => {
   let status = "unknown", statusLabel = "Brak danych rankingu łupów";
   if (d1 !== null && d1 > 0) { status = "high"; statusLabel = "Wysoka aktywność / farmuje"; }
   else if (d6 !== null && d6 > 0) { status = "medium"; statusLabel = "Średnia aktywność"; }
-  else if (lastLootAt && Date.now() - Date.parse(lastLootAt) >= 43200000 && d12 !== null && d12 === 0) { status = "low"; statusLabel = "Inaktywny (brak przyrostu > 12h)"; }
+  else if (lastLootAt && Date.now() - Date.parse(lastLootAt) >= 43200000 && loot12h.length >= 2 && d12 === 0) { status = "low"; statusLabel = "Inaktywny (brak przyrostu > 12h)"; }
   return {
     player_id: player.player_id, member_id: player.member_id, player: player.player,
     alliance_id: player.alliance_id, alliance_name: player.alliance_name,

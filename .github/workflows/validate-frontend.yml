@@ -1,0 +1,27 @@
+name: Validate Empirenew frontend
+on:
+  push:
+    paths:
+      - "mapa-rb.html"
+      - ".github/workflows/validate-frontend.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Extract and validate frontend JavaScript
+        run: |
+          sed -n '/<script>/,/<\/script>/p' mapa-rb.html | sed '1d;$d' > /tmp/empirenew-frontend.js
+          test -s /tmp/empirenew-frontend.js
+          node --check /tmp/empirenew-frontend.js
+      - name: Verify required intelligence views
+        run: |
+          for id in intelFeed intelProfile intelWatch intelAlliances intelRadar intelReports intelMap intelActivity intelDelta; do
+            grep -q "id=\"$id\"" mapa-rb.html
+          done

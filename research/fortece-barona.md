@@ -6,6 +6,8 @@ Dokumentacja EmpireCore identyfikuje zwykły zamek barona jako obszar mapy `DUNG
 
 Skan mapy królestwa można wykonać metodą `client.map.scan_kingdom(kingdom, item_types=[MapItemType.DUNGEON])`. Wynik zawiera współrzędne obiektów i właścicieli. Należy sprawdzać `failed_chunks`, ponieważ niepełny skan nie oznacza pustej mapy.
 
+W enumach biblioteki rozróżniono identyfikatory właścicieli NPC: zwykli baronowie zaczynają się od `-202` (zakres kolejnych 13 ID), a osobne identyfikatory krainowych dungeonów to `DESERT_DUNGEON = -220`, `ICE_DUNGEON = -221` i `VOLCANO_DUNGEON = -222`. Trzeba filtrować zarówno typ obiektu mapy, jak i właściciela NPC; nie wolno utożsamiać każdego obiektu `DUNGEON` z fortecą barona.
+
 ## Kody krain
 
 | Kraina | Kod API | Nazwa w grze |

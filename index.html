@@ -21,8 +21,8 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
 <body>
 <header><div class="head"><div class="brand">EMPIRENEW</div><nav class="nav" aria-label="Główna nawigacja"><button type="button" data-view="map">🗺️ Mapa</button><button type="button" data-view="spy">🕵️ Szpiegowanie</button><button type="button" data-view="extras">🔗 Dodatkowe</button></nav></div></header>
 <main>
-<section class="view" id="view-map" aria-label="Mapa"><div class="frame-shell"><iframe id="map-frame" title="Empirenew — Mapa RB i MD" loading="eager"></iframe></div></section>
-<section class="view" id="view-spy" aria-label="Szpiegowanie"><div class="frame-shell"><iframe id="spy-frame" title="Empirenew — Szpiegowanie PL1" loading="eager"></iframe></div></section>
+<section class="view" id="view-map" aria-label="Mapa"><div class="frame-shell"><iframe id="map-frame" title="Empirenew — Mapa RB i MD" loading="lazy"></iframe></div></section>
+<section class="view" id="view-spy" aria-label="Szpiegowanie"><div class="frame-shell"><iframe id="spy-frame" title="Empirenew — Szpiegowanie PL1" loading="lazy"></iframe></div></section>
 <section class="view" id="view-extras" aria-label="Dodatkowe">
 <div class="extras-intro"><div class="eyebrow">Empire tools · community hub</div><h1>Dodatkowe narzędzia</h1><p>Zewnętrzne rankingi, narzędzia społeczności oraz oficjalne informacje o wydarzeniach Goodgame Empire. Jeśli dostawca blokuje osadzanie strony, skorzystaj z przycisku otwarcia w nowej karcie.</p></div>
 <div class="resource-grid">
@@ -36,21 +36,26 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
 <script>
 (function(){
  const mapFrame=document.getElementById('map-frame'),spyFrame=document.getElementById('spy-frame');
- mapFrame.src='./mapa-rb.html';
- const spyUrl=()=> './mapa-rb.html?spy_refresh='+Date.now()+'#intel';
- spyFrame.src=spyUrl();
+ const loaded={map:false,spy:false};
+ function loadView(view){
+  const frame=view==='spy'?spyFrame:mapFrame;
+  if(loaded[view])return;
+  frame.src='./mapa-rb.html?embed=1#'+(view==='spy'?'intel':'map');
+  loaded[view]=true;
+ }
  function activate(view,writeHash){
   if(!['map','spy','extras'].includes(view))view='map';
-  if(view==='spy') spyFrame.src=spyUrl();
+  if(view==='map'||view==='spy')loadView(view);
   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='view-'+view));
   document.querySelectorAll('[data-view]').forEach(el=>{const on=el.dataset.view===view;el.classList.toggle('active',on);el.setAttribute('aria-current',on?'page':'false')});
   if(writeHash&&location.hash!=='#'+(view==='map'?'map':view==='spy'?'intel':'extras'))history.replaceState(null,'','#'+(view==='map'?'map':view==='spy'?'intel':'extras'));
   document.title='Empirenew — '+(view==='map'?'Mapa':view==='spy'?'Szpiegowanie':'Dodatkowe');
  }
  document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>activate(btn.dataset.view,true)));
- window.addEventListener('pageshow',()=>{if(location.hash==='#intel'||location.hash==='#spy')activate('spy',false)});
  function fromHash(){const h=location.hash.toLowerCase();activate(h==='#extras'?'extras':h==='#intel'||h==='#spy'?'spy':'map',false)}
- window.addEventListener('hashchange',fromHash);fromHash();
+ window.addEventListener('hashchange',fromHash);
+ window.addEventListener('pageshow',fromHash);
+ fromHash();
 })();
 </script>
 </body>

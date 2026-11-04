@@ -16,9 +16,9 @@ const fail = message => { console.error("TRACKER FAIL-SAFE:", message); process.
 function flatten(payloads) {
   const result = [];
   for (const d of payloads) {
-    if (!Array.isArray(d.members) || d.members.length === 0) fail(`AID ${d.alliance.aid}: pusta lista członków`);
+    const aid = Number(d.alliance?.aid ?? d.aid);\n    const allianceName = d.alliance?.name ?? d.name ?? `AID_${aid}`;\n    if (!Array.isArray(d.members) || d.members.length === 0) fail(`AID ${aid}: pusta lista członków`);
     for (const m of d.members) {
-      if (!Number.isInteger(Number(m.member_id)) || !m.name) fail(`AID ${d.alliance.aid}: niepoprawny gracz`);
+      if (!Number.isInteger(Number(m.member_id)) || !m.name) fail(`AID ${aid}: niepoprawny gracz`);
       for (const p of (m.ap || [])) {
         if (![p.kingdom_code,p.object_id,p.x,p.y,p.type_code].every(v => Number.isFinite(Number(v)))) fail(`Niepoprawna pozycja AP gracza ${m.name}`);
         const type = Number(p.type_code);

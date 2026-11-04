@@ -37,15 +37,11 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
 (function(){
  const mapFrame=document.getElementById('map-frame'),spyFrame=document.getElementById('spy-frame');
  mapFrame.src='./mapa-rb.html';
- const spyUrl=()=> './mapa-rb.html#intel';
+ const spyUrl=()=> './mapa-rb.html?spy_refresh='+Date.now()+'#intel';
  spyFrame.src=spyUrl();
  function activate(view,writeHash){
   if(!['map','spy','extras'].includes(view))view='map';
-  if(view==='spy'){
-   const target=spyUrl();
-   if(!spyFrame.src.endsWith('/mapa-rb.html#intel') && !spyFrame.src.includes('/mapa-rb.html#intel')) spyFrame.src=target;
-   else if(spyFrame.dataset.needsRefresh==='1'){spyFrame.src=target;spyFrame.dataset.needsRefresh='0';}
-  }
+  if(view==='spy') spyFrame.src=spyUrl();
   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='view-'+view));
   document.querySelectorAll('[data-view]').forEach(el=>{const on=el.dataset.view===view;el.classList.toggle('active',on);el.setAttribute('aria-current',on?'page':'false')});
   if(writeHash&&location.hash!=='#'+(view==='map'?'map':view==='spy'?'intel':'extras'))history.replaceState(null,'','#'+(view==='map'?'map':view==='spy'?'intel':'extras'));

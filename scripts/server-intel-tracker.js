@@ -93,7 +93,8 @@ const players = snapshot.players.map(player => {
   if (!last || last.captured_at !== point.captured_at) metricHistory.push(point);
   const last24 = metricHistory.filter(p => Date.parse(p.captured_at) >= Date.now() - 86400000);
   const first = last24[0], end = last24.at(-1);
-  const powerDelta24h = first && end && hasNumber(first.power) && hasNumber(end.power) ? Number(end.power) - Number(first.power) : null;\n  const honorDelta24h = first && end && hasNumber(first.honor_points) && hasNumber(end.honor_points) ? Number(end.honor_points) - Number(first.honor_points) : null;
+  const powerDelta24h = first && end && hasNumber(first.power) && hasNumber(end.power) ? Number(end.power) - Number(first.power) : null;
+  const honorDelta24h = first && end && hasNumber(first.honor_points) && hasNumber(end.honor_points) ? Number(end.honor_points) - Number(first.honor_points) : null;
   const lootDelta24h = first && end && hasNumber(first.loot) && hasNumber(end.loot) ? Number(end.loot) - Number(first.loot) : null;
   return {
     ...player, metrics_available: player.power !== null || player.loot !== null || player.glory_points !== null || player.honor_points !== null,

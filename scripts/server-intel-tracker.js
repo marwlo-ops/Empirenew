@@ -29,6 +29,8 @@ try {
   }, null, 2));
   fail("Nie udało się pobrać rankingu graczy; poprzedni snapshot i historia pozostają bez zmian.");
 }
+if (snapshot.complete !== true || snapshot.ranking_validated !== true) fail("Ranking nie przeszedł walidacji kompletności; pliki nie zostaną nadpisane.");
+if (!Number.isInteger(snapshot.total_count) || snapshot.player_count !== snapshot.total_count) fail(`Niezgodność liczby profili i LR: ${snapshot.player_count}/${snapshot.total_count}; pliki nie zostaną nadpisane.`);
 if (snapshot.player_count < 50) fail(`Ranking zwrócił podejrzanie mało graczy: ${snapshot.player_count}; pliki nie zostaną nadpisane.`);
 // A trusted baseline must come from a previous full hgh harvest, never from the RB/MD map seed.
 const hasTrustedBaseline = oldSnapshot?.source === "hgh" && oldSnapshot?.player_count >= 50 && Boolean(oldSnapshot?.baseline_established_at);

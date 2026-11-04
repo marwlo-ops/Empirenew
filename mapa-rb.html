@@ -219,7 +219,7 @@ async function loadIntel(){
   if(!Array.isArray(history.events)||!Array.isArray(history.players)||!Array.isArray(snapshot.players))throw Error('Niepoprawny format server-intel-*.json');
   if(snapshot.complete!==true||snapshot.ranking_validated!==true||!Number.isInteger(snapshot.total_count)||snapshot.player_count!==snapshot.total_count||snapshot.players.length!==snapshot.total_count)throw Error('Snapshot nie przeszedł walidacji kompletności — odmawiam wyświetlenia niepełnych danych.');
   if(history.player_count!==snapshot.player_count||Number(history.snapshot_sequence)!==Number(snapshot.snapshot_sequence))throw Error('Snapshot i historia pochodzą z różnych przebiegów — odśwież później.');
-  intelSnapshotSequence=snapshot.snapshot_sequence;intelFeed=history.events.map(e=>({...e,alliance_id:e.alliance_id??e.current_alliance_id??e.previous_alliance_id??0}));
+  intelSnapshotSequence=snapshot.snapshot_sequence;intelFeed=history.events.filter(e=>e.kind!=='glory_delta').map(e=>({...e,alliance_id:e.alliance_id??e.current_alliance_id??e.previous_alliance_id??0}));
   intelActivity=history.players.map(p=>({...p,player:p.name||p.player,player_id:p.player_id??p.member_id}));
   intelPlayers=snapshot.players.map(p=>({...p,player:p.name,member_id:p.player_id}));
   const mapFiles=await Promise.all(['rb-player-map.json','maddevils-player-map.json'].map(path=>fetch(base+path+'?v='+v,{cache:'no-store'})));

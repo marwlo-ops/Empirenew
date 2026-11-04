@@ -11,7 +11,7 @@ const read = async (url, fallback) => {
   try { return JSON.parse(await fs.readFile(url, "utf8")); }
   catch (error) { if (error.code === "ENOENT") return fallback; throw error; }
 };
-const write = async (url, value) => fs.writeFile(url, JSON.stringify(value, null, 2) + "\n");
+const write = async (url, value) => fs.writeFile(url, JSON.stringify(value) + "\n");
 const fail = message => { console.error("SERVER INTEL FAIL-SAFE:", message); process.exit(1); };
 const oldSnapshot = await read(snapshotPath, null);
 const oldHistory = await read(historyPath, { schema_version: 1, server: DEFAULT_SERVER, updated_at: null, events: [], players: [] });

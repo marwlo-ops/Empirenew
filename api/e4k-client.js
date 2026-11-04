@@ -169,8 +169,8 @@ function extractRankedProfile(entry) {
   const rank = Number(entry[0]);
   const profile = entry.findLast(value => value && typeof value === "object" && !Array.isArray(value));
   if (!Number.isInteger(rank) || rank < 1 || !profile) return null;
-  const id = profile.OID ?? profile.PID ?? profile.ID;
-  const name = profile.N ?? profile.PN ?? profile.NAME;
+  const id = profile.OID ?? profile.PID ?? profile.ID ?? profile.AID;
+  const name = profile.N ?? profile.PN ?? profile.NAME ?? profile.AN;
   if (id == null || name == null) return null;
   return { rank, profile, id: String(id), name: String(name) };
 }

@@ -49,3 +49,20 @@ Pierwszy snapshot w repozytorium został utworzony na podstawie aktualnych plik�
 **Fail-safe:** błąd HTTP/JSON, nieznana lista członków, zbyt mała liczba graczy lub podejrzany spadek liczby lokalizacji kończy zadanie błędem. W takim przypadku snapshot i historia nie są zapisywane. Zmiana liczby posterunków nie jest automatycznie klasyfikowana jako przeniesienie; przeniesienie jest rozpoznawane tylko przy tej samej liczbie obiektów danego gracza, krainy i typu.
 
 Widok `mapa-rb.html` pobiera wspólne pliki historii i oferuje filtry nicku, sojuszu, krainy, rodzaju obiektu i rodzaju zdarzenia. Lokalna historia w `localStorage` pozostaje osobnym, pomocniczym archiwum.
+
+
+## Szpiegowanie — ranking całego serwera PL1
+
+Moduł Szpiegowanie ma niezależny od Mapy kanał danych oparty na rankingu graczy `hgh`:
+
+- `api/e4k-client.js` — `fetchPlayerRankingPage` pobiera strony rankingu graczy (LT=1 potęga, LT=2 chwała), a `fetchServerPlayerRanking` scala rekordy po stałym PID.
+- `scripts/server-intel-tracker.js` — pobiera do 1000 graczy, porównuje ich z poprzednim snapshotem i zapisuje zdarzenia zmian nicku, sojuszu, potęgi, łupów (jeśli API zwróci takie pole) i chwały.
+- `data/server-intel-snapshot.json` — ostatni ranking PL1.
+- `data/server-intel-history.json` — historia zdarzeń i historia metryk graczy.
+- `.github/workflows/tracker.yml` — uruchamia osobny tracker Szpiegowania po trackerze lokalizacji Mapy.
+
+**Rozdzielenie źródeł:** Mapa nadal korzysta z `ain` oraz `location-snapshots.json`, `location-history.json` i `outpost-history.json`. Skrypt globalnego rankingu nie zapisuje do tych plików. Szpiegowanie odczytuje wyłącznie `server-intel-snapshot.json` i `server-intel-history.json`.
+
+W rankingu LT=1 pole `P` jest traktowane jako potęga, `PID` jako stały identyfikator, `N` jako nick, `AID/AN` jako sojusz, a `L/LL` jako poziom i poziom legendarny. Ranking LT=2 uzupełnia punkty chwały. **Punktów łupów nie wyprowadzamy z pola `L`** — zostaną pokazane dopiero, jeśli API zwróci osobne, rozpoznane pole łupów.
+
+Pierwszy przebieg tworzy bazę porównawczą i nie generuje zmian wstecz. Aktywność wymaga kolejnych odczytów; brak pola w odpowiedzi API pozostaje `null`, a nie zerem.

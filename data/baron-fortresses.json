@@ -1,0 +1,25 @@
+{
+  "captured_at": null,
+  "source": "EmpireCore live kingdom scan",
+  "results": {
+    "sands": {
+      "fortress_count": null,
+      "failed_chunks": null,
+      "complete": false,
+      "fortresses": []
+    },
+    "ice": {
+      "fortress_count": null,
+      "failed_chunks": null,
+      "complete": false,
+      "fortresses": []
+    },
+    "fire": {
+      "fortress_count": null,
+      "failed_chunks": null,
+      "complete": false,
+      "fortresses": []
+    }
+  },
+  "note": "Template only. No live fortress coordinates have been collected yet."
+}

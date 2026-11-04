@@ -75,27 +75,29 @@ const players = snapshot.players.map(player => {
         description: `Zmiana punktów łupów: ${delta > 0 ? "+" : ""}${delta.toLocaleString("pl-PL")}`
       });
     }
-    if (hasNumber(old.glory_points) && hasNumber(player.glory_points)) {
-      const delta = player.glory_points - old.glory_points;
+    const oldHonor = old.honor_points ?? old.raw?.H ?? null;
+    const currentHonor = player.honor_points ?? player.raw?.H ?? null;
+    if (hasNumber(oldHonor) && hasNumber(currentHonor)) {
+      const delta = Number(currentHonor) - Number(oldHonor);
       if (delta !== 0) events.push({
-        kind: "glory_delta", player_id: player.player_id, player: player.name,
+        kind: "honor_delta", player_id: player.player_id, player: player.name,
         alliance_id: player.alliance_id, alliance_name: player.alliance_name,
-        previous_value: Number(old.glory_points), current_value: player.glory_points, delta,
-        description: `Zmiana punktów chwały: ${delta > 0 ? "+" : ""}${delta.toLocaleString("pl-PL")}`
+        previous_value: Number(oldHonor), current_value: Number(currentHonor), delta,
+        description: `Zmiana honoru: ${delta > 0 ? "+" : ""}${delta.toLocaleString("pl-PL")} pkt.`
       });
     }
   }
   const metricHistory = isBaseline ? [] : (Array.isArray(old?.metric_history) ? old.metric_history.slice(-287) : []);
-  const point = { captured_at: snapshot.captured_at, power: player.power, loot: player.loot, glory_points: player.glory_points, rank: player.rank };
+  const point = { captured_at: snapshot.captured_at, power: player.power, loot: player.loot, honor_points: player.honor_points ?? player.raw?.H ?? null, rank: player.rank };
   const last = metricHistory.at(-1);
   if (!last || last.captured_at !== point.captured_at) metricHistory.push(point);
   const last24 = metricHistory.filter(p => Date.parse(p.captured_at) >= Date.now() - 86400000);
   const first = last24[0], end = last24.at(-1);
-  const powerDelta24h = first && end && hasNumber(first.power) && hasNumber(end.power) ? Number(end.power) - Number(first.power) : null;
+  const powerDelta24h = first && end && hasNumber(first.power) && hasNumber(end.power) ? Number(end.power) - Number(first.power) : null;\n  const honorDelta24h = first && end && hasNumber(first.honor_points) && hasNumber(end.honor_points) ? Number(end.honor_points) - Number(first.honor_points) : null;
   const lootDelta24h = first && end && hasNumber(first.loot) && hasNumber(end.loot) ? Number(end.loot) - Number(first.loot) : null;
   return {
-    ...player, metrics_available: player.power !== null || player.loot !== null || player.glory_points !== null,
-    power_delta_24h: powerDelta24h, loot_delta_24h: lootDelta24h,
+    ...player, metrics_available: player.power !== null || player.loot !== null || player.glory_points !== null || player.honor_points !== null,
+    power_delta_24h: powerDelta24h, loot_delta_24h: lootDelta24h, honor_delta_24h: honorDelta24h,
     trend_available: metricHistory.length >= 2,
     activity_status: metricHistory.length >= 2 && powerDelta24h !== null && powerDelta24h !== 0 ? "active" : "unknown",
     activity_label: metricHistory.length >= 2 && powerDelta24h !== null && powerDelta24h !== 0 ? "Zmiana potęgi w ostatnich 24 h" : "Brak wystarczających danych aktywności",
@@ -128,7 +130,7 @@ const history = {
   alliances: [...allianceMap.values()].sort((a, b) => b.total_power - a.total_power),
   source_snapshot_at: snapshot.captured_at, player_count: players.length,
   metrics_available: !isBaseline && snapshot.snapshot_sequence >= 2 && players.some(p => p.metrics_available),
-  metric_fields_detected: ["power", "loot", "glory_points"].filter(k => players.some(p => p[k] !== null)),
+  metric_fields_detected: ["power", "loot", "honor_points"].filter(k => players.some(p => p[k] !== null)),
   event_count: merged.length, new_events: stamped.length, events: merged, players
 };
 // Atomic-ish order: history first, then snapshot. A failed history write leaves previous snapshot in place.

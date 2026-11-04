@@ -62,7 +62,7 @@
  function renderList(){
   const q=$('search').value.trim().toLocaleLowerCase('pl');
   let rows=(data?.players||[]).map(p=>({...p,_activity:activity(p)})).filter(p=>(p.name+' '+p.player_id).toLocaleLowerCase('pl').includes(q));
-  if(filter==='active')rows=rows.filter(p=>p._activity.status==='active');
+  if(filter==='active')rows=rows.filter(p=>p._activity.status==='confirmed');
   if(filter==='recent')rows=rows.filter(p=>p._activity.status!=='unknown');
   if(filter==='unknown')rows=rows.filter(p=>p._activity.status==='unknown');
   rows.sort((a,b)=>a._activity.minutes-b._activity.minutes||a.name.localeCompare(b.name,'pl'));
@@ -109,11 +109,16 @@
   $("updated").textContent="Dane: "+date(data.updated_at);
   const sourceAge=age(data.source_snapshot_at);
   $("sourceFreshness").textContent="Snapshot: "+(Number.isFinite(sourceAge)?sourceAge+" min temu":"—");
+  $("sourceFreshness").className="pill "+(Number.isFinite(sourceAge)&&sourceAge<=15?"good":"warn");
   $("dataState").textContent=data.baseline_only?"Budowanie historii":(data.metrics_available?"Metryki dostępne":"Metryki częściowo niedostępne");
   $("dataState").className="pill "+(data.metrics_available?"good":"warn");
+  const eventLabels={honor_delta:"Honor – potwierdzona zmiana",loot_delta:"Łup – potwierdzona zmiana",power_gain:"Potęga – sygnał pośredni",power_drop:"Potęga – sygnał pośredni",nick_changed:"Zmiana nicku",alliance_changed:"Zmiana sojuszu"};
+  const recentAlerts=(data.events||[]).filter(e=>{const t=Date.parse(e.detected_at);return Number.isFinite(t)&&t>=Date.now()-86400000;}).sort((a,b)=>String(b.detected_at).localeCompare(String(a.detected_at))).slice(0,8);
+  $("alerts").innerHTML=recentAlerts.length?recentAlerts.map(e=>{const kind=["honor_delta","loot_delta"].includes(e.kind)?"Potwierdzony sygnał":["power_gain","power_drop"].includes(e.kind)?"Sygnał pośredni":"Zmiana profilu";return '<button class="player" data-alert-player="'+esc(e.player_id)+'"><span><span class="pname">'+esc(e.player||("PID "+e.player_id))+'</span><span class="sub">'+esc(eventLabels[e.kind]||e.kind)+' · '+esc(e.description||"Wykryto zmianę")+'</span></span><span class="status '+(["honor_delta","loot_delta"].includes(e.kind)?"active":"recent")+'">'+kind+'</span></button>';}).join(""):'<div class="empty">Brak alertów z ostatnich 24 godzin. Brak alertu nie oznacza, że gracz jest offline.</div>';
+  $("alerts").querySelectorAll("[data-alert-player]").forEach(btn=>btn.addEventListener("click",()=>{selectedId=Number(btn.dataset.alertPlayer);renderList();renderDetail();document.querySelector(".layout").scrollIntoView({behavior:"smooth",block:"start"});}));
   const feed=(data.events||[]).slice().sort((a,b)=>String(b.detected_at).localeCompare(String(a.detected_at))).slice(0,12);
   $("alertCount").textContent=feed.length+" najnowszych / "+(data.event_count||0);
-  const labels={honor_delta:"Honor – potwierdzona zmiana",loot_delta:"Łup – potwierdzona zmiana",power_gain:"Potęga – sygnał pośredni",power_drop:"Potęga – sygnał pośredni",nick_changed:"Zmiana nicku",alliance_changed:"Zmiana sojuszu"};
+  const labels=eventLabels;
   $("alertFeed").innerHTML=feed.length?feed.map(e=>'<button class="player" data-alert-player="'+e.player_id+'"><span><span class="pname">'+esc(e.player||("PID "+e.player_id))+'</span><span class="sub">'+esc(labels[e.kind]||e.kind)+' · '+esc(e.description||"Wykryto zmianę")+'</span></span><span class="sub">'+date(e.detected_at)+'</span></button>').join(""):'<div class="empty">Brak zapisanych alertów. Nowe pojawią się po wykryciu zmian w kolejnych skanach.</div>';
   $("alertFeed").querySelectorAll("[data-alert-player]").forEach(btn=>btn.addEventListener("click",()=>{selectedId=Number(btn.dataset.alertPlayer);renderList();renderDetail();document.querySelector(".layout").scrollIntoView({behavior:"smooth",block:"start"});}));
 
@@ -124,12 +129,13 @@
    const res=await fetch(DATA+(force?'?t='+Date.now():'?t='+Math.floor(Date.now()/60000)),{cache:'no-store'});
    if(!res.ok)throw new Error('HTTP '+res.status);
    const next=await res.json();
-   if(!Array.isArray(next.players)||Number(next.alliance_id)!==115)throw new Error('Plik nie zawiera poprawnego rosteru RB (AID 115).');
-   if(!next.players.every(p=>Array.isArray(p.metric_history)))throw new Error('Historia pomiarów nie została jeszcze zbudowana — oczekuj na kolejny skan.');
+   if(next.schema_version!==2||!Array.isArray(next.players)||Number(next.alliance_id)!==115||!next.updated_at||!next.source_snapshot_at||!Array.isArray(next.events))throw new Error('Snapshot nie spełnia wymaganego schematu RB v2.');
+   const playerIds=new Set(next.players.map(p=>String(p.player_id)));
+   if(playerIds.size!==next.players.length||!next.players.every(p=>Number.isInteger(Number(p.player_id))&&typeof p.name==="string"&&p.name.trim()&&Array.isArray(p.metric_history)))throw new Error('Roster zawiera duplikaty PID lub niekompletne rekordy graczy.');
    const prior=selectedId;data=next;
    if(!data.players.some(p=>Number(p.player_id)===Number(prior)))selectedId=data.players[0]?.player_id??null;
    renderStats();renderList();renderDetail();
-  }catch(e){$('dataState').textContent='Błąd danych: '+e.message;$('dataState').className='pill warn';}
+  }catch(e){$('dataState').textContent=data?'Błąd odświeżenia · zachowano poprzedni snapshot':'Błąd danych: '+e.message;$('dataState').className='pill warn';}
   finally{loading=false;$('refreshNow').disabled=false;}
  }
  function schedule(){if(timer)clearInterval(timer);const minutes=5;$('refreshRate').value="5";$('refreshRate').disabled=true;timer=setInterval(()=>{if(!document.hidden)load();},minutes*60000);}

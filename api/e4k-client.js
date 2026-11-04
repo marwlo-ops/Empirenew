@@ -224,15 +224,19 @@ export async function testReadOnlyApi(options = {}) {
 }
 
 /**
- * Diagnostyka zakresów rankingu PL1. Nie zapisuje danych i nie zmienia snapshotu.
- * Sprawdza osobno R oraz offset/limit w hgh, a także llsp z R.
+ * Read-only matrix diagnostic for PL1 highscore commands.
+ * Does not write snapshots. Keep the production tracker fail-safe.
  */
 export async function probePlayerRankingRanges(options = {}) {
-  const probes = [
-    { name: "hgh-R-1-100", command: "hgh", params: { LT: 1, LID: 1, SV: "1", R: [1, 100] } },
-    { name: "hgh-offset-limit", command: "hgh", params: { LT: 1, LID: 1, SV: "1", offset: 0, limit: 100 } },
-    { name: "llsp-R-1-100", command: "llsp", params: { LT: 1, LID: 1, R: [1, 100] } }
-  ];
+  const probes = [];
+  for (const lt of [1, 2, 3, 11]) {
+    for (const sv of ["1", "2", "3", "5"]) {
+      probes.push({ name: `hgh-LT${lt}-SV${sv}`, command: "hgh", params: { LT: lt, LID: 1, SV: sv } });
+    }
+  }
+  for (const range of [[0, 99], [1, 100], [0, 100], "0-99", "1-100"]) {
+    probes.push({ name: `llsp-R-${JSON.stringify(range)}`, command: "llsp", params: { LT: 1, LID: 1, R: range } });
+  }
   const results = [];
   for (const probe of probes) {
     try {
@@ -246,12 +250,14 @@ export async function probePlayerRankingRanges(options = {}) {
       };
       visit(content);
       results.push({ name: probe.name, ok: true, return_code: payload.return_code, arrays,
-        preview: JSON.stringify(content).slice(0, 1800) });
+        preview: JSON.stringify(content).slice(0, 500) });
     } catch (error) {
       results.push({ name: probe.name, ok: false, error: error.message, details: error.details || null });
     }
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 350));
   }
-  console.log("PL1 RANKING RANGE PROBES:", JSON.stringify({ server: options.server || DEFAULT_SERVER, results }));
+  console.log("PL1 RANKING MATRIX:", JSON.stringify({ server: options.server || DEFAULT_SERVER,
+    summary: results.map(r => ({ name: r.name, ok: r.ok, arrays: r.arrays?.map(a => ({path:a.path,count:a.count})), error:r.error })),
+    results }));
   return results;
 }

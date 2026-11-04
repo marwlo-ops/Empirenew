@@ -39,7 +39,7 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
  const mapFrame=document.getElementById('map-frame'),spyFrame=document.getElementById('spy-frame'),referenceFrame=document.getElementById('reference-frame');
  const loaded={map:false,spy:false,reference:false};
  function loadView(view){
-  const frame=view==='spy'?spyFrame:mapFrame;
+  const frame=view==='spy'?spyFrame:view==='reference'?referenceFrame:mapFrame;
   if(loaded[view])return;
   if(view==='reference')frame.src='./repetytorium.html';
   else frame.src='./mapa-rb.html?embed=1#'+(view==='spy'?'intel':'map');
@@ -50,7 +50,8 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
   if(view==='map'||view==='spy'||view==='reference')loadView(view);
   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='view-'+view));
   document.querySelectorAll('[data-view]').forEach(el=>{const on=el.dataset.view===view;el.classList.toggle('active',on);el.setAttribute('aria-current',on?'page':'false')});
-  if(writeHash&&location.hash!=='#'+(view==='map'?'map':view==='spy'?'intel':'extras'))history.replaceState(null,'','#'+(view==='map'?'map':view==='spy'?'intel':'extras'));
+  const hash=view==='map'?'map':view==='spy'?'intel':view==='reference'?'reference':'extras';
+  if(writeHash&&location.hash!=='#'+hash)history.replaceState(null,'','#'+hash);
   document.title='Empirenew — '+(view==='map'?'Mapa':view==='spy'?'Szpiegowanie':view==='reference'?'Repetytorium':'Dodatkowe');
  }
  document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>activate(btn.dataset.view,true)));

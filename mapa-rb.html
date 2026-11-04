@@ -20,6 +20,14 @@ svg{width:100%;height:100%;display:block}.dot{cursor:pointer;stroke:#08111d;stro
 @media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.controls input{grid-column:1/-1}.layout{grid-template-columns:1fr}.mapwrap{height:52vh;min-height:320px}.stats{gap:7px}.stat{padding:10px}.stat b{font-size:21px}}
 
 .history-tools{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.history-tools button{border:1px solid var(--line);border-radius:9px;background:#17263b;color:var(--txt);padding:9px 12px}.history-tools button.active{border-color:#a87e35;color:#ffe3a2}.history-panel{display:none;margin-top:14px}.history-panel.open{display:block}.history-row{padding:11px;border:1px solid var(--line);border-radius:10px;background:#101b2b;margin:7px 0}.history-row b{color:#ffe0a0}.history-row small{display:block;color:var(--muted);margin-top:4px}.history-empty{color:var(--muted);padding:14px 0}
+
+.post-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.post-tools select{background:#17263b;color:var(--txt);border:1px solid var(--line);border-radius:9px;padding:9px}
+.posts-panel{margin-top:14px}
+.post-row{padding:12px;border:1px solid var(--line);border-left:4px solid #64b5ff;border-radius:10px;background:#101b2b;margin:8px 0}
+.post-row.new{border-left-color:#55d6a0}.post-row.moved{border-left-color:#e5b85c}.post-row.removed{border-left-color:#ff535d}
+.post-row b{color:#ffe0a0}.post-row small{display:block;color:var(--muted);margin-top:5px;line-height:1.5}
+.post-empty{color:var(--muted);padding:14px 0}
 </style></head>
 <body>
 <header><h1>EMPIRENEW <span style="color:#e5b85c">/ MAPA SOJUSZY</span></h1><p>ReBorN · MADDEVILS · EmpirefourkingdomsExGG2_3 · panel lokalizacji graczy</p></header>
@@ -37,7 +45,7 @@ svg{width:100%;height:100%;display:block}.dot{cursor:pointer;stroke:#08111d;stro
 <aside class="panel"><h2>Gracze <span id="listAlliance">RB</span> <span class="muted" id="listCount"></span></h2><div class="list" id="players"></div><div class="detail" id="detail"><div class="muted">Wybierz gracza z listy lub punkt na mapie.</div></div></aside>
 </div>
 <section class="panel baron-panel" id="baronPanel"><h2>Fortecy baronów — Piaski, Lód, Ogień</h2><p class="muted">Lokalizacje są wczytywane z katalogu fortec. Przy każdej fortecy zapisujesz czas pokonania; ponowny atak jest dostępny po 24 godzinach.</p><div class="notice" id="baronStatus">Wczytywanie katalogu fortec…</div><h3>Fortecy — dostępne najpierw, oczekujące poniżej</h3><div id="baronList"></div></section><div class="history-tools"><button id="toggleHistory" type="button">Historia zmian lokalizacji zamków</button><button id="clearHistory" type="button">Wyczyść historię na tym urządzeniu</button></div><section class="panel history-panel" id="historyPanel"><h2>Historia zmian lokalizacji zamków</h2><p class="muted" id="historyInfo">Historia jest budowana z kolejnych odczytów danych mapy.</p><div id="historyList"></div></section>
-<div class="notice" id="status">Dane są pobierane z pliku JSON projektu.</div>
+<section class="panel posts-panel"><h2>Nowe posty — zmiany na mapie posterunków</h2><p class="muted">Automatyczny dziennik nowych, przeniesionych i znikających posterunków wykrytych w kolejnych odczytach danych mapy.</p><div class="post-tools"><select id="postAlliance"><option value="all">RB + MD</option><option value="115">RB</option><option value="41343">MD</option></select><select id="postType"><option value="all">Wszystkie zmiany</option><option value="new">Nowe posterunki</option><option value="moved">Zmiana lokalizacji</option><option value="removed">Zniknęły z mapy</option></select><button class="action" id="refreshPosts" type="button">Odśwież wpisy</button><button class="action" id="clearPosts" type="button">Wyczyść posty</button></div><div class="muted" id="postsInfo">Oczekiwanie na dane mapy…</div><div id="postsList"></div></section>\n<div class="notice" id="status">Dane są pobierane z pliku JSON projektu.</div>
 <div class="notice">Mapa prezentuje punkty na podstawie współrzędnych X/Y zwróconych przez API. To wizualizacja rozmieszczenia, nie oryginalna tekstura świata gry. Widok filtruje typy obiektów: w Wielkim Cesarstwie pokazuje zamki (typ 1) i posterunki (typ 4), a w krainach 1–3 tylko zamki (typ 12). Pozostałe typy są ukryte.</div>
 </main>
 <script>
@@ -62,7 +70,41 @@ function renderMap(){let pts=activePositions(),svg=$('map');if(!pts.length){svg.
  svg.innerHTML=markup;svg.querySelectorAll('.dot').forEach(c=>c.onclick=()=>{let p=pts[Number(c.dataset.i)];selectPlayer(p.member_id,p,p.alliance_id)});
  $('mapCaption').textContent=pts.length+' widocznych punktów · X '+minX+'–'+maxX+' (w prawo), Y '+minY+'–'+maxY+' (w dół)'}
 function selectPlayer(id,point=null,aid=null){selected=data.members.find(m=>m.member_id===id&&(aid===null||m.alliance_id===aid));$('selectedPlayer').innerHTML='Wybrany gracz: '+esc(selected.name)+' · '+esc(selected.alliance_name)+(point?'<small>'+point.kind+' · '+kingdomNames[point.kingdom_code]+' · X: '+point.x+' / Y: '+point.y+'</small>':'<small>Wybrano z listy graczy</small>');renderList();renderMap();let list=allPos(selected).filter(p=>$('kingdom').value==='all'||String(p.kingdom_code)===$('kingdom').value);$('detail').innerHTML='<h3>'+esc(selected.name)+'</h3><div class="muted">ID gracza: '+selected.member_id+' · '+list.length+' widocznych obiektów w aktualnym widoku</div><div class="coords" style="margin-top:10px">'+list.map(p=>'<div class="coord"><b>'+p.kind+'</b> · '+kingdomNames[p.kingdom_code]+'<br>X: '+p.x+' · Y: '+p.y+'<br><span class="muted">Obiekt: '+p.object_id+' · typ: '+p.type_code+'</span></div>').join('')+'</div>'+(point?'<div class="notice">Wybrany punkt: '+point.kind+' · '+point.x+','+point.y+'</div>':'')}
-const CASTLE_HISTORY_KEY='empirenew_castle_location_history_v1';
+
+const OUTPOST_POSTS_KEY='empirenew_outpost_posts_v1';
+const OUTPOST_SNAPSHOT_KEY='empirenew_outpost_snapshot_v1';
+function outpostRows(){
+ return Object.values(datasets).flatMap(d=>(d.members||[]).flatMap(m=>(m.ap||[]).filter(p=>Number(p.type_code)===4).map(p=>({
+  key:[d.alliance.aid,p.object_id].join(':'),object_id:Number(p.object_id),member_id:m.member_id,player:m.name,
+  alliance_id:Number(d.alliance.aid),alliance_name:d.alliance.name,kingdom_code:Number(p.kingdom_code),x:Number(p.x),y:Number(p.y),type_code:Number(p.type_code)
+ }))));
+}
+function detectOutpostChanges(){
+ const current=outpostRows(),prev=readJson(OUTPOST_SNAPSHOT_KEY,null),posts=readJson(OUTPOST_POSTS_KEY,[]);
+ if(prev&&Array.isArray(prev.rows)){
+  const before=new Map(prev.rows.map(x=>[x.key,x])),after=new Map(current.map(x=>[x.key,x]));
+  const stamp=new Date().toISOString();
+  for(const row of current){
+   const old=before.get(row.key);
+   if(!old)posts.unshift({id:'new:'+row.key+':'+stamp,kind:'new',detected_at:stamp,...row});
+   else if(old.x!==row.x||old.y!==row.y||old.member_id!==row.member_id||old.kingdom_code!==row.kingdom_code)
+    posts.unshift({id:'moved:'+row.key+':'+stamp,kind:'moved',detected_at:stamp,...row,previous:{x:old.x,y:old.y,player:old.player,kingdom_code:old.kingdom_code}});
+  }
+  for(const old of prev.rows)if(!after.has(old.key))posts.unshift({id:'removed:'+old.key+':'+stamp,kind:'removed',detected_at:stamp,...old});
+  localStorage.setItem(OUTPOST_POSTS_KEY,JSON.stringify(posts.slice(0,1000)));
+ }
+ localStorage.setItem(OUTPOST_SNAPSHOT_KEY,JSON.stringify({captured_at:new Date().toISOString(),rows:current}));
+ renderOutpostPosts();
+}
+function renderOutpostPosts(){
+ const posts=readJson(OUTPOST_POSTS_KEY,[]),aid=$('postAlliance').value,kind=$('postType').value;
+ const filtered=posts.filter(p=>(aid==='all'||String(p.alliance_id)===aid)&&(kind==='all'||p.kind===kind));
+ const labels={new:'NOWY POSTERUNEK',moved:'ZMIANA LOKALIZACJI',removed:'POSTERUNEK ZNIKNĄŁ'};
+ $('postsInfo').textContent='Wpisów: '+filtered.length+' · wykryte posterunki: '+outpostRows().length+' · ostatni odczyt: '+(readJson(OUTPOST_SNAPSHOT_KEY,{captured_at:null}).captured_at?new Date(readJson(OUTPOST_SNAPSHOT_KEY,{}).captured_at).toLocaleString('pl-PL'):'brak');
+ $('postsList').innerHTML=filtered.length?filtered.map(p=>'<article class="post-row '+p.kind+'"><b>'+labels[p.kind]+'</b> · '+esc(p.player)+' · '+esc(p.alliance_name)+'<small>'+kingdomNames[String(p.kingdom_code)]+' · wykryto: '+new Date(p.detected_at).toLocaleString('pl-PL')+'</small><small>'+(p.kind==='moved'?'Poprzednio: X '+p.previous.x+' / Y '+p.previous.y+' ('+esc(p.previous.player)+') → teraz: X '+p.x+' / Y '+p.y:p.kind==='new'?'Nowa pozycja: X '+p.x+' / Y '+p.y:'Ostatnia znana pozycja: X '+p.x+' / Y '+p.y)+'</small><small>ID obiektu: '+p.object_id+'</small></article>').join(''):'<div class="post-empty">Brak wpisów dla wybranych filtrów. Pierwszy odczyt tworzy punkt odniesienia — wpisy powstaną po wykryciu różnic w następnym odczycie.</div>';
+}
+$('postAlliance').onchange=renderOutpostPosts;$('postType').onchange=renderOutpostPosts;$('refreshPosts').onclick=()=>{detectOutpostChanges();$('postsInfo').textContent+=' · odświeżono porównanie bieżącego snapshotu'};$('clearPosts').onclick=()=>{if(confirm('Usunąć lokalną historię postów o posterunkach?')){localStorage.removeItem(OUTPOST_POSTS_KEY);renderOutpostPosts()}};
+\nconst CASTLE_HISTORY_KEY='empirenew_castle_location_history_v1';
 const CASTLE_SNAPSHOT_KEY='empirenew_castle_location_snapshot_v1';
 function castleRows(){return Object.values(datasets).flatMap(d=>(d.members||[]).flatMap(m=>(m.ap||[]).filter(p=>[1,12].includes(Number(p.type_code))&&[0,1,2,3].includes(Number(p.kingdom_code))).map(p=>({key:[m.member_id,p.kingdom_code].join(':'),member_id:m.member_id,player:m.name,alliance_id:d.alliance.aid,alliance_name:d.alliance.name,kingdom_code:Number(p.kingdom_code),object_id:Number(p.object_id),x:Number(p.x),y:Number(p.y)}))))}
 function readJson(key,fallback){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback))}catch{return fallback}}
@@ -101,5 +143,5 @@ $('kingdom').onchange=()=>{selected=null;$('selectedPlayer').textContent='Nie wy
 $('showAP').onclick=()=>{showAP=!showAP;$('showAP').classList.toggle('active',showAP);renderMap()};
 $('showVP').onclick=()=>{showVP=!showVP;$('showVP').classList.toggle('active',showVP);renderMap()};
 $('showAll').onclick=()=>{$('search').value='';$('kingdom').value='0';selected=null;$('selectedPlayer').textContent='Nie wybrano gracza — dotknij punktu na mapie';$('detail').innerHTML='<div class="muted">Wybierz gracza z listy lub punkt na mapie.</div>';showAP=true;showVP=true;$('showAP').classList.add('active');$('showVP').classList.add('active');render()};
-$('alliance').onchange=switchMode;setInterval(()=>{if($('alliance').value==='barons')renderBarons()},60000);Promise.all(Object.entries(DATA_URLS).map(async([id,url])=>{let r=await fetch(url);if(!r.ok)throw Error('HTTP '+r.status+' dla AID '+id);datasets[id]=await r.json()})).then(()=>{recordCastleSnapshot();loadAlliance();switchMode()}).catch(e=>{$('status').textContent='Nie udało się wczytać danych: '+e.message;$('map').innerHTML='<text x="450" y="320" text-anchor="middle" fill="#ffbd9b">Błąd ładowania danych</text>'});
+$('alliance').onchange=switchMode;setInterval(()=>{if($('alliance').value==='barons')renderBarons()},60000);Promise.all(Object.entries(DATA_URLS).map(async([id,url])=>{let r=await fetch(url);if(!r.ok)throw Error('HTTP '+r.status+' dla AID '+id);datasets[id]=await r.json()})).then(()=>{recordCastleSnapshot();detectOutpostChanges();loadAlliance();switchMode()}).catch(e=>{$('status').textContent='Nie udało się wczytać danych: '+e.message;$('map').innerHTML='<text x="450" y="320" text-anchor="middle" fill="#ffbd9b">Błąd ładowania danych</text>'});
 </script></body></html>

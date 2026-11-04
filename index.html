@@ -19,11 +19,11 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
 </style>
 </head>
 <body>
-<header><div class="head"><div class="brand">EMPIRENEW</div><nav class="nav" aria-label="Główna nawigacja"><button type="button" data-view="map">🗺️ Mapa</button><button type="button" data-view="spy">🕵️ Szpiegowanie</button><button type="button" data-view="extras">🔗 Dodatkowe</button><button type="button" data-view="reference">📚 Repetytorium</button></nav></div></header>
+<header><div class="head"><div class="brand">EMPIRENEW</div><nav class="nav" aria-label="Główna nawigacja"><button type="button" data-view="map">🗺️ Mapa</button><button type="button" data-view="spy">🕵️ Szpiegowanie</button><button type="button" data-view="extras">🔗 Dodatkowe</button><button type="button" data-view="reference">🛰️ Tracker RB</button></nav></div></header>
 <main>
 <section class="view" id="view-map" aria-label="Mapa"><div class="frame-shell"><iframe id="map-frame" title="Empirenew — Mapa RB i MD" loading="lazy"></iframe></div></section>
 <section class="view" id="view-spy" aria-label="Szpiegowanie"><div class="frame-shell"><iframe id="spy-frame" title="Empirenew — Szpiegowanie PL1" loading="lazy"></iframe></div></section>
-<section class="view" id="view-reference" aria-label="Repetytorium"><div class="frame-shell"><iframe id="reference-frame" title="Repetytorium Goodgame Empire" loading="lazy"></iframe></div></section>
+<section class="view" id="view-reference" aria-label="Tracker RB"><div class="frame-shell"><iframe id="reference-frame" title="Tracker RB" loading="lazy"></iframe></div></section>
 <section class="view" id="view-extras" aria-label="Dodatkowe">
 <div class="extras-intro"><div class="eyebrow">Empire tools · community hub</div><h1>Dodatkowe narzędzia</h1><p>Zewnętrzne rankingi, narzędzia społeczności oraz oficjalne informacje o wydarzeniach Goodgame Empire. Jeśli dostawca blokuje osadzanie strony, skorzystaj z przycisku otwarcia w nowej karcie.</p></div>
 <div class="resource-grid">
@@ -52,10 +52,10 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
   document.querySelectorAll('[data-view]').forEach(el=>{const on=el.dataset.view===view;el.classList.toggle('active',on);el.setAttribute('aria-current',on?'page':'false')});
   const hash=view==='map'?'map':view==='spy'?'intel':view==='reference'?'reference':'extras';
   if(writeHash&&location.hash!=='#'+hash)history.replaceState(null,'','#'+hash);
-  document.title='Empirenew — '+(view==='map'?'Mapa':view==='spy'?'Szpiegowanie':view==='reference'?'Repetytorium':'Dodatkowe');
+  document.title='Empirenew — '+(view==='map'?'Mapa':view==='spy'?'Szpiegowanie':view==='reference'?'Tracker RB':'Dodatkowe');
  }
  document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>activate(btn.dataset.view,true)));
- function fromHash(){const h=location.hash.toLowerCase();activate(h==='#extras'?'extras':h==='#intel'||h==='#spy'?'spy':h==='#reference'||h==='#repetytorium'?'reference':'map',false)}
+ function fromHash(){const h=location.hash.toLowerCase();activate(h==='#extras'?'extras':h==='#intel'||h==='#spy'?'spy':h==='#reference'||h==='#tracker-rb'||h==='#repetytorium'?'reference':'map',false)}
  window.addEventListener('hashchange',fromHash);
  window.addEventListener('pageshow',fromHash);
  fromHash();

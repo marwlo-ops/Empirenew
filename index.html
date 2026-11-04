@@ -1,63 +1,67 @@
 <!doctype html>
 <html lang="pl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#101827">
-<title>Empirenew · Mapa RB</title>
+<meta name="description" content="Empirenew — interaktywna mapa graczy sojuszu ReBorN w Goodgame Empire.">
+<title>Empirenew — mapa świata i gracze RB</title>
 <style>
-:root{color-scheme:dark;--bg:#0b1220;--panel:#131e30;--line:#26364d;--muted:#91a4bd;--txt:#edf4ff;--gold:#e5b85c;--blue:#64b5ff;--green:#55d6a0}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1e3553 0,transparent 55%),var(--bg);color:var(--txt);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
-header{padding:22px max(16px,calc((100vw - 1200px)/2));border-bottom:1px solid var(--line);background:#0c1524dd}
-h1{margin:0;font-size:clamp(24px,5vw,36px);letter-spacing:-.04em}header p{color:var(--muted);margin:6px 0 0}
-main{max-width:1200px;margin:auto;padding:18px 16px 40px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}.stat,.panel{background:linear-gradient(145deg,#17243a,#101a2a);border:1px solid var(--line);border-radius:15px}.stat{padding:14px}.stat b{display:block;font-size:25px}.stat span,.muted{color:var(--muted);font-size:12px}
-.controls{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;margin:14px 0}.control{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px;color:var(--txt);min-width:0;width:100%}
-.toggle{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}.toggle button,.action{border:1px solid var(--line);border-radius:10px;background:#17263b;color:var(--txt);padding:10px 13px;font-weight:650}.toggle button.active,.action{border-color:#a87e35;background:#493719;color:#ffe3a2}
-.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,.8fr);gap:14px}.panel{padding:14px;min-width:0}.panel h2{font-size:17px;margin:0 0 8px}.mapwrap{height:min(62vh,620px);min-height:340px;position:relative;background-color:#0a1725;background-image:linear-gradient(#263b542b 1px,transparent 1px),linear-gradient(90deg,#263b542b 1px,transparent 1px),radial-gradient(ellipse,#1b3442,#0b1725 70%);background-size:40px 40px,40px 40px,100% 100%;border:1px solid #30435a;border-radius:12px;overflow:hidden}
-svg{width:100%;height:100%;display:block}.dot{cursor:pointer;stroke:#08111d;stroke-width:1.2}.dot:hover,.dot.selected{stroke:#fff;stroke-width:3}.dot.ap{fill:var(--gold)}.dot.vp{fill:var(--blue)}.axis{fill:#8499b3;font-size:11px}.legend{display:flex;gap:15px;color:var(--muted);font-size:12px;margin-top:9px}.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
-.list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto}.player{display:flex;justify-content:space-between;gap:10px;text-align:left;width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#101b2b;color:var(--txt)}.player.active{border-color:var(--gold);background:#302819}.player small{display:block;color:var(--muted);margin-top:3px}
-.detail{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:#0e1929}.detail h3{margin:0 0 8px}.coords{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.coord{padding:8px;background:#17253a;border-radius:8px;font-size:12px}
-.notice{margin-top:14px;padding:11px 13px;border-radius:10px;background:#17263a;color:#b7c8dc;font-size:12px;line-height:1.5}
-@media(max-width:760px){.controls{grid-template-columns:1fr 1fr}.controls input{grid-column:1/-1}.layout{grid-template-columns:1fr}.mapwrap{height:52vh;min-height:320px}.stats{gap:7px}.stat{padding:10px}.stat b{font-size:21px}}
-</style></head>
+:root{color-scheme:dark;--bg:#080f1b;--panel:#111d2e;--line:#263951;--text:#edf4ff;--muted:#9aacc3;--gold:#e8bd68;--blue:#70baff;--green:#6be0ad}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#234268 0,transparent 52%),var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}
+a{color:inherit}.wrap{width:min(1100px,calc(100% - 32px));margin:auto}
+header{padding:22px 0;border-bottom:1px solid var(--line);background:#091321d9}
+.brand{font-weight:850;letter-spacing:.08em;font-size:14px;color:var(--gold)}nav{float:right;display:flex;gap:20px;font-size:14px;color:var(--muted)}nav a{text-decoration:none}nav a:hover{color:var(--gold)}
+.hero{padding:64px 0 38px}.eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+h1{font-size:clamp(36px,7vw,64px);line-height:1.04;letter-spacing:-.055em;margin:12px 0 18px;max-width:800px}
+.lead{font-size:clamp(17px,2.5vw,21px);color:#bdcce0;max-width:760px;margin:0 0 26px}
+.cta{display:inline-flex;align-items:center;gap:12px;padding:14px 20px;border-radius:12px;background:linear-gradient(120deg,#f0ca7c,#c9953e);color:#17130b;text-decoration:none;font-weight:850;box-shadow:0 10px 35px #d49e3b30}.cta span{font-size:20px}
+.secondary{display:inline-block;margin-left:16px;color:#c7d6e8;text-decoration:none;font-weight:650}
+.section-title{font-size:24px;letter-spacing:-.025em;margin:28px 0 14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 34px}.stat,.card{border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#15243a,#101a29)}
+.stat{padding:16px 18px}.stat strong{display:block;font-size:30px;line-height:1.2;color:var(--gold)}.stat span{font-size:12px;color:var(--muted);letter-spacing:.08em}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.card{padding:20px}.card h3{margin:0 0 7px;font-size:18px}.card p{color:var(--muted);margin:0 0 12px;font-size:14px}.card a{color:var(--blue);font-weight:700;text-decoration:none}.card a:hover{text-decoration:underline}
+.map-card{border-color:#8b6a35;background:linear-gradient(130deg,#292619,#132238 72%);padding:24px}.map-card h2{font-size:25px;margin:0 0 8px}.map-card p{color:#c5c8c8;max-width:720px}.pill{display:inline-block;border:1px solid #8b6a35;border-radius:999px;padding:4px 10px;color:#f2d28f;font-size:12px;margin-bottom:12px}
+footer{margin-top:38px;padding:22px 0 35px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+@media(max-width:620px){nav{gap:12px;font-size:12px}.hero{padding:44px 0 25px}.stats{gap:7px}.stat{padding:12px 9px}.stat strong{font-size:24px}.stat span{font-size:10px}.grid{grid-template-columns:1fr}.secondary{display:block;margin:14px 0 0}.section-title{font-size:22px}}
+</style>
+</head>
 <body>
-<header><h1>EMPIRENEW <span style="color:#e5b85c">/ MAPA RB</span></h1><p>ReBorN · EmpirefourkingdomsExGG2_3 · panel lokalizacji graczy</p></header>
-<main>
-<div class="stats"><div class="stat"><b id="playersN">—</b><span>GRACZY SOJUSZU</span></div><div class="stat"><b id="apN">—</b><span>POZYCJI AP</span></div><div class="stat"><b id="vpN">—</b><span>POZYCJI VP</span></div></div>
-<div class="controls">
-<select class="control" id="kingdom"><option value="all">Wszystkie krainy</option><option value="0">Wielkie Cesarstwo</option><option value="1">Płonące Piaski</option><option value="2">Wieczny Lód</option><option value="3">Ogniste Szczyty</option><option value="4">Nieustalony (kod 4)</option></select>
-<select class="control" id="sort"><option value="name">Sortuj: nazwa A–Z</option><option value="count">Najwięcej lokalizacji</option></select>
-<input class="control" id="search" placeholder="Szukaj gracza po nicku…">
+<header><div class="wrap"><span class="brand">EMPIRENEW</span><nav><a href="#mapa">Mapa RB</a><a href="#opracowania">Opracowania</a><a href="#zasady">Zasady</a></nav></div></header>
+<main class="wrap">
+<section class="hero">
+<div class="eyebrow">Repetytorium Goodgame Empire</div>
+<h1>Świat gry.<br><span style="color:var(--gold)">Dane, mapa, sojusze.</span></h1>
+<p class="lead">Projekt badawczy poświęcony lokalizacjom graczy, sojuszom i danym serwera. Zaczynamy od interaktywnej mapy członków ReBorN (RB).</p>
+<a class="cta" href="./mapa-rb.html">Otwórz mapę graczy RB <span>→</span></a>
+<a class="secondary" href="#opracowania">Zobacz pozostałe opracowania ↓</a>
+</section>
+<section id="mapa">
+<div class="map-card card">
+<span class="pill">GŁÓWNY MODUŁ · REBORN</span>
+<h2>Interaktywna mapa graczy RB</h2>
+<p>Przeglądaj punkty AP i VP na mapie współrzędnych, wybieraj krainy, wyszukuj graczy po nicku i sprawdzaj wszystkie zapisane lokalizacje wybranego członka sojuszu.</p>
+<a class="cta" href="./mapa-rb.html">Przejdź do mapy <span>↗</span></a>
 </div>
-<div class="toggle"><button id="showAP" class="active">AP</button><button id="showVP" class="active">VP</button><button id="showAll" class="action">Pokaż wszystko</button></div>
-<div class="layout">
-<section class="panel"><h2>Mapa współrzędnych</h2><div class="muted" id="mapCaption">Wybierz gracza lub punkt, aby zobaczyć szczegóły</div><div class="mapwrap"><svg id="map" viewBox="0 0 900 650" role="img" aria-label="Mapa współrzędnych lokalizacji graczy RB"><text x="450" y="320" text-anchor="middle" fill="#91a4bd">Ładowanie danych…</text></svg></div><div class="legend"><span><i style="background:#e5b85c"></i>AP</span><span><i style="background:#64b5ff"></i>VP</span><span>Współrzędne X/Y</span></div></section>
-<aside class="panel"><h2>Gracze RB <span class="muted" id="listCount"></span></h2><div class="list" id="players"></div><div class="detail" id="detail"><div class="muted">Wybierz gracza z listy lub punkt na mapie.</div></div></aside>
+<div class="stats">
+<div class="stat"><strong>65</strong><span>GRACZY SOJUSZU</span></div>
+<div class="stat"><strong>423</strong><span>POZYCJE AP</span></div>
+<div class="stat"><strong>832</strong><span>POZYCJE VP</span></div>
 </div>
-<div class="notice" id="status">Dane są pobierane z pliku JSON projektu.</div>
-<div class="notice">Mapa prezentuje punkty na podstawie współrzędnych X/Y zwróconych przez API. To wizualizacja rozmieszczenia, nie oryginalna tekstura świata gry. AP/VP oraz kody typów obiektów zachowujemy zgodnie z API; ich znaczenia nie są tu zgadywane.</div>
+</section>
+<section id="opracowania">
+<h2 class="section-title">Pozostałe opracowania</h2>
+<div class="grid">
+<article class="card"><h3>Dane sojuszu ReBorN (RB)</h3><p>Źródło API, identyfikator sojuszu i zapis odczytanych danych lokalizacji.</p><a href="./research/RB.md">Otwórz opracowanie →</a></article>
+<article class="card"><h3>Fortece baronów</h3><p>Rozpoznawanie obiektów i odróżnianie zwykłych fortec od innych lochów.</p><a href="./research/fortece-barona.md">Otwórz opracowanie →</a></article>
+<article class="card"><h3>Skanowanie fortec</h3><p>Notatki dotyczące skanowania obiektów w trzech krainach.</p><a href="./research/fortece-barona-skanowanie.md">Otwórz opracowanie →</a></article>
+<article class="card"><h3>Dane fortec — JSON</h3><p>Szablon danych przygotowany do późniejszego uzupełniania potwierdzonymi rekordami.</p><a href="./data/baron-fortresses.json">Otwórz plik JSON →</a></article>
+</div>
+</section>
+<section id="zasady">
+<h2 class="section-title">Zasady projektu</h2>
+<div class="card"><p>• Zapisujemy datę pobrania i źródło danych.<br>• Oddzielamy wartości zwrócone przez API od ich interpretacji.<br>• Nie zgadujemy znaczenia niezweryfikowanych kodów krain i typów obiektów.<br>• Współrzędne X/Y są współrzędnymi mapy gry, a nie GPS.</p></div>
+</section>
 </main>
-<script>
-const DATA_URL='./data/rb-player-map.json';
-const kingdomNames={'0':'Wielkie Cesarstwo','1':'Płonące Piaski','2':'Wieczny Lód','3':'Ogniste Szczyty','4':'Nieustalony (kod 4)'};
-let data=null,selected=null,showAP=true,showVP=true;
-const $=id=>document.getElementById(id);
-const positions=m=>[...(showAP?m.ap.map(p=>({...p,kind:'AP'})):[]),...(showVP?m.vp.map(p=>({...p,kind:'VP'})):[])];
-function allPos(m){return [...m.ap.map(p=>({...p,kind:'AP'})),...m.vp.map(p=>({...p,kind:'VP'}))]}
-function visiblePlayers(){let q=$('search').value.trim().toLowerCase(),k=$('kingdom').value;let arr=data.members.filter(m=>m.name.toLowerCase().includes(q)&&allPos(m).some(p=>k==='all'||String(p.kingdom_code)===k));if($('sort').value==='count')arr.sort((a,b)=>allPos(b).length-allPos(a).length);else arr.sort((a,b)=>a.name.localeCompare(b.name,'pl'));return arr}
-function activePositions(){let k=$('kingdom').value;return visiblePlayers().flatMap(m=>positions(m).filter(p=>k==='all'||String(p.kingdom_code)===k).map(p=>({...p,player:m.name,member_id:m.member_id})))}
-function renderList(){let arr=visiblePlayers();$('listCount').textContent='('+arr.length+')';$('players').innerHTML=arr.map(m=>'<button class="player '+(selected?.member_id===m.member_id?'active':'')+'" data-id="'+m.member_id+'"><span><b>'+esc(m.name)+'</b><small>'+allPos(m).length+' lokalizacji · '+m.ap.length+' AP / '+m.vp.length+' VP</small></span><span>›</span></button>').join('')||'<div class="muted">Brak wyników dla wybranych filtrów.</div>';document.querySelectorAll('.player').forEach(b=>b.onclick=()=>selectPlayer(Number(b.dataset.id)))}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function renderMap(){let pts=activePositions(),svg=$('map');if(!pts.length){svg.innerHTML='<text x="450" y="320" text-anchor="middle" fill="#91a4bd">Brak punktów dla wybranych filtrów</text>';return}let xs=pts.map(p=>p.x),ys=pts.map(p=>p.y),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);let dx=maxX-minX||1,dy=maxY-minY||1;let x=p=>65+(p.x-minX)/dx*770,y=p=>585-(p.y-minY)/dy*520;
-let markup='';for(let i=0;i<=8;i++){let xx=65+i*96.25,yy=65+i*65;markup+='<line x1="'+xx+'" y1="45" x2="'+xx+'" y2="600" stroke="#ffffff12"/><line x1="45" y1="'+yy+'" x2="870" y2="'+yy+'" stroke="#ffffff12"/>'}
-markup+='<text x="65" y="625" class="axis">X '+minX+' – '+maxX+'</text><text x="835" y="625" text-anchor="end" class="axis">Y '+minY+' – '+maxY+'</text>';
-pts.forEach((p,i)=>{let sel=selected&&selected.member_id===p.member_id;markup+='<circle class="dot '+p.kind.toLowerCase()+(sel?' selected':'')+'" cx="'+x(p)+'" cy="'+y(p)+'" r="'+(sel?6:4.1)+'" data-i="'+i+'"><title>'+esc(p.player)+' · '+p.kind+' · '+p.x+','+p.y+' · '+kingdomNames[p.kingdom_code]+'</title></circle>'});
-svg.innerHTML=markup;svg.querySelectorAll('.dot').forEach(c=>c.onclick=()=>{let p=pts[Number(c.dataset.i)];selectPlayer(p.member_id,p)});
-$('mapCaption').textContent=pts.length+' widocznych punktów · zakres X '+minX+'–'+maxX+', Y '+minY+'–'+maxY}
-function selectPlayer(id,point=null){selected=data.members.find(m=>m.member_id===id);renderList();renderMap();let list=allPos(selected).filter(p=>$('kingdom').value==='all'||String(p.kingdom_code)===$('kingdom').value);$('detail').innerHTML='<h3>'+esc(selected.name)+'</h3><div class="muted">ID gracza: '+selected.member_id+' · '+list.length+' lokalizacji w aktualnej krainie</div><div class="coords" style="margin-top:10px">'+list.map(p=>'<div class="coord"><b>'+p.kind+'</b> · '+kingdomNames[p.kingdom_code]+'<br>X: '+p.x+' · Y: '+p.y+'<br><span class="muted">Obiekt: '+p.object_id+' · typ: '+p.type_code+'</span></div>').join('')+'</div>'+(point?'<div class="notice">Wybrany punkt: '+point.kind+' · '+point.x+','+point.y+'</div>':'')}
-function render(){renderList();renderMap()}
-$('kingdom').onchange=render;$('sort').onchange=render;$('search').oninput=render;
-$('showAP').onclick=()=>{showAP=!showAP;$('showAP').classList.toggle('active',showAP);renderMap()};
-$('showVP').onclick=()=>{showVP=!showVP;$('showVP').classList.toggle('active',showVP);renderMap()};
-$('showAll').onclick=()=>{$('search').value='';$('kingdom').value='all';showAP=true;showVP=true;$('showAP').classList.add('active');$('showVP').classList.add('active');render()};
-fetch(DATA_URL).then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json()}).then(d=>{data=d;$('playersN').textContent=d.counts.members;$('apN').textContent=d.counts.ap_positions;$('vpN').textContent=d.counts.vp_positions;$('status').textContent='Dane wczytane. Odczyt: '+d.captured_at+' · źródło: Empire API · sojusz RB (AID 115).';render()}).catch(e=>{$('status').textContent='Nie udało się wczytać danych: '+e.message+'. Sprawdź, czy GitHub Pages jest włączone.';$('map').innerHTML='<text x="450" y="320" text-anchor="middle" fill="#ffbd9b">Błąd ładowania danych</text>'});
-</script></body></html>
+<footer><div class="wrap">Empirenew · Serwer: <code>EmpirefourkingdomsExGG2_3</code> · Sojusz: ReBorN (RB), AID 115</div></footer>
+</body></html>

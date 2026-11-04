@@ -65,9 +65,13 @@ export function normalizeMember(raw, aid, allianceName) {
 async function request(command, params, options = {}) {
   const base = (options.baseUrl || DEFAULT_API_BASE).replace(/\/$/, "");
   const server = options.server || DEFAULT_SERVER;
+  // empire-api/app.js parses headers as JSON.parse(`{${req.params.headers}}`).
+  // Therefore the path segment must contain JSON object members WITHOUT outer braces.
+  // Sending encodeURIComponent(JSON.stringify(params)) adds a second pair of braces
+  // after Express decodes the route parameter and is rejected as "Invalid command or headers".
   const encoded = command === "ain"
     ? `%22AID%22:${encodeURIComponent(String(params.AID))}`
-    : encodeURIComponent(JSON.stringify(params));
+    : encodeURIComponent(JSON.stringify(params).slice(1, -1));
   const url = `${base}/${encodeURIComponent(server)}/${command}/${encoded}`;
   const response = await fetch(url, {
     method: "GET",

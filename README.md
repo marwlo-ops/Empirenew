@@ -1,5 +1,10 @@
 # Empirenew
 
+## Mapa graczy RB
+- **[Otwórz interaktywną mapę RB](./)** — wyszukiwanie graczy, filtrowanie krain, podgląd AP/VP, lista i szczegóły lokalizacji.
+- [Dane lokalizacji RB (JSON)](data/rb-player-map.json)
+
+
 Repetytorium Goodgame Empire – mapa, lokalizacje, sojusze i dane serwera.
 
 ## Aktualne opracowania
@@ -11,7 +16,7 @@ Repetytorium Goodgame Empire – mapa, lokalizacje, sojusze i dane serwera.
 ## Zakres badania RB
 - Serwer: `EmpirefourkingdomsExGG2_3`
 - Sojusz: ReBorN (RB), AID `115`
-- Odczyt API: 65 rekordów członków, 423 pozycje AP i 832 pozycje VP.
+- Odczyt API: 65 członków, 423 pozycje AP i 832 pozycje VP (1 255 rekordów lokalizacji).
 
 ## Zasady
 - Zapisujemy datę pobrania i źródło danych.

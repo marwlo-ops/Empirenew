@@ -222,3 +222,36 @@ export async function testReadOnlyApi(options = {}) {
   }
   return { tested_at: new Date().toISOString(), server: options.server || DEFAULT_SERVER, checks };
 }
+
+/**
+ * Diagnostyka zakresów rankingu PL1. Nie zapisuje danych i nie zmienia snapshotu.
+ * Sprawdza osobno R oraz offset/limit w hgh, a także llsp z R.
+ */
+export async function probePlayerRankingRanges(options = {}) {
+  const probes = [
+    { name: "hgh-R-1-100", command: "hgh", params: { LT: 1, LID: 1, SV: "1", R: [1, 100] } },
+    { name: "hgh-offset-limit", command: "hgh", params: { LT: 1, LID: 1, SV: "1", offset: 0, limit: 100 } },
+    { name: "llsp-R-1-100", command: "llsp", params: { LT: 1, LID: 1, R: [1, 100] } }
+  ];
+  const results = [];
+  for (const probe of probes) {
+    try {
+      const payload = await request(probe.command, probe.params, options);
+      const content = payload.content ?? payload.data ?? {};
+      const arrays = [];
+      const visit = (value, path = "content", depth = 0) => {
+        if (depth > 5 || value == null) return;
+        if (Array.isArray(value)) { arrays.push({ path, count: value.length, first: value[0] ?? null }); return; }
+        if (typeof value === "object") for (const [key, child] of Object.entries(value)) visit(child, path + "." + key, depth + 1);
+      };
+      visit(content);
+      results.push({ name: probe.name, ok: true, return_code: payload.return_code, arrays,
+        preview: JSON.stringify(content).slice(0, 1800) });
+    } catch (error) {
+      results.push({ name: probe.name, ok: false, error: error.message, details: error.details || null });
+    }
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  console.log("PL1 RANKING RANGE PROBES:", JSON.stringify({ server: options.server || DEFAULT_SERVER, results }));
+  return results;
+}

@@ -118,7 +118,7 @@
   $("alertFeed").querySelectorAll("[data-alert-player]").forEach(btn=>btn.addEventListener("click",()=>{selectedId=Number(btn.dataset.alertPlayer);renderList();renderDetail();document.querySelector(".layout").scrollIntoView({behavior:"smooth",block:"start"});}));
 
  }
- function load(force=false){
+ async function load(force=false){
   if(loading)return;loading=true;$('refreshNow').disabled=true;
   try{
    const res=await fetch(DATA+(force?'?t='+Date.now():'?t='+Math.floor(Date.now()/60000)),{cache:'no-store'});

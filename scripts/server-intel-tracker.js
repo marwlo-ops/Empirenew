@@ -17,7 +17,18 @@ const oldSnapshot = await read(snapshotPath, null);
 const oldHistory = await read(historyPath, { schema_version: 1, server: DEFAULT_SERVER, updated_at: null, events: [], players: [] });
 if (!Array.isArray(oldHistory.events) || !Array.isArray(oldHistory.players)) fail("server-intel-history.json ma niepoprawną strukturę.");
 
-const snapshot = await fetchServerPlayerRanking({ limit: 1000, pageSize: 100, maxPages: 10 }, { server: DEFAULT_SERVER });
+let snapshot;
+try {
+  snapshot = await fetchServerPlayerRanking({ limit: 1000 }, { server: DEFAULT_SERVER });
+} catch (error) {
+  console.error("SERVER INTEL API DIAGNOSTICS:", JSON.stringify({
+    message: error.message,
+    name: error.name,
+    details: error.details || null,
+    stack: error.stack
+  }, null, 2));
+  fail("Nie udało się pobrać rankingu graczy; poprzedni snapshot i historia pozostają bez zmian.");
+}
 if (snapshot.player_count < 50) fail(`Ranking zwrócił podejrzanie mało graczy: ${snapshot.player_count}; pliki nie zostaną nadpisane.`);
 if (oldSnapshot?.players?.length && snapshot.player_count < Math.floor(oldSnapshot.players.length * 0.7)) {
   fail(`Podejrzany spadek liczby graczy: ${oldSnapshot.players.length} → ${snapshot.player_count}; zachowuję poprzedni snapshot.`);

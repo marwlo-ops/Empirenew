@@ -8,7 +8,7 @@ on:
       - "scripts/server-intel-tracker.js"
       - ".github/workflows/tracker.yml"
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 permissions:
   contents: write

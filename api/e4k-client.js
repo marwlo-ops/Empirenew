@@ -73,10 +73,11 @@ async function request(command, params, options = {}) {
     ? `%22AID%22:${encodeURIComponent(String(params.AID))}`
     : encodeURIComponent(JSON.stringify(params).slice(1, -1));
   const url = `${base}/${encodeURIComponent(server)}/${command}/${encoded}`;
+  const signal = options.signal || AbortSignal.timeout(options.timeoutMs ?? 20000);
   const response = await fetch(url, {
     method: "GET",
     headers: { Accept: "application/json" },
-    signal: options.signal
+    signal
   });
   if (!response.ok) {
     const body = await response.text().catch(() => "");

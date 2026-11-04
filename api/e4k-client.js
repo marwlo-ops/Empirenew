@@ -142,70 +142,118 @@ export async function fetchAllianceRanking(start = "5", options = {}) {
   };
 }
 
-/** Pobiera pojedynczy ranking graczy. Paginacja hgh nie jest jeszcze potwierdzona. */
-export async function fetchPlayerRankingPage({ listType = 1 } = {}, options = {}) {
-  if (![1, 2].includes(Number(listType))) throw new TypeError("listType musi wynosić 1 (potęga) lub 2 (chwała)");
-  // Minimalny wariant zgodny ze znanym, działającym wzorcem hgh dla sojuszy.
-  // SV=5 jest hipotezą do weryfikacji, a nie potwierdzonym typem rankingu graczy.
-  // Test the alternate hgh sub-version without unverified pagination fields.
-  // llsp exists in the proxy command map but is rejected by the live PL1 socket.
-  const params = { LT: Number(listType), LID: 1, SV: "1" };
+/**
+ * hgh returns six adjacent ranking entries. SV is the frame rank:
+ * returned rank positions are [SV-2 .. SV+3], clipped by the leaderboard bounds.
+ * Use SV=3,9,15... to harvest blocks [1..6], [7..12], [13..18]...
+ * Every page is checked against explicit rank numbers and a stable LR.
+ */
+async function fetchHighscoreBlock(listType, frameRank, options = {}) {
+  const params = { LT: Number(listType), LID: 1, SV: String(frameRank) };
   const payload = await request("hgh", params, options);
-  const root = payload.data ?? payload.content ?? payload;
-  const data = root.data ?? root;
-  let rows = data.L ?? data.highscoreList ?? data.HL ?? data.players ?? data.items ?? data;
-  if (!Array.isArray(rows) && rows && typeof rows === "object") {
-    const candidate = Object.values(rows).find(value => Array.isArray(value));
-    rows = candidate || [];
+  const content = payload.content ?? payload.data ?? {};
+  const rows = content.L ?? content.highscoreList ?? content.HL ?? content.players ?? content.items;
+  const total = Number(content.LR ?? payload.LR);
+  const fr = Number(content.FR ?? payload.FR);
+  if (!Array.isArray(rows) || !rows.length || !Number.isInteger(total) || total < 1 || !Number.isInteger(fr)) {
+    throw new E4KApiError("hgh: brak poprawnej listy lub metadanych FR/LR", {
+      params, keys: Object.keys(content), FR: content.FR, LR: content.LR,
+      preview: JSON.stringify(payload).slice(0, 1800)
+    });
   }
-  if (!Array.isArray(rows) || !rows.length) throw new E4KApiError("hgh: odpowiedź 200, ale nie rozpoznano listy graczy", {
-    params, rootKeys: Object.keys(root || {}), dataKeys: Object.keys(data || {}),
-    responsePreview: JSON.stringify(payload).slice(0, 3000)
-  });
-  return { list_type: Number(listType), rows, params, response_keys: Object.keys(data || {}), command: "hgh" };
+  return { rows, total, frame_rank: fr, requested_frame_rank: Number(frameRank), params };
 }
 
-/** Pobiera ranking graczy. hgh zwraca rekordy jako krotki [typ, wynik, profil]. */
-export async function fetchServerPlayerRanking({ limit = 1000 } = {}, options = {}) {
-  const result = await fetchPlayerRankingPage({ listType: 1 }, options);
-  const records = result.rows.map((entry, index) => {
-    if (Array.isArray(entry)) {
-      const profile = [...entry].reverse().find(value => value && typeof value === "object" && !Array.isArray(value));
-      return profile ? { ...profile, _ranking_position: index + 1, _ranking_tuple: entry.slice(0, -1) } : null;
-    }
-    return entry && typeof entry === "object" ? { ...entry, _ranking_position: index + 1 } : null;
-  }).filter(Boolean);
+function extractRankedProfile(entry) {
+  if (!Array.isArray(entry) || entry.length < 3) return null;
+  const rank = Number(entry[0]);
+  const profile = entry.findLast(value => value && typeof value === "object" && !Array.isArray(value));
+  if (!Number.isInteger(rank) || rank < 1 || !profile) return null;
+  const id = profile.OID ?? profile.PID ?? profile.ID;
+  const name = profile.N ?? profile.PN ?? profile.NAME;
+  if (id == null || name == null) return null;
+  return { rank, profile, id: String(id), name: String(name) };
+}
+
+async function fetchCompleteHighscore(listType, options = {}) {
+  const first = await fetchHighscoreBlock(listType, 3, options);
+  const total = first.total;
+  const byRank = new Map();
   const byId = new Map();
-  for (const row of records) {
-    const id = row.PID ?? row.OID ?? row.playerId ?? row.player_id ?? row.id;
-    if (id === undefined || id === null) continue;
-    byId.set(String(id), { ...row, PID: id });
+  let pagesFetched = 0;
+  for (let expectedStart = 1; expectedStart <= total; expectedStart += 6) {
+    const frameRank = expectedStart + 2;
+    const page = expectedStart === 1 ? first : await fetchHighscoreBlock(listType, frameRank, options);
+    pagesFetched += 1;
+    if (page.total !== total) {
+      throw new E4KApiError("hgh: LR zmieniło się w trakcie pobierania rankingu", {
+        listType, expectedTotal: total, actualTotal: page.total, expectedStart, frameRank
+      });
+    }
+    const expectedEnd = Math.min(expectedStart + 5, total);
+    const pageEntries = page.rows.map(extractRankedProfile).filter(Boolean);
+    const pageRanks = pageEntries.map(item => item.rank).sort((a,b)=>a-b);
+    const expectedRanks = Array.from({length: expectedEnd - expectedStart + 1}, (_,i)=>expectedStart+i);
+    if (JSON.stringify(pageRanks) !== JSON.stringify(expectedRanks)) {
+      throw new E4KApiError("hgh: luka lub nadmiar pozycji w bloku rankingu", {
+        listType, expectedStart, expectedEnd, frameRank, returnedRanks: pageRanks,
+        expectedRanks, FR: page.frame_rank, LR: page.total
+      });
+    }
+    for (const item of pageEntries) {
+      if (byRank.has(item.rank)) throw new E4KApiError("hgh: powtórzona pozycja rankingu", { rank:item.rank, listType });
+      if (byId.has(item.id)) throw new E4KApiError("hgh: ten sam OID występuje pod różnymi pozycjami", {
+        id:item.id, previousRank:byId.get(item.id), rank:item.rank, listType
+      });
+      byRank.set(item.rank, item.profile);
+      byId.set(item.id, item.rank);
+    }
+    if (expectedStart + 6 <= total) await new Promise(resolve => setTimeout(resolve, 250));
   }
-  const players = [...byId.values()].slice(0, limit).map((row, index) => {
+  if (byRank.size !== total) throw new E4KApiError("hgh: liczba unikalnych profili nie zgadza się z LR", {
+    listType, expected:total, actual:byRank.size, pagesFetched
+  });
+  return { rows:[...byRank.entries()].sort((a,b)=>a[0]-b[0]).map(([rank,profile])=>({rank,profile})),
+    total, pagesFetched, list_type:Number(listType) };
+}
+
+/** Pobiera ranking graczy w całości; nie zapisuje danych. */
+export async function fetchPlayerRankingPage({ listType = 1 } = {}, options = {}) {
+  if (![1, 2].includes(Number(listType))) throw new TypeError("listType musi wynosić 1 (potęga) lub 2 (chwała)");
+  const result = await fetchCompleteHighscore(Number(listType), options);
+  return { list_type:result.list_type, rows:result.rows.map(({rank,profile})=>[rank,null,profile]),
+    total_count:result.total, pages_fetched:result.pagesFetched, command:"hgh" };
+}
+
+/** Pobiera i waliduje kompletny ranking graczy. */
+export async function fetchServerPlayerRanking({ limit = 1000 } = {}, options = {}) {
+  const result = await fetchCompleteHighscore(1, options);
+  const players = result.rows.map(({rank,profile:row}) => {
     const aid = Number(row.AID ?? row.allianceId ?? 0);
     const powerValue = row.MP ?? row.P ?? row.POW ?? row.power;
     return {
-      player_id: Number(row.PID),
-      name: String(row.N ?? row.PN ?? row.playerName ?? row.nick ?? ""),
-      alliance_id: Number.isFinite(aid) && aid > 0 ? aid : 0,
-      alliance_name: String(row.AN ?? row.allianceName ?? (aid > 0 ? `Sojusz #${aid}` : "Brak sojuszu")),
-      rank: Number(row.rank ?? row.RANK ?? row._ranking_position ?? index + 1),
-      power: powerValue != null && Number.isFinite(Number(powerValue)) ? Number(powerValue) : null,
-      glory_points: (row.glory_points ?? row.GP) != null && Number.isFinite(Number(row.glory_points ?? row.GP)) ? Number(row.glory_points ?? row.GP) : null,
-      loot: (row.loot ?? row.LOOT ?? row.loot_points) != null && Number.isFinite(Number(row.loot ?? row.LOOT ?? row.loot_points)) ? Number(row.loot ?? row.LOOT ?? row.loot_points) : null,
-      level: row.L != null && Number.isFinite(Number(row.L)) ? Number(row.L) : null,
-      legend_level: row.LL != null && Number.isFinite(Number(row.LL)) ? Number(row.LL) : null,
-      raw: row
+      player_id:Number(row.OID ?? row.PID ?? row.ID),
+      name:String(row.N ?? row.PN ?? row.NAME ?? ""),
+      alliance_id:Number.isFinite(aid) && aid > 0 ? aid : 0,
+      alliance_name:String(row.AN ?? row.allianceName ?? (aid > 0 ? `Sojusz #${aid}` : "Brak sojuszu")),
+      rank,
+      power:powerValue != null && Number.isFinite(Number(powerValue)) ? Number(powerValue) : null,
+      glory_points:(row.AVP ?? row.GP) != null && Number.isFinite(Number(row.AVP ?? row.GP)) ? Number(row.AVP ?? row.GP) : null,
+      loot:(row.loot ?? row.LOOT ?? row.loot_points) != null && Number.isFinite(Number(row.loot ?? row.LOOT ?? row.loot_points)) ? Number(row.loot ?? row.LOOT ?? row.loot_points) : null,
+      level:row.L != null && Number.isFinite(Number(row.L)) ? Number(row.L) : null,
+      legend_level:row.LL != null && Number.isFinite(Number(row.LL)) ? Number(row.LL) : null,
+      raw:row
     };
-  }).filter(p => Number.isFinite(p.player_id) && p.player_id > 0 && p.name);
-  if (!players.length) throw new E4KApiError("hgh: odpowiedź zawiera wiersze, ale nie rozpoznano PID/OID i nicku", {
-    params: result.params, rowCount: result.rows.length, rowKeys: Object.keys(records[0] || {}),
-    firstRowPreview: JSON.stringify(result.rows[0] || {}).slice(0, 2500)
+  }).filter(p=>Number.isFinite(p.player_id) && p.player_id > 0 && p.name);
+  if (players.length !== result.total) throw new E4KApiError("hgh: nie wszystkie pozycje zawierają rozpoznawalny profil", {
+    expected:result.total, normalized:players.length, pagesFetched:result.pagesFetched
   });
-  return { schema_version: 1, server: options.server || DEFAULT_SERVER, captured_at: new Date().toISOString(),
-    source: result.command || "hgh", query: result.params, pages_fetched: 1, player_count: players.length,
-    total_count: players.length, players, raw_row_count: result.rows.length, response_keys: result.response_keys };
+  return { schema_version:1, server:options.server || DEFAULT_SERVER, captured_at:new Date().toISOString(),
+    source:"hgh", query:{LT:1,LID:1}, pages_fetched:result.pagesFetched,
+    player_count:players.length, total_count:result.total, leaderboard_total:result.total,
+    complete:true, ranking_validated:true, players };
 }
+
 /** Lekki test łączności dwóch potwierdzonych komend. Nie ukrywa błędów. */
 export async function testReadOnlyApi(options = {}) {
   const checks = [];

@@ -147,11 +147,13 @@ export async function fetchPlayerRankingPage({ listType = 1 } = {}, options = {}
   if (![1, 2].includes(Number(listType))) throw new TypeError("listType musi wynosić 1 (potęga) lub 2 (chwała)");
   // Minimalny wariant zgodny ze znanym, działającym wzorcem hgh dla sojuszy.
   // SV=5 jest hipotezą do weryfikacji, a nie potwierdzonym typem rankingu graczy.
-  const params = { LT: Number(listType), LID: 1, SV: "5" };
-  const payload = await request("hgh", params, options);
+  // hgh is a summary response (only a handful of rows). The API's command map
+  // defines llsp.R -> L.R, which is the actual range/page request for leaderboard rows.
+  const params = { LT: Number(listType), LID: 1, R: [0, 99] };
+  const payload = await request("llsp", params, options);
   const root = payload.data ?? payload.content ?? payload;
   const data = root.data ?? root;
-  let rows = data.highscoreList ?? data.HL ?? data.L ?? data.players ?? data.items ?? data;
+  let rows = data.L ?? data.highscoreList ?? data.HL ?? data.players ?? data.items ?? data;
   if (!Array.isArray(rows) && rows && typeof rows === "object") {
     const candidate = Object.values(rows).find(value => Array.isArray(value));
     rows = candidate || [];
@@ -160,7 +162,7 @@ export async function fetchPlayerRankingPage({ listType = 1 } = {}, options = {}
     params, rootKeys: Object.keys(root || {}), dataKeys: Object.keys(data || {}),
     responsePreview: JSON.stringify(payload).slice(0, 3000)
   });
-  return { list_type: Number(listType), rows, params, response_keys: Object.keys(data || {}) };
+  return { list_type: Number(listType), rows, params, response_keys: Object.keys(data || {}), command: "llsp" };
 }
 
 /** Pobiera ranking graczy. hgh zwraca rekordy jako krotki [typ, wynik, profil]. */
@@ -201,7 +203,7 @@ export async function fetchServerPlayerRanking({ limit = 1000 } = {}, options = 
     firstRowPreview: JSON.stringify(result.rows[0] || {}).slice(0, 2500)
   });
   return { schema_version: 1, server: options.server || DEFAULT_SERVER, captured_at: new Date().toISOString(),
-    source: "hgh", query: result.params, pages_fetched: 1, player_count: players.length,
+    source: result.command || "llsp", query: result.params, pages_fetched: 1, player_count: players.length,
     total_count: players.length, players, raw_row_count: result.rows.length, response_keys: result.response_keys };
 }
 /** Lekki test łączności dwóch potwierdzonych komend. Nie ukrywa błędów. */

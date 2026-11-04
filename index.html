@@ -23,7 +23,7 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
 <main>
 <section class="view" id="view-map" aria-label="Mapa"><div class="frame-shell"><iframe id="map-frame" title="Empirenew — Mapa RB i MD" loading="lazy"></iframe></div></section>
 <section class="view" id="view-spy" aria-label="Szpiegowanie"><div class="frame-shell"><iframe id="spy-frame" title="Empirenew — Szpiegowanie PL1" loading="lazy"></iframe></div></section>
-<section class="view" id="view-reference" aria-label="Tracker RB"><div class="frame-shell"><iframe id="reference-frame" title="Tracker RB" loading="lazy"></iframe></div></section>
+<section class="view" id="view-reference" aria-label="Tracker RB"><div class="frame-shell"><iframe id="reference-frame" title="Tracker RB — lista i aktywność graczy RB" loading="lazy"></iframe></div></section>
 <section class="view" id="view-extras" aria-label="Dodatkowe">
 <div class="extras-intro"><div class="eyebrow">Empire tools · community hub</div><h1>Dodatkowe narzędzia</h1><p>Zewnętrzne rankingi, narzędzia społeczności oraz oficjalne informacje o wydarzeniach Goodgame Empire. Jeśli dostawca blokuje osadzanie strony, skorzystaj z przycisku otwarcia w nowej karcie.</p></div>
 <div class="resource-grid">
@@ -41,7 +41,7 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
  function loadView(view){
   const frame=view==='spy'?spyFrame:view==='reference'?referenceFrame:mapFrame;
   if(loaded[view])return;
-  if(view==='reference')frame.src='./repetytorium.html';
+  if(view==='reference')frame.src='./tracker-rb.html';
   else frame.src='./mapa-rb.html?embed=1#'+(view==='spy'?'intel':'map');
   loaded[view]=true;
  }

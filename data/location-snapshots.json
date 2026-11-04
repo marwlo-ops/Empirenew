@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "server": "EmpirefourkingdomsExGG2_3",
-  "captured_at": "2026-11-04T11:16:26.982Z",
-  "source": "repo_seed",
+  "captured_at": "2026-11-04T14:08:50.510Z",
+  "source": "ain",
   "alliances": [
     {
       "aid": 115,
       "name": "- ReBorN -",
-      "captured_at": "2026-11-04T11:16:26.982Z",
+      "captured_at": "2026-11-04T14:08:51.045Z",
       "members": [
         {
           "member_id": 60811,
@@ -2743,27 +2743,6 @@
               "x": 667,
               "y": 701,
               "type_code": 12
-            },
-            {
-              "kingdom_code": 4,
-              "object_id": 1255,
-              "x": 676,
-              "y": 702,
-              "type_code": 24
-            },
-            {
-              "kingdom_code": 4,
-              "object_id": 1868,
-              "x": 651,
-              "y": 727,
-              "type_code": 24
-            },
-            {
-              "kingdom_code": 4,
-              "object_id": 1054,
-              "x": 594,
-              "y": 696,
-              "type_code": 24
             }
           ],
           "vp": [
@@ -6411,6 +6390,13 @@
               "type_code": 1
             },
             {
+              "kingdom_code": 0,
+              "object_id": 2514127,
+              "x": 784,
+              "y": 916,
+              "type_code": 4
+            },
+            {
               "kingdom_code": 1,
               "object_id": 2302640,
               "x": 632,
@@ -8630,13 +8616,6 @@
             },
             {
               "kingdom_code": 4,
-              "object_id": 435,
-              "x": 667,
-              "y": 684,
-              "type_code": 24
-            },
-            {
-              "kingdom_code": 4,
               "object_id": 1366,
               "x": 667,
               "y": 703,
@@ -8644,16 +8623,16 @@
             },
             {
               "kingdom_code": 4,
-              "object_id": 423,
-              "x": 651,
-              "y": 688,
+              "object_id": 794,
+              "x": 643,
+              "y": 696,
               "type_code": 24
             },
             {
               "kingdom_code": 4,
-              "object_id": 795,
-              "x": 648,
-              "y": 697,
+              "object_id": 796,
+              "x": 638,
+              "y": 698,
               "type_code": 24
             }
           ],
@@ -9430,7 +9409,7 @@
     {
       "aid": 41343,
       "name": "MADDEVILS",
-      "captured_at": "2026-11-04",
+      "captured_at": "2026-11-04T14:08:51.252Z",
       "members": [
         {
           "member_id": 1524565,
@@ -9509,6 +9488,34 @@
               "x": 851,
               "y": 833,
               "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 753238,
+              "x": 747,
+              "y": 761,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 812241,
+              "x": 399,
+              "y": 681,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1430718,
+              "x": 554,
+              "y": 849,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1572256,
+              "x": 852,
+              "y": 344,
+              "type_code": 10
             }
           ]
         },
@@ -9552,6 +9559,13 @@
               "x": 635,
               "y": 648,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 423858,
+              "x": 629,
+              "y": 824,
+              "type_code": 23
             }
           ],
           "vp": [
@@ -9588,6 +9602,314 @@
               "object_id": 978506,
               "x": 447,
               "y": 587,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1030286,
+              "x": 447,
+              "y": 837,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1111460,
+              "x": 429,
+              "y": 582,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1154674,
+              "x": 535,
+              "y": 755,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1154680,
+              "x": 541,
+              "y": 758,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1154681,
+              "x": 533,
+              "y": 759,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1154692,
+              "x": 538,
+              "y": 765,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1167687,
+              "x": 549,
+              "y": 758,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1255699,
+              "x": 555,
+              "y": 768,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1489099,
+              "x": 559,
+              "y": 814,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1494877,
+              "x": 703,
+              "y": 814,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1607436,
+              "x": 407,
+              "y": 508,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1608499,
+              "x": 403,
+              "y": 528,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1608500,
+              "x": 407,
+              "y": 528,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1944918,
+              "x": 691,
+              "y": 842,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1945167,
+              "x": 817,
+              "y": 843,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 439662,
+              "x": 624,
+              "y": 737,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 488004,
+              "x": 651,
+              "y": 435,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 734727,
+              "x": 608,
+              "y": 761,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 740539,
+              "x": 413,
+              "y": 656,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 752093,
+              "x": 624,
+              "y": 757,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 800368,
+              "x": 878,
+              "y": 466,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1052364,
+              "x": 656,
+              "y": 770,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1498393,
+              "x": 613,
+              "y": 865,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1599209,
+              "x": 613,
+              "y": 882,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 102580,
+              "x": 637,
+              "y": 658,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 569292,
+              "x": 553,
+              "y": 529,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1090121,
+              "x": 526,
+              "y": 465,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1095429,
+              "x": 465,
+              "y": 482,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1110127,
+              "x": 669,
+              "y": 460,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1228411,
+              "x": 570,
+              "y": 448,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1247368,
+              "x": 448,
+              "y": 562,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1261673,
+              "x": 447,
+              "y": 732,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1261681,
+              "x": 453,
+              "y": 736,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1378350,
+              "x": 695,
+              "y": 431,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1433968,
+              "x": 609,
+              "y": 787,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1440365,
+              "x": 434,
+              "y": 515,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1453194,
+              "x": 431,
+              "y": 708,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1453199,
+              "x": 434,
+              "y": 709,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1453202,
+              "x": 434,
+              "y": 711,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1455831,
+              "x": 429,
+              "y": 464,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1462005,
+              "x": 432,
+              "y": 723,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1462169,
+              "x": 429,
+              "y": 738,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1559006,
+              "x": 491,
+              "y": 425,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2035601,
+              "x": 496,
+              "y": 826,
               "type_code": 10
             }
           ]
@@ -9684,6 +10006,48 @@
               "x": 675,
               "y": 819,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1382554,
+              "x": 649,
+              "y": 777,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 633557,
+              "x": 423,
+              "y": 357,
+              "type_code": 23
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 633705,
+              "x": 838,
+              "y": 357,
+              "type_code": 23
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2514295,
+              "x": 566,
+              "y": 577,
+              "type_code": 26
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2514326,
+              "x": 631,
+              "y": 577,
+              "type_code": 26
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2514334,
+              "x": 670,
+              "y": 552,
+              "type_code": 26
             }
           ],
           "vp": [
@@ -9735,6 +10099,13 @@
               "object_id": 2229439,
               "x": 566,
               "y": 688,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 143,
+              "x": 653,
+              "y": 625,
               "type_code": 12
             }
           ],
@@ -9802,6 +10173,20 @@
               "x": 570,
               "y": 640,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 79059,
+              "x": 757,
+              "y": 520,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 365876,
+              "x": 592,
+              "y": 537,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -9831,6 +10216,27 @@
               "object_id": 181510,
               "x": 758,
               "y": 510,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 402177,
+              "x": 716,
+              "y": 557,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1379112,
+              "x": 835,
+              "y": 438,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1564997,
+              "x": 839,
+              "y": 427,
               "type_code": 10
             }
           ]
@@ -9882,6 +10288,139 @@
               "kingdom_code": 1,
               "object_id": 591256,
               "x": 646,
+              "y": 470,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1381391,
+              "x": 419,
+              "y": 500,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1381392,
+              "x": 422,
+              "y": 500,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1607448,
+              "x": 411,
+              "y": 514,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1607451,
+              "x": 405,
+              "y": 516,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1607453,
+              "x": 412,
+              "y": 516,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 143504,
+              "x": 739,
+              "y": 567,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 143515,
+              "x": 737,
+              "y": 563,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 146192,
+              "x": 736,
+              "y": 534,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 209858,
+              "x": 769,
+              "y": 549,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 210066,
+              "x": 773,
+              "y": 595,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 210068,
+              "x": 772,
+              "y": 594,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 379405,
+              "x": 718,
+              "y": 601,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 379601,
+              "x": 723,
+              "y": 621,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 535201,
+              "x": 745,
+              "y": 576,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 536516,
+              "x": 744,
+              "y": 619,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 708701,
+              "x": 759,
+              "y": 630,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 855310,
+              "x": 774,
+              "y": 590,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 994459,
+              "x": 783,
+              "y": 588,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1027011,
+              "x": 612,
               "y": 470,
               "type_code": 10
             }
@@ -9957,6 +10496,13 @@
               "x": 714,
               "y": 704,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 465,
+              "x": 633,
+              "y": 613,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -9972,6 +10518,48 @@
               "object_id": 211122,
               "x": 501,
               "y": 717,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 413359,
+              "x": 786,
+              "y": 452,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 496296,
+              "x": 709,
+              "y": 440,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 496708,
+              "x": 752,
+              "y": 434,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 568253,
+              "x": 835,
+              "y": 417,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 576053,
+              "x": 819,
+              "y": 419,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 486727,
+              "x": 632,
+              "y": 536,
               "type_code": 10
             }
           ]
@@ -10009,6 +10597,13 @@
               "x": 699,
               "y": 669,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 440,
+              "x": 640,
+              "y": 678,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -10031,6 +10626,55 @@
               "object_id": 169314,
               "x": 525,
               "y": 719,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 208083,
+              "x": 499,
+              "y": 670,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1077637,
+              "x": 549,
+              "y": 784,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 290649,
+              "x": 697,
+              "y": 679,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 327595,
+              "x": 696,
+              "y": 691,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 525975,
+              "x": 747,
+              "y": 634,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1006567,
+              "x": 785,
+              "y": 622,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2038555,
+              "x": 654,
+              "y": 820,
               "type_code": 10
             }
           ]
@@ -10105,6 +10749,13 @@
               "x": 722,
               "y": 718,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2463982,
+              "x": 557,
+              "y": 683,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10142,6 +10793,34 @@
               "x": 937,
               "y": 945,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2421533,
+              "x": 666,
+              "y": 773,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2420968,
+              "x": 554,
+              "y": 529,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2421991,
+              "x": 588,
+              "y": 625,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 14,
+              "x": 651,
+              "y": 637,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -10157,6 +10836,139 @@
               "object_id": 1257042,
               "x": 667,
               "y": 778,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1329858,
+              "x": 673,
+              "y": 782,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1329871,
+              "x": 673,
+              "y": 788,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1338777,
+              "x": 686,
+              "y": 783,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1338789,
+              "x": 684,
+              "y": 790,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1350663,
+              "x": 695,
+              "y": 785,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1350668,
+              "x": 693,
+              "y": 789,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1402280,
+              "x": 676,
+              "y": 794,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1402282,
+              "x": 684,
+              "y": 794,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1402287,
+              "x": 686,
+              "y": 797,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1402295,
+              "x": 687,
+              "y": 802,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 136489,
+              "x": 546,
+              "y": 549,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 147570,
+              "x": 553,
+              "y": 536,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 147584,
+              "x": 550,
+              "y": 541,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 179233,
+              "x": 607,
+              "y": 513,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 179234,
+              "x": 599,
+              "y": 514,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 216917,
+              "x": 580,
+              "y": 492,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 234380,
+              "x": 606,
+              "y": 683,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 290759,
+              "x": 582,
+              "y": 677,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 344055,
+              "x": 575,
+              "y": 562,
               "type_code": 10
             }
           ]
@@ -10194,6 +11006,27 @@
               "x": 839,
               "y": 591,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1348963,
+              "x": 639,
+              "y": 721,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1334760,
+              "x": 725,
+              "y": 668,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1363175,
+              "x": 709,
+              "y": 699,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10224,6 +11057,34 @@
               "x": 309,
               "y": 504,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 623770,
+              "x": 787,
+              "y": 653,
+              "type_code": 3
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2396278,
+              "x": 712,
+              "y": 661,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2392450,
+              "x": 662,
+              "y": 699,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2398306,
+              "x": 704,
+              "y": 582,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10261,6 +11122,27 @@
               "x": 704,
               "y": 418,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1674879,
+              "x": 735,
+              "y": 685,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1657134,
+              "x": 501,
+              "y": 471,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1691799,
+              "x": 836,
+              "y": 670,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -10306,6 +11188,34 @@
               "x": 744,
               "y": 560,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2514208,
+              "x": 887,
+              "y": 878,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2199387,
+              "x": 543,
+              "y": 755,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2193310,
+              "x": 679,
+              "y": 548,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2202133,
+              "x": 716,
+              "y": 616,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10336,6 +11246,27 @@
               "x": 0,
               "y": 981,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1357456,
+              "x": 784,
+              "y": 730,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1298954,
+              "x": 835,
+              "y": 764,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1401074,
+              "x": 473,
+              "y": 761,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10382,6 +11313,34 @@
               "x": 606,
               "y": 587,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2513870,
+              "x": 826,
+              "y": 358,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2483806,
+              "x": 651,
+              "y": 708,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2481884,
+              "x": 726,
+              "y": 645,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2505383,
+              "x": 646,
+              "y": 627,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10412,6 +11371,41 @@
               "x": 569,
               "y": 483,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2512864,
+              "x": 592,
+              "y": 651,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2292139,
+              "x": 742,
+              "y": 614,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2286993,
+              "x": 528,
+              "y": 728,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2361732,
+              "x": 708,
+              "y": 570,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 482,
+              "x": 656,
+              "y": 612,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -10427,6 +11421,13 @@
               "object_id": 884198,
               "x": 463,
               "y": 588,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1006391,
+              "x": 468,
+              "y": 619,
               "type_code": 10
             }
           ]
@@ -10449,6 +11450,27 @@
               "object_id": 2152799,
               "x": 648,
               "y": 718,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2145261,
+              "x": 761,
+              "y": 617,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2154924,
+              "x": 714,
+              "y": 782,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 323,
+              "x": 646,
+              "y": 618,
               "type_code": 12
             }
           ],
@@ -10473,6 +11495,20 @@
               "x": 626,
               "y": 517,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2272430,
+              "x": 635,
+              "y": 644,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2278071,
+              "x": 548,
+              "y": 490,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10496,6 +11532,27 @@
               "x": 647,
               "y": 801,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2080200,
+              "x": 630,
+              "y": 769,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2085489,
+              "x": 674,
+              "y": 605,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 1708,
+              "x": 646,
+              "y": 579,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -10504,6 +11561,62 @@
               "object_id": 1486134,
               "x": 418,
               "y": 556,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 153624,
+              "x": 533,
+              "y": 683,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 166126,
+              "x": 521,
+              "y": 526,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1003803,
+              "x": 516,
+              "y": 354,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1007122,
+              "x": 452,
+              "y": 359,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 730356,
+              "x": 725,
+              "y": 518,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1343912,
+              "x": 547,
+              "y": 771,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1350086,
+              "x": 641,
+              "y": 768,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1424618,
+              "x": 689,
+              "y": 783,
               "type_code": 10
             }
           ]
@@ -10526,6 +11639,20 @@
               "object_id": 2466918,
               "x": 674,
               "y": 547,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2466104,
+              "x": 588,
+              "y": 696,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2467680,
+              "x": 544,
+              "y": 759,
               "type_code": 12
             }
           ],
@@ -10550,6 +11677,27 @@
               "x": 902,
               "y": 869,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2083774,
+              "x": 473,
+              "y": 783,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2079342,
+              "x": 470,
+              "y": 554,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2091336,
+              "x": 708,
+              "y": 531,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10572,6 +11720,27 @@
               "object_id": 242563,
               "x": 714,
               "y": 602,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 202757,
+              "x": 507,
+              "y": 526,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 289291,
+              "x": 689,
+              "y": 668,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 467,
+              "x": 648,
+              "y": 679,
               "type_code": 12
             }
           ],
@@ -10604,6 +11773,20 @@
               "x": 621,
               "y": 576,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2468909,
+              "x": 558,
+              "y": 654,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2469945,
+              "x": 540,
+              "y": 721,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10627,6 +11810,48 @@
               "x": 543,
               "y": 551,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2362019,
+              "x": 750,
+              "y": 642,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2359199,
+              "x": 529,
+              "y": 542,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2364698,
+              "x": 752,
+              "y": 612,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 494756,
+              "x": 422,
+              "y": 826,
+              "type_code": 23
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 494800,
+              "x": 421,
+              "y": 707,
+              "type_code": 23
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 790320,
+              "x": 630,
+              "y": 941,
+              "type_code": 23
             }
           ],
           "vp": []
@@ -10650,6 +11875,41 @@
               "x": 826,
               "y": 361,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2513871,
+              "x": 835,
+              "y": 353,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2360653,
+              "x": 624,
+              "y": 646,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2359564,
+              "x": 607,
+              "y": 776,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2370259,
+              "x": 681,
+              "y": 704,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 321,
+              "x": 626,
+              "y": 618,
+              "type_code": 12
             }
           ],
           "vp": []
@@ -10673,6 +11933,34 @@
               "x": 590,
               "y": 408,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2506675,
+              "x": 589,
+              "y": 405,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1565119,
+              "x": 865,
+              "y": 387,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1549741,
+              "x": 476,
+              "y": 841,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1568785,
+              "x": 785,
+              "y": 800,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -10711,6 +11999,55 @@
               "x": 358,
               "y": 768,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 1087745,
+              "x": 329,
+              "y": 781,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2278006,
+              "x": 531,
+              "y": 662,
+              "type_code": 1
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2283138,
+              "x": 534,
+              "y": 513,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2279365,
+              "x": 684,
+              "y": 689,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2285640,
+              "x": 718,
+              "y": 544,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 856,
+              "x": 604,
+              "y": 642,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 423862,
+              "x": 839,
+              "y": 474,
+              "type_code": 23
             }
           ],
           "vp": [
@@ -10719,6 +12056,55 @@
               "object_id": 1558076,
               "x": 563,
               "y": 379,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 439875,
+              "x": 810,
+              "y": 579,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 690692,
+              "x": 621,
+              "y": 398,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 695297,
+              "x": 427,
+              "y": 840,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1085855,
+              "x": 769,
+              "y": 790,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1111823,
+              "x": 660,
+              "y": 800,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1498777,
+              "x": 677,
+              "y": 861,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1239245,
+              "x": 790,
+              "y": 445,
               "type_code": 10
             }
           ]
@@ -10741,6 +12127,27 @@
               "object_id": 2398260,
               "x": 736,
               "y": 543,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2396588,
+              "x": 714,
+              "y": 576,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2398872,
+              "x": 543,
+              "y": 577,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 245,
+              "x": 626,
+              "y": 646,
               "type_code": 12
             }
           ],
@@ -10765,9 +12172,1101 @@
               "x": 780,
               "y": 431,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2252246,
+              "x": 797,
+              "y": 425,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2294860,
+              "x": 788,
+              "y": 433,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1573691,
+              "x": 679,
+              "y": 653,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1531490,
+              "x": 766,
+              "y": 633,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1616184,
+              "x": 581,
+              "y": 688,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 745,
+              "x": 623,
+              "y": 689,
+              "type_code": 12
+            }
+          ],
+          "vp": [
+            {
+              "kingdom_code": 1,
+              "object_id": 96212,
+              "x": 674,
+              "y": 621,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 176662,
+              "x": 678,
+              "y": 677,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 176985,
+              "x": 596,
+              "y": 596,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 176989,
+              "x": 593,
+              "y": 591,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 185428,
+              "x": 611,
+              "y": 573,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 246279,
+              "x": 723,
+              "y": 625,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 265376,
+              "x": 674,
+              "y": 685,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 289386,
+              "x": 673,
+              "y": 535,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 391754,
+              "x": 518,
+              "y": 527,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 800168,
+              "x": 508,
+              "y": 450,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 886451,
+              "x": 463,
+              "y": 668,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1100811,
+              "x": 711,
+              "y": 744,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1248287,
+              "x": 616,
+              "y": 770,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1248290,
+              "x": 615,
+              "y": 771,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1270443,
+              "x": 712,
+              "y": 398,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1339517,
+              "x": 724,
+              "y": 791,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1350518,
+              "x": 850,
+              "y": 809,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1350534,
+              "x": 847,
+              "y": 817,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1434801,
+              "x": 422,
+              "y": 836,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1585574,
+              "x": 578,
+              "y": 824,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 42645,
+              "x": 658,
+              "y": 605,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 216499,
+              "x": 495,
+              "y": 487,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 298186,
+              "x": 489,
+              "y": 719,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 358171,
+              "x": 479,
+              "y": 739,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 516864,
+              "x": 853,
+              "y": 438,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 553577,
+              "x": 446,
+              "y": 695,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 622574,
+              "x": 598,
+              "y": 406,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 685426,
+              "x": 421,
+              "y": 738,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 736376,
+              "x": 421,
+              "y": 379,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1241206,
+              "x": 891,
+              "y": 615,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 290754,
+              "x": 576,
+              "y": 686,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 342741,
+              "x": 555,
+              "y": 648,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 861917,
+              "x": 773,
+              "y": 534,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 939853,
+              "x": 756,
+              "y": 485,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1010227,
+              "x": 469,
+              "y": 795,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1010231,
+              "x": 478,
+              "y": 796,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1010881,
+              "x": 789,
+              "y": 765,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1087972,
+              "x": 797,
+              "y": 770,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1110808,
+              "x": 456,
+              "y": 752,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1235624,
+              "x": 769,
+              "y": 444,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1235635,
+              "x": 768,
+              "y": 449,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1235640,
+              "x": 767,
+              "y": 453,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1275926,
+              "x": 581,
+              "y": 758,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1434848,
+              "x": 645,
+              "y": 790,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1509700,
+              "x": 712,
+              "y": 794,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1601979,
+              "x": 840,
+              "y": 664,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1601983,
+              "x": 838,
+              "y": 666,
+              "type_code": 10
+            }
+          ]
+        },
+        {
+          "member_id": 1667373,
+          "name": "Vanula",
+          "alliance_id": 41343,
+          "alliance_name": "MADDEVILS",
+          "ap": [
+            {
+              "kingdom_code": 0,
+              "object_id": 264571,
+              "x": 478,
+              "y": 501,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2068897,
+              "x": 676,
+              "y": 636,
+              "type_code": 1
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2513863,
+              "x": 429,
+              "y": 470,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2513873,
+              "x": 637,
+              "y": 828,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2080923,
+              "x": 760,
+              "y": 643,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2073728,
+              "x": 549,
+              "y": 696,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2084413,
+              "x": 724,
+              "y": 539,
+              "type_code": 12
             }
           ],
           "vp": []
+        },
+        {
+          "member_id": 1873065,
+          "name": "Uhtred",
+          "alliance_id": 41343,
+          "alliance_name": "MADDEVILS",
+          "ap": [
+            {
+              "kingdom_code": 0,
+              "object_id": 2368152,
+              "x": 732,
+              "y": 658,
+              "type_code": 1
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2373926,
+              "x": 566,
+              "y": 533,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2370243,
+              "x": 548,
+              "y": 632,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2375482,
+              "x": 584,
+              "y": 502,
+              "type_code": 12
+            }
+          ],
+          "vp": []
+        },
+        {
+          "member_id": 1002425,
+          "name": "Tomek76",
+          "alliance_id": 41343,
+          "alliance_name": "MADDEVILS",
+          "ap": [
+            {
+              "kingdom_code": 0,
+              "object_id": 208156,
+              "x": 607,
+              "y": 788,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 1268325,
+              "x": 609,
+              "y": 789,
+              "type_code": 1
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1363978,
+              "x": 478,
+              "y": 655,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1304477,
+              "x": 613,
+              "y": 836,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1402102,
+              "x": 467,
+              "y": 818,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 1500,
+              "x": 587,
+              "y": 618,
+              "type_code": 12
+            }
+          ],
+          "vp": [
+            {
+              "kingdom_code": 1,
+              "object_id": 885714,
+              "x": 455,
+              "y": 631,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 950972,
+              "x": 485,
+              "y": 801,
+              "type_code": 10
+            }
+          ]
+        },
+        {
+          "member_id": 1868650,
+          "name": "MaTT",
+          "alliance_id": 41343,
+          "alliance_name": "MADDEVILS",
+          "ap": [
+            {
+              "kingdom_code": 0,
+              "object_id": 2361469,
+              "x": 620,
+              "y": 615,
+              "type_code": 1
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2509734,
+              "x": 901,
+              "y": 881,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2365736,
+              "x": 527,
+              "y": 533,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2362951,
+              "x": 635,
+              "y": 527,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2367853,
+              "x": 681,
+              "y": 626,
+              "type_code": 12
+            }
+          ],
+          "vp": [
+            {
+              "kingdom_code": 1,
+              "object_id": 626242,
+              "x": 483,
+              "y": 549,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 626247,
+              "x": 487,
+              "y": 551,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 881770,
+              "x": 455,
+              "y": 555,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 881772,
+              "x": 456,
+              "y": 556,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1004010,
+              "x": 445,
+              "y": 505,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1245767,
+              "x": 438,
+              "y": 393,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1381690,
+              "x": 424,
+              "y": 578,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1381692,
+              "x": 427,
+              "y": 579,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1386694,
+              "x": 417,
+              "y": 568,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1609272,
+              "x": 411,
+              "y": 567,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1609348,
+              "x": 407,
+              "y": 588,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1609354,
+              "x": 410,
+              "y": 592,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 207922,
+              "x": 503,
+              "y": 631,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 456115,
+              "x": 457,
+              "y": 501,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 456699,
+              "x": 455,
+              "y": 508,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 735771,
+              "x": 638,
+              "y": 765,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 741361,
+              "x": 869,
+              "y": 848,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 538377,
+              "x": 742,
+              "y": 735,
+              "type_code": 10
+            }
+          ]
+        },
+        {
+          "member_id": 514929,
+          "name": "greg29",
+          "alliance_id": 41343,
+          "alliance_name": "MADDEVILS",
+          "ap": [
+            {
+              "kingdom_code": 0,
+              "object_id": 657200,
+              "x": 719,
+              "y": 380,
+              "type_code": 1
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2508810,
+              "x": 718,
+              "y": 382,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 899613,
+              "x": 597,
+              "y": 719,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 842896,
+              "x": 623,
+              "y": 421,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1070382,
+              "x": 646,
+              "y": 471,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 899,
+              "x": 597,
+              "y": 597,
+              "type_code": 12
+            }
+          ],
+          "vp": [
+            {
+              "kingdom_code": 1,
+              "object_id": 41492,
+              "x": 627,
+              "y": 641,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 62300,
+              "x": 626,
+              "y": 659,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 158749,
+              "x": 624,
+              "y": 586,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 158755,
+              "x": 625,
+              "y": 587,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 221858,
+              "x": 580,
+              "y": 673,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 225801,
+              "x": 613,
+              "y": 686,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 227126,
+              "x": 582,
+              "y": 703,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 364884,
+              "x": 525,
+              "y": 733,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 851522,
+              "x": 580,
+              "y": 717,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 872889,
+              "x": 459,
+              "y": 775,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 876394,
+              "x": 592,
+              "y": 721,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1060362,
+              "x": 583,
+              "y": 733,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1060745,
+              "x": 681,
+              "y": 738,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1061073,
+              "x": 592,
+              "y": 729,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1062294,
+              "x": 624,
+              "y": 738,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1117369,
+              "x": 834,
+              "y": 781,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1332290,
+              "x": 565,
+              "y": 786,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1400098,
+              "x": 598,
+              "y": 801,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 571505,
+              "x": 625,
+              "y": 422,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 571512,
+              "x": 624,
+              "y": 427,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 618433,
+              "x": 629,
+              "y": 407,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 618438,
+              "x": 624,
+              "y": 411,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 622573,
+              "x": 609,
+              "y": 405,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 622584,
+              "x": 606,
+              "y": 411,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 623018,
+              "x": 639,
+              "y": 411,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 627687,
+              "x": 611,
+              "y": 407,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 627702,
+              "x": 621,
+              "y": 414,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 694323,
+              "x": 639,
+              "y": 393,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 935092,
+              "x": 645,
+              "y": 482,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1007560,
+              "x": 469,
+              "y": 680,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1026946,
+              "x": 600,
+              "y": 469,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1027062,
+              "x": 641,
+              "y": 471,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1027063,
+              "x": 643,
+              "y": 471,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1027086,
+              "x": 660,
+              "y": 471,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1029467,
+              "x": 594,
+              "y": 475,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1091361,
+              "x": 612,
+              "y": 464,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1091423,
+              "x": 640,
+              "y": 457,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1091494,
+              "x": 657,
+              "y": 462,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1108407,
+              "x": 632,
+              "y": 466,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1229858,
+              "x": 600,
+              "y": 448,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1231691,
+              "x": 615,
+              "y": 444,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1237945,
+              "x": 594,
+              "y": 453,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1238473,
+              "x": 665,
+              "y": 453,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1379729,
+              "x": 631,
+              "y": 436,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1379828,
+              "x": 664,
+              "y": 432,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1440486,
+              "x": 433,
+              "y": 556,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1459864,
+              "x": 433,
+              "y": 573,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1559862,
+              "x": 642,
+              "y": 422,
+              "type_code": 10
+            }
+          ]
         },
         {
           "member_id": 259322,
@@ -10788,6 +13287,55 @@
               "x": 526,
               "y": 527,
               "type_code": 22
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2221711,
+              "x": 517,
+              "y": 646,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2468195,
+              "x": 1279,
+              "y": 947,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2358843,
+              "x": 785,
+              "y": 919,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 481221,
+              "x": 566,
+              "y": 689,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 386021,
+              "x": 476,
+              "y": 724,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 754551,
+              "x": 509,
+              "y": 660,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 4,
+              "object_id": 1893,
+              "x": 700,
+              "y": 618,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -10796,6 +13344,237 @@
               "object_id": 212820,
               "x": 572,
               "y": 692,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 212824,
+              "x": 573,
+              "y": 691,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 215670,
+              "x": 572,
+              "y": 684,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 235118,
+              "x": 566,
+              "y": 687,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 235119,
+              "x": 566,
+              "y": 685,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 235122,
+              "x": 564,
+              "y": 687,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 235130,
+              "x": 561,
+              "y": 684,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 240244,
+              "x": 569,
+              "y": 691,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 240259,
+              "x": 565,
+              "y": 691,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 513803,
+              "x": 588,
+              "y": 707,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 513811,
+              "x": 589,
+              "y": 710,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1060327,
+              "x": 567,
+              "y": 729,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1060331,
+              "x": 570,
+              "y": 730,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1060334,
+              "x": 563,
+              "y": 732,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1060335,
+              "x": 565,
+              "y": 732,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1060341,
+              "x": 562,
+              "y": 736,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 1060344,
+              "x": 570,
+              "y": 737,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 358183,
+              "x": 475,
+              "y": 736,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 379560,
+              "x": 474,
+              "y": 725,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 379572,
+              "x": 476,
+              "y": 721,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 609177,
+              "x": 436,
+              "y": 781,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 572027,
+              "x": 518,
+              "y": 670,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 572028,
+              "x": 511,
+              "y": 671,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 572029,
+              "x": 510,
+              "y": 672,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 572031,
+              "x": 509,
+              "y": 673,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 591381,
+              "x": 513,
+              "y": 642,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 591383,
+              "x": 517,
+              "y": 642,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 591389,
+              "x": 518,
+              "y": 646,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 591391,
+              "x": 515,
+              "y": 647,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 591393,
+              "x": 518,
+              "y": 648,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 598048,
+              "x": 516,
+              "y": 654,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 598052,
+              "x": 513,
+              "y": 656,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 598061,
+              "x": 507,
+              "y": 661,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 801866,
+              "x": 499,
+              "y": 658,
               "type_code": 10
             }
           ]
@@ -10819,6 +13598,55 @@
               "x": 547,
               "y": 551,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2487987,
+              "x": 494,
+              "y": 512,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2487988,
+              "x": 515,
+              "y": 537,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 683336,
+              "x": 488,
+              "y": 572,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 552561,
+              "x": 452,
+              "y": 794,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 797417,
+              "x": 506,
+              "y": 541,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 423850,
+              "x": 423,
+              "y": 474,
+              "type_code": 23
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 423852,
+              "x": 525,
+              "y": 538,
+              "type_code": 23
             }
           ],
           "vp": []
@@ -10842,6 +13670,34 @@
               "x": 419,
               "y": 1285,
               "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2481101,
+              "x": 1285,
+              "y": 411,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2122866,
+              "x": 710,
+              "y": 587,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2122814,
+              "x": 701,
+              "y": 655,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2123080,
+              "x": 713,
+              "y": 644,
+              "type_code": 12
             }
           ],
           "vp": [
@@ -10850,6 +13706,20 @@
               "object_id": 352915,
               "x": 748,
               "y": 592,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1269685,
+              "x": 570,
+              "y": 834,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 1269762,
+              "x": 608,
+              "y": 838,
               "type_code": 10
             }
           ]
@@ -10873,9 +13743,248 @@
               "x": 641,
               "y": 483,
               "type_code": 1
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2510561,
+              "x": 601,
+              "y": 587,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 0,
+              "object_id": 2510562,
+              "x": 429,
+              "y": 472,
+              "type_code": 4
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 2443560,
+              "x": 573,
+              "y": 527,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2442974,
+              "x": 681,
+              "y": 614,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2444943,
+              "x": 564,
+              "y": 743,
+              "type_code": 12
             }
           ],
-          "vp": []
+          "vp": [
+            {
+              "kingdom_code": 1,
+              "object_id": 361429,
+              "x": 588,
+              "y": 509,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 361431,
+              "x": 593,
+              "y": 513,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 400050,
+              "x": 581,
+              "y": 505,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 402571,
+              "x": 587,
+              "y": 501,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 402582,
+              "x": 596,
+              "y": 500,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 402586,
+              "x": 587,
+              "y": 503,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 410133,
+              "x": 601,
+              "y": 502,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 586509,
+              "x": 531,
+              "y": 472,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 586512,
+              "x": 526,
+              "y": 474,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 586515,
+              "x": 525,
+              "y": 475,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 41157,
+              "x": 665,
+              "y": 608,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 41173,
+              "x": 672,
+              "y": 606,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 42307,
+              "x": 679,
+              "y": 618,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 42310,
+              "x": 683,
+              "y": 612,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 44107,
+              "x": 681,
+              "y": 602,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 53340,
+              "x": 660,
+              "y": 593,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 53994,
+              "x": 648,
+              "y": 589,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 58650,
+              "x": 696,
+              "y": 643,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 94776,
+              "x": 650,
+              "y": 568,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 126824,
+              "x": 647,
+              "y": 549,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 440436,
+              "x": 813,
+              "y": 692,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 443912,
+              "x": 690,
+              "y": 737,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 469472,
+              "x": 525,
+              "y": 724,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 604396,
+              "x": 510,
+              "y": 775,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 604397,
+              "x": 513,
+              "y": 776,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 604400,
+              "x": 510,
+              "y": 778,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1345983,
+              "x": 535,
+              "y": 769,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1345984,
+              "x": 537,
+              "y": 769,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1417857,
+              "x": 537,
+              "y": 781,
+              "type_code": 10
+            }
+          ]
         },
         {
           "member_id": 1858019,
@@ -10896,9 +14005,157 @@
               "x": 706,
               "y": 535,
               "type_code": 12
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 2348951,
+              "x": 687,
+              "y": 567,
+              "type_code": 12
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 2352370,
+              "x": 611,
+              "y": 556,
+              "type_code": 12
             }
           ],
-          "vp": []
+          "vp": [
+            {
+              "kingdom_code": 1,
+              "object_id": 242510,
+              "x": 706,
+              "y": 556,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 285434,
+              "x": 695,
+              "y": 539,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 285487,
+              "x": 737,
+              "y": 538,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 304744,
+              "x": 744,
+              "y": 536,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 326907,
+              "x": 703,
+              "y": 528,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 331991,
+              "x": 732,
+              "y": 527,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 331992,
+              "x": 735,
+              "y": 523,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 403051,
+              "x": 664,
+              "y": 503,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 1,
+              "object_id": 420139,
+              "x": 719,
+              "y": 498,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 2,
+              "object_id": 95137,
+              "x": 699,
+              "y": 570,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 221173,
+              "x": 616,
+              "y": 603,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 228845,
+              "x": 599,
+              "y": 603,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 861372,
+              "x": 773,
+              "y": 718,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 934994,
+              "x": 621,
+              "y": 488,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 994584,
+              "x": 786,
+              "y": 626,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1189900,
+              "x": 730,
+              "y": 748,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1210294,
+              "x": 722,
+              "y": 749,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1229859,
+              "x": 605,
+              "y": 448,
+              "type_code": 10
+            },
+            {
+              "kingdom_code": 3,
+              "object_id": 1601753,
+              "x": 783,
+              "y": 811,
+              "type_code": 10
+            }
+          ]
         }
       ]
     }

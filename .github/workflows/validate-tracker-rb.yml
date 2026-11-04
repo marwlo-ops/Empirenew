@@ -19,7 +19,25 @@ jobs:
           node-version: 22
       - name: Validate backend JavaScript
         run: node --check scripts/server-intel-tracker.js && node --check api/e4k-client.js
-      - name: Extract and validate Tracker RB browser script
+      - name: Extract, syntax-check and regression-check Tracker RB
         run: |
-          node --input-type=commonjs -e 'const fs=require("node:fs"); const html=fs.readFileSync("tracker-rb.html","utf8"); const re=new RegExp("<script>([\\s\\S]*?)</script>","g"); const scripts=[...html.matchAll(re)]; if(!scripts.length) throw new Error("Tracker RB nie zawiera skryptu"); fs.writeFileSync("/tmp/tracker-rb-inline.js",scripts.at(-1)[1]);'
+          node --input-type=commonjs <<'NODE'
+          const fs = require("node:fs");
+          const html = fs.readFileSync("tracker-rb.html", "utf8");
+          const scripts = [...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)];
+          if (!html.includes('id="alerts"')) throw new Error("Brak panelu alertów RB");
+          if (!scripts.length) throw new Error("Tracker RB nie zawiera skryptu");
+          const script = scripts.at(-1)[1];
+          fs.writeFileSync("/tmp/tracker-rb-inline.js", script);
+          const checks = [
+            ["filtr potwierdzonych używa statusu confirmed", script.includes("p._activity.status==='confirmed'")],
+            ["panel ostatnich alertów jest zasilany danymi", script.includes('$("alerts").innerHTML=')],
+            ["snapshot RB v2 jest walidowany", script.includes("next.schema_version!==2")],
+            ["świeżość snapshotu ma próg ostrzegawczy", script.includes("sourceAge<=15")]
+          ];
+          for (const [name, ok] of checks) {
+            console.log((ok ? "PASS " : "FAIL ") + name);
+            if (!ok) process.exitCode = 1;
+          }
+          NODE
           node --check /tmp/tracker-rb-inline.js

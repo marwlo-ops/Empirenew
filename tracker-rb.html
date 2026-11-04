@@ -43,7 +43,7 @@
   const firstSample=h.length?Date.parse(h[0].captured_at):NaN;
   const monitoringAge=Number.isFinite(firstSample)?Math.max(0,(Date.now()-firstSample)/60000):Infinity;
   const minutesSinceChange=lastChange?minutes(lastChange):monitoringAge;
-  const status=!h.length||!Number.isFinite(Date.parse(h.at(-1)?.captured_at))?"unknown":minutesSinceChange<=10?"active":minutesSinceChange<30?"idle":"inactive";
+  const status=!h.length||!Number.isFinite(Date.parse(h.at(-1)?.captured_at))?"unknown":lastChange?(minutesSinceChange<=10?"active":minutesSinceChange<30?"idle":"inactive"):(monitoringAge>=30?"inactive":monitoringAge>=10?"idle":"unknown");
   return {direct,indirect,directAge,indirectAge,status,last:lastChange,minutes:minutesSinceChange,minutesSinceChange,monitoringAge};
  }
  function protectionHint(p){

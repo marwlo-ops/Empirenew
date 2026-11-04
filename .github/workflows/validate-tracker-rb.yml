@@ -1,0 +1,25 @@
+name: Validate Tracker RB
+on:
+  push:
+    paths:
+      - "tracker-rb.html"
+      - "scripts/server-intel-tracker.js"
+      - "api/e4k-client.js"
+      - ".github/workflows/validate-tracker-rb.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate backend JavaScript
+        run: node --check scripts/server-intel-tracker.js && node --check api/e4k-client.js
+      - name: Extract and validate Tracker RB browser script
+        run: |
+          node --input-type=commonjs -e 'const fs=require("node:fs"); const html=fs.readFileSync("tracker-rb.html","utf8"); const scripts=[...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)]; if(!scripts.length) throw new Error("Tracker RB nie zawiera skryptu"); fs.writeFileSync("/tmp/tracker-rb-inline.js",scripts.at(-1)[1]);'
+          node --check /tmp/tracker-rb-inline.js

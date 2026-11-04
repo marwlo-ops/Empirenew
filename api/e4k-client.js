@@ -229,6 +229,132 @@ async function fetchCompleteHighscore(listType, options = {}) {
     total, pagesFetched, list_type:Number(listType) };
 }
 
+/**
+ * Pobiera pełną bazę graczy przez roster każdego sojuszu.
+ * Ranking LT=1 jest ograniczony do TOP 255, dlatego służy wyłącznie jako
+ * uzupełnienie profili niezrzeszonych i źródło metryk/rang dla TOP.
+ * LT=11 dostarcza identyfikatory sojuszy; ain(AID) zwraca ich pełne roster'y.
+ */
+export async function fetchServerCompleteRoster(options = {}) {
+  const allianceRanking = await fetchCompleteHighscore(11, options);
+  const alliances = allianceRanking.rows.map(({ rank, profile }) => {
+    const aid = Number(profile.AID ?? profile.OID ?? profile.ID);
+    const name = String(profile.N ?? profile.AN ?? profile.NAME ?? profile.PN ?? "");
+    if (!Number.isInteger(aid) || aid <= 0 || !name) {
+      throw new E4KApiError("hgh LT=11: nie można rozpoznać ID/nazwy sojuszu", {
+        rank, profile: JSON.stringify(profile).slice(0, 1200)
+      });
+    }
+    return { aid, name, rank };
+  });
+  const uniqueAlliances = [...new Map(alliances.map(a => [a.aid, a])).values()];
+  if (!uniqueAlliances.length || uniqueAlliances.length !== alliances.length) {
+    throw new E4KApiError("hgh LT=11: pusta lista lub zduplikowane identyfikatory sojuszy", {
+      rankingRows: alliances.length, uniqueAlliances: uniqueAlliances.length
+    });
+  }
+
+  const rankResult = await fetchCompleteHighscore(1, options);
+  const rankedPlayers = new Map(rankResult.rows.map(({ rank, profile }) => {
+    const id = String(profile.OID ?? profile.PID ?? profile.ID);
+    return [id, { rank, profile }];
+  }));
+  const rosterById = new Map();
+  let fetched = 0;
+  const workers = Array.from({ length: 3 }, async () => {
+    while (true) {
+      const index = fetched++;
+      if (index >= uniqueAlliances.length) return;
+      const alliance = uniqueAlliances[index];
+      const roster = await fetchAlliance(alliance.aid, options);
+      if (roster.alliance.aid !== alliance.aid || !roster.members.length) {
+        throw new E4KApiError("ain: niekompletny roster sojuszu", {
+          aid: alliance.aid, returnedAid: roster.alliance.aid, members: roster.members.length
+        });
+      }
+      for (const member of roster.members) {
+        const id = String(member.member_id);
+        const prior = rosterById.get(id);
+        if (prior && prior.alliance_id !== alliance.aid) {
+          throw new E4KApiError("ain: gracz pojawił się w rosterach dwóch sojuszy", {
+            player_id: id, first_alliance: prior.alliance_id, second_alliance: alliance.aid
+          });
+        }
+        const raw = member.raw || {};
+        const ranked = rankedPlayers.get(id);
+        const value = (keys) => {
+          for (const key of keys) if (raw[key] != null && Number.isFinite(Number(raw[key]))) return Number(raw[key]);
+          return null;
+        };
+        rosterById.set(id, {
+          player_id: Number(member.member_id),
+          name: member.name,
+          alliance_id: alliance.aid,
+          alliance_name: roster.alliance.name || alliance.name,
+          rank: ranked?.rank ?? null,
+          power: ranked?.profile ? Number(ranked.profile.MP ?? ranked.profile.P ?? ranked.profile.POW ?? 0) : value(["MP","P","POW","power"]),
+          glory_points: ranked?.profile ? valueFrom(ranked.profile, ["AVP","GP"]) : value(["AVP","GP"]),
+          honor_points: ranked?.profile ? valueFrom(ranked.profile, ["H","HONOR","HONOUR"]) : value(["H","HONOR","HONOUR"]),
+          loot: value(["loot","LOOT","loot_points"]),
+          level: value(["L","level"]),
+          legend_level: value(["LL","legend_level"]),
+          raw
+        });
+      }
+      await new Promise(resolve => setTimeout(resolve, 120));
+    }
+  });
+  await Promise.all(workers);
+
+  // Preserve ranked unaffiliated players (the roster endpoint only covers alliances).
+  for (const [id, entry] of rankedPlayers) {
+    const p = entry.profile;
+    const aid = Number(p.AID ?? p.allianceId ?? 0);
+    if (rosterById.has(id)) continue;
+    if (aid > 0) {
+      throw new E4KApiError("hgh: gracz z AID nie wystąpił w rosterze sojuszu", {
+        player_id: id, alliance_id: aid, name: p.N ?? p.PN ?? p.NAME
+      });
+    }
+    const value = (keys) => {
+      for (const key of keys) if (p[key] != null && Number.isFinite(Number(p[key]))) return Number(p[key]);
+      return null;
+    };
+    rosterById.set(id, {
+      player_id: Number(id), name: String(p.N ?? p.PN ?? p.NAME ?? ""),
+      alliance_id: 0, alliance_name: "Brak sojuszu", rank: entry.rank,
+      power: value(["MP","P","POW","power"]), glory_points: value(["AVP","GP"]),
+      honor_points: value(["H","HONOR","HONOUR"]), loot: value(["loot","LOOT","loot_points"]),
+      level: value(["L","level"]), legend_level: value(["LL","legend_level"]), raw: p
+    });
+  }
+  const players = [...rosterById.values()].filter(p => Number.isFinite(p.player_id) && p.player_id > 0 && p.name);
+  if (players.length < rankResult.total || players.length !== rosterById.size) {
+    throw new E4KApiError("Roster nie przeszedł walidacji liczby graczy", {
+      rosterPlayers: players.length, uniquePlayers: rosterById.size,
+      rankedPlayers: rankResult.total, alliances: uniqueAlliances.length
+    });
+  }
+  return {
+    schema_version: 2, server: options.server || DEFAULT_SERVER,
+    captured_at: new Date().toISOString(), source: "alliance-roster+hgh",
+    query: { alliance_ranking: { LT: 11, LID: 1 }, player_ranking: { LT: 1, LID: 1 } },
+    pages_fetched: allianceRanking.pagesFetched + rankResult.pagesFetched,
+    alliance_count: uniqueAlliances.length, alliance_ranking_total: allianceRanking.total,
+    roster_alliances_fetched: uniqueAlliances.length,
+    ranked_player_count: rankResult.total,
+    unallied_ranked_count: players.filter(p => p.alliance_id === 0).length,
+    player_count: players.length, total_count: players.length,
+    leaderboard_total: rankResult.total, complete: true, ranking_validated: true,
+    roster_validated: true, players
+  };
+}
+
+function valueFrom(object, keys) {
+  for (const key of keys) if (object[key] != null && Number.isFinite(Number(object[key]))) return Number(object[key]);
+  return null;
+}
+
 /** Pobiera ranking graczy w całości; nie zapisuje danych. */
 export async function fetchPlayerRankingPage({ listType = 1 } = {}, options = {}) {
   if (![1, 2].includes(Number(listType))) throw new TypeError("listType musi wynosić 1 (potęga) lub 2 (chwała)");

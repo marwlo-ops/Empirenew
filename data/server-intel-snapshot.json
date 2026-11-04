@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "server": "EmpirefourkingdomsExGG2_3",
+  "captured_at": null,
+  "source": "hgh",
+  "query": {
+    "LT": 1,
+    "LID": 1,
+    "SV": "1",
+    "page_size": 100,
+    "limit": 1000
+  },
+  "total_count": null,
+  "pages_fetched": 0,
+  "player_count": 0,
+  "players": []
+}

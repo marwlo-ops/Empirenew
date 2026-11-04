@@ -90,11 +90,11 @@ const players = snapshot.players.map(player => {
       });
     }
   }
-  const metricHistory = isBaseline ? [] : (Array.isArray(old?.metric_history) ? old.metric_history.slice(-288) : []);
+  const metricHistory = isBaseline ? [] : (Array.isArray(old?.metric_history) ? old.metric_history.slice(-287) : []);
   const point = { captured_at: snapshot.captured_at, power: player.power, loot: player.loot, honor_points: player.honor_points ?? player.raw?.H ?? null, rank: player.rank };
   const last = metricHistory.at(-1);
   if (!last || last.captured_at !== point.captured_at) metricHistory.push(point);
-  const last24 = metricHistory.filter(p => Date.parse(p.captured_at) >= Date.now() - 86400000);
+  const last24 = metricHistory.filter(p => Date.parse(p.captured_at) >= Date.parse(snapshot.captured_at) - 86400000);
   const first = last24[0], end = last24.at(-1);
   const powerDelta24h = first && end && hasNumber(first.power) && hasNumber(end.power) ? Number(end.power) - Number(first.power) : null;
   const honorDelta24h = first && end && hasNumber(first.honor_points) && hasNumber(end.honor_points) ? Number(end.honor_points) - Number(first.honor_points) : null;
@@ -146,7 +146,7 @@ const rbPlayers = players.filter(player => Number(player.alliance_id) === RB_ALL
 const rbIds = new Set(rbPlayers.map(player => Number(player.player_id)));
 const rbEvents = merged.filter(event => rbIds.has(Number(event.player_id))).slice(0, 5000);
 const rbTracker = {
-  schema_version: 1, server: DEFAULT_SERVER, alliance_id: RB_ALLIANCE_ID,
+  schema_version: 2, server: DEFAULT_SERVER, alliance_id: RB_ALLIANCE_ID,
   alliance_name: rbPlayers[0]?.alliance_name || "- ReBorN -",
   updated_at: now, source_snapshot_at: snapshot.captured_at,
   source_sequence: snapshot.snapshot_sequence, baseline_only: isBaseline,

@@ -1,15 +1,14 @@
 # Empirenew
 
-## Mapa graczy RB
-- **[Otwórz interaktywną mapę RB](./)** — wyszukiwanie graczy, filtrowanie krain, podgląd AP/VP, lista i szczegóły lokalizacji.
+Repetytorium Goodgame Empire — mapa świata, lokalizacje graczy, sojusze i dane serwera.
+
+## Główny moduł: mapa graczy RB
+- **[Otwórz interaktywną mapę graczy RB](./mapa-rb.html)** — wyszukiwanie po nicku, wybór krainy, warstwy AP/VP, lista graczy i szczegóły wszystkich lokalizacji.
 - [Dane lokalizacji RB (JSON)](data/rb-player-map.json)
-
-
-Repetytorium Goodgame Empire – mapa, lokalizacje, sojusze i dane serwera.
 
 ## Aktualne opracowania
 - [Sojusz ReBorN (RB) — dane z API](research/RB.md)
-- [Fortecę baronów — rozpoznawanie obiektów](research/fortece-barona.md)
+- [Fortece baronów — rozpoznawanie obiektów](research/fortece-barona.md)
 - [Skanowanie fortec w trzech krainach](research/fortece-barona-skanowanie.md)
 - [Dane fortec — szablon JSON](data/baron-fortresses.json)
 

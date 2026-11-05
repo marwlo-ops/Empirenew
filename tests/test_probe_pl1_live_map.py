@@ -1,5 +1,7 @@
 import importlib.util
+import io
 import unittest
+from contextlib import redirect_stderr
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -105,6 +107,16 @@ class ProbePl1LiveMapTests(unittest.TestCase):
         self.assertEqual(result["status"], "not_confirmed")
         self.assertEqual(result["rows"], [])
         self.assertIn("not proof", result["note"].lower())
+
+    def test_legacy_empirecore_probe_refuses_e4k_before_credentials_or_network(self):
+        stderr = io.StringIO()
+        args = SimpleNamespace(zone="EmpirefourkingdomsExGG_3", game_id=None, network_id=None)
+        with redirect_stderr(stderr):
+            result = PROBE.run_probe(args)
+        self.assertEqual(result, 2)
+        self.assertIn("TCP", stderr.getvalue())
+        self.assertIn("node scripts/barony-live/probe.mjs", stderr.getvalue())
+        self.assertIn("No credentials were read", stderr.getvalue())
 
 
 if __name__ == "__main__":

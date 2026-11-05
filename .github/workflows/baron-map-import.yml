@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts/import-baron-map.js"
       - "scripts/test-barony-mobile.mjs"
+      - "scripts/test-baron-map-catalog.mjs"
       - "barony.html"
       - ".github/workflows/baron-map-import.yml"
   schedule:
@@ -38,6 +39,7 @@ jobs:
         run: |
           node --check scripts/import-baron-map.js
           node scripts/import-baron-map.js
+          node scripts/test-baron-map-catalog.mjs
       - name: Commit imported IT1 map
         run: |
           if [[ -n "$(git status --porcelain data/baron-fortresses.json)" ]]; then

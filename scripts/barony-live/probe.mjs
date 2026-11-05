@@ -233,7 +233,7 @@ async function main() {
     movement_probe:movementProbe,movement_evidence:movementEvidence,
     mailbox_report_probe:reportProbe,mailbox_report_evidence:reportEvidence,
     state_file:a.noState?null:stateFile,
-    attack_history_status:'target_specific_defeater_and_cooldown_fields_available_but_PL1_live_unvalidated',
+    attack_history_status:'optional_account_scoped_mailbox_and_movement_evidence; no_global_PL1_history; exact_attack_time_unavailable',
     warning:'Map rows contain no exact attacked_at. Optional GAM observations cover only movements pushed to this account; optional NPC battle reports cover only this account mailbox. Report receipt time and movement departure are not exact attack timestamps; no global PL1 history is persisted.'
   },null,2)+'\n');
   return 0;

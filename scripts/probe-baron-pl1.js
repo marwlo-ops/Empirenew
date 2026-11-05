@@ -130,12 +130,9 @@ try {
   console.log(JSON.stringify({ probe: "beta-dungeon-coordinate-overlap", error: String(error) }));
 }
 
-async function probePlayerRosterOverlap() {
+async function probeBetaPlayerHistory() {
   try {
-    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
     const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
-    const memberNames = new Set((snapshot.alliances || []).flatMap(a => a.members || [])
-      .map(m => String(m.name || "").trim().toLowerCase()).filter(Boolean));
     const known = new Set();
     for (const data of Object.values(map.results || {})) {
       for (const f of data.fortresses || []) known.add(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y));
@@ -150,7 +147,7 @@ async function probePlayerRosterOverlap() {
       const body = await response.json();
       if (!response.ok) {
         console.log(JSON.stringify({
-          probe: "player-roster-overlap",
+          probe: "beta-player-history",
           api_server: "E4K_PL1_BETA",
           http_status: response.status,
           error: body.error ?? null
@@ -161,38 +158,38 @@ async function probePlayerRosterOverlap() {
       apiPlayers.push(...(Array.isArray(body.players) ? body.players : []));
       if (apiPlayers.length >= Number(totalPlayers || 0)) break;
     }
-    const matches = apiPlayers.filter(p => memberNames.has(String(p.player_name || "").trim().toLowerCase()));
     const historySamples = [];
-    for (const player of matches.slice(0, 5)) {
+    for (const player of apiPlayers.slice(0, 5)) {
       const response = await fetch(base + "/dungeons/player/" + encodeURIComponent(player.player_id) + "?lastDays=365", {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(20000)
       });
       const body = await response.json();
       const rows = Array.isArray(body.dungeons) ? body.dungeons : [];
+      const targetRows = rows.filter(d =>
+        known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))
+      );
       historySamples.push({
         history_status: response.status,
         records: rows.length,
-        target_matches: rows.filter(d => known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))).length,
-        sample: rows.slice(0, 5).map(d => ({
+        target_matches: targetRows.length,
+        sample_target_events: targetRows.slice(0, 5).map(d => ({
           kid: Number(d.kid), x: Number(d.position_x), y: Number(d.position_y),
-          attacked_at: d.attacked_at,
-          matches_it1_fortress: known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))
+          attacked_at: d.attacked_at
         }))
       });
     }
     console.log(JSON.stringify({
-      probe: "player-roster-overlap",
+      probe: "beta-player-history",
       api_server: "E4K_PL1_BETA",
       api_players_fetched: apiPlayers.length,
       api_total_players: totalPlayers,
-      snapshot_member_count: memberNames.size,
-      name_overlap_count: matches.length,
       histories_checked: historySamples.length,
-      histories: historySamples
+      histories: historySamples,
+      note: "This is a Beta-only endpoint test, not production PL1 attack evidence."
     }));
   } catch (error) {
-    console.log(JSON.stringify({ probe: "player-roster-overlap", error: String(error) }));
+    console.log(JSON.stringify({ probe: "beta-player-history", error: String(error) }));
   }
 }
 
@@ -224,8 +221,7 @@ async function probeBridge() {
 
     const commands = [
       ["gam", { M: {} }],
-      ["gam", { O: {} }],
-      ["gaa", { KID: 1 }]
+      ["gam", { O: {} }]
     ];
     for (const [command, params] of commands) {
       try {
@@ -244,7 +240,7 @@ async function probeBridge() {
         const targetRows = movements.map(m => ({ kid: Number(m.KID), movement_id: Number(m.MID),
           returning: Number(m.D) === 1, type: Number(m.T), area: m.TA }))
           .filter(m => Array.isArray(m.area));
-        const baronTargets = targetRows.filter(m => Number(m.area[0]) === 2 && !m.returning)
+        const dungeonTargetCandidates = targetRows.filter(m => Number(m.area[0]) === 2 && !m.returning)
           .map(m => ({ kid: m.kid, x: Number(m.area[1]), y: Number(m.area[2]), movement_type: m.type }));
         const typeCounts = {};
         for (const m of targetRows) typeCounts[String(m.area[0])] = (typeCounts[String(m.area[0])] || 0) + 1;
@@ -259,12 +255,71 @@ async function probeBridge() {
           content_keys: content && typeof content === "object" ? Object.keys(content) : [],
           movement_count: wrappers.length,
           movement_target_type_counts: typeCounts,
-          outbound_baron_target_count: baronTargets.length,
-          outbound_baron_targets: baronTargets.slice(0, 25),
-          map_row_count: mapRows.length
+          outbound_dungeon_target_candidate_count: dungeonTargetCandidates.length,
+          outbound_dungeon_target_candidates: dungeonTargetCandidates.slice(0, 25),
+          map_row_count: mapRows.length,
+          scope_note: "Movement data visible to the connected bridge account only; not server-wide."
         }));
       } catch (error) {
         console.log(JSON.stringify({ probe: "bridge-read-command", command, error: String(error) }));
+      }
+    }
+
+    // Read a tiny 2x2 map area around one known IT1 coordinate in each kingdom.
+    // Do not assume row[0] or row[6] semantics until a real PL1 response confirms them.
+    const catalog = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
+    for (const [kingdom, group] of Object.entries(catalog.results || {})) {
+      const fortress = group.fortresses?.[0];
+      if (!fortress) continue;
+      const x = Number(fortress.x);
+      const y = Number(fortress.y);
+      const params = {
+        KID: Number(fortress.kid),
+        AX1: x,
+        AY1: y,
+        AX2: Math.min(1286, x + 1),
+        AY2: Math.min(1286, y + 1)
+      };
+      try {
+        const headers = encodeURIComponent(JSON.stringify(params).slice(1, -1));
+        const url = bridgeBase + "/" + encodeURIComponent(targetServer) + "/gaa/" + headers;
+        const result = await fetch(url, {
+          headers: { Accept: "application/json" },
+          signal: AbortSignal.timeout(20000)
+        });
+        const raw = await result.text();
+        let body;
+        try { body = JSON.parse(raw); } catch { body = { raw: raw.slice(0, 300) }; }
+        const content = body?.content ?? body?.data ?? {};
+        const rows = Array.isArray(content?.AI) ? content.AI : [];
+        const typeCounts = {};
+        for (const row of rows) {
+          const type = String(row?.[0] ?? "unknown");
+          typeCounts[type] = (typeCounts[type] || 0) + 1;
+        }
+        const samples = rows.slice(0, 5).map(row => ({
+          object_type: row?.[0] ?? null,
+          x: Number(row?.[1]),
+          y: Number(row?.[2]),
+          field_count: Array.isArray(row) ? row.length : null,
+          field5_numeric: row?.[5] !== null && row?.[5] !== undefined && Number.isFinite(Number(row[5])),
+          field6_present: row?.[6] !== null && row?.[6] !== undefined,
+          field6_type: typeof row?.[6]
+        }));
+        console.log(JSON.stringify({
+          probe: "bridge-map-area",
+          kingdom,
+          sample_area: { kid: params.KID, x1: params.AX1, y1: params.AY1, x2: params.AX2, y2: params.AY2 },
+          http_status: result.status,
+          error: body?.error ?? null,
+          return_code: body?.return_code ?? null,
+          content_keys: content && typeof content === "object" ? Object.keys(content) : [],
+          map_row_count: rows.length,
+          object_type_counts: typeCounts,
+          sample_rows: samples
+        }));
+      } catch (error) {
+        console.log(JSON.stringify({ probe: "bridge-map-area", kingdom, error: String(error) }));
       }
     }
   } catch (error) {
@@ -272,5 +327,5 @@ async function probeBridge() {
   }
 }
 
-await probePlayerRosterOverlap();
+await probeBetaPlayerHistory();
 await probeBridge();

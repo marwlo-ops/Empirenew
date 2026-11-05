@@ -242,7 +242,7 @@ export function extractNpcBattleReportEvidence(message, battleLog) {
     source_fields: [
       'message.messageType=6',
       'message.areaType=11',
-      'message.subType=2',
+      'message.metadata (areaType+subType+result)',
       'message.kingdomId',
       'message.ownerId',
       'battleLog.mapobject.position',

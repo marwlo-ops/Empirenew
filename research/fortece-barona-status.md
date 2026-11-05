@@ -668,7 +668,7 @@ Istotny szczegół: handler commands/gam.js wywołuje MovementManager._add_or_up
 
 ### Poprawka
 
-W scripts/barony-live/probe.mjs observer przechwytuje teraz przed dispatch handlera wyłącznie metadane odpowiedzi XT: nazwę komendy, strefę, kod błędu i czas odbioru. Nie przechowuje payloadu odpowiedzi. Batch ruchów otrzymuje powiązany response_ok i response_error_code.
+W scripts/barony-live/probe.mjs observer przechwytuje teraz przed dispatch handlera wyłącznie metadane odpowiedzi XT: nazwę komendy, nieinterpretowane drugie pole XT, kod błędu i czas odbioru; osobno zapisuje strefę skonfigurowanej sesji. Kod klienta ggejs i niezależnego pygge pomija drugie pole podczas dekodowania, więc nie przypisujemy mu znaczenia strefy. Nie przechowuje payloadu odpowiedzi. Batch ruchów otrzymuje powiązany response_ok i response_error_code.
 
 W scripts/barony-live/probe-core.mjs dodano parseGgejsCommandResponseEnvelope() oraz rozszerzono buildGamProbeSummary(). Batch jest przyjmowany jako źródło ruchów tylko wtedy, gdy odpowiedź dla dokładnej strefy PL1 ma kod sukcesu 0 lub 10005. Kody błędów, nieparsowalne statusy, brak envelope albo brak batcha są raportowane osobnymi statusami; nie mogą zostać przedstawione jako udana pusta migawka.
 

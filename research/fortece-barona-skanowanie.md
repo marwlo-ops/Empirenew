@@ -206,3 +206,22 @@ Poprzedni test z sufiksem zoneId=259 pozostaje w logu jako nieudana hipoteza (3/
 Ograniczenie czasu: scraper GGE Tracker w collectDungeonCooldowns wybiera rekordy typu 11 z dodatnim pozostałym cooldownem, a następnie wykonuje INSERT INTO dungeons_history (kid, position_x, position_y, player_id) bez jawnego pola attacked_at. API odczytuje później DH.attacked_at. Dopóki schemat i domyślna wartość kolumny nie potwierdzą pochodzenia czasu, nie traktujemy attacked_at jako dokładnego czasu zdarzenia gry. Kod scrapera może również zapisywać obserwacje tego samego aktywnego cooldownu w kolejnych przebiegach; nie liczymy automatycznie każdego wiersza jako nowego ataku.
 
 Źródło: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+
+### 4.3. Odrzucenie pozornie globalnych feedów zmian (2026-11-05)
+
+Sprawdzono implementację publicznego endpointu GGE Tracker GET /changes. Jego zamknięta lista typów obejmuje wyłącznie:
+- membership,
+- player_rename,
+- castle_movement,
+- alliance_rename,
+- alliance_description.
+
+Nie ma typu dungeon_attack ani zdarzenia ataku na NPC. Endpoint nie jest więc źródłem globalnej historii ataków na fortece.
+
+Sprawdzono też GET /server/movements. Implementacja czyta tabelę player_castle_movements_history i opisuje ruchy/relokacje zamków graczy. Nie jest to feed ruchów armii ani ataków na obiekty NPC.
+
+Źródła:
+- GGE Tracker ApiChanges — lista SOURCES i obsługa GET /changes: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-changes.ts
+- GGE Tracker ApiServer — GET /server/movements oparty o player_castle_movements_history: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-server.ts
+
+Wniosek: publiczny GGE Tracker udostępnia historię fortec tylko per playerId przez /dungeons/player/{playerId}; nie znaleziono globalnego feedu ataków na NPC. Dlatego nowy test routingu ID z kodem katalogowym jest obecnie najbardziej konkretnym sposobem sprawdzenia, czy da się uzyskać historię graczy PL1. Nie zastępuje on jeszcze globalnego monitoringu wszystkich atakujących.

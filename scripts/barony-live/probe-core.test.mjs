@@ -454,8 +454,9 @@ test('parses the ggejs XT response envelope without retaining account payload da
     '%xt%gam%EmpirefourkingdomsExGG_3%0%{"M":[],"O":[]}%'
   );
   assert.deepEqual(success, {
-    command: 'gam', zone: 'EmpirefourkingdomsExGG_3', error_code: 0, ok: true,
+    command: 'gam', context_field_2: 'EmpirefourkingdomsExGG_3', error_code: 0, ok: true,
   });
+  assert.equal(Object.hasOwn(success, 'zone'), false);
   const acceptedLegacyCode = parseGgejsCommandResponseEnvelope(
     '%xt%gam%EmpirefourkingdomsExGG_3%10005%{}%'
   );
@@ -478,7 +479,7 @@ test('does not label an error-code GAM handler batch as a successful empty snaps
     sampledAt: '2026-11-05T22:30:01Z',
     responseStatusCaptureEnabled: true,
     responseStatuses: [{
-      phase: 'request', command: 'gam', zone: 'EmpirefourkingdomsExGG_3',
+      phase: 'request', command: 'gam', connection_zone: 'EmpirefourkingdomsExGG_3', context_field_2: 'opaque',
       error_code: 42, ok: false, received_at_utc: '2026-11-05T22:30:00.100Z',
     }],
     responseBatches: [{
@@ -502,7 +503,7 @@ test('does not accept a GAM batch when the raw response status could not be veri
     requestSent: true,
     responseStatusCaptureEnabled: true,
     responseStatuses: [{
-      phase: 'request', command: 'gam', zone: 'EmpirefourkingdomsExGG_3',
+      phase: 'request', command: 'gam', connection_zone: 'EmpirefourkingdomsExGG_3', context_field_2: 'opaque',
       error_code: null, ok: null,
     }],
     responseBatches: [{
@@ -525,7 +526,7 @@ test('accepts a parsed GAM batch only when its response envelope reports success
     sampledAt: '2026-11-05T22:40:01Z',
     responseStatusCaptureEnabled: true,
     responseStatuses: [{
-      phase: 'request', command: 'gam', zone: 'EmpirefourkingdomsExGG_3',
+      phase: 'request', command: 'gam', connection_zone: 'EmpirefourkingdomsExGG_3', context_field_2: 'opaque',
       error_code: 0, ok: true, received_at_utc: '2026-11-05T22:40:00.100Z',
     }],
     responseBatches: [{

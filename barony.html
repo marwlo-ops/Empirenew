@@ -18,8 +18,7 @@ main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyeb
 </main>
 <script>
 (()=>{'use strict';
-const TRACKER='https://api.gge-tracker.com/api/v1/dungeons';
-const TRACKER_SERVER='IT1';
+const DATA='./data/baron-fortresses.json';
 const TARGET_API='https://empire-api.fly.dev';
 const TARGET_SERVER='EmpirefourkingdomsExGG2_3';
 const HISTORY_KEY='empirenew-baron-pl1-history-v1';
@@ -55,31 +54,25 @@ function normalizeMapRecord(x){
 }
 
 async function loadTracker(){
- const records=[];
- let page=1,totalPages=1,totalItems=null;
- do{
-  const qs=new URLSearchParams({page:String(page),size:'4000',filterByKid:'[1,2,3]'});
-  const url=TRACKER+'?'+qs.toString();
-  const r=await fetch(url,{headers:{'gge-server':TRACKER_SERVER,'Accept':'application/json'},cache:'no-store'});
-  if(!r.ok)throw Error('GGE Tracker IT1 HTTP '+r.status);
-  const payload=await r.json();
-  if(!Array.isArray(payload.dungeons))throw Error('API IT1 nie zwróciło tablicy dungeons');
-  const pagination=payload.pagination||{};
-  totalPages=Math.max(1,Number(pagination.total_pages)||1);
-  if(totalItems===null&&Number.isFinite(Number(pagination.total_items_count)))totalItems=Number(pagination.total_items_count);
-  records.push(...payload.dungeons.map(normalizeMapRecord).filter(Boolean));
-  page++;
-  if(page>totalPages+1)throw Error('Nieprawidłowa paginacja API IT1');
- }while(page<=totalPages);
- const unique=new Map(records.map(x=>[keyOf(x),x]));
- if(!unique.size)throw Error('API IT1 zwróciło 0 rozpoznanych lokalizacji');
- if(totalItems!==null&&unique.size!==totalItems)throw Error('Niekompletna lista IT1: '+unique.size+'/'+totalItems);
- const list=[...unique.values()];
- const results={sands:[],ice:[],fire:[],unassigned:[]};
- for(const x of list)results[x.kingdom].push(x);
- const captured=new Date().toISOString();
- db={captured_at:captured,source:'GGE Tracker map only',server_source:TRACKER_SERVER,complete:true,total_count:list.length,
-  results:Object.fromEntries(Object.entries(results).map(([k,fortresses])=>[k,{fortress_count:fortresses.length,complete:true,fortresses}]))};
+ const response=await fetch(DATA+'?t='+Date.now(),{cache:'no-store'});
+ if(!response.ok)throw Error('Katalog fortec HTTP '+response.status);
+ const payload=await response.json();
+ if(payload.complete!==true||!payload.results)throw Error('Katalog IT1 nie jest oznaczony jako kompletny');
+ const groups={sands:[],ice:[],fire:[]};
+ let count=0;
+ for(const group of Object.keys(groups)){
+  const source=payload.results[group]?.fortresses;
+  if(!Array.isArray(source))throw Error('Brak listy krainy '+group);
+  groups[group]=source.map(x=>({
+   id:String(x.id),kid:Number(x.kid),x:Number(x.x),y:Number(x.y),
+   kingdom:group,source_server:'IT1'
+  })).filter(x=>Number.isInteger(x.kid)&&Number.isInteger(x.x)&&Number.isInteger(x.y));
+  if(groups[group].length!==source.length)throw Error('Niepoprawne współrzędne w krainie '+group);
+  count+=groups[group].length;
+ }
+ if(count!==Number(payload.total_count))throw Error('Katalog nie przeszedł kontroli liczby rekordów');
+ db={captured_at:payload.captured_at,source:'GGE Tracker IT1 · map only',complete:true,total_count:count,
+  results:Object.fromEntries(Object.entries(groups).map(([k,fortresses])=>[k,{fortress_count:fortresses.length,complete:true,fortresses}]))};
 }
 
 function historySummary(x){
@@ -116,7 +109,7 @@ function render(){
   $('map').innerHTML='<svg viewBox="0 0 1000 700" role="img" aria-label="Mapa fortec IT1">'+pts.map(x=>'<circle class="dot '+(isCooling(x)?'wait':'')+'" cx="'+(40+(x.x-minX)/dx*920)+'" cy="'+(40+(x.y-minY)/dy*620)+'" r="8"><title>'+x.x+':'+x.y+'</title></circle>').join('')+'</svg>';
  }else $('map').innerHTML='<div class="empty">Brak współrzędnych do wyświetlenia.</div>';
  const current=db?.results?.[kingdom];
- $('status').textContent=current?'Mapa IT1 · '+current.fortress_count+' fortec · aktywność odczytywana osobno z PL1 przez gaa.':'Brak danych dla '+(names[kingdom]||kingdom)+'.';
+ $('status').textContent=current?'Mapa IT1 · '+current.fortress_count+' fortec · odczyt z pliku danych. Ataki sprawdzane osobno przez PL1.':'Brak danych dla '+(names[kingdom]||kingdom)+'.';
 }
 
 function saveObservation(x,observation){
@@ -176,7 +169,7 @@ async function checkTarget(x,silent=false){
 }
 
 async function load(){
- $('status').textContent='Pobieranie samych lokalizacji fortec z GGE Tracker IT1…';
+ $('status').textContent='Pobieranie kompletnej mapy IT1…';
  try{await loadTracker();await loadPlayerNames();render();}
  catch(error){$('status').textContent='Nie udało się pobrać kompletnej mapy IT1: '+error.message;$('list').innerHTML='<div class="empty">Brak potwierdzonej pełnej listy IT1. Nie wyświetlam niepełnego importu jako kompletnego.</div>';$('total').textContent='—';$('ready').textContent='—';$('wait').textContent='—';}
 }

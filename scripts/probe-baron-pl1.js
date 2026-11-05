@@ -144,13 +144,14 @@ async function probePlayerRosterOverlap() {
     let totalPlayers = null;
     for (let page = 1; page <= 2; page++) {
       const response = await fetch(base + "/players?page=" + page + "&size=100", {
-        headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
+        headers: { "gge-server": "E4K_PL1_BETA", Accept: "application/json" },
         signal: AbortSignal.timeout(20000)
       });
       const body = await response.json();
       if (!response.ok) {
         console.log(JSON.stringify({
           probe: "player-roster-overlap",
+          api_server: "E4K_PL1_BETA",
           http_status: response.status,
           error: body.error ?? null
         }));
@@ -182,6 +183,7 @@ async function probePlayerRosterOverlap() {
     }
     console.log(JSON.stringify({
       probe: "player-roster-overlap",
+      api_server: "E4K_PL1_BETA",
       api_players_fetched: apiPlayers.length,
       api_total_players: totalPlayers,
       snapshot_member_count: memberNames.size,

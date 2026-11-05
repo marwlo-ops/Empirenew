@@ -5,7 +5,7 @@ import {
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
   isNpcBattleReportMessage,
   extractParsedOutboundBossDungeonMovementEvidence,
-  pickSamples, validateMapOnlyCatalog,
+  pickSamples, selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
 } from './probe-core.mjs';
 
 function catalog() {
@@ -159,6 +159,21 @@ test('recognizes ggejs NPC report subtype from metadata when the parsed property
     attacker: { playerId: 1234567 }, defender: { playerId: -230 },
   }).attacker_player_id, 1234567);
   assert.equal(isNpcBattleReportMessage({ ...message, metadata: '11+0+0#1+-230' }), false);
+});
+
+test('selects newest NPC reports using metadata subtype and excludes unrelated messages', () => {
+  const older = {
+    messageType: 6, areaType: 11, subType: 0, metadata: '11+2+0#1+-230',
+    kingdomId: 1, ownerId: -230, messageId: 10,
+    deliveryTime: new Date('2026-11-05T18:00:00Z'),
+  };
+  const newest = { ...older, messageId: 12, deliveryTime: new Date('2026-11-05T18:20:00Z') };
+  const middle = { ...older, messageId: 11, deliveryTime: new Date('2026-11-05T18:10:00Z') };
+  const unrelated = { ...newest, messageId: 13, metadata: '11+0+0#1+-230' };
+  const selected = selectLatestNpcBattleReportMessages([older, unrelated, newest, middle], 2);
+  assert.deepEqual(selected.map((message) => message.messageId), [12, 11]);
+  assert.deepEqual(selectLatestNpcBattleReportMessages(null, 2), []);
+  assert.throws(() => selectLatestNpcBattleReportMessages([older], 0), /limit/);
 });
 
 test('extracts exact target and attacker from a matching NPC boss-dungeon battle report', () => {

@@ -14,13 +14,15 @@ main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyeb
 <div class="stats"><div class="stat"><b id="total">—</b><span>Wszystkie obiekty</span></div><div class="stat"><b id="ready">—</b><span>Gotowe do ataku</span></div><div class="stat"><b id="wait">—</b><span>Odnowienie 24 h</span></div><div class="stat"><b id="updated">—</b><span>Ostatni odczyt</span></div></div>
 <div class="controls" id="kingdoms"><button class="active" data-k="sands">🏜️ Piaski</button><button data-k="ice">❄️ Lód</button><button data-k="fire">🔥 Ogień</button><button data-k="islands">🏝️ Archipelag · wyspy</button><button data-k="unassigned">📍 Nieprzypisane</button><input id="search" placeholder="Szukaj po współrzędnych lub ID…"><select id="filter"><option value="all">Wszystkie statusy</option><option value="ready">Gotowe do ataku</option><option value="wait">W odnowieniu</option></select><select id="sort"><option value="ready">Najpierw gotowe</option><option value="level">Poziom malejąco</option><option value="xy">Współrzędne</option></select></div>
 <div class="layout"><section class="panel"><h2>Mapa lokalizacji</h2><div class="map" id="map"><div class="empty">Oczekiwanie na potwierdzone współrzędne skanu.</div></div><div class="legend">Złoty znacznik — gotowa do ataku · czerwony — trwa 24-godzinne odnowienie.</div></section><section class="panel"><h2>Lista fortec</h2><div class="list" id="list"><div class="empty">Ładowanie katalogu…</div></div></section></div>
-<div class="notice" id="status">Pobieranie katalogu fortec…</div><p class="subtle">Czasy ataków zapisują się lokalnie w tej przeglądarce. Dane lokalizacji będą pokazywane dopiero po potwierdzonym skanie API — aplikacja nie tworzy fikcyjnych punktów.</p>
+<div class="notice" id="status">Pobieranie katalogu fortec z GGE Tracker (IT1)…</div><p class="subtle">Czasy ataków zapisują się lokalnie w tej przeglądarce. Dane lokalizacji będą pokazywane dopiero po potwierdzonym skanie API — aplikacja nie tworzy fikcyjnych punktów.</p>
 </main>
 <script>
 (()=>{'use strict';
 const DATA='./data/baron-fortresses.json',KEY='empirenew-baron-cooldowns-v1';
+const TRACKER='https://api.gge-tracker.com/api/v1/dungeons';
+const TRACKER_SERVER='IT1';
 const names={sands:'Płonące Piaski',ice:'Wieczny Lód',fire:'Ogniste Szczyty',islands:'Archipelag · wyspy',unassigned:'Nieprzypisane · import IT1'};
-let db=null,kingdom='sands',targets=[];
+let db=null,kingdom='sands',targets=[],trackerLoaded=false;
 const $=id=>document.getElementById(id);
 const readTimes=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(_){return {}}};
 const writeTimes=x=>localStorage.setItem(KEY,JSON.stringify(x));
@@ -36,12 +38,44 @@ function render(){
  const all=Object.values(db?.results||{}).flatMap(v=>v.fortresses||[]);
  $('total').textContent=all.length;$('ready').textContent=all.filter(isReady).length;$('wait').textContent=all.filter(x=>!isReady(x)).length;
  $('updated').textContent=db?.captured_at?fmt(db.captured_at):'brak';
- $('list').innerHTML=targets.length?targets.map(x=>{const t=until(x),id=idOf(x);return '<article class="item"><strong>Forteca · '+(x.level?'poziom '+x.level:'poziom nieznany')+'</strong><small>X: '+x.x+' · Y: '+x.y+' · ID: '+(x.id??x.object_id??'—')+(x.owner_id!==undefined?' · NPC: '+x.owner_id:'')+'</small><small>Źródło: '+(x.source_server||'PL1')+' · '+(x.match_verified_on_target?'potwierdzona na PL1':'wymaga potwierdzenia na PL1')+'</small><small>'+(t>Date.now()?'Dostępna za: '+fmt(t):'Gotowa do ataku')+'</small><button data-attack="'+id+'" '+(t>Date.now()?'disabled':'')+'>Zapisz pokonanie · 24 h</button></article>'}).join(''):'<div class="empty">'+(records.length?'Brak wyników dla wybranych filtrów.':'Brak potwierdzonych lokalizacji w tej krainie. Skan nie został jeszcze wykonany lub nie zwrócił kompletnych danych.')+'</div>';
+ $('list').innerHTML=targets.length?targets.map(x=>{const t=until(x),id=idOf(x);const trackerUntil=x.tracker_cooldown_until?Date.parse(x.tracker_cooldown_until):0;return '<article class="item"><strong>Forteca · '+(x.level?'poziom '+x.level:'poziom nieznany')+'</strong><small>X: '+x.x+' · Y: '+x.y+' · ID: '+(x.id??x.object_id??'—')+(x.last_attacked_by?' · Ostatni atakujący: '+x.last_attacked_by:'')+'</small><small>Źródło: '+(x.source_server||'PL1')+' · '+(x.match_verified_on_target?'potwierdzona na PL1':'dane IT1 — wymaga potwierdzenia na PL1')+'</small>'+(x.last_attack?'<small>Ostatni atak wg API: '+x.last_attack+'</small>':'')+(trackerUntil?'<small>Dostępna wg API: '+fmt(trackerUntil)+'</small>':'')+'<small>'+(t>Date.now()?'Lokalna notatka: dostępna za '+fmt(t):'Lokalny status: gotowa / brak lokalnego cooldownu')+'</small><button data-attack="'+id+'">Zapisz pokonanie na tym urządzeniu · 24 h</button></article>'}).join(''):'<div class="empty">'+(records.length?'Brak wyników dla wybranych filtrów.':'Brak potwierdzonych lokalizacji w tej krainie. Skan nie został jeszcze wykonany lub nie zwrócił kompletnych danych.')+'</div>';
  const pts=targets.filter(x=>Number.isFinite(Number(x.x))&&Number.isFinite(Number(x.y)));
  if(pts.length){const xs=pts.map(x=>Number(x.x)),ys=pts.map(x=>Number(x.y)),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),dx=maxX-minX||1,dy=maxY-minY||1;$('map').innerHTML='<svg viewBox="0 0 1000 700" role="img" aria-label="Mapa fortec baronów">'+pts.map(x=>'<circle class="dot '+(isReady(x)?'':'wait')+'" cx="'+(40+(Number(x.x)-minX)/dx*920)+'" cy="'+(40+(Number(x.y)-minY)/dy*620)+'" r="8"><title>'+x.x+':'+x.y+'</title></circle>').join('')+'</svg>'}else $('map').innerHTML='<div class="empty">Brak współrzędnych do wyświetlenia.</div>';
  const k=db?.results?.[kingdom];$('status').textContent=k?(k.complete?'Skan kompletny · ':'Skan niekompletny · ')+(k.fortress_count??records.length)+' fortec · nieudane fragmenty: '+(k.failed_chunks?.length??'brak danych'):'Brak danych dla '+names[kingdom]+'.';
 }
-async function load(){try{const r=await fetch(DATA+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);db=await r.json();$('status').textContent='Katalog załadowany. '+(db.note||'');render()}catch(e){$('status').textContent='Nie udało się pobrać katalogu: '+e.message;$('list').innerHTML='<div class="empty">Błąd odczytu katalogu danych.</div>'}}
+function normalizeTrackerRecord(x,index){
+ const kid=Number(x.kingdom_id??x.kid??x.kingdomId);
+ const kingdomKey=kid===1?'sands':kid===2?'ice':kid===3?'fire':'unassigned';
+ const px=Number(x.position_x??x.x),py=Number(x.position_y??x.y);
+ if(!Number.isFinite(px)||!Number.isFinite(py))return null;
+ return {id:String(x.id??x.dungeon_id??('it1-'+px+'-'+py+'-'+index)),x:px,y:py,level:x.level??x.dungeon_level??null,kingdom_id:kid,kingdom:kingdomKey,type:'barbarian_fortress',source:'gge-tracker',source_server:TRACKER_SERVER,target_server:'E4K_PL1',match_verified_on_target:false,verification:'imported_from_tracker',attack_cooldown:Number(x.attack_cooldown??0),last_attack:x.last_attack??null,last_attacked_by:x.player_name??null,player_might:x.player_might??null,player_level:x.player_level??null,tracker_attackable:x.attackable??null,tracker_cooldown_until:x.effective_cooldown_until??null};
+}
+async function loadTracker(){
+ const url=TRACKER+'?page=1&size=0&filterByKid='+encodeURIComponent('[1,2,3]')+'&filterByAttackCooldown=0';
+ const r=await fetch(url,{headers:{'gge-server':TRACKER_SERVER,'Accept':'application/json'},cache:'no-store'});
+ if(!r.ok)throw Error('GGE Tracker HTTP '+r.status);
+ const payload=await r.json();
+ const raw=Array.isArray(payload)?payload:(payload.data??payload.dungeons??payload.results??payload.items??[]);
+ if(!Array.isArray(raw))throw Error('Nieznany format odpowiedzi dungeons');
+ const records=raw.map(normalizeTrackerRecord).filter(Boolean);
+ if(!records.length)throw Error('API zwróciło 0 rekordów z rozpoznanymi współrzędnymi');
+ const results={sands:[],ice:[],fire:[],islands:[],unassigned:[]};
+ for(const x of records)results[x.kingdom].push(x);
+ const captured=new Date().toISOString();
+ db={captured_at:captured,source:'GGE Tracker public API',server_source:TRACKER_SERVER,target_server:'E4K_PL1',complete:true,results:Object.fromEntries(Object.entries(results).map(([k,fortresses])=>[k,{fortress_count:fortresses.length,failed_chunks:0,complete:true,fortresses}])),note:'Źródło: GGE Tracker IT1. Dane IT1 nie są automatycznie potwierdzone dla E4K PL1. Czasy i gracz ostatniego ataku pochodzą z odpowiedzi API, jeśli zostały udostępnione.'};
+ trackerLoaded=true;
+}
+async function load(){
+ $('status').textContent='Pobieranie wszystkich fortec z GGE Tracker IT1…';
+ try{
+  await loadTracker();
+  $('status').textContent='Załadowano '+Object.values(db.results).reduce((n,k)=>n+k.fortresses.length,0)+' fortec z IT1. Dane nie są potwierdzone dla PL1.';
+  render();
+ }catch(e){
+  try{const r=await fetch(DATA+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);db=await r.json();$('status').textContent='GGE Tracker niedostępny ('+e.message+'). Pokazuję lokalny katalog częściowy; pełna lista IT1 nie została pobrana.';render()}
+  catch(localError){$('status').textContent='Nie udało się pobrać listy IT1: '+e.message+'; katalog lokalny: '+localError.message;$('list').innerHTML='<div class="empty">Nie udało się załadować fortec. Sprawdź połączenie i ponów próbę.</div>'}
+ }
+}
 $('kingdoms').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;kingdom=b.dataset.k;document.querySelectorAll('[data-k]').forEach(x=>x.classList.toggle('active',x===b));render()});
 $('list').addEventListener('click',e=>{const b=e.target.closest('[data-attack]');if(!b)return;const times=readTimes();times[b.dataset.attack]=Date.now()+24*60*60*1000;writeTimes(times);render()});
 ['search','filter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));

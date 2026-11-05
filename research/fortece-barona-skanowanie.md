@@ -153,3 +153,23 @@ To nie dowodzi, że serwer nie udostępnia tych danych. Pokazuje, że obecny pub
 5. Dla zwykłego barona nie zakładaj, że rekord mapy zawiera identyfikator atakującego. Jeżeli potrzebny jest nick atakującego, wymagany będzie osobny dowód z ruchu lub raportu walki.
 6. Następny wymagany element techniczny: most do produkcyjnego E4K PL1 z obsługą odpowiedzi `gaa` (dopasowanie co najmniej po `KID`) albo włączenie produkcyjnego `E4K_PL1` do scrapera GGE Tracker. Bez tego nie ma potwierdzonego źródła automatycznej historii PL1.
 
+## Iteracja wdrożeniowa — 2026-11-05
+
+W gałęzi roboczej przygotowano bezpieczne poprawki modułu i diagnostyki:
+
+1. Test GAA wysyła teraz pełny zestaw parametrów KID, AX1, AY1, AX2, AY2. Sprawdza mały obszar 2×2 wokół przykładowej współrzędnej z katalogu IT1 w każdej krainie.
+2. Wynik GAA jest raportowany przez liczbę rekordów, typy obiektów i obecność pól. Nie zakładamy, że indeks 6 oznacza atakującego: znaczenie zależy od typu obiektu i musi być potwierdzone rzeczywistą odpowiedzią PL1.
+3. Próby GAA nie są mieszane z listą ruchów GAM. Ruchy GAM są widoczne tylko dla sesji konta podłączonego do mostu i nie reprezentują wszystkich graczy serwera.
+4. Historia graczy testowana przez GGE Tracker jest jawnie oznaczona jako E4K_PL1_BETA. Nie porównujemy jej z produkcyjnym PL1 i nie zapisujemy z niej zdarzeń PL1.
+5. Dodano odczyt /dungeons/meta dla E4K_PL1, E4K_PL1_BETA i IT1, aby odróżnić brak obsługi od nieaktualnego skanu.
+6. Ręczny wpis w Barony wymaga podania gracza, faktycznej daty i godziny ataku oraz dodatkowego potwierdzenia. Osobno zapisuje czas wprowadzenia wpisu; rekord nadal pozostaje lokalny w przeglądarce.
+7. Widok Barony pokazuje tylko trzy obsługiwane krainy. Dane z pozycji AP/VP w module Szpiegowanie są opisane jako pozycje gracza, nie cel ataku.
+8. Dodano test katalogu mapy, test składni skryptu strony i podstawowy test responsywności mobile. Workflow uruchamia też read-only probe przy pull requeście.
+
+### Granice dowodowe
+
+- Zgodność siatki współrzędnych PL1 z IT1 przyjmujemy na podstawie potwierdzenia użytkownika; katalog nadal ma pochodzenie IT1.
+- Odczyt Beta służy tylko do sprawdzenia formatu API i zgodności współrzędnych. Nie jest dowodem zdarzenia na produkcyjnym PL1.
+- Sygnały łupu, honoru, potęgi oraz pozycje zamków/AP/VP nie są celem ataku.
+- Nie zapisujemy automatycznej historii, dopóki nie otrzymamy odpowiedzi z produkcyjnego PL1 zawierającej współrzędne konkretnego obiektu i wiarygodne dane ataku. Dla atakującego potrzebny jest dodatkowy dowód z rekordu mapy, ruchu lub raportu walki.
+

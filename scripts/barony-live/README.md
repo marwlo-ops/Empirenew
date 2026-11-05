@@ -42,6 +42,20 @@ To jest wyłącznie pasywny odczyt ruchów widocznych dla zalogowanego konta. Pr
 
 Jeśli w oknie obserwacji 3 sekund nie nadejdzie aktualizacja `GAM`, wynik ma status `no_server_push_observed`; nie oznacza to, że serwer nie ma aktywnych ruchów. Okno obserwacji można zmienić przez `--movement-wait-ms 1000..10000`. Nie uruchamiaj tego w GitHub Actions; poświadczenia są przeznaczone wyłącznie do lokalnej sesji operatora.
 
+## Raporty bitew NPC z własnej skrzynki (opcjonalnie)
+
+Aby odczytać raporty NPC dostępne na zalogowanym koncie:
+
+```sh
+node scripts/barony-live/probe.mjs --reports
+```
+
+Po logowaniu `ggejs` pobiera skrzynkę przez `SNE`. Probe wybiera wyłącznie raporty typu battle log, area type 11 i subtype NPC attack 2, a następnie pobiera ich szczegóły przez read-only `BLS/BLM/BLD`. Ekstraktor wymaga zgodności KID/właściciela, dokładnych współrzędnych mapobject oraz dodatniego ID atakującego i zgodnego obrońcy NPC. Maksymalnie 10 raportów jest sprawdzanych domyślnie; limit można zmienić przez `--report-limit 1..25`.
+
+Wynik zawiera lokalizację, ID atakującego, wynik bitwy i `report_received_at_utc`. To **czas dostarczenia/odczytu wiadomości wyliczony z wieku skrzynki**, nie dokładny czas rozpoczęcia ataku; `attack_time_utc` pozostaje `null`. Raport dotyczy wyłącznie wiadomości dostępnych temu kontu, nie wszystkich graczy PL1. Probe niczego nie usuwa, nie oznacza jako przeczytane, nie przekazuje dalej i nie zapisuje raportów do pliku stanu ani repozytorium.
+
+Jeżeli odpowiedź skrzynki nie nadejdzie w ciągu 3 sekund, status będzie `mailbox_update_not_observed`; okno można zmienić przez `--report-wait-ms 1000..10000`.
+
 ## Pełny plan
 
 ```sh

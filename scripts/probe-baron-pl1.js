@@ -1,8 +1,10 @@
 import { readFile } from "node:fs/promises";
+import { DEFAULT_PL1_ZONE } from "./barony-live/probe-core.mjs";
 // Read-only probes only; do not persist player names or inferred attack events.
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
-const targetServer = "EmpirefourkingdomsExGG2_3";
+const targetServer = DEFAULT_PL1_ZONE;
+const legacyTargetServer = "EmpirefourkingdomsExGG2_3";
 
 const serverListResponse = await fetch(base + "/servers", {
   headers: { Accept: "application/json" },
@@ -58,13 +60,13 @@ try {
     content_type: catalogResponse.headers.get("content-type"),
     bytes: xml.length,
     server_entries: entries,
-    contains_target_zone: xml.includes("EmpirefourkingdomsExGG2_3")
+    contains_target_zone: xml.includes(targetServer)
   }));
 } catch (error) {
   console.log(JSON.stringify({ probe: "server-catalog", error: String(error) }));
 }
 
-for (const server of [targetServer, "E4K_PL1", "E4K_PL1_BETA", "PL1", "IT1"]) {
+for (const server of [targetServer, legacyTargetServer, "E4K_PL1", "E4K_PL1_BETA", "PL1", "IT1"]) {
   try {
     const url = base + "/dungeons?page=1&size=1&filterByKid=" + encodeURIComponent("[1,2,3]");
     const response = await fetch(url, {
@@ -94,7 +96,7 @@ for (const server of [targetServer, "E4K_PL1", "E4K_PL1_BETA", "PL1", "IT1"]) {
   }
 }
 
-for (const server of ["E4K_PL1", "E4K_PL1_BETA", "IT1"]) {
+for (const server of [targetServer, "E4K_PL1", "E4K_PL1_BETA", "IT1"]) {
   try {
     const response = await fetch(base + "/dungeons/meta", {
       headers: { "gge-server": server, Accept: "application/json" },
@@ -313,7 +315,7 @@ async function probeProductionPlayerHistoryWithZoneIdSuffix() {
   try {
     const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
     const network = JSON.parse(await readFile(new URL("./barony-live/node_modules/e4k-data/network/network.json", import.meta.url), "utf8"));
-    const pl1 = network.instances.find(item => item.zone === "EmpirefourkingdomsExGG_3");
+    const pl1 = network.instances.find(item => item.zone === targetServer);
     if (!pl1 || !Number.isInteger(pl1.zoneId)) {
       console.log(JSON.stringify({
         probe: "production-pl1-player-history-with-zone-id-suffix",
@@ -364,6 +366,112 @@ async function probeProductionPlayerHistoryWithZoneIdSuffix() {
     }));
   } catch (error) {
     console.log(JSON.stringify({ probe: "production-pl1-player-history-with-zone-id-suffix", error: String(error) }));
+  }
+}
+
+
+async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
+  try {
+    const catalogResponse = await fetch(base + "/servers/catalog", {
+      headers: { Accept: "application/xml, text/xml, */*" },
+      signal: AbortSignal.timeout(20000)
+    });
+    const xml = await catalogResponse.text();
+    const blocks = xml.match(/<server>[\\s\\S]*?<\\/server>/g) || [];
+    const block = blocks.find(item => new RegExp("<name>\\\\s*E4K_PL1\\\\s*</name>").test(item));
+    const readTag = name => {
+      const match = block?.match(new RegExp("<" + name + ">\\\\s*([^<]+?)\\\\s*</" + name + ">"));
+      return match ? match[1].trim() : null;
+    };
+    const code = readTag("code");
+    if (!catalogResponse.ok || !/^\\d{3}$/.test(code || "")) {
+      console.log(JSON.stringify({
+        probe: "production-pl1-player-history-with-catalog-code-suffix",
+        catalog_status: catalogResponse.status,
+        skipped: true,
+        reason: "GGE Tracker E4K_PL1 catalog entry did not provide a three-digit server code",
+        catalog_entry_found: Boolean(block),
+        catalog_code: code,
+        enabled: readTag("enabled"),
+        fortress: readTag("fortress")
+      }));
+      return;
+    }
+
+    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
+    const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
+    const known = new Set();
+    for (const data of Object.values(map.results || {})) {
+      for (const fortress of data.fortresses || []) {
+        known.add(Number(fortress.kid) + "/" + Number(fortress.x) + "/" + Number(fortress.y));
+      }
+    }
+    const members = (snapshot.alliances || []).flatMap(alliance => alliance.members || [])
+      .filter(member => member.name && Number.isInteger(member.member_id) && member.member_id > 999)
+      .slice(0, 3);
+    const results = [];
+    for (let index = 0; index < members.length; index++) {
+      const member = members[index];
+      const candidateId = String(member.member_id) + code;
+      try {
+        const profileResponse = await fetch(
+          base + "/players/" + encodeURIComponent(candidateId) + "/profile?include=none",
+          { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
+        );
+        const profile = await profileResponse.json();
+        const identity = profile?.player || {};
+        const profileMatched = profileResponse.ok &&
+          String(profile.server_code || "") === code &&
+          String(identity.player_id || "") === candidateId &&
+          String(identity.player_name || "").trim().toLocaleLowerCase() === String(member.name).trim().toLocaleLowerCase();
+
+        const historyResponse = await fetch(
+          base + "/dungeons/player/" + encodeURIComponent(candidateId) + "?lastDays=365",
+          { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
+        );
+        const history = await historyResponse.json();
+        const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
+        const targetRows = rows.filter(row =>
+          known.has(Number(row.kid) + "/" + Number(row.position_x) + "/" + Number(row.position_y))
+        );
+        results.push({
+          sample: index + 1,
+          profile_status: profileResponse.status,
+          profile_server_code: profile.server_code ?? null,
+          profile_identity_matched_to_spy_snapshot: profileMatched,
+          history_status: historyResponse.status,
+          history_error: history.error ?? null,
+          history_records: rows.length,
+          map_target_matches: profileMatched ? targetRows.length : 0,
+          unverified_target_coordinate_matches: profileMatched ? 0 : targetRows.length,
+          sample_target_rows: profileMatched ? targetRows.slice(0, 3).map(row => ({
+            kid: Number(row.kid),
+            x: Number(row.position_x),
+            y: Number(row.position_y),
+            attacked_at: row.attacked_at ?? null
+          })) : []
+        });
+      } catch (error) {
+        results.push({ sample: index + 1, error: String(error) });
+      }
+    }
+    console.log(JSON.stringify({
+      probe: "production-pl1-player-history-with-catalog-code-suffix",
+      api_route: "/dungeons/player/{playerId}",
+      suffix_source: "GGE Tracker /servers/catalog E4K_PL1 <code>, not e4k-data zoneId",
+      server_code: code,
+      catalog_enabled: readTag("enabled"),
+      catalog_fortress: readTag("fortress"),
+      snapshot_members_sampled: members.length,
+      profiles_matched: results.filter(result => result.profile_identity_matched_to_spy_snapshot).length,
+      histories_checked: results.length,
+      nonempty_matched_histories: results.filter(result => result.profile_identity_matched_to_spy_snapshot && result.history_records > 0).length,
+      total_confirmed_target_matches: results.reduce((total, result) => total + Number(result.map_target_matches || 0), 0),
+      results,
+      timestamp_warning: "API attacked_at is not treated as exact attack time: the public scraper INSERT omits attacked_at, so its database timestamp semantics are not proven to be the game event time."
+    }));
+  } catch (error) {
+    console.log(JSON.stringify({ probe: "production-pl1-player-history-with-catalog-code-suffix", error: String(error) }));
   }
 }
 
@@ -446,4 +554,5 @@ async function probeBridge() {
 await probeBetaPlayerHistoryFromDungeonRows();
 await probeProductionPlayerHistoryFromSpySnapshot();
 await probeProductionPlayerHistoryWithZoneIdSuffix();
+await probeProductionPlayerHistoryWithCatalogCodeSuffix();
 await probeBridge();

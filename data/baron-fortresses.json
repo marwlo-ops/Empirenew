@@ -1,34 +1,12 @@
 {
-  "captured_at": "2026-11-05",
-  "source": "GGE Tracker API · E4K_PL1_BETA",
+  "captured_at": null,
+  "source": "EmpireCore live kingdom scan",
   "results": {
     "sands": {
-      "fortress_count": 3,
-      "failed_chunks": [],
+      "fortress_count": null,
+      "failed_chunks": null,
       "complete": false,
-      "fortresses": [
-        {
-          "id": "beta-633-477",
-          "x": 633,
-          "y": 477,
-          "source_server": "E4K_PL1_BETA",
-          "source_label": "BETA · kandydat"
-        },
-        {
-          "id": "beta-711-555",
-          "x": 711,
-          "y": 555,
-          "source_server": "E4K_PL1_BETA",
-          "source_label": "BETA · kandydat"
-        },
-        {
-          "id": "beta-692-536",
-          "x": 692,
-          "y": 536,
-          "source_server": "E4K_PL1_BETA",
-          "source_label": "BETA · kandydat"
-        }
-      ]
+      "fortresses": []
     },
     "ice": {
       "fortress_count": null,
@@ -49,5 +27,5 @@
       "fortresses": []
     }
   },
-  "note": "Dodano 3 współrzędne z E4K_PL1_BETA na prośbę użytkownika jako prowizoryczną listę kandydatów. Nie są potwierdzone na produkcyjnym E4K_PL1; status BETA należy zachować. Skan produkcyjny nadal niedostępny."
+  "note": "Template only. Live coordinates require an authenticated EmpireCore game session; no coordinates have been fabricated."
 }

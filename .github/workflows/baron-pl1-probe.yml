@@ -9,6 +9,8 @@ on:
       - "tests/test_probe_pl1_live_map.py"
       - "scripts/test-barony-mobile.mjs"
       - "scripts/test-baron-map-catalog.mjs"
+      - "scripts/barony-live/**"
+      - "research/fortece-barona-status.md"
       - ".github/workflows/baron-pl1-probe.yml"
   workflow_dispatch:
 
@@ -18,7 +20,7 @@ permissions:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,6 +33,39 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Test E4K PL1 read-only probe core
+        run: |
+          node --check scripts/barony-live/probe.mjs
+          node --check scripts/barony-live/probe-core.mjs
+          node --test scripts/barony-live/probe-core.test.mjs
+          node scripts/barony-live/probe.mjs --plan --all > "$RUNNER_TEMP/barony-plan.json"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const catalog = JSON.parse(fs.readFileSync('data/baron-fortresses.json', 'utf8'));
+          const plan = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/barony-plan.json', 'utf8'));
+          if (plan.target_count !== catalog.total_count) throw new Error('Plan target count differs from the validated map catalog.');
+          if (plan.sector_count < 1 || plan.estimated_map_tiles !== plan.sector_count * 10000) throw new Error('Invalid 100x100 sector plan.');
+          console.log(JSON.stringify({targets: plan.target_count, sectors: plan.sector_count, estimated_map_tiles: plan.estimated_map_tiles}));
+          NODE
+      - name: Verify pinned E4K client and PL1 server metadata
+        run: |
+          npm install --prefix scripts/barony-live --ignore-scripts --no-audit --no-fund
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const { network } = require('./scripts/barony-live/node_modules/e4k-data');
+          const { E4KClient } = require('./scripts/barony-live/node_modules/ggejs');
+          const pl1 = network.instances.find(x => x.zone === 'EmpirefourkingdomsExGG_3');
+          if (!pl1 || pl1.server !== 'e4k-live-pl1-game.goodgamestudios.com' || pl1.value !== 3) throw new Error('Pinned e4k-data does not identify the expected PL1 production endpoint.');
+          if (typeof E4KClient !== 'function') throw new Error('Pinned ggejs does not export E4KClient.');
+          const root = './scripts/barony-live/node_modules/ggejs/src';
+          const socket = fs.readFileSync(root + '/managers/SocketManager.js', 'utf8');
+          const dungeon = fs.readFileSync(root + '/structures/mapobjects/DungeonMapobject.js', 'utf8');
+          const parser = fs.readFileSync(root + '/utils/MapObjectParser.js', 'utf8');
+          if (!socket.includes("serverInstance.zone.startsWith('EmpirefourkingdomsExGG') ? 'tcp' : 'wss'")) throw new Error('E4K TCP transport selection is not present in pinned ggejs.');
+          if (!dungeon.includes('this.attackCount = data[4]') || !dungeon.includes('this.attackCooldownEnd = new Date(Date.now() + data[5] * 1000)')) throw new Error('Dungeon attack counter/cooldown row mapping changed.');
+          if (!parser.includes('case 2:') || !parser.includes('return new DungeonMapobject(client, data)')) throw new Error('DUNGEON rows are not parsed by DungeonMapobject.');
+          console.log(JSON.stringify({zone: pl1.zone, host: pl1.server, instance: pl1.value, network_version: network.versionNo, network_deploy_time: new Date(network.deployTime * 1000).toISOString(), transport: 'TCP', e4k_client_export: 'PASS'}));
+          NODE
       - name: Test Barony mobile UI
         run: node scripts/test-barony-mobile.mjs
       - name: Validate published IT1 map catalog

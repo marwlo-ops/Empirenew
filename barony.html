@@ -28,7 +28,7 @@ const readTimes=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catc
 const writeTimes=x=>localStorage.setItem(KEY,JSON.stringify(x));
 const idOf=x=>String(x.id??x.object_id??(x.x+'-'+x.y));
 const localUntil=x=>Number(readTimes()[idOf(x)]||0);
-const trackerUntil=x=>{const absolute=x.tracker_cooldown_until?Date.parse(x.tracker_cooldown_until):0;const seconds=Number(x.attack_cooldown||0);const relative=seconds>0?Date.now()+seconds*1000:0;return Math.max(Number.isFinite(absolute)?absolute:0,relative)};
+const trackerUntil=x=>{const absolute=x.tracker_cooldown_until?Date.parse(x.tracker_cooldown_until):0;const seconds=Number(x.attack_cooldown||0);const base=Date.parse(x.updated_at||x.observed_at||'');const relative=seconds>0?(Number.isFinite(base)?base:Date.now())+seconds*1000:0;return Math.max(Number.isFinite(absolute)?absolute:0,relative)};
 const until=x=>Math.max(localUntil(x),trackerUntil(x));
 const isReady=x=>until(x)<=Date.now();
 const fmt=t=>new Date(t).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'});
@@ -50,7 +50,7 @@ function normalizeTrackerRecord(x,index){
  const kingdomKey=kid===1?'sands':kid===2?'ice':kid===3?'fire':'unassigned';
  const px=Number(x.position_x??x.x),py=Number(x.position_y??x.y);
  if(!Number.isFinite(px)||!Number.isFinite(py))return null;
- return {id:String(x.id??x.dungeon_id??('it1-'+px+'-'+py+'-'+index)),x:px,y:py,level:x.level??x.dungeon_level??null,kingdom_id:kid,kingdom:kingdomKey,type:'barbarian_fortress',source:'gge-tracker',source_server:TRACKER_SERVER,target_server:'E4K_PL1',match_verified_on_target:false,verification:'imported_from_tracker',attack_cooldown:Number(x.attack_cooldown??0),last_attack:x.last_attack??null,last_attacked_by:x.player_name??null,player_might:x.player_might??null,player_level:x.player_level??null,tracker_attackable:x.attackable??null,tracker_cooldown_until:x.effective_cooldown_until??null};
+ return {id:String(x.id??x.dungeon_id??('it1-'+px+'-'+py+'-'+index)),x:px,y:py,level:x.level??x.dungeon_level??null,kingdom_id:kid,kingdom:kingdomKey,type:'barbarian_fortress',source:'gge-tracker',source_server:TRACKER_SERVER,target_server:'E4K_PL1',match_verified_on_target:false,verification:'imported_from_tracker',attack_cooldown:Number(x.attack_cooldown??0),updated_at:x.updated_at??null,observed_at:new Date().toISOString(),last_attack:x.last_attack??null,last_attacked_by:x.player_name??null,player_might:x.player_might??null,player_level:x.player_level??null,tracker_attackable:x.attackable??null,tracker_cooldown_until:x.effective_cooldown_until??null};
 }
 async function loadTracker(){
  const url=TRACKER+'?page=1&size=0&filterByKid='+encodeURIComponent('[1,2,3]')+'&filterByAttackCooldown=0';

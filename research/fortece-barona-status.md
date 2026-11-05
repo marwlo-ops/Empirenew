@@ -231,7 +231,7 @@ Poprzedni lokalny skrypt scripts/probe-pl1-live-map.py korzystał z EmpireCore. 
 - WorldMapManager.getSector(kid, x, y) pobiera sektor 100×100 przez komendę gaa. gaa.js wysyła KID, AX1, AY1, AX2, AY2, a odpowiedź mapy jest parsowana z AI i OI.
 - MapObjectParser.js kieruje typ mapy 2 do DungeonMapobject. W DungeonMapobject.js pola wiersza są mapowane jako data[4] → attackCount, data[5] → attackCooldownEnd (wyliczane jako lokalne Date.now() + data[5] * 1000), data[6] → kingdomId. WorldMapOwnerInfoData mapuje właścicieli dungeonów krain KID 1/2/3 na ID -220/-221/-222.
 
-Wniosek techniczny: istnieje E4K-specyficzna, read-only ścieżka pobrania stanu konkretnego wiersza mapy. Wiersz może dostarczyć X/Y, KID, typ, NPC owner ID, licznik attackCount i pozostały cooldown. Nie zawiera automatycznie nicku atakującego ani dokładnego czasu rozpoczęcia ataku. Sam kod biblioteki nie potwierdza jeszcze semantyki licznika i cooldownu na produkcyjnym PL1.
+Wniosek techniczny: istnieje E4K-specyficzna, read-only ścieżka pobrania stanu konkretnego wiersza mapy. Wiersz może dostarczyć X/Y, KID, typ, NPC owner ID, licznik attackCount i pozostały cooldown. Nie zawiera automatycznie nicku atakującego ani dokładnego czasu rozpoczęcia ataku. Funkcje DungeonConst.getLevel(victories, KID) i getVictories() używają attackCount jako licznika zwycięstw, więc jego wzrost jest mocniejszym sygnałem niż sam cooldown; nadal oznaczamy go jako kandydacki do czasu live walidacji PL1. Biblioteka zawiera też stałą COOLDOWN=10800, ale probe jej nie używa — nie jest to pomiar cooldownu PL1. WorldMapManager opisuje getSector jako dostępny tylko dla krain, w których konto ma zamek; błąd odczytu takiej krainy nie jest dowodem braku fortec.
 
 ### Nowy lokalny probe
 

@@ -454,8 +454,9 @@ export function isGgejsGamDispatchStack(stack) {
 /**
  * Parse the SmartFox XT response envelope before ggejs dispatches its command
  * handler. The wire layout consumed by ggejs is:
- *   %xt%<command>%<zone>%<errorCode>%<payload>%
- * Only the envelope is retained; payloads may contain account data.
+ *   %xt%<command>%<opaque-context-field>%<errorCode>%<payload>%
+ * The second response field is skipped by ggejs/pygge; its semantics are not
+ * assumed to be a server zone. Only the envelope is retained, never the payload.
  */
 export function parseGgejsCommandResponseEnvelope(message) {
   if (typeof message !== 'string' || message.length === 0) return null;

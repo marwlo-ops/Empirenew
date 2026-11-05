@@ -1,31 +1,70 @@
 {
-  "captured_at": null,
-  "source": "EmpireCore live kingdom scan",
+  "captured_at": "2026-11-05T11:17:00+01:00",
+  "source": "GGE Tracker public dungeon list · server IT1 · user-provided screenshots",
+  "server_source": "IT1",
+  "target_server": "E4K_PL1",
+  "complete": false,
   "results": {
-    "sands": {
-      "fortress_count": null,
+    "sands": {"fortress_count": null, "failed_chunks": null, "complete": false, "fortresses": []},
+    "ice": {"fortress_count": null, "failed_chunks": null, "complete": false, "fortresses": []},
+    "fire": {"fortress_count": null, "failed_chunks": null, "complete": false, "fortresses": []},
+    "islands": {"fortress_count": null, "failed_chunks": null, "complete": false, "fortresses": []},
+    "unassigned": {
+      "fortress_count": 3,
       "failed_chunks": null,
       "complete": false,
-      "fortresses": []
-    },
-    "ice": {
-      "fortress_count": null,
-      "failed_chunks": null,
-      "complete": false,
-      "fortresses": []
-    },
-    "fire": {
-      "fortress_count": null,
-      "failed_chunks": null,
-      "complete": false,
-      "fortresses": []
-    },
-    "islands": {
-      "fortress_count": null,
-      "failed_chunks": null,
-      "complete": false,
-      "fortresses": []
+      "fortresses": [
+        {
+          "id": "it1-653-848",
+          "x": 653,
+          "y": 848,
+          "kingdom": null,
+          "level": null,
+          "type": "barbarian_fortress",
+          "source": "gge-tracker",
+          "source_server": "IT1",
+          "target_server": "E4K_PL1",
+          "verification": "visible_in_user_screenshot",
+          "match_verified_on_target": false,
+          "last_attack_at": null,
+          "last_attacked_by": null,
+          "cooldown_until": null
+        },
+        {
+          "id": "it1-867-321",
+          "x": 867,
+          "y": 321,
+          "kingdom": null,
+          "level": null,
+          "type": "barbarian_fortress",
+          "source": "gge-tracker",
+          "source_server": "IT1",
+          "target_server": "E4K_PL1",
+          "verification": "visible_in_user_screenshot",
+          "match_verified_on_target": false,
+          "last_attack_at": null,
+          "last_attacked_by": null,
+          "cooldown_until": null
+        },
+        {
+          "id": "it1-789-516",
+          "x": 789,
+          "y": 516,
+          "kingdom": null,
+          "level": null,
+          "type": "barbarian_fortress",
+          "source": "gge-tracker",
+          "source_server": "IT1",
+          "target_server": "E4K_PL1",
+          "verification": "coordinate_matches_in_game_screenshot",
+          "match_verified_on_target": true,
+          "last_attack_at": null,
+          "last_attacked_by": "Zabster",
+          "cooldown_until": null,
+          "observed_remaining_cooldown": "05:56:00"
+        }
+      ]
     }
   },
-  "note": "Template only. Live coordinates require an authenticated EmpireCore game session; no coordinates have been fabricated."
+  "note": "Seed list transcribed from the user's GGE Tracker IT1 screenshot. Coordinate [789,516] also appears in the user's in-game screenshot as a Barbarzyńska forteca; the in-game label says it was defeated by Zabster and showed 05:56:00 remaining at capture. The other two coordinates are visible in the IT1 list but have not yet been independently confirmed on PL1. Kingdoms, levels, current cooldowns and attack timestamps are deliberately left unknown. This is a partial seed list, not a complete PL1 scan."
 }

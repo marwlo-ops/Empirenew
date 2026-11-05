@@ -183,3 +183,30 @@ Wyniki workflow `42051704644` dla commitu `0179ec3`:
 - Test mobilny jest statycznym testem DOM/CSS/JS; fizyczny telefon nie był dostępny do testu ręcznego.
 
 Wniosek tej iteracji: katalog IT1 jest poprawny i gotowy do publikacji jako mapa współrzędnych; automatyczna historia ataków na produkcyjnym PL1 nadal nie ma wiarygodnego źródła. Nie skopiowano żadnych danych Beta/IT1 do historii PL1 i nie utworzono zdarzeń ataku.
+
+## 14. Walidator katalogu, odświeżenie IT1 i publikacja — 2026-11-05 15:13 UTC
+
+Dodano `scripts/test-baron-map-catalog.mjs` i podłączono go do obu workflow fortec:
+- sprawdza kompletność katalogu i poprawny czas pobrania;
+- wymaga źródła GGE Tracker IT1, zgodnego KID/krainy, typu `dungeon` i zakresu współrzędnych 0–1286;
+- wykrywa duplikaty oraz odrzuca pola ataku, cooldownu, gracza i gotowości;
+- uruchamia się po imporcie, a także w diagnostyce PL1.
+
+Odświeżenie danych:
+- workflow `42052431277` pobrał ponownie 1/1 stronę GGE Tracker IT1 i zapisał 2021 rekordów;
+- walidator po imporcie: PASS — 2021 unikalnych współrzędnych, bez pól ataku/cooldown/gracza/gotowości;
+- nowy snapshot: `2026-11-05T15:11:37.173Z`;
+- porównanie starego snapshotu z nowym: 2021/2021 współrzędnych identycznych, 0 dodanych, 0 usuniętych. Zmienił się czas pobrania, nie pozycje fortec.
+
+Obsłużony błąd wdrożeniowy:
+- pierwsza próba importu `42052340772` przeszła pobranie i walidację, ale push został odrzucony przez non-fast-forward, ponieważ w tym samym czasie pojawiły się inne commity;
+- poprawiono krok publikacji w `.github/workflows/baron-map-import.yml`: przed push wykonuje teraz `git fetch` i `git rebase` na aktualny branch;
+- ponowny workflow `42052431277` zakończył się sukcesem i wypchnął commit danych `11f92ee`.
+
+Końcowa kontrola:
+- workflow PL1 `42052367160`: PASS — 12 testów offline, test mobilny i walidator aktualnego katalogu;
+- test mobilny potwierdził viewport, cele dotykowe 44 px, focus i rozdzielenie lokalnych wpisów od potwierdzonej historii;
+- workflow GitHub Pages `42052460959` dla commitu `11f92ee`: build i deploy PASS; środowisko Pages zgłosiło sukces;
+- ostatni live test publicznego API nadal wykazuje `E4K_PL1 fortress=false`, `/dungeons` HTTP 400 oraz `target_connected=false` w publicznym moście. Żaden rekord Beta/IT1 nie został przeniesiony do historii PL1.
+
+Aktualny stan: mapa IT1 jest świeżo pobrana, zweryfikowana i opublikowana; automatyczna historia „kto i kiedy zaatakował” dla produkcyjnego PL1 pozostaje niepotwierdzona. Lokalny skrypt testowy nadal wymaga potwierdzenia obsługi E4K przez EmpireCore, poprawnych identyfikatorów game/network oraz uruchomienia przez operatora w autoryzowanej sesji. Nie zapisano żadnych fikcyjnych ataków.

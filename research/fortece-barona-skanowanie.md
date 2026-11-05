@@ -98,15 +98,29 @@ Każdy odczyt powinien zachować:
 - liczbę nieudanych fragmentów skanu,
 - informację, czy skan jest kompletny.
 
-## Status danych
+## Status danych — aktualizacja 2026-11-05
 
-| Kraina | Skan wykonany | Współrzędne potwierdzone |
-|---|---|---|
-| Płonące Piaski | Nie | Nie |
-| Wieczny Lód | Nie | Nie |
-| Ogniste Szczyty | Nie | Nie |
+| Kraina | Katalog współrzędnych IT1 | Liczba | Potwierdzenie dla E4K PL1 |
+|---|---:|---:|---|
+| Płonące Piaski | Tak | 671 | Nie |
+| Wieczny Lód | Tak | 779 | Nie |
+| Ogniste Szczyty | Tak | 571 | Nie |
+| **Łącznie** | **Tak** | **2021** | **Nie** |
 
-Na dzień 2026-11-04 nie posiadamy jeszcze rzeczywistych wyników skanowania tych trzech krain. Ten dokument opisuje zweryfikowaną metodę, a nie gotową listę lokalizacji.
+Katalog został pobrany z publicznego API GGE Tracker dla serwera **IT1**. Odczyt z 2026-11-05 14:20:35 UTC zwrócił jedną stronę i 2021 unikalnych lokalizacji. Kontrola pliku opublikowanego w repozytorium potwierdziła 0 duplikatów, 0 niepoprawnych współrzędnych i brak pól gracza, ataku, cooldownu lub gotowości. Współrzędne nie są potwierdzone dla E4K PL1.
+
+Testy zgodności API z 2026-11-05:
+- `gge-server: IT1` na `GET /dungeons` — HTTP 200; użyte do importu mapy.
+- `gge-server: E4K_PL1` — HTTP 400; odpowiedź wymienia `E4K_PL1_BETA`, ale nie produkcyjne `E4K_PL1`.
+- `gge-server: E4K_PL1_BETA` — HTTP 200, 976 stron przy próbce `size=1`, z polami ataku; tylko porównanie, nie dane produkcyjnego PL1.
+- `gge-server: EmpirefourkingdomsExGG2_3` oraz `PL1` — HTTP 400 (nieprawidłowa nazwa serwera w GGE Tracker).
+- Nie wolno zastępować produkcyjnego PL1 serwerem BETA.
+
+Źródło GGE Tracker ma w rekordach lochów pola `last_attack`, `last_attacker_id` i `total_attack_count`, ale są one dostępne tylko dla serwerów obsługiwanych przez ich bazę. Endpoint `/dungeons` odrzuca produkcyjny E4K PL1; jego komunikat o dozwolonych serwerach zawiera E4K_PL1_BETA, ale nie produkcyjny E4K_PL1. Endpoint `/servers` zwraca 63 pozycje i ma dokładne wpisy `E4K_PL1` oraz `E4K_PL1_BETA`; nie jest to jednak allowlista endpointu `/dungeons`. Ten drugi dla produkcyjnego nagłówka nadal zwraca HTTP 400, a jego komunikat dopuszcza tylko `E4K_PL1_BETA`.
+
+Publiczny most `empire-api.fly.dev` pochodzi z upstream `danadum/empire-api`. Jego aktualna mapa komend nie zawiera `gaa` ani `fnm`; dla nieznanej komendy używa całego nagłówka żądania jako wzorca odpowiedzi i ma timeout 1000 ms. Dokumentacja protokołu mapy potwierdza, że `gaa` przyjmuje `KID, AX1, AY1, AX2, AY2`, a odpowiedź może zawierać dodatkowe pola `AI`, `OI` i `uap`. Fork mostu GGE Tracker ma już osobne dopasowanie `gaa` tylko po `KID`. Test mostu z 2026-11-05 potwierdził `/status` HTTP 200 i aktywne połączenie serwera `EmpirefourkingdomsExGG2_3`. Dwa bezpieczne zapytania read-only — `gaa` na obszarze 2×2 i `fnm` dla DUNGEON/-202 — zwróciły HTTP 400 `Invalid command or headers`. To potwierdza, że sam socket PL1 jest połączony, ale publiczny most nie obsługuje obecnie poprawnie tych komend.
+
+Skanowanie przez EmpireCore pozostaje opisem technicznej metody dla klienta gry, a nie wykonanym skanem E4K PL1. Wymaga aktywnej sesji gry i oddzielnego testu zgodności z E4K. Nie zapisujemy wyniku takiego skanu, dopóki nie przejdzie testu.
 
 ## Źródła
 

@@ -5,6 +5,8 @@ on:
     branches: ["**"]
     paths:
       - "scripts/import-baron-map.js"
+      - "scripts/test-barony-mobile.mjs"
+      - "barony.html"
       - ".github/workflows/baron-map-import.yml"
   schedule:
     - cron: "17 */6 * * *"
@@ -30,6 +32,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Test Barony mobile layout and local-history labels
+        run: node scripts/test-barony-mobile.mjs
       - name: Validate and import map-only data
         run: |
           node --check scripts/import-baron-map.js

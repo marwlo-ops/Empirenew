@@ -5,7 +5,8 @@ import path from 'node:path';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildObservation, buildScanPlan, compareObservations,
-  extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence, stateKey } from './probe-core.mjs';
+  extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
+  isNpcBattleReportMessage, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
 
 const require = createRequire(import.meta.url);
@@ -164,7 +165,7 @@ async function main() {
       await sleep(a.reportWaitMs);
       const mailbox=Array.isArray(client.mailMessages)?client.mailMessages:[];
       const reportMessages=mailbox
-        .filter(m=>Number(m?.messageType)===6 && Number(m?.areaType)===11 && Number(m?.subType)===2)
+        .filter(isNpcBattleReportMessage)
         .slice(-a.reportLimit);
       let battleLogsLoaded=0,fetchErrors=0,rejectedReports=0;
       for (const message of reportMessages) {

@@ -47,11 +47,6 @@ async function loadPlayerNames(){
  }catch(_){}
 }
 
-function normalizeMapRecord(x){
- const kid=Number(x.kid),px=Number(x.position_x),py=Number(x.position_y);
- if(!kingdomById[kid]||!Number.isInteger(px)||!Number.isInteger(py)||px<0||px>1286||py<0||py>1286)return null;
- return {id:'it1-'+kid+'-'+px+'-'+py,kid:kid,x:px,y:py,kingdom:kingdomById[kid],source_server:TRACKER_SERVER};
-}
 
 async function loadTracker(){
  const response=await fetch(DATA+'?t='+Date.now(),{cache:'no-store'});

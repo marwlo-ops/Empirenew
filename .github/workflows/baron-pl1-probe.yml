@@ -55,7 +55,7 @@ jobs:
           const { network } = require('./scripts/barony-live/node_modules/e4k-data');
           const { E4KClient } = require('./scripts/barony-live/node_modules/ggejs');
           const pl1 = network.instances.find(x => x.zone === 'EmpirefourkingdomsExGG_3');
-          if (!pl1 || pl1.server !== 'e4k-live-pl1-game.goodgamestudios.com' || pl1.value !== 3) throw new Error('Pinned e4k-data does not identify the expected PL1 production endpoint.');
+          if (!pl1 || pl1.server !== 'e4k-live-pl1-game.goodgamestudios.com' || pl1.value !== 3 || pl1.zoneId !== 259 || pl1.instanceLocaId !== 'generic_country_PL') throw new Error('Pinned e4k-data does not identify the expected PL1 production endpoint.');
           if (typeof E4KClient !== 'function') throw new Error('Pinned ggejs does not export E4KClient.');
           const root = './scripts/barony-live/node_modules/ggejs/src';
           const socket = fs.readFileSync(root + '/managers/SocketManager.js', 'utf8');
@@ -64,7 +64,7 @@ jobs:
           if (!socket.includes("serverInstance.zone.startsWith('EmpirefourkingdomsExGG') ? 'tcp' : 'wss'")) throw new Error('E4K TCP transport selection is not present in pinned ggejs.');
           if (!dungeon.includes('this.attackCount = data[4]') || !dungeon.includes('this.attackCooldownEnd = new Date(Date.now() + data[5] * 1000)')) throw new Error('Dungeon attack counter/cooldown row mapping changed.');
           if (!parser.includes('case 2:') || !parser.includes('return new DungeonMapobject(client, data)')) throw new Error('DUNGEON rows are not parsed by DungeonMapobject.');
-          console.log(JSON.stringify({zone: pl1.zone, host: pl1.server, instance: pl1.value, network_version: network.versionNo, network_deploy_time: new Date(network.deployTime * 1000).toISOString(), transport: 'TCP', e4k_client_export: 'PASS'}));
+          console.log(JSON.stringify({zone: pl1.zone, host: pl1.server, instance: pl1.value, zone_id: pl1.zoneId, loca_id: pl1.instanceLocaId, network_version: network.versionNo, network_deploy_time: new Date(network.deployTime * 1000).toISOString(), transport: 'TCP', e4k_client_export: 'PASS'}));
           NODE
       - name: Test Barony mobile UI
         run: node scripts/test-barony-mobile.mjs

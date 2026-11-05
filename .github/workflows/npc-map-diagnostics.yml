@@ -8,6 +8,7 @@ on:
       - 'scripts/probe_gge_tracker.py'
       - '.github/workflows/npc-map-diagnostics.yml'
       - 'research/npc-map-bridge-fix.md'
+      - 'bridge-deployment/**'
   workflow_dispatch:
     inputs:
       kingdom:
@@ -40,6 +41,8 @@ jobs:
       - name: Run read-only gaa/fnm diagnostic
         id: probe
         continue-on-error: true
+        env:
+          E4K_API_BASE: ${{ secrets.E4K_API_BASE || 'https://empire-api.fly.dev' }}
         run: |
           python3 scripts/scan_npc_map.py \
             --kingdom "${{ inputs.kingdom || '1' }}" \

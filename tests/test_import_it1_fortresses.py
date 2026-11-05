@@ -39,6 +39,34 @@ class ImportIt1FortressesTests(unittest.TestCase):
         forbidden = {"attacked_at", "cooldown", "player_id", "ready_at", "source"}
         self.assertTrue(forbidden.isdisjoint(point.keys()))
 
+    def test_normalizes_live_gge_tracker_row_and_strips_dynamic_state(self):
+        # Mirrors the public IT1 API shape: coordinates plus dynamic fields,
+        # but no area_type/id. Only map coordinates may enter the public catalog.
+        point = IMPORTER.normalize({
+            "kid": 3, "position_x": 671, "position_y": 779,
+            "player_id": 12345, "player_name": "synthetic-test-only",
+            "player_might": 999999, "total_attack_count": 12,
+            "available_duration_seconds": 3600,
+            "global_available_at": "2030-01-01T00:00:00Z",
+            "effective_cooldown_until": "2030-01-01T00:00:00Z",
+            "last_attack": {"attacked_at": "2030-01-01T00:00:00Z"},
+            "distance": 1,
+        })
+        self.assertEqual(
+            point,
+            {
+                "id": "it1-3-671-779", "kid": 3, "kingdom": "fire",
+                "x": 671, "y": 779, "type": "dungeon",
+                "source_server": "IT1",
+            }
+        )
+        forbidden = {
+            "player_id", "player_name", "player_might", "total_attack_count",
+            "available_duration_seconds", "global_available_at",
+            "effective_cooldown_until", "last_attack", "attacked_at", "distance",
+        }
+        self.assertTrue(forbidden.isdisjoint(point.keys()))
+
     def test_rejects_non_boss_dungeon_rows_when_area_type_is_present(self):
         self.assertIsNone(IMPORTER.normalize({
             "kid": 1, "x": 10, "y": 20, "areaType": 2

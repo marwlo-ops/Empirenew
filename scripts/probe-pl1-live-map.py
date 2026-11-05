@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Read-only, local probe of selected E4K PL1 fortress coordinates.
+"""Legacy EmpireCore map probe. It deliberately refuses E4K zones.
 
-The script never sends attacks or spies, never writes to the repository, and
-never turns a cooldown into a guessed attack timestamp. Credentials are read
-from the environment or prompted locally; they are never printed.
+EmpireCore builds a WSS URL; E4K uses the TCP transport documented by ggejs.
+Use scripts/barony-live/probe.mjs for the read-only E4K PL1 test.
 """
 from __future__ import annotations
 
@@ -173,7 +172,19 @@ def resolve_boss_defeater(client: Any, row: dict[str, Any], cache: dict[int, Any
     row["boss_defeater"] = {"player_id": player_id, **cache[player_id]}
 
 
+def is_e4k_zone(zone: str) -> bool:
+    return str(zone).startswith("EmpirefourkingdomsExGG")
+
+
 def run_probe(args: argparse.Namespace) -> int:
+    if is_e4k_zone(getattr(args, "zone", "")):
+        print(
+            "EmpireCore transport for E4K PL1 is unverified: its NetworkInstance uses WSS, "
+            "while the E4K client implementation uses TCP. Use node scripts/barony-live/probe.mjs. "
+            "No credentials were read and no network request was sent.",
+            file=sys.stderr,
+        )
+        return 2
     if args.game_id is None or args.network_id is None:
         print("Brak potwierdzonych identyfikatorów sieci. Podaj --game-id i --network-id lub GGE_GAME_ID i GGE_NETWORK_ID; skrypt nie zgaduje tych wartości.", file=sys.stderr)
         return 2
@@ -288,7 +299,7 @@ def run_probe(args: argparse.Namespace) -> int:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--zone", default=os.getenv("GGE_ZONE", "EmpirefourkingdomsExGG2_3"))
+    parser.add_argument("--zone", default=os.getenv("GGE_ZONE", "EmpirefourkingdomsExGG_3"))
     game_id = os.getenv("GGE_GAME_ID")
     network_id = os.getenv("GGE_NETWORK_ID")
     parser.add_argument("--game-id", type=int, default=int(game_id) if game_id else None)

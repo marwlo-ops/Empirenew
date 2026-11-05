@@ -75,6 +75,7 @@ test('accepts only a DUNGEON row with the expected kingdom NPC owner', () => {
   assert.equal(observation.status, 'fortress_row_found');
   assert.equal(observation.owner_id, -220);
   assert.equal(observation.attack_count, 12);
+  assert.equal(observation.attack_count_semantics, 'ggejs_uses_as_victories_for_level_progression');
   assert.equal(observation.cooldown_active, true);
   assert.equal(observation.attack_time_utc, null);
 });
@@ -105,8 +106,10 @@ test('reports counter and cooldown transitions only as unvalidated candidate sig
     target: previous.target, attack_count: 13, cooldown_active: true,
   };
   const signals = compareObservations(previous, current);
-  assert.deepEqual(signals.map((s) => s.kind), ['attack_count_increased', 'target_cooldown_started']);
+  assert.deepEqual(signals.map((s) => s.kind), ['dungeon_progress_counter_increased', 'target_cooldown_started']);
   assert.ok(signals.every((s) => s.classification === 'candidate_signal_not_yet_live_validated'));
+  assert.equal(signals[0].metric, 'DungeonMapobject.attackCount');
+  assert.equal(signals[0].counter_semantics, 'ggejs_uses_as_victories_for_level_progression');
   assert.equal(signals[0].interval_start_utc, previous.sampled_at_utc);
   assert.equal(signals[0].interval_end_utc, current.sampled_at_utc);
 });

@@ -134,8 +134,9 @@ async function checkTarget(x,silent=false){
  try{
   const tileSize=12,spacing=13,x1=Math.floor(x.x/spacing)*spacing,y1=Math.floor(x.y/spacing)*spacing;
   const x2=Math.min(x1+tileSize,1286),y2=Math.min(y1+tileSize,1286);
-  const params='"KID":'+x.kid+',"AX1":'+x1+',"AY1":'+y1+',"AX2":'+x2+',"AY2":'+y2;
-  const url=encodeURI(TARGET_API+'/'+encodeURIComponent(TARGET_SERVER)+'/gaa/'+params);
+  const params={KID:x.kid,AX1:x1,AY1:y1,AX2:x2,AY2:y2};
+  const encoded=encodeURIComponent(JSON.stringify(params).slice(1,-1));
+  const url=TARGET_API+'/'+encodeURIComponent(TARGET_SERVER)+'/gaa/'+encoded;
   const response=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store'});
   if(!response.ok)throw Error('E4K PL1 HTTP '+response.status);
   const payload=await response.json();

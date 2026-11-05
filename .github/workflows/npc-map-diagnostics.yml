@@ -51,7 +51,8 @@ jobs:
         id: tracker
         continue-on-error: true
         run: |
-          python3 scripts/probe_gge_tracker.py > gge-tracker-probe.json
+          set -o pipefail
+          python3 scripts/probe_gge_tracker.py | tee gge-tracker-probe.json
       - name: Upload diagnostic report
         if: always()
         uses: actions/upload-artifact@v4

@@ -305,7 +305,7 @@ Klient ma `sne` i typ raportu NPC attack (battle-log subtype 2). Raport zawiera 
 
 ### Różnica względem GGE Tracker
 
-Kod GGE Tracker przechowuje `dungeons_history` z `player_id` i `attacked_at`, ale scraper desktopowego GGE używa `dungeon[6]` jako player ID. W E4K ggejs `data[6]` jest KID. To różne schematy protokołu; parsera desktopowego nie wolno przenosić do PL1. Produkcyjny `E4K_PL1` pozostawał wyłączony w ostatnim potwierdzonym teście API; Beta jest oddzielnym środowiskiem.
+Kod API GGE Tracker przechowuje `dungeons_history` z `player_id` i `attacked_at`. Jego wewnętrzny parser dungeonów filtruje jednak obiekty typu `11` i mapuje `dungeon[5]` na pozostały cooldown, a `dungeon[6]` na `player_id`. `ggejs` dla E4K mapuje typ `2` do `DungeonMapobject`, gdzie `data[5]` jest cooldownem, a `data[6]` jest KID. Repozytorium GGE Tracker deklaruje obsługę serwerów E4K, ale ten parser dungeonów nie ma rozgałęzienia E4K dla tego mapowania. Nie potwierdzono więc, że `dungeon[6]` oznacza player ID w E4K_PL1_BETA/PL1; nie wolno przenosić tego parsera ani traktować go jako dowodu historii PL1. Produkcyjny `E4K_PL1` pozostawał wyłączony w ostatnim potwierdzonym teście API; Beta jest oddzielnym środowiskiem.
 
 Źródła: [API dungeons](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts), [dungeon truth](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-truth.ts), [scraper](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts).
 

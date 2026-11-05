@@ -520,3 +520,22 @@ Osobny workflow `Empirenew location tracker` (`42101624821`) nadal kończy się 
 - Produkcyjny PL1 nadal nie udostępnia potwierdzonego publicznego katalogu fortec/historii, a automatyzacja nie ma lokalnych poświadczeń operatora. Nie wykonano live `--reports` ani `--movements`, nie zapisano żadnych zdarzeń ataków.
 
 Następny krok: po lokalnym, autoryzowanym uruchomieniu `node scripts/barony-live/probe.mjs --reports` porównać raporty z konkretnymi współrzędnymi; osobno uruchomić `--movements` i sprawdzić, czy serwer wypycha aktualizacje GAM. Każdy rekord powinien zachować rozdział między czasem raportu, estymowanym odjazdem ruchu i nieznanym dokładnym czasem ataku.
+
+
+## 20. Wspólny selektor raportów NPC dla obu probe — 2026-11-05 20:28 UTC
+
+W przeglądzie aktualnego kodu wykryto niespójność: zintegrowany probe.mjs rozpoznawał podtyp raportu NPC z message.metadata, natomiast osobny reports.mjs nadal filtrował wyłącznie message.subType. W ggejs pole subType może pozostać równe 0, gdy właściwa wartość 2 znajduje się w metadanych. W efekcie samodzielny probe mógł pomijać prawidłowe raporty.
+
+Poprawki:
+- dodano wspólny selectLatestNpcBattleReportMessages() w probe-core.mjs;
+- oba probe korzystają teraz z tego samego rozpoznawania messageType=6, areaType=11 i podtypu NPC odczytanego z metadanych z bezpiecznym fallbackiem;
+- selektor wybiera najnowsze raporty według czasu dostarczenia, a rekordy bez poprawnego czasu pozostawia na końcu;
+- limit jest walidowany (1–100);
+- komunikat attack_time_status wskazuje rzeczywistą nazwę pola report_delivery_time_estimate_utc i nadal wyraźnie oddziela szacowany czas dostarczenia od czasu rozpoczęcia ataku;
+- dodano test regresyjny dla subType=0 + metadata=11+2+..., sortowania najnowszych raportów i odrzucania niepowiązanych wiadomości.
+
+Zakres: wyłącznie scripts/barony-live/** oraz ten dziennik. Nie zmieniono barony.html, mapa-rb.html, danych mapy ani zakładek Mapa, Szpiegowanie i Dodatkowe.
+
+Wyniki testów Actions dla tego commitu są oczekiwane; do czasu zakończenia nowego workflow nie oznaczamy ich jako PASS. Żaden probe nie został uruchomiony na żywo bez autoryzowanej sesji operatora. Nie zapisano żadnych zdarzeń ataku.
+
+Ostatni potwierdzony katalog mapy pozostaje snapshotem 2026-11-05T20:04:20.052153Z: 2021 punktów (Piaski 671, Lód 779, Ogień 571), bez duplikatów i pól cooldownu/gotowości/gracza/historii. API /dungeons/meta w ostatnim zapisanym odczycie zgłaszało skan 2026-11-05T20:05:37.282Z. W tej iteracji nie wykonano kolejnego bezpośredniego pobrania endpointu, więc nie przedstawiam tego snapshotu jako świeżego odczytu z 20:28 UTC.

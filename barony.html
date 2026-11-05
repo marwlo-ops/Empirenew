@@ -10,41 +10,145 @@ main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyeb
 .notice{margin-top:13px;padding:12px;border:1px solid #66532f;border-radius:10px;background:#2a2418;color:#e8d3a7;font-size:12px}.subtle{color:var(--muted);font-size:12px}
 @media(max-width:760px){main{padding:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.map{height:370px}.list{max-height:none}.controls input{min-width:100%;flex-basis:100%}}
 </style></head><body><main>
-<section class="hero"><div class="eyebrow">Empire tools · NPC map tracker</div><h1>🏰 Barony</h1><p>Fortecę baronów i lochy NPC — lokalizacje, poziomy, status pokonania oraz kolejność ponownego ataku po 24 godzinach.</p></section>
-<div class="stats"><div class="stat"><b id="total">—</b><span>Wszystkie obiekty</span></div><div class="stat"><b id="ready">—</b><span>Gotowe do ataku</span></div><div class="stat"><b id="wait">—</b><span>Odnowienie 24 h</span></div><div class="stat"><b id="updated">—</b><span>Ostatni odczyt</span></div></div>
-<div class="controls" id="kingdoms"><button class="active" data-k="sands">🏜️ Piaski</button><button data-k="ice">❄️ Lód</button><button data-k="fire">🔥 Ogień</button><button data-k="islands">🏝️ Archipelag · wyspy</button><input id="search" placeholder="Szukaj po współrzędnych lub ID…"><select id="filter"><option value="all">Wszystkie statusy</option><option value="ready">Gotowe do ataku</option><option value="wait">W odnowieniu</option></select><select id="sort"><option value="ready">Najpierw gotowe</option><option value="level">Poziom malejąco</option><option value="xy">Współrzędne</option></select></div>
-<div class="layout"><section class="panel"><h2>Mapa lokalizacji</h2><div class="map" id="map"><div class="empty">Oczekiwanie na potwierdzone współrzędne skanu.</div></div><div class="legend">Złoty znacznik — gotowa do ataku · czerwony — trwa 24-godzinne odnowienie.</div></section><section class="panel"><h2>Lista fortec</h2><div class="list" id="list"><div class="empty">Ładowanie katalogu…</div></div></section></div>
-<div class="notice" id="status">Pobieranie katalogu fortec…</div><p class="subtle">Czasy ataków zapisują się lokalnie w tej przeglądarce. Dane lokalizacji będą pokazywane dopiero po potwierdzonym skanie API — aplikacja nie tworzy fikcyjnych punktów.</p>
+<section class="hero"><div class="eyebrow">Empire tools · NPC map tracker</div><h1>🏰 Barony</h1><p>Lokalizacje fortec z mapy IT1. Historia ataków PL1 jest oddzielona od mapy IT1.</p></section>
+<div class="stats"><div class="stat"><b id="total">—</b><span>Fortecy z IT1</span></div><div class="stat"><b id="ready">—</b><span>Sprawdzone w PL1</span></div><div class="stat"><b id="wait">—</b><span>W obserwacji</span></div><div class="stat"><b id="updated">—</b><span>Ostatni odczyt</span></div></div>
+<div class="controls" id="kingdoms"><button class="active" data-k="sands">🏜️ Piaski</button><button data-k="ice">❄️ Lód</button><button data-k="fire">🔥 Ogień</button><button data-k="islands">🏝️ Archipelag · wyspy</button><button data-k="unassigned">📍 Nieprzypisane</button><input id="search" placeholder="Szukaj po współrzędnych lub ID…"><select id="filter"><option value="all">Wszystkie fortecy</option><option value="checked">Sprawdzone w PL1</option><option value="watched">Obserwowane w PL1</option></select><select id="sort"><option value="xy">Współrzędne</option><option value="checked">Najpierw sprawdzone</option></select></div>
+<div class="layout"><section class="panel"><h2>Mapa lokalizacji</h2><div class="map" id="map"><div class="empty">Oczekiwanie na potwierdzone współrzędne skanu.</div></div><div class="legend">Mapa i współrzędne pochodzą wyłącznie z GGE Tracker IT1. Czas ataku nie jest pobierany z IT1.</div></section><section class="panel"><h2>Lista fortec</h2><div class="list" id="list"><div class="empty">Ładowanie katalogu…</div></div></section></div>
+<div class="notice" id="status">Pobieranie katalogu fortec z GGE Tracker (IT1)…</div><p class="subtle">IT1 dostarcza tylko krainę i współrzędne. API PL1 nie udostępnia obecnie potwierdzonego odczytu ataków na fortecy. Zapis ataku jest na razie ręczny i lokalny; czas odnowienia liczymy jako 24 h od zapisanego zdarzenia.</p>
 </main>
 <script>
 (()=>{'use strict';
-const DATA='./data/baron-fortresses.json',KEY='empirenew-baron-cooldowns-v1';
-const names={sands:'Płonące Piaski',ice:'Wieczny Lód',fire:'Ogniste Szczyty',islands:'Archipelag · wyspy'};
-let db=null,kingdom='sands',targets=[];
+const DATA='./data/baron-fortresses.json';
+const TARGET_API='https://empire-api.fly.dev';
+const TARGET_SERVER='EmpirefourkingdomsExGG2_3';
+const HISTORY_KEY='empirenew-baron-pl1-history-v1';
+const WATCH_KEY='empirenew-baron-pl1-watch-v1';
+const names={sands:'Płonące Piaski',ice:'Wieczny Lód',fire:'Ogniste Szczyty',unassigned:'Nieprzypisane'};
+const kingdomById={1:'sands',2:'ice',3:'fire'};
 const $=id=>document.getElementById(id);
-const readTimes=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(_){return {}}};
-const writeTimes=x=>localStorage.setItem(KEY,JSON.stringify(x));
-const idOf=x=>String(x.id??x.object_id??(x.x+'-'+x.y));
-const until=x=>Number(readTimes()[idOf(x)]||0);
-const isReady=x=>until(x)<=Date.now();
-const fmt=t=>new Date(t).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'});
+let db=null,kingdom='sands',targets=[],playerNames={};
+
+const readJson=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback))}catch(_){return fallback}};
+const writeJson=(key,value)=>localStorage.setItem(key,JSON.stringify(value));
+const readHistory=()=>readJson(HISTORY_KEY,{});
+const readWatch=()=>readJson(WATCH_KEY,[]);
+const keyOf=x=>String(Number(x.kid??x.kingdom_id))+':'+String(Number(x.x))+':'+String(Number(x.y));
+const fmt=t=>{const d=new Date(t);return Number.isNaN(d.getTime())?'—':d.toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'medium'})};
+const isCooling=x=>{const latest=readHistory()[keyOf(x)]?.latest;return latest?.status==='cooldown'&&Date.parse(latest.available_at)>Date.now()};
+
+async function loadPlayerNames(){
+ try{
+  const r=await fetch('./data/location-snapshots.json?t='+Date.now(),{cache:'no-store'});
+  if(!r.ok)return;
+  const data=await r.json();
+  for(const alliance of data.alliances||[])for(const member of alliance.members||[]){
+   if(member.member_id!=null&&member.name)playerNames[String(member.member_id)]=String(member.name);
+  }
+ }catch(_){}
+}
+
+
+async function loadTracker(){
+ const response=await fetch(DATA+'?t='+Date.now(),{cache:'no-store'});
+ if(!response.ok)throw Error('Katalog fortec HTTP '+response.status);
+ const payload=await response.json();
+ if(payload.complete!==true||!payload.results)throw Error('Katalog IT1 nie jest oznaczony jako kompletny');
+ const groups={sands:[],ice:[],fire:[]};
+ let count=0;
+ for(const group of Object.keys(groups)){
+  const source=payload.results[group]?.fortresses;
+  if(!Array.isArray(source))throw Error('Brak listy krainy '+group);
+  groups[group]=source.map(x=>({
+   id:String(x.id),kid:Number(x.kid),x:Number(x.x),y:Number(x.y),
+   kingdom:group,source_server:'IT1'
+  })).filter(x=>Number.isInteger(x.kid)&&Number.isInteger(x.x)&&Number.isInteger(x.y));
+  if(groups[group].length!==source.length)throw Error('Niepoprawne współrzędne w krainie '+group);
+  count+=groups[group].length;
+ }
+ if(count!==Number(payload.total_count))throw Error('Katalog nie przeszedł kontroli liczby rekordów');
+ db={captured_at:payload.captured_at,source:'GGE Tracker IT1 · map only',complete:true,total_count:count,
+  results:Object.fromEntries(Object.entries(groups).map(([k,fortresses])=>[k,{fortress_count:fortresses.length,complete:true,fortresses}]))};
+}
+
+function historySummary(x){
+ const h=readHistory()[keyOf(x)];
+ if(!h?.latest)return 'Brak zarejestrowanego ataku';
+ const e=h.latest;
+ if(e.status==='not_found')return 'Niezweryfikowane współrzędne';
+ if(e.status==='cooldown')return 'Ostatni zapisany atak '+fmt(e.attacked_at)+' · '+(e.player_name||('ID '+(e.player_id??'nieznane')))+' · gotowa '+fmt(e.available_at);
+ if(e.status==='ready')return 'Minęło odnowienie · ostatni atak: '+(e.attacked_at?fmt(e.attacked_at):'brak aktywnego odnowienia');
+ return 'PL1: wynik odczytu nieznany';
+}
+
 function render(){
  const records=db?.results?.[kingdom]?.fortresses||[];
- const q=$('search').value.trim().toLowerCase(),f=$('filter').value,s=$('sort').value;
- targets=records.filter(x=>(!q||[x.x,x.y,x.id,x.object_id,x.owner_id].some(v=>String(v??'').toLowerCase().includes(q)))&&(f==='all'||(f==='ready'?isReady(x):!isReady(x))));
- targets.sort((a,b)=>s==='level'?(Number(b.level||0)-Number(a.level||0)):s==='xy'?(Number(a.x)-Number(b.x)||Number(a.y)-Number(b.y)):(Number(isReady(b))-Number(isReady(a))||Number(a.level||0)-Number(b.level||0)));
+ const q=$('search').value.trim().toLowerCase(),filter=$('filter').value,sort=$('sort').value;
+ const hist=readHistory(),watched=new Set(readWatch());
+ targets=records.filter(x=>{
+  const text=[x.x,x.y,x.id,x.kid].join(' ').toLowerCase(),h=hist[keyOf(x)];
+  return (!q||text.includes(q))&&(filter==='all'||(filter==='checked'?!!h?.latest:watched.has(keyOf(x))));
+ });
+ targets.sort((a,b)=>sort==='checked'?(Number(!!hist[keyOf(b)]?.latest)-Number(!!hist[keyOf(a)]?.latest)||a.x-b.x||a.y-b.y):(a.x-b.x||a.y-b.y));
  const all=Object.values(db?.results||{}).flatMap(v=>v.fortresses||[]);
- $('total').textContent=all.length;$('ready').textContent=all.filter(isReady).length;$('wait').textContent=all.filter(x=>!isReady(x)).length;
- $('updated').textContent=db?.captured_at?fmt(db.captured_at):'brak';
- $('list').innerHTML=targets.length?targets.map(x=>{const t=until(x),id=idOf(x);return '<article class="item"><strong>Forteca · '+(x.level?'poziom '+x.level:'poziom nieznany')+'</strong><small>X: '+x.x+' · Y: '+x.y+' · ID: '+(x.id??x.object_id??'—')+(x.owner_id!==undefined?' · NPC: '+x.owner_id:'')+'</small><small>'+(t>Date.now()?'Dostępna za: '+fmt(t):'Gotowa do ataku')+'</small><button data-attack="'+id+'" '+(t>Date.now()?'disabled':'')+'>Zapisz pokonanie · 24 h</button></article>'}).join(''):'<div class="empty">'+(records.length?'Brak wyników dla wybranych filtrów.':'Brak potwierdzonych lokalizacji w tej krainie. Skan nie został jeszcze wykonany lub nie zwrócił kompletnych danych.')+'</div>';
- const pts=targets.filter(x=>Number.isFinite(Number(x.x))&&Number.isFinite(Number(x.y)));
- if(pts.length){const xs=pts.map(x=>Number(x.x)),ys=pts.map(x=>Number(x.y)),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),dx=maxX-minX||1,dy=maxY-minY||1;$('map').innerHTML='<svg viewBox="0 0 1000 700" role="img" aria-label="Mapa fortec baronów">'+pts.map(x=>'<circle class="dot '+(isReady(x)?'':'wait')+'" cx="'+(40+(Number(x.x)-minX)/dx*920)+'" cy="'+(40+(Number(x.y)-minY)/dy*620)+'" r="8"><title>'+x.x+':'+x.y+'</title></circle>').join('')+'</svg>'}else $('map').innerHTML='<div class="empty">Brak współrzędnych do wyświetlenia.</div>';
- const k=db?.results?.[kingdom];$('status').textContent=k?(k.complete?'Skan kompletny · ':'Skan niekompletny · ')+(k.fortress_count??records.length)+' fortec · nieudane fragmenty: '+(k.failed_chunks?.length??'brak danych'):'Brak danych dla '+names[kingdom]+'.';
+ const checked=all.filter(x=>!!hist[keyOf(x)]?.latest).length;
+ $('total').textContent=all.length;$('ready').textContent=checked;$('wait').textContent=watched.size;
+ $('updated').textContent=db?.captured_at?fmt(db.captured_at):'—';
+ $('list').innerHTML=targets.length?targets.map(x=>{
+  const k=keyOf(x),h=hist[k],state=historySummary(x);
+  const events=(h?.events||[]).slice(-3).reverse().map(e=>'<small>Atak: '+fmt(e.attacked_at)+' · '+(e.player_name||('ID '+(e.player_id??'nieznane')) )+'</small>').join('');
+  return '<article class="item"><strong>Forteca · '+names[x.kingdom]+'</strong><small>X: '+x.x+' · Y: '+x.y+' · źródło mapy: IT1</small><small>'+state+'</small>'+events+'<button data-attack="'+k+'" type="button">Zapisz atak · blokada 24 h</button></article>';
+ }).join(''):'<div class="empty">'+(records.length?'Brak wyników dla wybranych filtrów.':'Brak lokalizacji w tej krainie.')+'</div>';
+ const pts=targets.filter(x=>Number.isFinite(x.x)&&Number.isFinite(x.y));
+ if(pts.length){
+  const xs=pts.map(x=>x.x),ys=pts.map(x=>x.y),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),dx=maxX-minX||1,dy=maxY-minY||1;
+  $('map').innerHTML='<svg viewBox="0 0 1000 700" role="img" aria-label="Mapa fortec IT1">'+pts.map(x=>'<circle class="dot '+(isCooling(x)?'wait':'')+'" cx="'+(40+(x.x-minX)/dx*920)+'" cy="'+(40+(x.y-minY)/dy*620)+'" r="8"><title>'+x.x+':'+x.y+'</title></circle>').join('')+'</svg>';
+ }else $('map').innerHTML='<div class="empty">Brak współrzędnych do wyświetlenia.</div>';
+ const current=db?.results?.[kingdom];
+ $('status').textContent=current?'Mapa IT1 · '+current.fortress_count+' fortec · odczyt z pliku danych. Ataki nie są importowane z IT1; lokalny rejestr liczy 24 h od zapisu.':'Brak danych dla '+(names[kingdom]||kingdom)+'.';
 }
-async function load(){try{const r=await fetch(DATA+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);db=await r.json();$('status').textContent='Katalog załadowany. '+(db.note||'');render()}catch(e){$('status').textContent='Nie udało się pobrać katalogu: '+e.message;$('list').innerHTML='<div class="empty">Błąd odczytu katalogu danych.</div>'}}
-$('kingdoms').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;kingdom=b.dataset.k;document.querySelectorAll('[data-k]').forEach(x=>x.classList.toggle('active',x===b));render()});
-$('list').addEventListener('click',e=>{const b=e.target.closest('[data-attack]');if(!b)return;const times=readTimes();times[b.dataset.attack]=Date.now()+24*60*60*1000;writeTimes(times);render()});
+
+function saveObservation(x,observation){
+ const key=keyOf(x),all=readHistory(),entry=all[key]||{kid:x.kid,x:x.x,y:x.y,events:[]},prior=entry.latest;
+ if(observation.status==='cooldown'){
+  const nearPrior=prior?.status==='cooldown'&&String(prior.player_id??'')===String(observation.player_id??'')&&Math.abs(Date.parse(prior.attacked_at)-Date.parse(observation.attacked_at))<120000;
+  if(nearPrior){
+   entry.events=entry.events||[];
+   const last=entry.events[entry.events.length-1];
+   if(last){last.sampled_at=observation.sampled_at;last.available_at=observation.available_at;last.attacked_at=observation.attacked_at;}
+  }else{
+   entry.events=entry.events||[];entry.events.push({...observation});entry.events=entry.events.slice(-100);
+  }
+ }
+ entry.latest=observation;entry.updated_at=observation.sampled_at;all[key]=entry;
+ writeJson(HISTORY_KEY,all);
+}
+
+function recordAttack(x){
+ const attacker=(window.prompt('Kto zaatakował tę fortecę? Podaj nick gracza:', 'Mój atak')||'').trim();
+ if(!attacker)return;
+ const attackedAt=new Date().toISOString();
+ const availableAt=new Date(Date.now()+24*60*60*1000).toISOString();
+ const key=keyOf(x),all=readHistory(),entry=all[key]||{kid:x.kid,x:x.x,y:x.y,events:[]};
+ const event={status:'cooldown',sampled_at:attackedAt,attacked_at:attackedAt,available_at:availableAt,player_name:attacker,source:'manual-confirmation'};
+ entry.events=entry.events||[];
+ entry.events.push(event);
+ entry.events=entry.events.slice(-100);
+ entry.latest=event;entry.updated_at=attackedAt;all[key]=entry;
+ writeJson(HISTORY_KEY,all);
+ const watched=readWatch();if(!watched.includes(key)){watched.push(key);writeJson(WATCH_KEY,watched);}
+ render();
+ $('status').textContent='Zapisano atak na '+x.x+':'+x.y+'. Ponowna dostępność: '+fmt(availableAt)+'. Zapis jest lokalny na tym urządzeniu.';
+}
+
+async function load(){
+ $('status').textContent='Pobieranie kompletnej mapy IT1…';
+ try{await loadTracker();render();}
+ catch(error){$('status').textContent='Nie udało się pobrać kompletnej mapy IT1: '+error.message;$('list').innerHTML='<div class="empty">Brak potwierdzonej pełnej listy IT1. Nie wyświetlam niepełnego importu jako kompletnego.</div>';$('total').textContent='—';$('ready').textContent='—';$('wait').textContent='—';}
+}
+$('kingdoms').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;kingdom=b.dataset.k;document.querySelectorAll('[data-k]').forEach(x=>x.classList.toggle('active',x===b));render();});
+$('list').addEventListener('click',e=>{const b=e.target.closest('[data-attack]');if(!b)return;const x=targets.find(v=>keyOf(v)===b.dataset.attack);if(x)recordAttack(x);});
 ['search','filter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
-load();setInterval(load,5*60*1000);setInterval(render,60*1000);
+load();
+
 })();
 </script></body></html>

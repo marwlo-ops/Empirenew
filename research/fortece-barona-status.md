@@ -680,7 +680,7 @@ Dodano testy:
 - odrzucenia batcha bez zweryfikowanego statusu;
 - przyjęcia batcha wyłącznie po zweryfikowanym sukcesie.
 
-Testy wcześniejszej logiki pozostają bez zmiany. Wynik uruchomienia CI dla nowego commitu należy sprawdzić osobno; nie deklaruje się PASS przed otrzymaniem statusu workflow.
+Testy wcześniejszej logiki pozostają bez zmiany. Wykonano wszystkie 32 przypadki z scripts/barony-live/probe-core.test.mjs w izolowanym harnessie JavaScript: 32/32 PASS. To nie jest uruchomienie node --test ani GitHub Actions. Dostępny odczyt status checks dla najnowszych commitów zwrócił pustą listę, więc pełny wynik CI pozostaje niepotwierdzony.
 
 ### Ograniczenia
 

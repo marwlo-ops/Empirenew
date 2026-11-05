@@ -469,7 +469,7 @@ export function parseGgejsCommandResponseEnvelope(message) {
   if (!command) return null;
   const zone = String(parts[2] ?? '');
   const codeText = String(parts[3] ?? '');
-  const errorCode = /^-?\\d+$/.test(codeText) ? Number(codeText) : null;
+  const errorCode = /^-?\d+$/.test(codeText) ? Number(codeText) : null;
   return {
     command,
     zone,
@@ -480,6 +480,10 @@ export function parseGgejsCommandResponseEnvelope(message) {
 
 /**
  * Summarize an account-scoped, read-only GAM movement snapshot request.
+ * GAM may arrive in several response batches. Only batches tied to a verified
+ * successful XT response envelope are accepted when status capture is enabled.
+ * Coverage remains limited to movements returned to this authenticated account.
+ */
 export function buildGamProbeSummary({
   requestSent = false,
   preRequestBatches = [],

@@ -1,9 +1,12 @@
 {
   "schema_version": 2,
-  "captured_at": "2026-11-05T19:10:33.054Z",
+  "captured_at": "2026-11-05T20:04:20.052153+00:00",
   "source": "GGE Tracker public API · map coordinates only",
   "server_source": "IT1",
+  "target_server": "E4K_PL1",
+  "coordinate_alignment": "operator_confirmed; not independently live-verified by this importer",
   "complete": true,
+  "pages_read": 1,
   "total_count": 2021,
   "results": {
     "sands": {
@@ -18214,5 +18217,5 @@
       ]
     }
   },
-  "note": "Imported from GGE Tracker IT1. This file intentionally contains only kingdom and map coordinates; attack activity and cooldown are queried separately from the E4K target server."
+  "note": "IT1 is the map-coordinate source. The coordinate grid alignment with production E4K PL1 was confirmed by the operator; this import does not verify current PL1 object presence. No cooldown, readiness, player or attack-history fields are imported."
 }

@@ -363,3 +363,78 @@ Workflow diagnostyczny zakończył się poprawnie jako proces, ale status runu n
 Lokalny `scripts/barony-live/probe.mjs` nie został uruchomiony live: wymaga lokalnej autoryzowanej sesji operatora. Wiersz typu 11 może zawierać `defeaterPlayerId`, ale nie ma w nim dokładnego `attacked_at`. Nie zapisano żadnych zdarzeń ataku.
 
 Następny krok: odczytać wynik per-endpoint z logu workflow `42081486716`, a następnie — po stronie operatora — wykonać dwie małe próbki live PL1 na autoryzowanej sesji i porównać konkretne `kid/x/y`, `defeaterPlayerId` oraz przejście cooldownu. Do tego czasu sygnały pozostają kandydackie, a dokładny czas ataku pozostaje nieustalony.
+
+
+## 19. Świeży import IT1, test rzeczywistego schematu API i odczyt GAM — 2026-11-05 20:08 UTC
+
+### Ponowna weryfikacja mapy IT1
+
+Bezpośredni odczyt publicznego API GGE Tracker z nagłówkiem `gge-server: IT1`:
+- `GET /api/v1/dungeons?page=1&size=4000&filterByKid=[1,2,3]`: HTTP 200, 2021 rekordów na jednej stronie;
+- Piaski/KID 1: 671, Lód/KID 2: 779, Ogień/KID 3: 571;
+- 0 nieprawidłowych współrzędnych i 0 duplikatów;
+- `/dungeons/meta`: ostatni skan zgłoszony przez API `2026-11-05T20:05:37.282Z`;
+- w bezpośrednim porównaniu współrzędnych wykonanym o 20:01 UTC API i katalog miały identyczny zestaw 2021/2021 punktów, bez brakujących ani dodatkowych pozycji.
+
+API IT1 zwraca również pola dynamiczne (m.in. `player_id`, `player_name`, `total_attack_count`, `available_duration_seconds`, `effective_cooldown_until`, `last_attack`). Nie są one kopiowane do katalogu strony.
+
+### Świeży import i test normalizacji
+
+Commit testu: `da0d190d5cd50a551b2a60f1cb62089c15788676`.
+
+- Workflow importu `42099856157`: PASS; 21 testów Python; importer pobrał 2021 rekordów z 1 strony.
+- Dodany test odwzorowuje rzeczywisty kształt wiersza GGE Tracker (bez `area_type` i źródłowego ID, ale z polami gracza/historii/cooldownu) i wymaga, by wynik zawierał wyłącznie schemat mapowy.
+- Walidator: PASS — 2021 unikalnych współrzędnych, brak pól ataku/cooldownu/gracza/gotowości.
+- Plan Barony: 2021 celów, 199 sektorów 100×100, 1 990 000 szacowanych pól.
+- Nowy snapshot zapisany przez importer: `captured_at=2026-11-05T20:04:20.052153Z`, `pages_read=1`.
+- Commit danych po imporcie: `a6fd9392e81e395ac2ab78bb4058a3e920913fac`.
+
+### Rozszerzenie read-only GAM w lokalnym probe
+
+Na podstawie kodu przypiętego `ggejs 2.2.0` potwierdzono:
+- `GAM` jest parsowane do `client.movements` przez `gam.js`;
+- `MovementManager.get()` zwraca bieżące ruchy, a `BasicMovement` mapuje typ ruchu, kierunek, ID ruchu, źródło/cel, KID oraz lokalnie wyliczone czasy odjazdu/przyjazdu;
+- źródło i cel są parsowane z właścicielami; typ 11 celu tworzy `BossDungeonMapobject`.
+
+Wprowadzono w module Barony:
+1. `extractParsedOutboundBossDungeonMovementEvidence` — waliduje typ ruchu 11, kierunek wychodzący, typ celu 11, zgodny KID i właściciela NPC (-230/-231/-232), dodatni ID właściciela źródła oraz dokładne X/Y;
+2. `node scripts/barony-live/probe.mjs --movements` — opcjonalnie wysyła read-only `GAM` po lokalnym, autoryzowanym zalogowaniu; oczekuje na odpowiedź maksymalnie 3 sekundy (regulowane `--movement-wait-ms`);
+3. ruchy są wyłącznie wypisywane w wyniku lokalnego probe — nie są zapisywane do pliku stanu ani repozytorium;
+4. klasyfikacja została zmieniona na `observed_outbound_npc_attack_movement_to_boss_dungeon`, aby nie mylić ruchu w drodze z zakończoną bitwą.
+
+Ograniczenia:
+- ID atakującego i dokładne X/Y są potwierdzone tylko dla ruchów zwróconych zalogowanej sesji;
+- `departureTime` i `arrivalTime` w `ggejs` są wyliczane lokalnie z czasu trwania ruchu; odjazd jest estymacją, nie serwerowym timestampem ataku;
+- `attack_time_utc` pozostaje null;
+- GAM nie jest globalnym feedem PL1 i nie potwierdza zakończenia bitwy;
+- ten tryb nie został uruchomiony live, ponieważ automatyzacja nie ma lokalnych poświadczeń operatora.
+
+### Testy, deployment i diagnostyka PL1
+
+Najnowszy workflow probe `42100365201` dla commitu `ec2fc1a89bea2ed699bdaa9a70cd6fa450b1ed37`:
+- Python probe tests: 13/13 PASS;
+- Node core tests: 22/22 PASS;
+- kontrola przypiętego klienta E4K, hosta PL1 i transportu TCP: PASS;
+- test mobilny Barony (viewport, cele dotykowe 44 px, focus, etykiety lokalnej historii i separacja dowodów): PASS;
+- walidator katalogu IT1: PASS;
+- diagnostyka publicznych endpointów: wykonana, ale bez dostępu do produkcyjnej historii PL1.
+
+Najnowszy Pages build/deployment `42100365593` dla tego samego commitu: build PASS, deploy PASS, report-build-status PASS.
+
+Wyniki publicznego API w przebiegu `42100365201`:
+- `E4K_PL1` na `/dungeons` i `/dungeons/meta`: HTTP 400, Invalid server;
+- katalog serwerów: produkcyjny `E4K_PL1` ma `enabled=true`, `fortress=false`; `E4K_PL1_BETA` ma `fortress=true`;
+- Beta: 976 rekordów; 5/5 historii niepustych (7763 rekordy w tych próbkach) — wyłącznie diagnostyka Beta;
+- produkcyjny PL1: 3/3 testowanych identyfikatorów z migawki Szpiegowania nierozpoznane, historia HTTP 400 `Invalid player ID`;
+- `empire-api.fly.dev/status`: HTTP 200, ale `EmpirefourkingdomsExGG_3=false`; zapytania GAM/GAA zostały pominięte z powodu braku potwierdzonego socketu.
+
+Pierwszy CI uruchomiony bezpośrednio po zmianie etykiety ekstraktora zakończył się 1 niepowodzeniem testu, ponieważ test oczekiwał starej etykiety `confirmed_...`. Zaktualizowano asercję i dodano testy parsed MovementManager; następny przebieg `42100365201` przeszedł 22/22. To był błąd przejściowy testu, nie błąd produkcyjnego odczytu.
+
+### Wniosek i następny krok
+
+- Katalog IT1: świeży, zweryfikowany i opublikowany jako współrzędne mapy bez danych cooldownu/gotowości.
+- Lokalny probe ma teraz dwie bezpieczne ścieżki: odczyt wierszy mapy przez `GAA` oraz opcjonalny snapshot ruchów przez `GAM`.
+- Produkcyjny PL1 nadal nie ma potwierdzonego publicznego endpointu historii fortec, a most nie ma aktywnego socketu PL1.
+- Nie wykonano autoryzowanego logowania operatora, nie odczytano live GAM z PL1 i nie zapisano żadnych zdarzeń ataku.
+
+Następny krok: operator uruchamia lokalnie `node scripts/barony-live/probe.mjs --movements` w autoryzowanej sesji PL1, a następnie powtarza próbkę po kilku minutach. Ruchy pozostają obserwacją aktywnego ataku w drodze; do historii zakończonych ataków potrzebny będzie wiarygodny raport walki lub serwerowy dziennik zdarzeń z czasem.

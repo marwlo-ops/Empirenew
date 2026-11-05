@@ -539,3 +539,23 @@ Zakres: wyłącznie scripts/barony-live/** oraz ten dziennik. Nie zmieniono baro
 Wyniki testów Actions dla tego commitu są oczekiwane; do czasu zakończenia nowego workflow nie oznaczamy ich jako PASS. Żaden probe nie został uruchomiony na żywo bez autoryzowanej sesji operatora. Nie zapisano żadnych zdarzeń ataku.
 
 Ostatni potwierdzony katalog mapy pozostaje snapshotem 2026-11-05T20:04:20.052153Z: 2021 punktów (Piaski 671, Lód 779, Ogień 571), bez duplikatów i pól cooldownu/gotowości/gracza/historii. API /dungeons/meta w ostatnim zapisanym odczycie zgłaszało skan 2026-11-05T20:05:37.282Z. W tej iteracji nie wykonano kolejnego bezpośredniego pobrania endpointu, więc nie przedstawiam tego snapshotu jako świeżego odczytu z 20:28 UTC.
+
+
+## 21. Bezpośrednia inspekcja czasu w raportach ggejs — 2026-11-05 20:34 UTC
+
+Ponownie odczytano kod przypiętego upstream ggejs (bez wykonywania logowania):
+- BasicMessage.js ustawia deliveryTime jako Date.now() - data[5] * 1000. Jest to lokalne oszacowanie wieku wiadomości, a nie timestamp serwera ani chwila ataku.
+- BasicBattleLogMessage.js parsuje subtype z pierwszego segmentu metadata (areaType+subType+wynik), a KID i owner ID z drugiego segmentu. getBattleLog() pobiera BLS, BLM i BLD.
+- bls.js zwraca ID raportu, obiekt mapy, uczestników, wynik i parametry walki, ale nie wystawia czasu rozpoczęcia ataku.
+- blm.js i bld.js uzupełniają dowódców, fale, narzędzia i jednostki; w przeglądanym kodzie nie znaleziono pola czasu/datowania walki.
+
+Wniosek: raport NPC może potwierdzić dokładny cel (KID/X/Y) i ID atakującego dla wiadomości z konkretnej skrzynki, ale nie daje dokładnego czasu ataku. Pole deliveryTime może być pokazane wyłącznie jako szacowany czas dostarczenia wiadomości; dla przekazanych raportów nie jest to nawet pierwotny czas dostarczenia. Nie wolno mapować go na attacked_at.
+
+Źródła upstream:
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/structures/messages/BasicMessage.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/structures/messages/BasicBattleLogMessage.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/bls.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/blm.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/bld.js
+
+Zakres repozytorium: wyłącznie dokumentacja badawcza. Nie zmieniono kodu UI, mapy ani danych publikowanych. Nie wykonano live połączenia PL1 i nie zapisano zdarzeń ataku.

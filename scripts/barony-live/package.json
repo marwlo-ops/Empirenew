@@ -1,0 +1,16 @@
+{
+  "name": "empirenew-barony-live-probe",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test probe-core.test.mjs",
+    "plan": "node probe.mjs --plan",
+    "plan:all": "node probe.mjs --plan --all",
+    "probe": "node probe.mjs"
+  },
+  "dependencies": {
+    "e4k-data": "4.144.21-788.RC.3",
+    "ggejs": "2.2.0"
+  }
+}

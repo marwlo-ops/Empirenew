@@ -126,3 +126,19 @@ bridge; it has not been deployed by this repository.
 - Artifact: `npc-map-diagnostic` (506 bytes)
 - The run correctly failed its validation gate; the report confirms both
   commands returned HTTP 400 and no snapshot was changed.
+
+
+## Alternate source check — GGE Tracker (live, 2026-11-05)
+
+A second read-only probe tested the public endpoint
+`https://api.gge-tracker.com/api/v1/dungeons?page=1&size=3&filterByKid=%5B1%5D`
+with the documented `gge-server` header.
+
+- `E4K_PL1`: HTTP 400, code `INVALID_SERVER`.
+- The API's own error lists its currently supported servers and does not include production `E4K_PL1`.
+- `E4K_PL1_BETA`: HTTP 200 and returns dungeon records with `position_x` / `position_y`.
+- The beta response is not production PL1 and must not be merged into the PL1 snapshot or displayed as PL1 data.
+
+The compatibility probe is in `scripts/probe_gge_tracker.py`; it tests both server keys, writes only a diagnostic report, and deliberately exits non-zero when production PL1 is unavailable. The latest Actions run is `41947051704`.
+
+This rules out the public GGE Tracker endpoint as a source for the requested production server at this time. The remaining credible route is to fix or replace the external SmartFox bridge so that `gaa` / `fnm` responses can be read from the authenticated E4K PL1 connection.

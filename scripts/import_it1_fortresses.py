@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Import map-only dungeon/fortress coordinates from GGE Tracker IT1.
+"""Import map-only fortress coordinates from GGE Tracker IT1.
 
-Cooldown and attack history are deliberately excluded. The collector preserves the
-last good catalog if the API fails, returns an unknown schema, or yields no points.
+The public catalog deliberately excludes cooldown, readiness, player and attack
+history. The last known-good catalog is preserved on any incomplete/invalid scan.
 """
 import json
-import os
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -15,8 +14,10 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "baron-fortresses.json"
 API = "https://api.gge-tracker.com/api/v1/dungeons"
 SERVER = "IT1"
+TARGET_SERVER = "E4K_PL1"
 PAGE_SIZE = 4000
 MAX_PAGES = 20
+MAX_COORDINATE = 1286
 KINGDOMS = {1: "sands", 2: "ice", 3: "fire"}
 
 
@@ -59,18 +60,28 @@ def normalize(record):
     kid = integer(record, ("kid", "kingdom_id", "kingdomId", "kingdom"))
     x = integer(record, ("position_x", "x", "posX", "X"))
     y = integer(record, ("position_y", "y", "posY", "Y"))
-    if kid not in KINGDOMS or x is None or y is None or x < 0 or y < 0:
+    area_type = integer(record, ("area_type", "areaType"))
+    if area_type is not None and area_type != 11:
+        return None
+    if (
+        kid not in KINGDOMS
+        or x is None
+        or y is None
+        or not 0 <= x <= MAX_COORDINATE
+        or not 0 <= y <= MAX_COORDINATE
+    ):
         return None
     stable_id = record.get("id", record.get("dungeon_id", record.get("object_id")))
+    # Keep the public schema identical to the catalog consumed by Barony/probe.
+    # Never copy arbitrary API fields (especially player/cooldown/history fields).
     return {
         "id": str(stable_id) if stable_id is not None else f"it1-{kid}-{x}-{y}",
         "kid": kid,
+        "kingdom": KINGDOMS[kid],
         "x": x,
         "y": y,
-        "kingdom": KINGDOMS[kid],
+        "type": "dungeon",
         "source_server": SERVER,
-        "source": "GGE Tracker map data",
-        "match_verified_on_target": False
     }
 
 
@@ -82,8 +93,11 @@ def fetch_page(page):
     })
     req = urllib.request.Request(
         API + "?" + query,
-        headers={"gge-server": SERVER, "Accept": "application/json",
-                 "User-Agent": "Empirenew-Map-Importer/1.0"}
+        headers={
+            "gge-server": SERVER,
+            "Accept": "application/json",
+            "User-Agent": "Empirenew-Map-Importer/1.0",
+        }
     )
     with urllib.request.urlopen(req, timeout=30) as response:
         if response.status != 200:
@@ -94,6 +108,7 @@ def fetch_page(page):
 def main():
     all_points = {}
     pages_read = 0
+    pagination_complete = False
     for page in range(1, MAX_PAGES + 1):
         payload = fetch_page(page)
         rows = records_from(payload)
@@ -103,19 +118,25 @@ def main():
         for row in rows:
             point = normalize(row)
             if point:
-                all_points[(point["kid"], point["x"], point["y"])] = point
-        # Stop when the API returns fewer rows than requested.
+                key = (point["kid"], point["x"], point["y"])
+                if key in all_points:
+                    raise RuntimeError(f"Duplicate IT1 coordinate {key}; existing catalog preserved")
+                all_points[key] = point
         if len(rows) < PAGE_SIZE:
+            pagination_complete = True
             break
+
+    if not pagination_complete:
+        raise RuntimeError("Safety limit reached before proving pagination complete; existing catalog preserved")
     if not all_points:
         raise RuntimeError("API returned no recognized coordinates; existing catalog preserved")
-    if pages_read == MAX_PAGES:
-        raise RuntimeError("Safety limit reached before proving pagination complete; existing catalog preserved")
 
     groups = {name: [] for name in ("sands", "ice", "fire")}
     for point in all_points.values():
         groups[point["kingdom"]].append(point)
-    for values in groups.values():
+    for name, values in groups.items():
+        if not values:
+            raise RuntimeError(f"GGE Tracker returned no IT1 points for {name}; existing catalog preserved")
         values.sort(key=lambda p: (p["x"], p["y"]))
 
     old = {}
@@ -123,18 +144,20 @@ def main():
         old = json.loads(OUT.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         pass
-    # Never replace a larger previous complete catalog with a smaller result silently.
     old_total = int(old.get("total_count", 0) or 0)
     if old.get("complete") is True and len(all_points) < old_total:
-        raise RuntimeError(f"New scan ({len(all_points)}) is smaller than last complete catalog ({old_total}); preserving old data")
+        raise RuntimeError(
+            f"New scan ({len(all_points)}) is smaller than last complete catalog ({old_total}); preserving old data"
+        )
 
     captured = now()
     output = {
         "schema_version": 2,
         "captured_at": captured,
-        "source": "GGE Tracker public API",
+        "source": "GGE Tracker public API · map coordinates only",
         "server_source": SERVER,
-        "target_server": "E4K_PL1",
+        "target_server": TARGET_SERVER,
+        "coordinate_alignment": "operator_confirmed; not independently live-verified by this importer",
         "complete": True,
         "pages_read": pages_read,
         "total_count": len(all_points),
@@ -142,13 +165,17 @@ def main():
             name: {"fortress_count": len(points), "complete": True, "fortresses": points}
             for name, points in groups.items()
         },
-        "note": "Map-only import from desktop IT1. No attack cooldown or attack-history fields are imported. IT1 coordinates are not confirmed for E4K_PL1."
+        "note": (
+            "IT1 is the map-coordinate source. The coordinate grid alignment with production E4K PL1 "
+            "was confirmed by the operator; this import does not verify current PL1 object presence. "
+            "No cooldown, readiness, player or attack-history fields are imported."
+        ),
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     tmp = OUT.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     tmp.replace(OUT)
-    print(f"Imported {len(all_points)} map records from IT1 across {pages_read} page(s).")
+    print(f"Imported {len(all_points)} map-only IT1 records across {pages_read} page(s).")
 
 
 if __name__ == "__main__":

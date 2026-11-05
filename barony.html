@@ -14,6 +14,7 @@ main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyeb
 <div class="stats"><div class="stat"><b id="total">—</b><span>Fortecy z IT1</span></div><div class="stat"><b id="ready">—</b><span>Sprawdzone w PL1</span></div><div class="stat"><b id="wait">—</b><span>W obserwacji</span></div><div class="stat"><b id="updated">—</b><span>Ostatni odczyt</span></div></div>
 <div class="controls" id="kingdoms"><button class="active" data-k="sands">🏜️ Piaski</button><button data-k="ice">❄️ Lód</button><button data-k="fire">🔥 Ogień</button><button data-k="islands">🏝️ Archipelag · wyspy</button><button data-k="unassigned">📍 Nieprzypisane</button><input id="search" placeholder="Szukaj po współrzędnych lub ID…"><select id="filter"><option value="all">Wszystkie fortecy</option><option value="checked">Sprawdzone w PL1</option><option value="watched">Obserwowane w PL1</option></select><select id="sort"><option value="xy">Współrzędne</option><option value="checked">Najpierw sprawdzone</option></select></div>
 <div class="layout"><section class="panel"><h2>Mapa lokalizacji</h2><div class="map" id="map"><div class="empty">Oczekiwanie na potwierdzone współrzędne skanu.</div></div><div class="legend">Mapa i współrzędne pochodzą wyłącznie z GGE Tracker IT1. Czas ataku nie jest pobierany z IT1.</div></section><section class="panel"><h2>Lista fortec</h2><div class="list" id="list"><div class="empty">Ładowanie katalogu…</div></div></section></div>
+<section class="panel" style="margin-top:13px"><h2>📡 Sygnały aktywności PL1 · Szpiegowanie</h2><div class="subtle" id="intelSummary">Odczyt historii całego serwera PL1…</div><div id="intelSignals" class="list" style="max-height:360px;margin-top:10px"><div class="empty">Ładowanie sygnałów…</div></div><div class="notice">Wzrost łupu lub honoru wskazuje aktywność gracza pomiędzy snapshotami. Nie zawiera współrzędnych celu, więc nie jest dowodem ataku na konkretną fortecę IT1. Nie ustawiamy na tej podstawie blokady 24 h.</div></section>
 <div class="notice" id="status">Pobieranie katalogu fortec z GGE Tracker (IT1)…</div><p class="subtle">IT1 dostarcza tylko krainę i współrzędne. API PL1 nie udostępnia obecnie potwierdzonego odczytu ataków na fortecy. Zapis ataku jest na razie ręczny i lokalny; czas odnowienia liczymy jako 24 h od zapisanego zdarzenia.</p>
 </main>
 <script>
@@ -140,6 +141,30 @@ function recordAttack(x){
  $('status').textContent='Zapisano atak na '+x.x+':'+x.y+'. Ponowna dostępność: '+fmt(availableAt)+'. Zapis jest lokalny na tym urządzeniu.';
 }
 
+async function loadServerIntel(){
+ const summary=$('intelSummary'),list=$('intelSignals');
+ try{
+  const response=await fetch('./data/server-intel-history.json?v='+Date.now(),{cache:'no-store'});
+  if(!response.ok)throw Error('HTTP '+response.status);
+  const history=await response.json();
+  if(!Array.isArray(history.events)||!Array.isArray(history.players))throw Error('Nieprawidłowa historia Szpiegowania');
+  const cutoff=Date.now()-86400000;
+  const signals=history.events.filter(e=>{
+   const at=Date.parse(e.detected_at);
+   return Number.isFinite(at)&&at>=cutoff&&['loot_delta','honor_delta','power_gain','power_drop'].includes(e.kind);
+  }).sort((a,b)=>Date.parse(b.detected_at)-Date.parse(a.detected_at));
+  const loot=signals.filter(e=>e.kind==='loot_delta'&&Number(e.delta)>0);
+  const honor=signals.filter(e=>e.kind==='honor_delta'&&Number(e.delta)>0);
+  const power=signals.filter(e=>e.kind==='power_gain');
+  summary.textContent='PL1 · '+(history.player_count||history.players.length)+' profili · snapshot '+(history.source_snapshot_at?fmt(history.source_snapshot_at):'brak daty')+' · sygnały 24 h: łup +'+loot.length+', honor +'+honor.length+', potęga +'+power.length+'.';
+  const top=[...loot.map(e=>({...e,signal:'Wzrost łupu',weight:3})),...honor.map(e=>({...e,signal:'Wzrost honoru',weight:2})),...power.map(e=>({...e,signal:'Wzrost potęgi',weight:1}))].sort((a,b)=>b.weight-a.weight||Date.parse(b.detected_at)-Date.parse(a.detected_at)).slice(0,40);
+  list.innerHTML=top.length?top.map(e=>'<article class="item"><strong>'+e.signal+' · '+String(e.player||'Gracz').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</strong><small>'+String(e.alliance_name||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+' · '+fmt(e.detected_at)+'</small><small>Zmiana: '+(Number(e.delta)>0?'+':'')+Number(e.delta||0).toLocaleString('pl-PL')+' · PID '+(e.player_id??'—')+'</small></article>').join(''):'<div class="empty">Brak dodatnich zmian łupu, honoru lub potęgi w ostatnich 24 godzinach.</div>';
+ }catch(error){
+  summary.textContent='Nie udało się pobrać historii Szpiegowania: '+error.message;
+  list.innerHTML='<div class="empty">Sygnały PL1 są chwilowo niedostępne.</div>';
+ }
+}
+
 async function load(){
  $('status').textContent='Pobieranie kompletnej mapy IT1…';
  try{await loadTracker();render();}
@@ -148,6 +173,7 @@ async function load(){
 $('kingdoms').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;kingdom=b.dataset.k;document.querySelectorAll('[data-k]').forEach(x=>x.classList.toggle('active',x===b));render();});
 $('list').addEventListener('click',e=>{const b=e.target.closest('[data-attack]');if(!b)return;const x=targets.find(v=>keyOf(v)===b.dataset.attack);if(x)recordAttack(x);});
 ['search','filter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
+loadServerIntel();
 load();
 
 })();

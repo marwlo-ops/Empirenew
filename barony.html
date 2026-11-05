@@ -148,75 +148,47 @@ async function loadServerIntel(){
  const summary=$('intelSummary'),list=$('intelSignals');
  try{
   const base='./data/',v=Date.now();
-  const responses=await Promise.all([
-   fetch(base+'server-intel-history.json?v='+v,{cache:'no-store'}),
-   fetch(base+'location-snapshots.json?v='+v,{cache:'no-store'}),
-   fetch(DATA+'?v='+v,{cache:'no-store'})
-  ]);
-  const failed=responses.find(r=>!r.ok);
-  if(failed)throw Error('HTTP '+failed.status);
-  const [history,locations,catalog]=await Promise.all(responses.map(r=>r.json()));
-  if(!Array.isArray(history.events)||!Array.isArray(history.players)||
-     !Array.isArray(locations.alliances)||catalog.complete!==true||!catalog.results)
-    throw Error('Nieprawidłowy format historii, pozycji lub mapy');
+  const historyResponse=await fetch(base+'server-intel-history.json?v='+v,{cache:'no-store'});
+  if(!historyResponse.ok)throw Error('historia HTTP '+historyResponse.status);
+  const history=await historyResponse.json();
+  if(!Array.isArray(history.events))throw Error('Brak tablicy zdarzeń Szpiegowania');
+  let locations=null;
+  try{
+   const response=await fetch(base+'location-snapshots.json?v='+v,{cache:'no-store'});
+   if(response.ok)locations=await response.json();
+  }catch(_){}
+  const positions=new Map();
+  for(const alliance of locations?.alliances||[]){
+   for(const member of alliance.members||[]){
+    positions.set(String(member.member_id),[...(member.ap||[]),...(member.vp||[])]);
+   }
+  }
   const cutoff=Date.now()-86400000;
   const events=history.events.filter(e=>{
    const at=Date.parse(e.detected_at);
    return Number.isFinite(at)&&at>=cutoff&&['loot_delta','honor_delta','power_gain','power_drop'].includes(e.kind);
-  });
-  const byPlayer=new Map();
-  for(const e of events){
-   const id=String(e.player_id??'');
-   if(!id)continue;
-   const old=byPlayer.get(id)||{player_id:id,player:e.player,alliance_name:e.alliance_name,events:[],score:0};
-   old.events.push(e);
-   if(e.kind==='loot_delta'&&Number(e.delta)>0)old.score+=3;
-   if(e.kind==='honor_delta'&&Number(e.delta)>0)old.score+=2;
-   if(e.kind==='power_gain'&&Number(e.delta)>0)old.score+=1;
-   byPlayer.set(id,old);
-  }
-  const playerRows=[];
-  for(const alliance of locations.alliances){
-   for(const member of alliance.members||[]){
-    const p=byPlayer.get(String(member.member_id));
-    if(!p)continue;
-    p.positions=[...(member.ap||[]),...(member.vp||[])];
-    playerRows.push(p);
-   }
-  }
-  const kingdomMap={1:'sands',2:'ice',3:'fire'};
-  const fortresses=Object.entries(catalog.results).flatMap(([kingdom,data])=>(data.fortresses||[]).map(f=>({...f,kingdom})));
-  const candidates=[];
-  for(const p of playerRows){
-   for(const pos of p.positions){
-    const kingdom=kingdomMap[Number(pos.kingdom_code)];
-    if(!kingdom||!Number.isFinite(Number(pos.x))||!Number.isFinite(Number(pos.y)))continue;
-    let nearest=null;
-    for(const f of fortresses){
-     if(f.kingdom!==kingdom)continue;
-     const distance=Math.hypot(Number(f.x)-Number(pos.x),Number(f.y)-Number(pos.y));
-     if(!nearest||distance<nearest.distance)nearest={fortress:f,distance};
-    }
-    // Radius is a discovery aid only, not proof of an attack.
-    if(nearest&&nearest.distance<=30){
-     candidates.push({...p,position:pos,fortress:nearest.fortress,distance:nearest.distance,
-       latest:p.events.sort((a,b)=>Date.parse(b.detected_at)-Date.parse(a.detected_at))[0]});
-    }
-   }
-  }
-  candidates.sort((a,b)=>b.score-a.score||a.distance-b.distance||Date.parse(b.latest.detected_at)-Date.parse(a.latest.detected_at));
-  const loot=events.filter(e=>e.kind==='loot_delta'&&Number(e.delta)>0).length;
-  const honor=events.filter(e=>e.kind==='honor_delta'&&Number(e.delta)>0).length;
-  const power=events.filter(e=>e.kind==='power_gain'&&Number(e.delta)>0).length;
-  summary.textContent='PL1 · '+(history.player_count||history.players.length)+' profili · sygnały 24 h: łup +'+loot+', honor +'+honor+', potęga +'+power+' · kandydaci w pobliżu fortec IT1: '+candidates.length+'.';
+  }).sort((a,b)=>Date.parse(b.detected_at)-Date.parse(a.detected_at));
+  const positive=kind=>events.filter(e=>e.kind===kind&&Number(e.delta)>0).length;
+  summary.textContent='PL1 · '+(history.player_count||history.players?.length||'—')+
+   ' profili · sygnały 24 h: łup +'+positive('loot_delta')+', honor +'+positive('honor_delta')+
+   ', potęga +'+positive('power_gain')+'. Brak potwierdzonego celu ataku w tych sygnałach.';
   const esc=s=>String(s??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
-  list.innerHTML=candidates.length?candidates.slice(0,40).map(p=>{
-   const e=p.latest,fort=p.fortress;
-   return '<article class="item"><strong>Kandydat w pobliżu · '+esc(p.player||'Gracz')+'</strong><small>'+esc(p.alliance_name||'')+' · PID '+esc(p.player_id)+'</small><small>Sygnał: '+esc(e.kind)+' · '+(Number(e.delta)>0?'+':'')+Number(e.delta||0).toLocaleString('pl-PL')+' · '+fmt(e.detected_at)+'</small><small>Pozycja gracza: '+p.position.x+':'+p.position.y+' · Forteca IT1: '+fort.x+':'+fort.y+' · odległość: '+p.distance.toFixed(1)+'</small><small>To korelacja przestrzenna i czasowa, nie potwierdzenie ataku. Współrzędne IT1 nie są zweryfikowane jako identyczne z PL1.</small></article>';
-  }).join(''):'<div class="empty">Brak graczy z sygnałem aktywności w promieniu 30 pól od fortec IT1. Sygnały aktywności nie wskazują celu ataku.</div>';
+  const kingdomNames={0:'Zielone',1:'Piaski',2:'Lód',3:'Ogień'};
+  list.innerHTML=events.length?events.slice(0,40).map(e=>{
+   const playerPositions=positions.get(String(e.player_id))||[];
+   const positionText=playerPositions.slice(0,3).map(p=>
+    (kingdomNames[Number(p.kingdom_code)]||'Kraina '+p.kingdom_code)+' '+p.x+':'+p.y
+   ).join(' · ');
+   const delta=Number(e.delta||0);
+   return '<article class="item"><strong>'+esc(e.player||'Gracz')+' · '+esc(e.kind)+'</strong>'+
+    '<small>'+esc(e.alliance_name||'')+' · PID '+esc(e.player_id)+'</small>'+
+    '<small>Zmiana: '+(delta>0?'+':'')+delta.toLocaleString('pl-PL')+' · '+fmt(e.detected_at)+'</small>'+
+    (positionText?'<small>Pozycje z migawki: '+esc(positionText)+'</small>':'')+
+    '<small>To aktywność/statystyka gracza, nie współrzędne celu. Nie jest dowodem ataku na fortecę i nie uruchamia cooldownu.</small></article>';
+  }).join(''):'<div class="empty">Brak sygnałów aktywności graczy z ostatnich 24 godzin.</div>';
  }catch(error){
-  summary.textContent='Nie udało się połączyć Szpiegowania z mapą: '+error.message;
-  list.innerHTML='<div class="empty">Korelacja aktywności i lokalizacji jest chwilowo niedostępna.</div>';
+  summary.textContent='Nie udało się pobrać sygnałów Szpiegowania: '+error.message;
+  list.innerHTML='<div class="empty">Historia aktywności jest chwilowo niedostępna.</div>';
  }
 }
 async function load(){

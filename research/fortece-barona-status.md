@@ -270,3 +270,16 @@ Rzeczywisty katalog z repozytorium (snapshot 2026-11-05 15:11:37 UTC) został ni
 Nie wykonano live logowania ani odczytu PL1 w tej iteracji, ponieważ środowisko automatyzacji nie ma poświadczeń operatora. Nie wysłano żadnych danych logowania. W tej chwili nie ma potwierdzonego ataku PL1 i nie utworzono wpisów historii ataków.
 
 Następny krok: operator uruchamia lokalnie najpierw domyślną próbkę 9 punktów na produkcyjnym PL1. Po uzyskaniu wierszy mapy trzeba wykonać drugą próbkę po około 10 minutach i sprawdzić, czy attackCount oraz cooldown zmieniają się zgodnie z rzeczywistym atakiem. Dopiero po takim teście można rozważyć zmianę kandydackiego sygnału na potwierdzone zdarzenie z przedziałem czasu.
+
+
+## 16. Kontrola testów i publikacji po wdrożeniu probe — 2026-11-05
+
+- Testy lokalne rdzenia probe: 11/11 PASS (walidacja katalogu, sektorów, dopasowania typu/KID/NPC owner ID, sygnałów licznika i cooldownu, mapowania właścicieli trzech krain).
+- node --check probe.mjs — PASS na lokalnym pliku roboczym.
+- Tryb plan-only na syntetycznym katalogu — PASS: 9 celów, 9 sektorów, 90 000 pól; bez połączenia sieciowego.
+- Rzeczywisty katalog z main: 2021 celów / 199 sektorów; domyślna próbka: 9 celów / 9 sektorów.
+- Próba npm install w środowisku automatyzacji przekroczyła limit 120 s i została przerwana. Nie uznaję zatem zależności npm ani live klienta za przetestowane w tym środowisku. Workflow baron-pl1-probe.yml ma teraz osobny krok instalujący przypięte pakiety i sprawdzający dokładny host/strefę PL1, wybór TCP oraz mapowanie wiersza dungeon. Status API dla bieżącego commitu zwrócił pustą listę statuses; nie deklaruję jeszcze PASS nowego przebiegu GitHub Actions.
+- Ostatni potwierdzony workflow PL1 pozostaje 42052367160 — zakończony success; ostatni potwierdzony Pages build/deploy pozostaje 42052460959 — build, deploy i report-build-status success.
+- Porównanie plików main z commitem ostatniej publikacji 11f92ee: barony.html, data/baron-fortresses.json, data/server-intel-history.json i data/location-snapshots.json mają identyczne SHA. W tym wdrożeniu zmieniono wyłącznie skrypty, testy, workflow diagnostyczny i dokumentację; nie zmieniono UI ani danych publikowanych na Pages. Strona pozostaje więc treściowo identyczna z ostatnią potwierdzoną publikacją; nie twierdzę, że wykonano nowy deploy dla commitów skryptowych.
+
+Wniosek: ścieżka odczytu mapy E4K jest teraz opisana i przygotowana jako lokalny, read-only probe, ale **nie ma jeszcze live odczytu z produkcyjnego PL1**. Brakuje autoryzowanej sesji operatora i dwóch kolejnych próbek PL1, które potwierdzą zachowanie attackCount/cooldown. Do tego czasu żaden sygnał nie jest zapisywany jako potwierdzony atak.

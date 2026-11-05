@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1422"><title>Empirenew · Barony</title>
+<style>
+:root{color-scheme:dark;--bg:#08111e;--panel:#122137;--line:#2a405d;--txt:#edf4ff;--muted:#9aacc3;--gold:#e8bd68;--green:#66d9a5;--red:#ff7b83}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#294767 0,transparent 55%),var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyebrow{font-size:11px;letter-spacing:.16em;color:var(--green);font-weight:850;text-transform:uppercase}.hero h1{font-size:clamp(27px,5vw,42px);margin:5px 0;color:#f4d18d}.hero p{color:var(--muted);max-width:850px;margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.stat,.panel{background:linear-gradient(145deg,#192b43,#101c2d);border:1px solid var(--line);border-radius:14px}.stat{padding:13px}.stat b{display:block;font-size:25px;color:var(--gold)}.stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.controls button,.controls select,.controls input,.action{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#14263d;color:var(--txt);font:inherit}.controls button{font-weight:750}.controls button.active{border-color:#c99a45;background:#493719;color:#ffe3a2}.controls input{flex:1;min-width:180px}.controls select{min-width:150px}
+.layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:13px}.panel{padding:14px;min-width:0}.panel h2{font-size:17px;margin:0 0 10px}.map{height:520px;position:relative;overflow:hidden;border:1px solid #314762;border-radius:11px;background-color:#0b1828;background-image:linear-gradient(#2b45602b 1px,transparent 1px),linear-gradient(90deg,#2b45602b 1px,transparent 1px),radial-gradient(ellipse,#1c3948,#0b1725 72%);background-size:40px 40px,40px 40px,100% 100%}.map svg{width:100%;height:100%;display:block}.dot{fill:#e8bd68;stroke:#08111e;stroke-width:1.5;cursor:pointer}.dot.wait{fill:#ff7b83}.legend{font-size:12px;color:var(--muted);margin-top:8px}.list{display:flex;flex-direction:column;gap:8px;max-height:520px;overflow:auto}.item{padding:11px;border:1px solid var(--line);border-radius:10px;background:#0f1b2b}.item strong{color:#f4d18d}.item small{display:block;color:var(--muted);margin:3px 0 8px}.item button{border:1px solid #507b67;border-radius:8px;background:#183b30;color:#c9ffe1;padding:8px 10px;font-weight:750}.item button:disabled{opacity:.55;cursor:not-allowed}.empty{padding:18px;border:1px dashed var(--line);border-radius:10px;color:var(--muted)}
+.notice{margin-top:13px;padding:12px;border:1px solid #66532f;border-radius:10px;background:#2a2418;color:#e8d3a7;font-size:12px}.subtle{color:var(--muted);font-size:12px}
+@media(max-width:760px){main{padding:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.map{height:370px}.list{max-height:none}.controls input{min-width:100%;flex-basis:100%}}
+</style></head><body><main>
+<section class="hero"><div class="eyebrow">Empire tools · NPC map tracker</div><h1>🏰 Barony</h1><p>Fortecę baronów i lochy NPC — lokalizacje, poziomy, status pokonania oraz kolejność ponownego ataku po 24 godzinach.</p></section>
+<div class="stats"><div class="stat"><b id="total">—</b><span>Wszystkie obiekty</span></div><div class="stat"><b id="ready">—</b><span>Gotowe do ataku</span></div><div class="stat"><b id="wait">—</b><span>Odnowienie 24 h</span></div><div class="stat"><b id="updated">—</b><span>Ostatni odczyt</span></div></div>
+<div class="controls" id="kingdoms"><button class="active" data-k="sands">🏜️ Piaski</button><button data-k="ice">❄️ Lód</button><button data-k="fire">🔥 Ogień</button><button data-k="islands">🏝️ Archipelag · wyspy</button><input id="search" placeholder="Szukaj po współrzędnych lub ID…"><select id="filter"><option value="all">Wszystkie statusy</option><option value="ready">Gotowe do ataku</option><option value="wait">W odnowieniu</option></select><select id="sort"><option value="ready">Najpierw gotowe</option><option value="level">Poziom malejąco</option><option value="xy">Współrzędne</option></select></div>
+<div class="layout"><section class="panel"><h2>Mapa lokalizacji</h2><div class="map" id="map"><div class="empty">Oczekiwanie na potwierdzone współrzędne skanu.</div></div><div class="legend">Złoty znacznik — gotowa do ataku · czerwony — trwa 24-godzinne odnowienie.</div></section><section class="panel"><h2>Lista fortec</h2><div class="list" id="list"><div class="empty">Ładowanie katalogu…</div></div></section></div>
+<div class="notice" id="status">Pobieranie katalogu fortec…</div><p class="subtle">Czasy ataków zapisują się lokalnie w tej przeglądarce. Dane lokalizacji będą pokazywane dopiero po potwierdzonym skanie API — aplikacja nie tworzy fikcyjnych punktów.</p>
+</main>
+<script>
+(()=>{'use strict';
+const DATA='./data/baron-fortresses.json',KEY='empirenew-baron-cooldowns-v1';
+const names={sands:'Płonące Piaski',ice:'Wieczny Lód',fire:'Ogniste Szczyty',islands:'Archipelag · wyspy'};
+let db=null,kingdom='sands',targets=[];
+const $=id=>document.getElementById(id);
+const readTimes=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch(_){return {}}};
+const writeTimes=x=>localStorage.setItem(KEY,JSON.stringify(x));
+const idOf=x=>String(x.id??x.object_id??(x.x+'-'+x.y));
+const until=x=>Number(readTimes()[idOf(x)]||0);
+const isReady=x=>until(x)<=Date.now();
+const fmt=t=>new Date(t).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'});
+function render(){
+ const records=db?.results?.[kingdom]?.fortresses||[];
+ const q=$('search').value.trim().toLowerCase(),f=$('filter').value,s=$('sort').value;
+ targets=records.filter(x=>(!q||[x.x,x.y,x.id,x.object_id,x.owner_id].some(v=>String(v??'').toLowerCase().includes(q)))&&(f==='all'||(f==='ready'?isReady(x):!isReady(x))));
+ targets.sort((a,b)=>s==='level'?(Number(b.level||0)-Number(a.level||0)):s==='xy'?(Number(a.x)-Number(b.x)||Number(a.y)-Number(b.y)):(Number(isReady(b))-Number(isReady(a))||Number(a.level||0)-Number(b.level||0)));
+ const all=Object.values(db?.results||{}).flatMap(v=>v.fortresses||[]);
+ $('total').textContent=all.length;$('ready').textContent=all.filter(isReady).length;$('wait').textContent=all.filter(x=>!isReady(x)).length;
+ $('updated').textContent=db?.captured_at?fmt(db.captured_at):'brak';
+ $('list').innerHTML=targets.length?targets.map(x=>{const t=until(x),id=idOf(x);return '<article class="item"><strong>Forteca · '+(x.level?'poziom '+x.level:'poziom nieznany')+'</strong><small>X: '+x.x+' · Y: '+x.y+' · ID: '+(x.id??x.object_id??'—')+(x.owner_id!==undefined?' · NPC: '+x.owner_id:'')+'</small><small>'+(t>Date.now()?'Dostępna za: '+fmt(t):'Gotowa do ataku')+'</small><button data-attack="'+id+'" '+(t>Date.now()?'disabled':'')+'>Zapisz pokonanie · 24 h</button></article>'}).join(''):'<div class="empty">'+(records.length?'Brak wyników dla wybranych filtrów.':'Brak potwierdzonych lokalizacji w tej krainie. Skan nie został jeszcze wykonany lub nie zwrócił kompletnych danych.')+'</div>';
+ const pts=targets.filter(x=>Number.isFinite(Number(x.x))&&Number.isFinite(Number(x.y)));
+ if(pts.length){const xs=pts.map(x=>Number(x.x)),ys=pts.map(x=>Number(x.y)),minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys),dx=maxX-minX||1,dy=maxY-minY||1;$('map').innerHTML='<svg viewBox="0 0 1000 700" role="img" aria-label="Mapa fortec baronów">'+pts.map(x=>'<circle class="dot '+(isReady(x)?'':'wait')+'" cx="'+(40+(Number(x.x)-minX)/dx*920)+'" cy="'+(40+(Number(x.y)-minY)/dy*620)+'" r="8"><title>'+x.x+':'+x.y+'</title></circle>').join('')+'</svg>'}else $('map').innerHTML='<div class="empty">Brak współrzędnych do wyświetlenia.</div>';
+ const k=db?.results?.[kingdom];$('status').textContent=k?(k.complete?'Skan kompletny · ':'Skan niekompletny · ')+(k.fortress_count??records.length)+' fortec · nieudane fragmenty: '+(k.failed_chunks?.length??'brak danych'):'Brak danych dla '+names[kingdom]+'.';
+}
+async function load(){try{const r=await fetch(DATA+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);db=await r.json();$('status').textContent='Katalog załadowany. '+(db.note||'');render()}catch(e){$('status').textContent='Nie udało się pobrać katalogu: '+e.message;$('list').innerHTML='<div class="empty">Błąd odczytu katalogu danych.</div>'}}
+$('kingdoms').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;kingdom=b.dataset.k;document.querySelectorAll('[data-k]').forEach(x=>x.classList.toggle('active',x===b));render()});
+$('list').addEventListener('click',e=>{const b=e.target.closest('[data-attack]');if(!b)return;const times=readTimes();times[b.dataset.attack]=Date.now()+24*60*60*1000;writeTimes(times);render()});
+['search','filter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
+load();setInterval(load,5*60*1000);setInterval(render,60*1000);
+})();
+</script></body></html>

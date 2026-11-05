@@ -177,7 +177,7 @@ test('extracts exact target and attacker from a matching NPC boss-dungeon battle
   assert.equal(evidence.attacker_player_id, 1234567);
   assert.equal(evidence.attacker_player_name, 'Test Attacker');
   assert.equal(evidence.outcome, 'attacker_won');
-  assert.equal(evidence.report_received_at_utc, '2026-11-05T18:00:00.000Z');
+  assert.equal(evidence.report_delivery_time_estimate_utc, '2026-11-05T18:00:00.000Z');
   assert.equal(evidence.message_is_forwarded, false);
   assert.equal(evidence.report_delivery_kind, 'original_mailbox_entry');
   assert.equal(evidence.attack_time_utc, null);

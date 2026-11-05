@@ -171,6 +171,10 @@ def resolve_boss_defeater(client: Any, row: dict[str, Any], cache: dict[int, Any
 
 
 def run_probe(args: argparse.Namespace) -> int:
+    if args.game_id is None or args.network_id is None:
+        print("Brak potwierdzonych identyfikatorów sieci. Podaj --game-id i --network-id lub GGE_GAME_ID i GGE_NETWORK_ID; skrypt nie zgaduje tych wartości.", file=sys.stderr)
+        return 2
+
     username = os.getenv("GGE_USERNAME") or input("Login do E4K PL1: ").strip()
     password = os.getenv("GGE_PASSWORD") or getpass.getpass("Hasło (nie będzie wyświetlane): ")
     if not username or not password:
@@ -282,8 +286,10 @@ def run_probe(args: argparse.Namespace) -> int:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--zone", default=os.getenv("GGE_ZONE", "EmpirefourkingdomsExGG2_3"))
-    parser.add_argument("--game-id", type=int, default=int(os.getenv("GGE_GAME_ID", "12")))
-    parser.add_argument("--network-id", type=int, default=int(os.getenv("GGE_NETWORK_ID", "1")))
+    game_id = os.getenv("GGE_GAME_ID")
+    network_id = os.getenv("GGE_NETWORK_ID")
+    parser.add_argument("--game-id", type=int, default=int(game_id) if game_id else None)
+    parser.add_argument("--network-id", type=int, default=int(network_id) if network_id else None)
     parser.add_argument("--samples-per-kingdom", type=int, default=3)
     return parser.parse_args()
 

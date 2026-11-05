@@ -5,7 +5,7 @@ Ostatnia aktualizacja: 2026-11-05. Dane w tym dokumencie rozdzielają potwierdzo
 ## 1. Katalog mapy IT1
 
 - Źródło: publiczne API GGE Tracker, `GET /api/v1/dungeons`, nagłówek `gge-server: IT1`.
-- Odczyt na głównej gałęzi: 2026-11-05 14:00:35 UTC; ponowny odczyt w gałęzi PR: 2026-11-05 14:16:52 UTC.
+- Odczyt na głównej gałęzi: 2026-11-05 14:00:35 UTC; ponowny odczyt w gałęzi PR: 2026-11-05 14:20:35 UTC.
 - Wynik importera: strona 1/1, 2021 rekordów.
 - Krainy: Piaski 671, Lód 779, Ogień 571.
 - Walidacja opublikowanego JSON: 2021 rekordów, 0 duplikatów współrzędnych, 0 niepoprawnych współrzędnych.
@@ -21,6 +21,7 @@ Odczyty z workflow diagnostycznego z 2026-11-05 14:00 UTC:
 | `IT1` | 200 | API zwróciło rekordy mapy; użyte do importu |
 | `EmpirefourkingdomsExGG2_3` | 400 | Nieprawidłowa nazwa serwera dla GGE Tracker |
 | `E4K_PL1` | 400 | Nieobsługiwany serwer produkcyjny |
+| `E4K_PL1_BETA` | 200 | 976 stron przy próbce size=1; zwraca pola historii, ale to nie produkcyjny PL1 i nie jest importowany |
 | `PL1` | 400 | Nieobsługiwana nazwa serwera |
 
 Treść błędu dla `E4K_PL1` wymienia obsługiwane serwery i zawiera `E4K_PL1_BETA`, ale nie produkcyjne `E4K_PL1`. Endpoint `/servers` zwraca 63 pozycje, w tym dokładne wpisy `E4K_PL1` i `E4K_PL1_BETA`; nie jest to jednak allowlista endpointu `/dungeons`, który nadal odrzuca produkcyjny nagłówek HTTP 400. BETA nie jest zamiennikiem produkcyjnego serwera i nie została użyta do importu.
@@ -59,8 +60,8 @@ Wniosek: most jest osiągalny i ma aktywny socket PL1, ale jego aktualna obsług
 ## 5. Build i publikacja
 
 - Import mapy IT1 na main: workflow zakończony sukcesem, 2021 rekordów, commit `11e3910`.
-- Ponowny import w gałęzi PR: workflow `42043448793` zakończony sukcesem, test UI PASS, importer zwrócił 2021 rekordów i zapisał świeży snapshot w commicie `87dcba2`. Ten snapshot czeka na scaleniu PR.
-- Diagnostyka PL1: workflow `42043428860` zakończony sukcesem jako uruchomienie skryptu; testy `/dungeons` dla produkcyjnego PL1 i komendy mostu nadal zwróciły HTTP 400. Sukces workflow oznacza poprawne wykonanie diagnostyki, nie obsługę API.
+- Ponowny import w gałęzi PR: workflow `42044039367` zakończony sukcesem; test UI PASS, importer zwrócił 2021 rekordów i zapisał snapshot z 14:20:35 UTC w commicie `c9aaa9b`. Snapshot czeka na scaleniu PR.
+- Diagnostyka PL1: workflow `42044033255` zakończony sukcesem jako uruchomienie skryptu; powtórzone testy `/dungeons` dla produkcyjnego PL1 oraz komendy mostu nadal zwróciły HTTP 400. Sukces workflow oznacza poprawne wykonanie diagnostyki, nie obsługę API.
 - GitHub Pages: build i deploy dla aktualnego main commitu `0502e9f` zakończone sukcesem o 14:16 UTC. Zmiany z PR nie są jeszcze na stronie; wymagają scalenia i kolejnego deployu.
 
 
@@ -77,7 +78,7 @@ Wprowadzone poprawki:
 - przyciski, pola i selektory otrzymują minimalną wysokość 44 px;
 - dodano widoczny focus dla obsługi klawiaturą.
 
-Test statyczny w CI `42043448793` sprawdził viewport, breakpoint mobilny, minimalny rozmiar dotykowy, focus i poprawne etykiety — PASS. Zachowuje też istniejący panel sygnałów PL1, ale nie interpretuje go jako historii ataków na konkretne punkty. Nie zastępuje to testu na fizycznym telefonie.
+Test statyczny w CI `42044039367` sprawdził viewport, breakpoint mobilny, minimalny rozmiar dotykowy, focus, etykiety źródła i zachowanie panelu sygnałów — PASS. Zachowuje też istniejący panel sygnałów PL1, ale nie interpretuje go jako historii ataków na konkretne punkty. Nie zastępuje to testu na fizycznym telefonie.
 
 ## 8. Co nadal blokuje automatyczną historię ataków PL1
 

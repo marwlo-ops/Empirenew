@@ -95,6 +95,7 @@ async function main() {
       if (i>0) await sleep(a.delay);
       try {
         const result=await client.worldMaps.getSector(sector.kid,sector.center_x,sector.center_y);
+        // Timestamp the received snapshot, not the moment before the network request.
         const sampledAt=new Date().toISOString();
         const rows=Array.isArray(result?.mapObjects)?result.mapObjects:[];
         for (const target of sector.targets) {

@@ -2,15 +2,15 @@ import fs from "node:fs/promises";
 
 const html = await fs.readFile(new URL("../barony.html", import.meta.url), "utf8");
 const fail = message => { console.error("BARONY UI CHECK FAIL:", message); process.exit(1); };
-const scripts = [...html.matchAll(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gi)];
+const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
 if (!scripts.length) fail("Brak skryptu aplikacji.");
 for (let i = 0; i < scripts.length; i++) {
   try { new Function(scripts[i][1]); }
   catch (error) { fail("Błąd składni skryptu " + (i + 1) + ": " + error.message); }
 }
 if (!html.includes('name="viewport"') || !html.includes("width=device-width")) fail("Brak viewportu mobile.");
-if (!/@media\\s*\\(max-width:\\s*760px\\)/i.test(html)) fail("Brak reguł mobilnych.");
-if (!/min-height:\\s*44px/.test(html)) fail("Kontrolki nie mają minimalnego celu dotykowego 44 px.");
+if (!/@media\s*\(max-width:\s*760px\)/i.test(html)) fail("Brak reguł mobilnych.");
+if (!/min-height:\s*44px/.test(html)) fail("Kontrolki nie mają minimalnego celu dotykowego 44 px.");
 for (const kingdom of ["sands", "ice", "fire"]) {
   if (!html.includes('data-k="' + kingdom + '"')) fail("Brak selektora krainy " + kingdom + ".");
 }

@@ -22,9 +22,34 @@ jobs:
         with:
           python-version: "3.x"
       - name: Test importer validation
-        run: python -m unittest discover -s tests -v
+        run: |
+          python -m py_compile scripts/import_it1_fortresses.py
+          python -m unittest discover -s tests -v
       - name: Import map-only data from GGE Tracker IT1
         run: python scripts/import_it1_fortresses.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate public catalog and Barony scan plan
+        run: |
+          node scripts/test-baron-map-catalog.mjs
+          node scripts/barony-live/probe.mjs --plan --all > "$RUNNER_TEMP/barony-plan.json"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const catalog = JSON.parse(fs.readFileSync('data/baron-fortresses.json', 'utf8'));
+          const plan = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/barony-plan.json', 'utf8'));
+          if (plan.target_count !== catalog.total_count) throw new Error('Barony plan differs from the imported catalog count.');
+          if (plan.sector_count < 1 || plan.estimated_map_tiles !== plan.sector_count * 10000) {
+            throw new Error('Invalid 100x100 sector plan.');
+          }
+          console.log(JSON.stringify({
+            imported_targets: catalog.total_count,
+            scan_sectors: plan.sector_count,
+            estimated_map_tiles: plan.estimated_map_tiles,
+            public_catalog: 'PASS',
+            plan_only: 'PASS'
+          }));
+          NODE
       - name: Commit updated map catalog
         run: |
           if git diff --quiet -- data/baron-fortresses.json; then

@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
 const targetServer = "EmpirefourkingdomsExGG2_3";
+let betaDungeonRows = [];
 
 const serverListResponse = await fetch(base + "/servers", {
   headers: { Accept: "application/json" },
@@ -121,6 +122,7 @@ try {
   });
   const body = await response.json();
   const dungeons = Array.isArray(body.dungeons) ? body.dungeons : [];
+  betaDungeonRows = dungeons;
   const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
   const known = new Map();
   for (const data of Object.values(map.results || {})) {
@@ -156,30 +158,15 @@ async function probeBetaPlayerHistory() {
     for (const data of Object.values(map.results || {})) {
       for (const f of data.fortresses || []) known.add(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y));
     }
-    const apiPlayers = [];
-    let totalPlayers = null;
-    for (let page = 1; page <= 2; page++) {
-      const response = await fetch(base + "/players?page=" + page + "&size=100", {
-        headers: { "gge-server": "E4K_PL1_BETA", Accept: "application/json" },
-        signal: AbortSignal.timeout(20000)
-      });
-      const body = await response.json();
-      if (!response.ok) {
-        console.log(JSON.stringify({
-          probe: "beta-player-history",
-          api_server: "E4K_PL1_BETA",
-          http_status: response.status,
-          error: body.error ?? null
-        }));
-        return;
-      }
-      totalPlayers = body.pagination?.total_items_count ?? totalPlayers;
-      apiPlayers.push(...(Array.isArray(body.players) ? body.players : []));
-      if (apiPlayers.length >= Number(totalPlayers || 0)) break;
-    }
+    // Sample player IDs that actually appear as last attackers in Beta dungeon rows,
+    // not arbitrary high-ranked players who may never have attacked a dungeon.
+    const playerIds = [...new Set(betaDungeonRows
+      .map(row => row.player_id)
+      .filter(id => id !== null && id !== undefined && String(id).trim() !== "")
+      .map(String))].slice(0, 5);
     const historySamples = [];
-    for (const player of apiPlayers.slice(0, 5)) {
-      const response = await fetch(base + "/dungeons/player/" + encodeURIComponent(player.player_id) + "?lastDays=365", {
+    for (const playerId of playerIds) {
+      const response = await fetch(base + "/dungeons/player/" + encodeURIComponent(playerId) + "?lastDays=365", {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(20000)
       });
@@ -201,11 +188,11 @@ async function probeBetaPlayerHistory() {
     console.log(JSON.stringify({
       probe: "beta-player-history",
       api_server: "E4K_PL1_BETA",
-      api_players_fetched: apiPlayers.length,
-      api_total_players: totalPlayers,
+      beta_dungeon_rows: betaDungeonRows.length,
+      distinct_attacker_ids_sampled: playerIds.length,
       histories_checked: historySamples.length,
       histories: historySamples,
-      note: "This is a Beta-only endpoint test, not production PL1 attack evidence."
+      note: "Beta-only diagnostic. IDs are sampled from Beta dungeon rows; this is not production PL1 attack evidence."
     }));
   } catch (error) {
     console.log(JSON.stringify({ probe: "beta-player-history", error: String(error) }));
@@ -227,7 +214,8 @@ async function probeBridge() {
       http_status: response.status,
       target_server: targetServer,
       target_connected: status ? (status[targetServer] ?? null) : null,
-      known_server_count: status && typeof status === "object" ? Object.keys(status).length : null
+      known_server_count: status && typeof status === "object" ? Object.keys(status).length : null,
+      matching_aliases: status && typeof status === "object" ? Object.keys(status).filter(key => /PL1|Poland|ExGG2_3/i.test(key)) : []
     }));
     if (!response.ok || !connected) {
       console.log(JSON.stringify({

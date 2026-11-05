@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   DEFAULT_PL1_ZONE,
   extractNpcBattleReportEvidence,
+  selectLatestNpcBattleReportMessages,
   validateMapOnlyCatalog,
 } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
@@ -80,18 +81,7 @@ async function main() {
     const messages = Array.isArray(returnedMessages)
       ? returnedMessages
       : (Array.isArray(client.mailMessages) ? client.mailMessages : []);
-    const npcReports = messages
-      .filter((message) =>
-        Number(message.messageType) === 6 &&
-        Number(message.areaType) === 11 &&
-        Number(message.subType) === 2
-      )
-      .sort((a, b) => {
-        const ta = new Date(a.deliveryTime).getTime();
-        const tb = new Date(b.deliveryTime).getTime();
-        return (Number.isFinite(tb) ? tb : 0) - (Number.isFinite(ta) ? ta : 0);
-      })
-      .slice(0, args.limit);
+    const npcReports = selectLatestNpcBattleReportMessages(messages, args.limit);
 
     const evidence = [];
     const rejectedReports = [];
@@ -135,7 +125,7 @@ async function main() {
       detail_errors: detailErrors,
       evidence,
       coverage: 'Only battle reports in the authenticated account mailbox; this is not a global PL1 feed.',
-      attack_time_status: 'Not present in the parsed report fields. report_received_at_utc is a mailbox delivery timestamp, not the attack start time.',
+      attack_time_status: 'Not present in the parsed report fields. report_delivery_time_estimate_utc is an estimated mailbox delivery timestamp, not the attack start time.',
       persisted: false,
     }, null, 2) + '\n');
   } finally {

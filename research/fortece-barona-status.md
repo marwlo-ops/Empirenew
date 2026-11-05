@@ -500,7 +500,7 @@ Aktualne wyniki PL1:
 - brak trzycyfrowego kodu w katalogu serwerów, więc test sufiksu kodu został bezpiecznie pominięty;
 - most `empire-api.fly.dev`: HTTP 200, ale produkcyjny socket `EmpirefourkingdomsExGG_3=false`; GAA/GAM przez most pominięto.
 
-Najświeższy Pages workflow dla commitu `3a596514adc11d323e07c9b67a9b2ebbd4eb5b7d` jest śledzony osobno; wcześniejszy Pages run dla snapshotu katalogu i kodu probe zakończył się sukcesem. Nie deklarować nowej publikacji do czasu zakończenia najnowszego runu.
+Pages workflow `42102074287` dla commitu `3a596514adc11d323e07c9b67a9b2ebbd4eb5b7d` został anulowany przez nowszy commit. Końcowy build/deploy dla commitu `29036c876091050bf269a207c9ef1f58a3646dc0` zakończył się sukcesem w runie `42102461861` (build, deploy, report-build-status: PASS).
 
 ### Błędy przejściowe i osobny workflow
 

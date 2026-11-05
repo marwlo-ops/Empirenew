@@ -21,6 +21,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG_PATH = ROOT / "data" / "baron-fortresses.json"
 KINGDOM_ENUM_NAMES = {"sands": "SANDS", "ice": "ICE", "fire": "FIRE"}
+KINGDOM_KIDS = {"sands": 1, "ice": 2, "fire": 3}
 FORBIDDEN_CATALOG_KEYS = ("cooldown", "attacked_at", "last_attack", "defeater", "player_id")
 
 
@@ -55,8 +56,10 @@ def validate_catalog(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]]
             kid, x, y = point.get("kid"), point.get("x"), point.get("y")
             if not all(isinstance(value, int) and not isinstance(value, bool) for value in (kid, x, y)):
                 raise ValueError(f"Non-integer coordinate in {kingdom!r}.")
-            if x < 0 or y < 0:
-                raise ValueError(f"Negative coordinate in {kingdom!r}.")
+            if x < 0 or y < 0 or x > 1286 or y > 1286:
+                raise ValueError(f"Coordinate outside the verified IT1 map bounds in {kingdom!r}.")
+            if kid != KINGDOM_KIDS[kingdom] or point.get("kingdom") != kingdom or point.get("source_server") != "IT1" or point.get("type") != "dungeon":
+                raise ValueError(f"Kingdom/source/type mismatch in {kingdom!r}.")
             key = (kid, x, y)
             if key in seen:
                 raise ValueError(f"Duplicate IT1 coordinate {key}.")

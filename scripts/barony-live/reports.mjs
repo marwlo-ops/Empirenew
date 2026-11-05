@@ -37,7 +37,7 @@ async function main() {
     process.stdout.write(
       'Read-only PL1 mailbox report probe. Credentials: E4K_USERNAME/E4K_PASSWORD. ' +
       'Use --limit 25 to limit NPC boss-dungeon reports. No report data is persisted. ' +
-      'Report delivery time is not the exact attack start time.\\n'
+      'Report delivery time is not the exact attack start time.\n'
     );
     return 0;
   }
@@ -137,7 +137,7 @@ async function main() {
       coverage: 'Only battle reports in the authenticated account mailbox; this is not a global PL1 feed.',
       attack_time_status: 'Not present in the parsed report fields. report_received_at_utc is a mailbox delivery timestamp, not the attack start time.',
       persisted: false,
-    }, null, 2) + '\\n');
+    }, null, 2) + '\n');
   } finally {
     try { await client.socketManager.disconnect(); } catch {}
   }
@@ -145,6 +145,6 @@ async function main() {
 }
 
 main().then((code) => { process.exitCode = code; }).catch((error) => {
-  process.stderr.write(`Barony mailbox report probe stopped safely: ${error?.constructor?.name || 'Error'}: ${error?.message || error}\\n`);
+  process.stderr.write(`Barony mailbox report probe stopped safely: ${error?.constructor?.name || 'Error'}: ${error?.message || error}\n`);
   process.exitCode = 1;
 });

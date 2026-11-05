@@ -79,7 +79,7 @@ async function main() {
   const {network}=require('e4k-data');
   const instance=network?.instances?.find(x=>x.zone===a.zone);
   if (!instance) throw new Error(`Zone ${a.zone} is absent from pinned e4k-data network list.`);
-  if (a.zone!==DEFAULT_PL1_ZONE || instance.server!=='e4k-live-pl1-game.goodgamestudios.com') {
+  if (a.zone!==DEFAULT_PL1_ZONE || instance.server!=='e4k-live-pl1-game.goodgamestudios.com' || instance.value!==3 || instance.zoneId!==259 || instance.instanceLocaId!=='generic_country_PL') {
     throw new Error(`Refusing non-production-PL1 endpoint: ${a.zone} / ${instance.server}.`);
   }
 
@@ -127,7 +127,7 @@ async function main() {
   const deployTime=Number(network.deployTime);
   process.stdout.write(JSON.stringify({
     mode:'live_read_only_map_probe',target_server:'E4K PL1 production',
-    server_zone:a.zone,server_host:instance.server,server_instance_id:instance.value,
+    server_zone:a.zone,server_host:instance.server,server_instance_id:instance.value,server_zone_id:instance.zoneId,instance_loca_id:instance.instanceLocaId,
     network_version_no:network.versionNo??null,
     network_deploy_time_utc:Number.isFinite(deployTime)?new Date(deployTime*1000).toISOString():null,
     source:'ggejs 2.2.0 + e4k-data 4.144.21-788.RC.3',

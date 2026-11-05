@@ -231,6 +231,9 @@ export function extractNpcBattleReportEvidence(message, battleLog) {
       owner_id: expectedOwner,
     },
     attacker_player_id: attackerId,
+    attacker_player_name: typeof battleLog?.attacker?.ownerInfo?.playerName === 'string' && battleLog.attacker.ownerInfo.playerName.trim()
+      ? battleLog.attacker.ownerInfo.playerName.trim()
+      : null,
     outcome: typeof message.hasAttackerWon === 'boolean'
       ? (message.hasAttackerWon ? 'attacker_won' : 'attacker_lost')
       : null,
@@ -320,6 +323,9 @@ export function extractOutboundBossDungeonMovementEvidence(movement, sampledAt =
       owner_id: expectedOwner,
     },
     attacker_player_id: attackerId,
+    attacker_player_name: typeof sourceArea?.ownerInfo?.playerName === 'string' && sourceArea.ownerInfo.playerName.trim()
+      ? sourceArea.ownerInfo.playerName.trim()
+      : null,
     source: sourceArea && [sourceX, sourceY].every(Number.isFinite)
       ? { area_type: Number(sourceArea[0]), x: sourceX, y: sourceY }
       : null,

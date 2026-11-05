@@ -144,27 +144,78 @@ function recordAttack(x){
 async function loadServerIntel(){
  const summary=$('intelSummary'),list=$('intelSignals');
  try{
-  const response=await fetch('./data/server-intel-history.json?v='+Date.now(),{cache:'no-store'});
-  if(!response.ok)throw Error('HTTP '+response.status);
-  const history=await response.json();
-  if(!Array.isArray(history.events)||!Array.isArray(history.players))throw Error('Nieprawidłowa historia Szpiegowania');
+  const base='./data/',v=Date.now();
+  const responses=await Promise.all([
+   fetch(base+'server-intel-history.json?v='+v,{cache:'no-store'}),
+   fetch(base+'location-snapshots.json?v='+v,{cache:'no-store'}),
+   fetch(DATA+'?v='+v,{cache:'no-store'})
+  ]);
+  const failed=responses.find(r=>!r.ok);
+  if(failed)throw Error('HTTP '+failed.status);
+  const [history,locations,catalog]=await Promise.all(responses.map(r=>r.json()));
+  if(!Array.isArray(history.events)||!Array.isArray(history.players)||
+     !Array.isArray(locations.alliances)||catalog.complete!==true||!catalog.results)
+    throw Error('Nieprawidłowy format historii, pozycji lub mapy');
   const cutoff=Date.now()-86400000;
-  const signals=history.events.filter(e=>{
+  const events=history.events.filter(e=>{
    const at=Date.parse(e.detected_at);
    return Number.isFinite(at)&&at>=cutoff&&['loot_delta','honor_delta','power_gain','power_drop'].includes(e.kind);
-  }).sort((a,b)=>Date.parse(b.detected_at)-Date.parse(a.detected_at));
-  const loot=signals.filter(e=>e.kind==='loot_delta'&&Number(e.delta)>0);
-  const honor=signals.filter(e=>e.kind==='honor_delta'&&Number(e.delta)>0);
-  const power=signals.filter(e=>e.kind==='power_gain');
-  summary.textContent='PL1 · '+(history.player_count||history.players.length)+' profili · snapshot '+(history.source_snapshot_at?fmt(history.source_snapshot_at):'brak daty')+' · sygnały 24 h: łup +'+loot.length+', honor +'+honor.length+', potęga +'+power.length+'.';
-  const top=[...loot.map(e=>({...e,signal:'Wzrost łupu',weight:3})),...honor.map(e=>({...e,signal:'Wzrost honoru',weight:2})),...power.map(e=>({...e,signal:'Wzrost potęgi',weight:1}))].sort((a,b)=>b.weight-a.weight||Date.parse(b.detected_at)-Date.parse(a.detected_at)).slice(0,40);
-  list.innerHTML=top.length?top.map(e=>'<article class="item"><strong>'+e.signal+' · '+String(e.player||'Gracz').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</strong><small>'+String(e.alliance_name||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+' · '+fmt(e.detected_at)+'</small><small>Zmiana: '+(Number(e.delta)>0?'+':'')+Number(e.delta||0).toLocaleString('pl-PL')+' · PID '+(e.player_id??'—')+'</small></article>').join(''):'<div class="empty">Brak dodatnich zmian łupu, honoru lub potęgi w ostatnich 24 godzinach.</div>';
+  });
+  const byPlayer=new Map();
+  for(const e of events){
+   const id=String(e.player_id??'');
+   if(!id)continue;
+   const old=byPlayer.get(id)||{player_id:id,player:e.player,alliance_name:e.alliance_name,events:[],score:0};
+   old.events.push(e);
+   if(e.kind==='loot_delta'&&Number(e.delta)>0)old.score+=3;
+   if(e.kind==='honor_delta'&&Number(e.delta)>0)old.score+=2;
+   if(e.kind==='power_gain'&&Number(e.delta)>0)old.score+=1;
+   byPlayer.set(id,old);
+  }
+  const playerRows=[];
+  for(const alliance of locations.alliances){
+   for(const member of alliance.members||[]){
+    const p=byPlayer.get(String(member.member_id));
+    if(!p)continue;
+    p.positions=[...(member.ap||[]),...(member.vp||[])];
+    playerRows.push(p);
+   }
+  }
+  const kingdomMap={1:'sands',2:'ice',3:'fire'};
+  const fortresses=Object.entries(catalog.results).flatMap(([kingdom,data])=>(data.fortresses||[]).map(f=>({...f,kingdom})));
+  const candidates=[];
+  for(const p of playerRows){
+   for(const pos of p.positions){
+    const kingdom=kingdomMap[Number(pos.kingdom_code)];
+    if(!kingdom||!Number.isFinite(Number(pos.x))||!Number.isFinite(Number(pos.y)))continue;
+    let nearest=null;
+    for(const f of fortresses){
+     if(f.kingdom!==kingdom)continue;
+     const distance=Math.hypot(Number(f.x)-Number(pos.x),Number(f.y)-Number(pos.y));
+     if(!nearest||distance<nearest.distance)nearest={fortress:f,distance};
+    }
+    // Radius is a discovery aid only, not proof of an attack.
+    if(nearest&&nearest.distance<=30){
+     candidates.push({...p,position:pos,fortress:nearest.fortress,distance:nearest.distance,
+       latest:p.events.sort((a,b)=>Date.parse(b.detected_at)-Date.parse(a.detected_at))[0]});
+    }
+   }
+  }
+  candidates.sort((a,b)=>b.score-a.score||a.distance-b.distance||Date.parse(b.latest.detected_at)-Date.parse(a.latest.detected_at));
+  const loot=events.filter(e=>e.kind==='loot_delta'&&Number(e.delta)>0).length;
+  const honor=events.filter(e=>e.kind==='honor_delta'&&Number(e.delta)>0).length;
+  const power=events.filter(e=>e.kind==='power_gain'&&Number(e.delta)>0).length;
+  summary.textContent='PL1 · '+(history.player_count||history.players.length)+' profili · sygnały 24 h: łup +'+loot+', honor +'+honor+', potęga +'+power+' · kandydaci w pobliżu fortec IT1: '+candidates.length+'.';
+  const esc=s=>String(s??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+  list.innerHTML=candidates.length?candidates.slice(0,40).map(p=>{
+   const e=p.latest,fort=p.fortress;
+   return '<article class="item"><strong>Kandydat w pobliżu · '+esc(p.player||'Gracz')+'</strong><small>'+esc(p.alliance_name||'')+' · PID '+esc(p.player_id)+'</small><small>Sygnał: '+esc(e.kind)+' · '+(Number(e.delta)>0?'+':'')+fmtNum(e.delta)+' · '+fmt(e.detected_at)+'</small><small>Pozycja gracza: '+p.position.x+':'+p.position.y+' · Forteca IT1: '+fort.x+':'+fort.y+' · odległość: '+p.distance.toFixed(1)+'</small><small>To korelacja przestrzenna i czasowa, nie potwierdzenie ataku. Współrzędne IT1 nie są zweryfikowane jako identyczne z PL1.</small></article>';
+  }).join(''):'<div class="empty">Brak graczy z sygnałem aktywności w promieniu 30 pól od fortec IT1. Sygnały aktywności nie wskazują celu ataku.</div>';
  }catch(error){
-  summary.textContent='Nie udało się pobrać historii Szpiegowania: '+error.message;
-  list.innerHTML='<div class="empty">Sygnały PL1 są chwilowo niedostępne.</div>';
+  summary.textContent='Nie udało się połączyć Szpiegowania z mapą: '+error.message;
+  list.innerHTML='<div class="empty">Korelacja aktywności i lokalizacji jest chwilowo niedostępna.</div>';
  }
 }
-
 async function load(){
  $('status').textContent='Pobieranie kompletnej mapy IT1…';
  try{await loadTracker();render();}

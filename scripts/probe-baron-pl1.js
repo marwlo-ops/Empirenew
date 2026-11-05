@@ -34,17 +34,31 @@ try {
     signal: AbortSignal.timeout(20000)
   });
   const xml = await catalogResponse.text();
-  const snippets = {};
+  const blocks = xml.match(/<server>[\\s\\S]*?<\\/server>/g) || [];
+  const entries = {};
   for (const alias of ["E4K_PL1", "E4K_PL1_BETA"]) {
-    const index = xml.indexOf(alias);
-    snippets[alias] = index < 0 ? null : xml.slice(Math.max(0, index - 350), Math.min(xml.length, index + 700)).replace(/\\s+/g, " ");
+    const block = blocks.find(item => new RegExp("<name>\\\\s*" + alias + "\\\\s*</name>").test(item));
+    const field = name => {
+      const match = block?.match(new RegExp("<" + name + ">([\\\\s\\\\S]*?)</" + name + ">"));
+      return match ? match[1].trim() : null;
+    };
+    entries[alias] = block ? {
+      name: field("name"),
+      gge_server_name: field("gge-server-name"),
+      zone: field("zone"),
+      zone_id: field("zone-id"),
+      code: field("code"),
+      enabled: field("enabled"),
+      fortress: field("fortress")
+    } : null;
   }
   console.log(JSON.stringify({
     probe: "server-catalog",
     http_status: catalogResponse.status,
     content_type: catalogResponse.headers.get("content-type"),
     bytes: xml.length,
-    server_entries: snippets
+    server_entries: entries,
+    contains_target_zone: xml.includes("EmpirefourkingdomsExGG2_3")
   }));
 } catch (error) {
   console.log(JSON.stringify({ probe: "server-catalog", error: String(error) }));

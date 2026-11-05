@@ -224,7 +224,7 @@ Poprzedni lokalny skrypt scripts/probe-pl1-live-map.py korzystał z EmpireCore. 
 
 Źródła i ustalenia:
 
-- Repozytorium danych E4K E4K-data, plik network/network.json, wskazuje wpis PL1: value=3, host e4k-live-pl1-game.goodgamestudios.com, strefa EmpirefourkingdomsExGG_3, zoneId=259.
+- Repozytorium danych E4K E4K-data, plik network/network.json, wskazuje wpis PL1: value=3, host e4k-live-pl1-game.goodgamestudios.com, strefa EmpirefourkingdomsExGG_3, zoneId=259 i instanceLocaId=generic_country_PL.
 - Pakiet npm e4k-data ma wersję 4.144.21-788.RC.3; jego wpis sieciowy podaje deployTime=1767612028, czyli 2026-01-05 11:20:28 UTC. To metadane pakietu, nie świeży test połączenia; skrypt sprawdza dokładny host i strefę i odmawia przełączenia na inny serwer.
 - ggejs 2.2.0 udostępnia osobny E4KClient. W SocketManager.js transport jest wybierany jako TCP dla stref zaczynających się od EmpirefourkingdomsExGG, a WSS dla pozostałych. To wyjaśnia, dlaczego nie wolno traktować adresu WSS generowanego przez EmpireCore jako potwierdzonej konfiguracji E4K.
 - Kod ggejs używa game ID 16 w integracji kont E4K. Network ID jest odczytywany z odpowiedzi core_gpi; nowy probe nie zgaduje ani nie wpisuje network ID na sztywno.

@@ -14,6 +14,7 @@ on:
       - "tests/test_import_it1_fortresses.py"
       - ".github/workflows/import-it1-fortresses.yml"
       - "research/fortece-barona-status.md"
+      - "research/fortece-barona-ruchy-npc-2026-11-05.md"
       - ".github/workflows/baron-pl1-probe.yml"
   workflow_dispatch:
 

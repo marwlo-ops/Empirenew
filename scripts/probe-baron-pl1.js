@@ -175,6 +175,57 @@ async function probePlayerDungeonHistory() {
   }
 }
 
+async function probeRankedPlayerDungeonHistory() {
+  try {
+    const playersResponse = await fetch(base + "/players?page=1&size=1", {
+      headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
+      signal: AbortSignal.timeout(20000)
+    });
+    const playersBody = await playersResponse.json();
+    const first = Array.isArray(playersBody.players) ? playersBody.players[0] : null;
+    if (!playersResponse.ok || !first?.player_id) {
+      console.log(JSON.stringify({
+        probe: "ranked-player-dungeon-history",
+        players_status: playersResponse.status,
+        total_players: playersBody.pagination?.total_items_count ?? null,
+        player_available: false,
+        error: playersBody.error ?? null
+      }));
+      return;
+    }
+    const historyResponse = await fetch(base + "/dungeons/player/" + encodeURIComponent(first.player_id) + "?lastDays=365", {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(20000)
+    });
+    const history = await historyResponse.json();
+    const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
+    const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
+    const known = new Set();
+    for (const data of Object.values(map.results || {})) {
+      for (const f of data.fortresses || []) known.add(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y));
+    }
+    const sample = rows.slice(0, 20).map(d => ({
+      kid: Number(d.kid),
+      x: Number(d.position_x),
+      y: Number(d.position_y),
+      attacked_at: d.attacked_at,
+      matches_it1_fortress: known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))
+    }));
+    console.log(JSON.stringify({
+      probe: "ranked-player-dungeon-history",
+      players_status: playersResponse.status,
+      total_players: playersBody.pagination?.total_items_count ?? null,
+      history_status: historyResponse.status,
+      history_error: history.error ?? null,
+      records_last_365_days: rows.length,
+      it1_fortress_matches: sample.filter(d => d.matches_it1_fortress).length,
+      sample
+    }));
+  } catch (error) {
+    console.log(JSON.stringify({ probe: "ranked-player-dungeon-history", error: String(error) }));
+  }
+}
+
 async function probeBridge() {
   try {
     const response = await fetch(bridgeBase + "/status", {
@@ -252,4 +303,5 @@ async function probeBridge() {
 }
 
 await probePlayerDungeonHistory();
+await probeRankedPlayerDungeonHistory();
 await probeBridge();

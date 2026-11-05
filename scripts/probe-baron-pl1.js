@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { DEFAULT_PL1_ZONE } from "./barony-live/probe-core.mjs";
+import { DEFAULT_PL1_ZONE, extractOutboundBossDungeonMovementEvidence } from "./barony-live/probe-core.mjs";
 // Read-only probes only; do not persist player names or inferred attack events.
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
@@ -520,13 +520,33 @@ async function probeBridge() {
         const content = body?.content ?? body?.data ?? {};
         const wrappers = Array.isArray(content?.M) ? content.M : [];
         const movements = wrappers.map(item => item?.M ?? item).filter(Boolean);
+        const sampledAt = new Date().toISOString();
         const targetRows = movements.map(m => ({ kid: Number(m.KID), movement_id: Number(m.MID),
-          returning: Number(m.D) === 1, type: Number(m.T), area: m.TA }))
+          returning: Number(m.D) === 1, movement_type: Number(m.T), area: m.TA }))
           .filter(m => Array.isArray(m.area));
-        const baronTargets = targetRows.filter(m => Number(m.area[0]) === 2 && !m.returning)
-          .map(m => ({ kid: m.kid, x: Number(m.area[1]), y: Number(m.area[2]), movement_type: m.type }));
         const typeCounts = {};
         for (const m of targetRows) typeCounts[String(m.area[0])] = (typeCounts[String(m.area[0])] || 0) + 1;
+        const mapCatalog = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
+        const catalogIds = new Map();
+        for (const group of Object.values(mapCatalog.results || {})) {
+          for (const fortress of group.fortresses || []) {
+            catalogIds.set(Number(fortress.kid) + "/" + Number(fortress.x) + "/" + Number(fortress.y), fortress.id);
+          }
+        }
+        const outboundBossDungeonAttacks = movements
+          .map(m => extractOutboundBossDungeonMovementEvidence(m, sampledAt))
+          .filter(Boolean)
+          .map(evidence => ({
+            ...evidence,
+            target: {
+              ...evidence.target,
+              catalog_id_it1: catalogIds.get(evidence.target.kid + "/" + evidence.target.x + "/" + evidence.target.y) || null
+            }
+          }));
+        const npcAttackMovementCount = targetRows.filter(m => m.movement_type === 11).length;
+        const outboundRegularDungeonTargetCount = targetRows.filter(m =>
+          Number(m.area[0]) === 2 && !m.returning
+        ).length;
         const mapRows = Array.isArray(content?.AI) ? content.AI : [];
         console.log(JSON.stringify({
           probe: "bridge-read-command",
@@ -538,8 +558,11 @@ async function probeBridge() {
           content_keys: content && typeof content === "object" ? Object.keys(content) : [],
           movement_count: wrappers.length,
           movement_target_type_counts: typeCounts,
-          outbound_baron_target_count: baronTargets.length,
-          outbound_baron_targets: baronTargets.slice(0, 25),
+          npc_attack_movement_count: npcAttackMovementCount,
+          outbound_regular_dungeon_target_count: outboundRegularDungeonTargetCount,
+          confirmed_outbound_boss_dungeon_attack_count: outboundBossDungeonAttacks.length,
+          confirmed_outbound_boss_dungeon_attacks: outboundBossDungeonAttacks.slice(0, 25),
+          movement_coverage: "GAM movements visible to the connected bridge session only; no global server coverage.",
           map_row_count: mapRows.length
         }));
       } catch (error) {

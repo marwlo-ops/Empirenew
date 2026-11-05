@@ -245,3 +245,80 @@ export function extractNpcBattleReportEvidence(message, battleLog) {
     ],
   };
 }
+
+
+/**
+ * Extract a live outbound NPC attack movement whose exact target is a
+ * BossDungeonMapobject (area type 11). This proves an in-flight attack
+ * movement visible to the connected account, not a global server event.
+ * PT is elapsed seconds at sample time; departure is therefore an estimate,
+ * not a server-issued exact attack timestamp.
+ */
+export function extractOutboundBossDungeonMovementEvidence(movement, sampledAt = new Date().toISOString()) {
+  if (!movement || typeof movement !== 'object') return null;
+
+  const kid = Number(movement.KID);
+  const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[kid];
+  const targetArea = movement.TA;
+  if (
+    Number(movement.T) !== 11 ||
+    Number(movement.D) !== 0 ||
+    !Number.isInteger(expectedOwner) ||
+    !Array.isArray(targetArea) ||
+    Number(targetArea[0]) !== 11 ||
+    Number(targetArea[7]) !== kid ||
+    Number(movement.TID) !== expectedOwner
+  ) return null;
+
+  const x = Number(targetArea[1]);
+  const y = Number(targetArea[2]);
+  const attackerId = Number(movement.SID);
+  const movementId = Number(movement.MID);
+  const elapsedSeconds = Number(movement.PT);
+  const totalTravelSeconds = Number(movement.TT);
+  if (
+    ![x, y].every((value) => Number.isInteger(value) && value >= 0 && value <= 1286) ||
+    !Number.isSafeInteger(attackerId) || attackerId <= 0 ||
+    !Number.isSafeInteger(movementId) || movementId <= 0 ||
+    !Number.isFinite(elapsedSeconds) || elapsedSeconds < 0 ||
+    !Number.isFinite(totalTravelSeconds) || totalTravelSeconds <= elapsedSeconds
+  ) return null;
+
+  const sampledAtIso = toIsoDate(sampledAt);
+  if (!sampledAtIso) throw new Error('Invalid movement sample timestamp.');
+  const sampledAtMs = Date.parse(sampledAtIso);
+  const sourceArea = Array.isArray(movement.SA) ? movement.SA : null;
+  const sourceX = sourceArea ? Number(sourceArea[1]) : NaN;
+  const sourceY = sourceArea ? Number(sourceArea[2]) : NaN;
+  const departureAt = new Date(sampledAtMs - elapsedSeconds * 1000).toISOString();
+  const estimatedArrivalAt = new Date(sampledAtMs + (totalTravelSeconds - elapsedSeconds) * 1000).toISOString();
+
+  return {
+    evidence_kind: 'live_outbound_npc_attack_movement',
+    classification: 'confirmed_outbound_attack_movement_to_boss_dungeon',
+    movement_id: movementId,
+    movement_type: 11,
+    attack_type: Number.isFinite(Number(movement.ATT)) ? Number(movement.ATT) : null,
+    direction: 0,
+    sampled_at_utc: sampledAtIso,
+    movement_departure_estimate_utc: departureAt,
+    estimated_arrival_at_utc: estimatedArrivalAt,
+    elapsed_seconds_at_sample: elapsedSeconds,
+    total_travel_seconds: totalTravelSeconds,
+    target: {
+      kid,
+      kingdom: KINGDOM_NAME_BY_KID[kid],
+      x,
+      y,
+      area_type: 11,
+      owner_id: expectedOwner,
+    },
+    attacker_player_id: attackerId,
+    source: sourceArea && [sourceX, sourceY].every(Number.isFinite)
+      ? { area_type: Number(sourceArea[0]), x: sourceX, y: sourceY }
+      : null,
+    attack_time_utc: null,
+    time_semantics: 'PT is elapsed travel time; departure is estimated from the local sample timestamp and is not an exact server-issued event time.',
+    coverage: 'Only movements returned to the authenticated bridge session; not a global PL1 feed.',
+  };
+}

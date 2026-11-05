@@ -1,7 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  buildObservation, buildScanPlan, compareObservations, extractNpcBattleReportEvidence, pickSamples, validateMapOnlyCatalog,
+  buildObservation, buildScanPlan, compareObservations,
+  extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
+  pickSamples, validateMapOnlyCatalog,
 } from './probe-core.mjs';
 
 function catalog() {
@@ -213,4 +215,51 @@ test('marks forwarded NPC battle reports so delivery time is not mistaken for or
   assert.equal(evidence.message_is_forwarded, true);
   assert.equal(evidence.report_delivery_kind, 'forwarded_to_this_account');
   assert.equal(evidence.attack_time_utc, null);
+});
+
+
+test('extracts a confirmed outbound NPC movement to the exact BossDungeonMapobject target', () => {
+  const movement = {
+    MID: 77123, T: 11, D: 0, KID: 1, SID: 1234567, TID: -230,
+    PT: 125, TT: 600, ATT: 2,
+    SA: [1, 200, 300],
+    TA: [11, 321, 654, -1, 72, 0, 1234567, 1],
+  };
+  const evidence = extractOutboundBossDungeonMovementEvidence(movement, '2026-11-05T20:00:00Z');
+  assert.equal(evidence.classification, 'confirmed_outbound_attack_movement_to_boss_dungeon');
+  assert.equal(evidence.movement_id, 77123);
+  assert.equal(evidence.attacker_player_id, 1234567);
+  assert.deepEqual(evidence.target, {
+    kid: 1, kingdom: 'sands', x: 321, y: 654, area_type: 11, owner_id: -230,
+  });
+  assert.equal(evidence.movement_departure_estimate_utc, '2026-11-05T19:57:55.000Z');
+  assert.equal(evidence.estimated_arrival_at_utc, '2026-11-05T20:07:55.000Z');
+  assert.equal(evidence.attack_time_utc, null);
+  assert.match(evidence.time_semantics, /estimated/);
+  assert.match(evidence.coverage, /not a global PL1 feed/);
+});
+
+test('rejects movements unless movement type, target type, kingdom and NPC owner all agree', () => {
+  const movement = {
+    MID: 77123, T: 11, D: 0, KID: 2, SID: 1234567, TID: -231,
+    PT: 10, TT: 100, TA: [11, 321, 654, -1, 72, 0, 1234567, 2],
+  };
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, T: 0 }), null);
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, TA: [2, 321, 654, -1, 72, 0, 1234567, 2] }), null);
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, KID: 1 }), null);
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, TID: -230 }), null);
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, TA: [11, 321, 654, -1, 72, 0, 1234567, 1] }), null);
+});
+
+test('rejects returning, expired, untimed or unattributed NPC movements', () => {
+  const movement = {
+    MID: 77123, T: 11, D: 0, KID: 3, SID: 1234567, TID: -232,
+    PT: 10, TT: 100, TA: [11, 321, 654, -1, 72, 0, 1234567, 3],
+  };
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, D: 1 }), null);
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, PT: 100 }), null);
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, PT: -1 }), null);
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, SID: 0 }), null);
+  assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, MID: 0 }), null);
+  assert.throws(() => extractOutboundBossDungeonMovementEvidence(movement, 'not-a-date'), /Invalid movement sample timestamp/);
 });

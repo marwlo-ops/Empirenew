@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
-  isNpcBattleReportMessage,
+  isNpcBattleReportMessage, isGgejsGamDispatchStack,
   extractParsedOutboundBossDungeonMovementEvidence,
   pickSamples, selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
 } from './probe-core.mjs';
@@ -344,4 +344,22 @@ test('rejects parsed movements with wrong direction/type/owner, missing player o
     ...movement, arrivalTime: new Date('2026-11-05T19:59:59Z'),
   }, '2026-11-05T20:00:00Z'), null);
   assert.throws(() => extractParsedOutboundBossDungeonMovementEvidence(movement, 'not-a-date'), /Invalid parsed movement sample timestamp/);
+});
+
+
+test('recognizes only the ggejs GAM response handler stack', () => {
+  const gamStack = [
+    'Error',
+    '    at Object.execute (/opt/app/node_modules/ggejs/src/commands/gam.js:13:22)',
+    '    at executeResponse (/opt/app/node_modules/ggejs/src/commands/index.js:55:13)',
+  ].join('\\n');
+  const otherStack = [
+    'Error',
+    '    at Object.execute (/opt/app/node_modules/ggejs/src/commands/cra.js:20:22)',
+    '    at executeResponse (/opt/app/node_modules/ggejs/src/commands/index.js:55:13)',
+  ].join('\\n');
+  assert.equal(isGgejsGamDispatchStack(gamStack), true);
+  assert.equal(isGgejsGamDispatchStack(otherStack), false);
+  assert.equal(isGgejsGamDispatchStack(''), false);
+  assert.equal(isGgejsGamDispatchStack(null), false);
 });

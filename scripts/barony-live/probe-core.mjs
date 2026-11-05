@@ -435,3 +435,16 @@ export function extractParsedOutboundBossDungeonMovementEvidence(movement, sampl
     coverage: 'Only movements returned to the authenticated E4K account session; not a global PL1 feed.',
   };
 }
+
+
+/**
+ * True only when MovementManager._add_or_update was called by ggejs' GAM
+ * response handler. Other command handlers (CRA/CRM/CSM, etc.) also update
+ * MovementManager, so counting every update as a GAM response is unsafe.
+ */
+export function isGgejsGamDispatchStack(stack) {
+  if (typeof stack !== 'string' || stack.length === 0) return false;
+  return stack.split('\\n').some((line) =>
+    /[\\/]commands[\\/]gam\\.js(?::\\d+:\\d+)?(?:\\)|\\s|$)/.test(line)
+  );
+}

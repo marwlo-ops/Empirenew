@@ -6,7 +6,7 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
-  selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
+  isGgejsGamDispatchStack, selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
 
 const require = createRequire(import.meta.url);
@@ -100,16 +100,29 @@ async function main() {
   const client=new E4KClient(instance);
   client.socketManager.reconnectTimeout=-1;
   const originalAddOrUpdate=client.movements._add_or_update;
-  let movementUpdateBatches=0;
+  const movementGamBatches=[];
+  let ignoredNonGamMovementUpdates=0;
   if (a.movements) {
-    // Passive observer only: ggejs exposes GAM response parsing but no documented request method.
+    // GAM is an incoming response handler. Other ggejs commands also update MovementManager,
+    // so count and inspect only batches whose call stack identifies commands/gam.js.
     client.movements._add_or_update=function(items) {
-      movementUpdateBatches++;
+      const receivedAt=new Date().toISOString();
+      const stack=new Error().stack||'';
+      if (isGgejsGamDispatchStack(stack)) {
+        const batch=Array.isArray(items)?items:[];
+        movementGamBatches.push({
+          received_at_utc:receivedAt,
+          movement_count:batch.length,
+          evidence:batch.map(m=>extractParsedOutboundBossDungeonMovementEvidence(m,receivedAt)).filter(Boolean),
+        });
+      } else {
+        ignoredNonGamMovementUpdates++;
+      }
       return originalAddOrUpdate.call(this,items);
     };
   }
   const observations=[],candidateSignals=[],sectorErrors=[];
-  let movementProbe={status:'not_requested',update_batches:0,movement_count:0,matching_count:0};
+  let movementProbe={status:'not_requested',gam_response_batches:0,ignored_non_gam_movement_updates:0,movement_count:0,matching_count:0};
   let movementEvidence=[];
   let mailboxUpdateObserved=false;
   const onMailMessageAdd=()=>{mailboxUpdateObserved=true;};
@@ -144,19 +157,21 @@ async function main() {
     }
 
     if (a.movements) {
-      // Wait for any server-pushed GAM update; do not send an undocumented command.
+      // Observe incoming GAM response batches only; no undocumented GAM request is sent.
       await sleep(a.movementWaitMs);
       const sampledAt=new Date().toISOString();
-      const parsedMovements=movementUpdateBatches>0?client.movements.get():[];
-      movementEvidence=parsedMovements
-        .map(m=>extractParsedOutboundBossDungeonMovementEvidence(m,sampledAt))
-        .filter(Boolean);
+      movementEvidence=movementGamBatches.flatMap(batch=>batch.evidence);
       movementProbe={
-        status:movementUpdateBatches>0?'server_push_observed':'no_server_push_observed',
-        update_batches:movementUpdateBatches,
+        status:movementGamBatches.length>0?'gam_response_observed':'no_gam_response_observed',
+        gam_response_batches:movementGamBatches.length,
+        ignored_non_gam_movement_updates:ignoredNonGamMovementUpdates,
         sampled_at_utc:sampledAt,
-        movement_count:parsedMovements.length,
+        movement_count:movementGamBatches.reduce((total,batch)=>total+batch.movement_count,0),
         matching_count:movementEvidence.length,
+        response_batches:movementGamBatches.map(batch=>({
+          received_at_utc:batch.received_at_utc,
+          movement_count:batch.movement_count,
+        })),
       };
     }
 

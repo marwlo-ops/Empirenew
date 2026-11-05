@@ -82,18 +82,23 @@ function toIsoDate(value) {
 
 function serializeExactRow(row, sampledAt) {
   const cooldownUntil = toIsoDate(row.attackCooldownEnd);
-  const cooldownMs = cooldownUntil ? Date.parse(cooldownUntil) - Date.parse(sampledAt) : 0;
+  const sampledAtMs = Date.parse(sampledAt);
+  const cooldownMs = cooldownUntil && Number.isFinite(sampledAtMs)
+    ? Date.parse(cooldownUntil) - sampledAtMs
+    : null;
   return {
     area_type: Number.isInteger(row.areaType) ? row.areaType : null,
     kingdom_id: Number.isInteger(row.kingdomId) ? row.kingdomId : null,
     owner_id: Number.isInteger(row.ownerInfo?.playerId) ? row.ownerInfo.playerId : null,
     attack_count: Number.isInteger(row.attackCount) ? row.attackCount : null,
     cooldown_until_utc: cooldownUntil,
-    cooldown_remaining_seconds_at_sample: cooldownUntil ? Math.max(0, Math.ceil(cooldownMs / 1000)) : null,
+    cooldown_remaining_seconds_at_sample: cooldownMs === null ? null : Math.max(0, Math.ceil(cooldownMs / 1000)),
   };
 }
 
 export function buildObservation(target, mapObjects, sampledAt = new Date().toISOString()) {
+  const sampledAtIso = toIsoDate(sampledAt);
+  if (!sampledAtIso) throw new Error('Invalid observation timestamp.');
   const exactRows = (Array.isArray(mapObjects) ? mapObjects : []).filter((row) =>
     row?.position?.X === target.x && row?.position?.Y === target.y
   );
@@ -108,8 +113,8 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
 
   const observation = {
     target: { catalog_id_it1: target.id, kid: target.kid, kingdom: target.kingdom, x: target.x, y: target.y, expected_npc_owner_id: expectedOwner },
-    sampled_at_utc: sampledAt, status,
-    rows: exactRows.map((row) => serializeExactRow(row, sampledAt)),
+    sampled_at_utc: sampledAtIso, status,
+    rows: exactRows.map((row) => serializeExactRow(row, sampledAtIso)),
     attack_time_utc: null,
     note: 'Map observation only. No exact attack timestamp or attacker is inferred.',
   };
@@ -118,7 +123,9 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     observation.owner_id = row.owner_id;
     observation.attack_count = row.attack_count;
     observation.cooldown_until_utc = row.cooldown_until_utc;
-    observation.cooldown_active = Boolean(row.cooldown_until_utc && Date.parse(row.cooldown_until_utc) > Date.parse(sampledAt));
+    observation.cooldown_active = row.cooldown_until_utc === null
+      ? null
+      : Date.parse(row.cooldown_until_utc) > Date.parse(sampledAtIso);
   }
   return observation;
 }

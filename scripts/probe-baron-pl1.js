@@ -84,8 +84,9 @@ async function probeBridge() {
     }
 
     const commands = [
-      ["gaa", { KID: 1, AX1: 0, AY1: 0, AX2: 1, AY2: 1 }],
-      ["fnm", { T: 2, KID: 1, LMIN: 1, LMAX: 1, NID: -202 }]
+      ["gam", { M: {} }],
+      ["gam", { O: {} }],
+      ["gaa", { KID: 1 }]
     ];
     for (const [command, params] of commands) {
       try {
@@ -95,26 +96,36 @@ async function probeBridge() {
           headers: { Accept: "application/json" },
           signal: AbortSignal.timeout(20000)
         });
-        const text = await result.text();
+        const raw = await result.text();
         let body;
-        try { body = JSON.parse(text); } catch { body = { raw: text.slice(0, 300) }; }
+        try { body = JSON.parse(raw); } catch { body = { raw: raw.slice(0, 300) }; }
         const content = body?.content ?? body?.data ?? {};
-        const area = command === "gaa" ? content : (content?.gaa ?? {});
-        const rows = Array.isArray(area?.AI) ? area.AI : null;
-        const owners = Array.isArray(area?.OI) ? area.OI : null;
+        const wrappers = Array.isArray(content?.M) ? content.M : [];
+        const movements = wrappers.map(item => item?.M ?? item).filter(Boolean);
+        const targetRows = movements.map(m => ({ kid: Number(m.KID), movement_id: Number(m.MID),
+          returning: Number(m.D) === 1, type: Number(m.T), area: m.TA }))
+          .filter(m => Array.isArray(m.area));
+        const baronTargets = targetRows.filter(m => Number(m.area[0]) === 2 && !m.returning)
+          .map(m => ({ kid: m.kid, x: Number(m.area[1]), y: Number(m.area[2]), movement_type: m.type }));
+        const typeCounts = {};
+        for (const m of targetRows) typeCounts[String(m.area[0])] = (typeCounts[String(m.area[0])] || 0) + 1;
+        const mapRows = Array.isArray(content?.AI) ? content.AI : [];
         console.log(JSON.stringify({
-          probe: "bridge-map-command",
+          probe: "bridge-read-command",
           command,
+          sent_header_keys: Object.keys(params),
           http_status: result.status,
           error: body?.error ?? null,
           return_code: body?.return_code ?? null,
-          response_keys: body && typeof body === "object" ? Object.keys(body) : [],
           content_keys: content && typeof content === "object" ? Object.keys(content) : [],
-          map_row_count: rows?.length ?? null,
-          owner_row_count: owners?.length ?? null
+          movement_count: wrappers.length,
+          movement_target_type_counts: typeCounts,
+          outbound_baron_target_count: baronTargets.length,
+          outbound_baron_targets: baronTargets.slice(0, 25),
+          map_row_count: mapRows.length
         }));
       } catch (error) {
-        console.log(JSON.stringify({ probe: "bridge-map-command", command, error: String(error) }));
+        console.log(JSON.stringify({ probe: "bridge-read-command", command, error: String(error) }));
       }
     }
   } catch (error) {

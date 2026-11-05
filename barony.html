@@ -10,11 +10,11 @@ main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyeb
 .notice{margin-top:13px;padding:12px;border:1px solid #66532f;border-radius:10px;background:#2a2418;color:#e8d3a7;font-size:12px}.subtle{color:var(--muted);font-size:12px}
 @media(max-width:760px){main{padding:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.map{height:370px}.list{max-height:none}.controls input{min-width:100%;flex-basis:100%}}
 </style></head><body><main>
-<section class="hero"><div class="eyebrow">Empire tools · NPC map tracker</div><h1>🏰 Barony</h1><p>Lokalizacje fortec z mapy IT1. Ostatni atak i odnowienie są sprawdzane osobno w API E4K PL1.</p></section>
+<section class="hero"><div class="eyebrow">Empire tools · NPC map tracker</div><h1>🏰 Barony</h1><p>Lokalizacje fortec z mapy IT1. Historia ataków PL1 jest oddzielona od mapy IT1.</p></section>
 <div class="stats"><div class="stat"><b id="total">—</b><span>Fortecy z IT1</span></div><div class="stat"><b id="ready">—</b><span>Sprawdzone w PL1</span></div><div class="stat"><b id="wait">—</b><span>W obserwacji</span></div><div class="stat"><b id="updated">—</b><span>Ostatni odczyt</span></div></div>
 <div class="controls" id="kingdoms"><button class="active" data-k="sands">🏜️ Piaski</button><button data-k="ice">❄️ Lód</button><button data-k="fire">🔥 Ogień</button><button data-k="islands">🏝️ Archipelag · wyspy</button><button data-k="unassigned">📍 Nieprzypisane</button><input id="search" placeholder="Szukaj po współrzędnych lub ID…"><select id="filter"><option value="all">Wszystkie fortecy</option><option value="checked">Sprawdzone w PL1</option><option value="watched">Obserwowane w PL1</option></select><select id="sort"><option value="xy">Współrzędne</option><option value="checked">Najpierw sprawdzone</option></select></div>
 <div class="layout"><section class="panel"><h2>Mapa lokalizacji</h2><div class="map" id="map"><div class="empty">Oczekiwanie na potwierdzone współrzędne skanu.</div></div><div class="legend">Mapa i współrzędne pochodzą wyłącznie z GGE Tracker IT1. Czas ataku nie jest pobierany z IT1.</div></section><section class="panel"><h2>Lista fortec</h2><div class="list" id="list"><div class="empty">Ładowanie katalogu…</div></div></section></div>
-<div class="notice" id="status">Pobieranie katalogu fortec z GGE Tracker (IT1)…</div><p class="subtle">IT1 dostarcza tylko krainę i współrzędne. Po wybraniu fortecy moduł sprawdza jej aktywność w API E4K PL1; zapis historii na tym telefonie zaczyna się od pierwszego odczytu.</p>
+<div class="notice" id="status">Pobieranie katalogu fortec z GGE Tracker (IT1)…</div><p class="subtle">IT1 dostarcza tylko krainę i współrzędne. API PL1 nie udostępnia obecnie potwierdzonego odczytu ataków na fortecy. Zapis ataku jest na razie ręczny i lokalny; czas odnowienia liczymy jako 24 h od zapisanego zdarzenia.</p>
 </main>
 <script>
 (()=>{'use strict';
@@ -77,11 +77,11 @@ async function loadTracker(){
 
 function historySummary(x){
  const h=readHistory()[keyOf(x)];
- if(!h?.latest)return 'PL1: jeszcze nie sprawdzono';
+ if(!h?.latest)return 'Brak zarejestrowanego ataku';
  const e=h.latest;
- if(e.status==='not_found')return 'PL1: brak fortecy pod tymi współrzędnymi';
- if(e.status==='cooldown')return 'PL1: ostatni atak '+fmt(e.attacked_at)+' · '+(e.player_name||('ID '+(e.player_id??'nieznane')))+' · gotowa '+fmt(e.available_at);
- if(e.status==='ready')return 'PL1: obecnie gotowa · ostatni zapis: '+(e.attacked_at?fmt(e.attacked_at):'brak aktywnego odnowienia');
+ if(e.status==='not_found')return 'Niezweryfikowane współrzędne';
+ if(e.status==='cooldown')return 'Ostatni zapisany atak '+fmt(e.attacked_at)+' · '+(e.player_name||('ID '+(e.player_id??'nieznane')))+' · gotowa '+fmt(e.available_at);
+ if(e.status==='ready')return 'Minęło odnowienie · ostatni atak: '+(e.attacked_at?fmt(e.attacked_at):'brak aktywnego odnowienia');
  return 'PL1: wynik odczytu nieznany';
 }
 
@@ -109,7 +109,7 @@ function render(){
   $('map').innerHTML='<svg viewBox="0 0 1000 700" role="img" aria-label="Mapa fortec IT1">'+pts.map(x=>'<circle class="dot '+(isCooling(x)?'wait':'')+'" cx="'+(40+(x.x-minX)/dx*920)+'" cy="'+(40+(x.y-minY)/dy*620)+'" r="8"><title>'+x.x+':'+x.y+'</title></circle>').join('')+'</svg>';
  }else $('map').innerHTML='<div class="empty">Brak współrzędnych do wyświetlenia.</div>';
  const current=db?.results?.[kingdom];
- $('status').textContent=current?'Mapa IT1 · '+current.fortress_count+' fortec · odczyt z pliku danych. Ataki sprawdzane osobno przez PL1.':'Brak danych dla '+(names[kingdom]||kingdom)+'.';
+ $('status').textContent=current?'Mapa IT1 · '+current.fortress_count+' fortec · odczyt z pliku danych. Ataki nie są importowane z IT1; lokalny rejestr liczy 24 h od zapisu.':'Brak danych dla '+(names[kingdom]||kingdom)+'.';
 }
 
 function saveObservation(x,observation){
@@ -128,56 +128,32 @@ function saveObservation(x,observation){
  writeJson(HISTORY_KEY,all);
 }
 
-async function checkTarget(x,silent=false){
- const button=document.querySelector('[data-check="'+keyOf(x)+'"]');
- if(button&&!silent){button.disabled=true;button.textContent='Sprawdzam PL1…';}
- try{
-  const tileSize=12,spacing=13,x1=Math.floor(x.x/spacing)*spacing,y1=Math.floor(x.y/spacing)*spacing;
-  const x2=Math.min(x1+tileSize,1286),y2=Math.min(y1+tileSize,1286);
-  const params={KID:x.kid,AX1:x1,AY1:y1,AX2:x2,AY2:y2};
-  const encoded=encodeURIComponent(JSON.stringify(params).slice(1,-1));
-  const url=TARGET_API+'/'+encodeURIComponent(TARGET_SERVER)+'/gaa/'+encoded;
-  const response=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store'});
-  if(!response.ok)throw Error('E4K PL1 HTTP '+response.status);
-  const payload=await response.json();
-  if(String(payload.return_code)!=='0')throw Error('E4K PL1 return_code='+String(payload.return_code??'brak'));
-  const rows=payload.content?.AI;
-  if(!Array.isArray(rows))throw Error('E4K PL1 nie zwróciło content.AI');
-  const row=rows.find(v=>Array.isArray(v)&&String(v[0])==='11'&&Number(v[1])===x.x&&Number(v[2])===x.y);
-  const sampledAt=new Date().toISOString();
-  if(!row){
-   saveObservation(x,{status:'not_found',sampled_at:sampledAt});render();
-   if(!silent)throw Error('PL1 nie zwróciło fortecy pod tymi współrzędnymi. Współrzędne z IT1 nie muszą pokrywać się z PL1.');
-   return;
-  }
-  const remaining=Number(row[5]),playerId=row[6]==null?null:String(row[6]);
-  if(!Number.isFinite(remaining))throw Error('PL1 zwróciło nieprawidłowy czas odnowienia');
-  if(remaining>0){
-   const sampleMs=Date.parse(sampledAt);
-   const attackedAt=new Date(sampleMs-(86400-remaining)*1000).toISOString();
-   const availableAt=new Date(sampleMs+remaining*1000).toISOString();
-   saveObservation(x,{status:'cooldown',sampled_at:sampledAt,player_id:playerId,player_name:playerId?playerNames[playerId]||null:null,attacked_at:attackedAt,available_at:availableAt,remaining_seconds:remaining,source:'E4K PL1 gaa'});
-  }else{
-   const old=readHistory()[keyOf(x)]?.latest;
-   saveObservation(x,{status:'ready',sampled_at:sampledAt,player_id:old?.player_id??null,player_name:old?.player_name??null,attacked_at:old?.attacked_at??null,available_at:sampledAt,remaining_seconds:0,source:'E4K PL1 gaa'});
-  }
-  render();
- }catch(error){
-  if(!silent)$('status').textContent='Błąd odczytu PL1: '+error.message;
- }finally{
-  if(button){button.disabled=false;button.textContent='Sprawdź aktywność PL1';}
- }
+function recordAttack(x){
+ const attacker=(window.prompt('Kto zaatakował tę fortecę? Podaj nick gracza:', 'Mój atak')||'').trim();
+ if(!attacker)return;
+ const attackedAt=new Date().toISOString();
+ const availableAt=new Date(Date.now()+24*60*60*1000).toISOString();
+ const key=keyOf(x),all=readHistory(),entry=all[key]||{kid:x.kid,x:x.x,y:x.y,events:[]};
+ const event={status:'cooldown',sampled_at:attackedAt,attacked_at:attackedAt,available_at:availableAt,player_name:attacker,source:'manual-confirmation'};
+ entry.events=entry.events||[];
+ entry.events.push(event);
+ entry.events=entry.events.slice(-100);
+ entry.latest=event;entry.updated_at=attackedAt;all[key]=entry;
+ writeJson(HISTORY_KEY,all);
+ const watched=readWatch();if(!watched.includes(key)){watched.push(key);writeJson(WATCH_KEY,watched);}
+ render();
+ $('status').textContent='Zapisano atak na '+x.x+':'+x.y+'. Ponowna dostępność: '+fmt(availableAt)+'. Zapis jest lokalny na tym urządzeniu.';
 }
 
 async function load(){
  $('status').textContent='Pobieranie kompletnej mapy IT1…';
- try{await loadTracker();await loadPlayerNames();render();}
+ try{await loadTracker();render();}
  catch(error){$('status').textContent='Nie udało się pobrać kompletnej mapy IT1: '+error.message;$('list').innerHTML='<div class="empty">Brak potwierdzonej pełnej listy IT1. Nie wyświetlam niepełnego importu jako kompletnego.</div>';$('total').textContent='—';$('ready').textContent='—';$('wait').textContent='—';}
 }
 $('kingdoms').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(!b)return;kingdom=b.dataset.k;document.querySelectorAll('[data-k]').forEach(x=>x.classList.toggle('active',x===b));render();});
-$('list').addEventListener('click',e=>{const b=e.target.closest('[data-check]');if(!b)return;const x=targets.find(v=>keyOf(v)===b.dataset.check);if(x){const watch=readWatch();if(!watch.includes(keyOf(x))){watch.push(keyOf(x));writeJson(WATCH_KEY,watch);}checkTarget(x);}});
+$('list').addEventListener('click',e=>{const b=e.target.closest('[data-attack]');if(!b)return;const x=targets.find(v=>keyOf(v)===b.dataset.attack);if(x)recordAttack(x);});
 ['search','filter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
 load();
-setInterval(()=>{const watched=new Set(readWatch());for(const x of Object.values(db?.results||{}).flatMap(v=>v.fortresses||[])){if(watched.has(keyOf(x)))checkTarget(x,true);}},5*60*1000);
+
 })();
 </script></body></html>

@@ -137,3 +137,26 @@ Ograniczenia i warunki testu:
 4. Połączenie musi być wykonane lokalnie lub w zabezpieczonym środowisku operatora. Nie umieszczamy loginu, hasła ani tokenów w repozytorium, GitHub Actions ani plikach publikowanych na Pages.
 
 Następny test: na autoryzowanej sesji produkcyjnego PL1 wykonać wyłącznie odczyt kilku znanych współrzędnych w każdej krainie i zapisać surowy rekord mapy, kid/x/y, owner_id, attack_cooldown_seconds, czas próbki i status kompletności. Dopiero po pozytywnym wyniku tego testu projektować poller. Do tego czasu automatyczna historia ataków PL1 pozostaje niepotwierdzona.
+
+## 12. Przygotowany lokalny test mapy PL1 — 2026-11-05 14:58 UTC
+
+Nowy przegląd dokumentacji EmpireCore 0.63.0 potwierdza, że autoryzowana sesja gry ma osobny, read-only odczyt mapy:
+- `client.map.scan_around(x, y, radius, kingdom)` zwraca wiersze mapy w zadanym promieniu; dla promienia 1 jest to mały odczyt wokół jednej współrzędnej.
+- `MapAreaItem` może zawierać `owner_id`, `dungeon_level`, `attack_cooldown_seconds`, `total_cooldown_seconds`, `victory_count`, `defeater_player_id` i `is_defeated`.
+- Dokumentacja definiuje `defeater_player_id` jako identyfikator gracza, który pokonał **boss dungeon**. Nie rozszerzamy tego znaczenia automatycznie na zwykłe fortece/baronów.
+- `attack_cooldown_seconds` to pozostały czas do ponownego ataku, a nie znacznik czasu ostatniego ataku.
+- Callbacki ruchów/ataków nie obejmują zwykłych właścicieli typu dungeon/robber baron; nie będą więc globalnym źródłem historii tych celów.
+
+Wprowadzone zmiany w repozytorium:
+- `scripts/probe-pl1-live-map.py` — lokalny, read-only test 3 przykładowych współrzędnych na krainę (9 żądań). Ładuje wyłącznie kompletny katalog mapy IT1, odczytuje wskazane współrzędne na serwerze określonym przez `GGE_ZONE` (domyślnie `EmpirefourkingdomsExGG2_3`) i zwraca surowe, opatrzone czasem próbki JSON.
+- Skrypt nie wysyła ataków ani szpiegowania, nie zapisuje plików i nie wylicza `attacked_at` z cooldownu. Identyfikator pokonującego jest rozwiązywany do nicku tylko dla rekordu typu `BOSS_DUNGEON`, gdy serwer go poda.
+- Login/hasło są pobierane lokalnie z `GGE_USERNAME`/`GGE_PASSWORD` lub z bezpiecznego promptu; nie są zapisane w repozytorium ani przekazywane do GitHub Actions.
+- `tests/test_probe_pl1_live_map.py` — testy offline walidacji katalogu, duplikatów, zakazanych pól, doboru próbek, braku fikcyjnego czasu ataku i ograniczenia pola defeatera do boss dungeon.
+- `.github/workflows/baron-pl1-probe.yml` — dodano kontrolę składni Python i testy offline przed istniejącą diagnostyką API. Zmiana jest w commicie `ddf550e`; wynik uruchomienia nowego workflow nie został jeszcze potwierdzony w tej iteracji.
+
+Status wykonania:
+- Katalog IT1 nadal ma 2021 unikalne punkty: Piaski 671, Lód 779, Ogień 571; 0 duplikatów i 0 pól ataku/cooldown. Snapshot: 2026-11-05 14:34:36 UTC.
+- Skrypt lokalny został dodany, ale **nie wykonano jeszcze testu live na PL1** — wymaga autoryzowanej sesji gry na koncie operatora. Nie należy przekazywać loginu ani hasła w czacie ani umieszczać ich w GitHub Secrets/Actions dla tego testu.
+- Nawet jeśli live map zwróci cooldown, nie potwierdzi to automatycznie kto i kiedy zaatakował zwykłego barona. Do tego potrzebny jest osobny, wiarygodny dziennik zdarzeń albo porównywanie kolejnych próbek z potwierdzonym źródłem gracza i czasu. Na razie nie zapisujemy historii ataków.
+
+Następny krok: uruchomić lokalnie `python -m pip install "empire-core==0.63.0"`, a następnie `python scripts/probe-pl1-live-map.py` na koncie zalogowanym do produkcyjnego E4K PL1. Jeśli biblioteka nie rozpozna strefy, należy zweryfikować `GGE_ZONE`, `GGE_GAME_ID` i `GGE_NETWORK_ID` na podstawie listy serwerów — skrypt kończy się błędem zamiast przełączać się na inny świat. Dopiero wynik rzeczywistej próbki zdecyduje, czy można budować poller.

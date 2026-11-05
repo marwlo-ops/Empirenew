@@ -10,7 +10,7 @@ Ostatnia aktualizacja: 2026-11-05. Dane w tym dokumencie rozdzielają potwierdzo
 - Krainy: Piaski 671, Lód 779, Ogień 571.
 - Walidacja opublikowanego JSON: 2021 rekordów, 0 duplikatów współrzędnych, 0 niepoprawnych współrzędnych.
 - Każdy rekord zawiera wyłącznie identyfikator, KID, krainę, X/Y, typ i źródło IT1. Nie zawiera danych gracza, czasu ataku, cooldownu ani gotowości.
-- Wszystkie rekordy są oznaczone jako źródło IT1; nie są zweryfikowane jako E4K PL1.
+- Wszystkie rekordy są oznaczone jako źródło IT1. Operator potwierdził zgodność siatki współrzędnych IT1 i produkcyjnego PL1; sam import nie potwierdza jednak aktualnej obecności każdego obiektu ani stanu ataków na PL1.
 
 ## 2. Zgodność GGE Tracker z E4K PL1
 
@@ -318,3 +318,48 @@ Kod API GGE Tracker przechowuje `dungeons_history` z `player_id` i `attacked_at`
 - Pages build/deploy 42052460959: success. SHA `barony.html`, katalogu fortec, historii Szpiegowania i snapshotów lokalizacji są identyczne jak w deploy commicie `11f92ee`; UI/dane strony nie zmieniły się w tej iteracji.
 
 Wniosek: statyczny kontrakt E4K i ograniczony kanał raportów własnego konta są potwierdzone w kodzie biblioteki, ale brak live PL1 nadal uniemożliwia potwierdzenie ataków i dokładnego czasu.
+
+## 18. Świeży import IT1 i naprawa kontraktu publikacji — 2026-11-05 18:10 UTC
+
+### Import mapy
+
+Workflow `42081486806` pobrał rzeczywiste dane z GGE Tracker IT1 i zakończył się sukcesem. Nowy snapshot:
+- `captured_at=2026-11-05T18:09:27.536395Z`;
+- Piaski 671, Lód 779, Ogień 571; razem 2021;
+- 2021 unikalnych współrzędnych, 0 duplikatów, 0 niepoprawnych punktów;
+- 0 pól cooldownu/gotowości/gracza/historii ataków;
+- porównanie ze snapshotem 15:11:37 UTC: 0 dodanych i 0 usuniętych współrzędnych;
+- 199 sektorów 100×100 w pełnym planie odczytu.
+
+Commit danych: `e6d2d963`.
+
+### Wykryty i naprawiony błąd importera
+
+Poprzedni `scripts/import_it1_fortresses.py` generował rekordy z polami `source` i `match_verified_on_target`, ale nie ustawiał wymaganego przez aktualny katalog pola `type: "dungeon"`. Wartość głównego pola `source` nie zawierała też frazy `map coordinates only`. To rozjeżdżało kontrakt importera z walidatorem Barony i mogło spowodować, że kolejny import opublikowałby katalog odrzucany przez probe.
+
+Poprawiono:
+1. importer zapisuje teraz dokładnie mapowy schemat używany przez stronę i probe: ID, KID, krainę, X/Y, typ oraz źródło IT1;
+2. importer odrzuca jawne rekordy o typie innym niż 11 oraz współrzędne poza zakresem 0–1286;
+3. nie kopiuje arbitralnych pól API, więc cooldown, gotowość, gracz i historia nie przedostaną się do katalogu;
+4. wykryte duplikaty współrzędnych zatrzymują import zamiast po cichu nadpisywać rekord;
+5. zachowywany jest poprzedni kompletny katalog, gdy skan jest niepełny lub mniejszy;
+6. workflow importu uruchamia po pobraniu walidator publikowanego JSON i pełny plan Barony przed commitem;
+7. workflow importu uruchamia się także po zmianie importera/testów/workflow, oprócz harmonogramu.
+
+### Testy i deployment
+
+- importer: Python unit tests — PASS;
+- walidator publikowanego katalogu `scripts/test-baron-map-catalog.mjs` — PASS;
+- plan Barony: 2021 cele / 199 sektorów — PASS;
+- workflow PL1 `42081486716`: wszystkie kroki PASS, w tym testy rdzenia, instalacja przypiętego klienta E4K, test mobilny, walidator katalogu i uruchomienie diagnostyki publicznych źródeł;
+- Pages dla commitu danych `e6d2d963`, workflow `42081530187`: build PASS, deploy PASS, raport statusu PASS.
+
+Zmiany dotyczyły importera, testów, workflow i danych fortec. Nie zmieniono `barony.html`, `mapa-rb.html`, Mapa, Szpiegowanie ani Dodatkowe.
+
+### Produkcyjny PL1 — nadal bez potwierdzonej historii
+
+Workflow diagnostyczny zakończył się poprawnie jako proces, ale status runu nie zawiera treści odpowiedzi poszczególnych endpointów. Nie wyciągam więc z samego zielonego statusu wniosku, że API zaakceptowało PL1. Ostatnie szczegółowo zapisane wyniki nadal wskazują, że GGE Tracker `/dungeons` odrzuca produkcyjny `E4K_PL1`, a Beta jest odrębnym serwerem.
+
+Lokalny `scripts/barony-live/probe.mjs` nie został uruchomiony live: wymaga lokalnej autoryzowanej sesji operatora. Wiersz typu 11 może zawierać `defeaterPlayerId`, ale nie ma w nim dokładnego `attacked_at`. Nie zapisano żadnych zdarzeń ataku.
+
+Następny krok: odczytać wynik per-endpoint z logu workflow `42081486716`, a następnie — po stronie operatora — wykonać dwie małe próbki live PL1 na autoryzowanej sesji i porównać konkretne `kid/x/y`, `defeaterPlayerId` oraz przejście cooldownu. Do tego czasu sygnały pozostają kandydackie, a dokładny czas ataku pozostaje nieustalony.

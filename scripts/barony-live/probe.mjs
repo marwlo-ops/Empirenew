@@ -67,7 +67,7 @@ async function writeState(file,state) {
 async function main() {
   const a=argsOf(process.argv.slice(2));
   if (a.help) {
-    process.stdout.write('Read-only E4K PL1 map probe. Default: 3 samples per kingdom. Credentials: E4K_USERNAME/E4K_PASSWORD. Use --plan --all to preview the full sector plan. Candidate signals are intervals, never exact attack times.\n');
+    process.stdout.write('Read-only E4K PL1 probe. Default: 3 map samples per kingdom. Optional --movements observes server-pushed GAM; --reports reads NPC battle reports from this account mailbox. Credentials: E4K_USERNAME/E4K_PASSWORD. Use --plan --all to preview the full sector plan. No exact attack time is inferred.\n');
     return 0;
   }
   const catalog=JSON.parse(await readFile(CATALOG,'utf8'));

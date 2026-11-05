@@ -409,6 +409,10 @@ Ograniczenia:
 - GAM nie jest globalnym feedem PL1 i nie potwierdza zakończenia bitwy;
 - ten tryb nie został uruchomiony live, ponieważ automatyzacja nie ma lokalnych poświadczeń operatora.
 
+### Korekta bezpieczeństwa GAM po inspekcji kodu biblioteki
+
+Po ponownym sprawdzeniu `ggejs` stwierdzono, że `src/commands/gam.js` eksportuje parser odpowiedzi i aktualizuje `MovementManager`, ale nie udostępnia udokumentowanej metody żądania snapshotu. Dlatego lokalny probe został skorygowany: `--movements` tylko pasywnie obserwuje aktualizacje `GAM` wypychane przez serwer. Nie wysyła ręcznie `sendCommand('gam', ...)`. Brak pushu w oknie obserwacji jest opisany jako brak zaobserwowanej aktualizacji, a nie jako brak aktywnych ruchów. Wyniki nadal nie są zapisywane.
+
 ### Testy, deployment i diagnostyka PL1
 
 Najnowszy workflow probe `42100365201` dla commitu `ec2fc1a89bea2ed699bdaa9a70cd6fa450b1ed37`:

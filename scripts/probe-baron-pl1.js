@@ -34,12 +34,12 @@ try {
     signal: AbortSignal.timeout(20000)
   });
   const xml = await catalogResponse.text();
-  const blocks = xml.match(/<server>[\\s\\S]*?<\\/server>/g) || [];
+  const blocks = xml.match(/<server>[\s\S]*?<\/server>/g) || [];
   const entries = {};
   for (const alias of ["E4K_PL1", "E4K_PL1_BETA"]) {
-    const block = blocks.find(item => new RegExp("<name>\\\\s*" + alias + "\\\\s*</name>").test(item));
+    const block = blocks.find(item => new RegExp("<name>\\s*" + alias + "\\s*</name>").test(item));
     const field = name => {
-      const match = block?.match(new RegExp("<" + name + ">([\\\\s\\\\S]*?)</" + name + ">"));
+      const match = block?.match(new RegExp("<" + name + ">([\\s\\S]*?)</" + name + ">"));
       return match ? match[1].trim() : null;
     };
     entries[alias] = block ? {

@@ -91,6 +91,7 @@ function serializeExactRow(row, sampledAt) {
     kingdom_id: Number.isInteger(row.kingdomId) ? row.kingdomId : null,
     owner_id: Number.isInteger(row.ownerInfo?.playerId) ? row.ownerInfo.playerId : null,
     attack_count: Number.isInteger(row.attackCount) ? row.attackCount : null,
+    attack_count_semantics: 'ggejs_uses_as_victories_for_level_progression',
     cooldown_until_utc: cooldownUntil,
     cooldown_remaining_seconds_at_sample: cooldownMs === null ? null : Math.max(0, Math.ceil(cooldownMs / 1000)),
   };
@@ -116,12 +117,13 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     sampled_at_utc: sampledAtIso, status,
     rows: exactRows.map((row) => serializeExactRow(row, sampledAtIso)),
     attack_time_utc: null,
-    note: 'Map observation only. No exact attack timestamp or attacker is inferred.',
+    note: 'Map observation only. attackCount is a progression/victory counter in the client parser, not a complete attack log. No exact attack timestamp or attacker is inferred.',
   };
   if (validRows.length === 1) {
     const row = serializeExactRow(validRows[0], sampledAt);
     observation.owner_id = row.owner_id;
     observation.attack_count = row.attack_count;
+    observation.attack_count_semantics = row.attack_count_semantics;
     observation.cooldown_until_utc = row.cooldown_until_utc;
     observation.cooldown_active = row.cooldown_until_utc === null
       ? null
@@ -135,7 +137,9 @@ export function compareObservations(previous, current) {
   const signals = [];
   if (Number.isInteger(previous.attack_count) && Number.isInteger(current.attack_count) && current.attack_count > previous.attack_count) {
     signals.push({
-      kind: 'attack_count_increased', classification: 'candidate_signal_not_yet_live_validated',
+      kind: 'dungeon_progress_counter_increased', metric: 'DungeonMapobject.attackCount',
+      counter_semantics: 'ggejs_uses_as_victories_for_level_progression',
+      classification: 'candidate_signal_not_yet_live_validated',
       delta: current.attack_count - previous.attack_count,
       interval_start_utc: previous.sampled_at_utc, interval_end_utc: current.sampled_at_utc, target: current.target,
     });

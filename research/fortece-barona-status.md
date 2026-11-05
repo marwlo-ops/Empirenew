@@ -160,3 +160,26 @@ Status wykonania:
 - Nawet jeśli live map zwróci cooldown, nie potwierdzi to automatycznie kto i kiedy zaatakował zwykłego barona. Do tego potrzebny jest osobny, wiarygodny dziennik zdarzeń albo porównywanie kolejnych próbek z potwierdzonym źródłem gracza i czasu. Na razie nie zapisujemy historii ataków.
 
 Następny krok: uruchomić lokalnie `python -m pip install "empire-core==0.63.0"`, a następnie `python scripts/probe-pl1-live-map.py` na koncie zalogowanym do produkcyjnego E4K PL1. Jeśli biblioteka nie rozpozna strefy, należy zweryfikować `GGE_ZONE`, `GGE_GAME_ID` i `GGE_NETWORK_ID` na podstawie listy serwerów — skrypt kończy się błędem zamiast przełączać się na inny świat. Dopiero wynik rzeczywistej próbki zdecyduje, czy można budować poller.
+
+## 13. Wyniki kolejnej iteracji CI i korekta konfiguracji — 2026-11-05 15:08 UTC
+
+Dodatkowa korekta bezpieczeństwa:
+- `scripts/probe-pl1-live-map.py` nie przyjmuje już domyślnych `game_id=12` i `network_id=1`. Te identyfikatory nie zostały potwierdzone dla E4K PL1, więc skrypt wymaga jawnego `--game-id` i `--network-id` albo zmiennych `GGE_GAME_ID` i `GGE_NETWORK_ID`. W razie braku/niezgodności kończy się bez logowania i bez przełączania na inny serwer.
+- EmpireCore 0.63.0 jest dokumentowane przede wszystkim jako klient Goodgame Empire; zgodność z E4K PL1 nie została potwierdzona. Lokalny skrypt jest przygotowanym testem kandydującym, nie dowodem działającego połączenia PL1.
+
+Wyniki workflow `42051704644` dla commitu `0179ec3`:
+- `py_compile` — PASS.
+- 10 testów offline `test_probe_pl1_live_map.py` — PASS.
+- Test mobilny `scripts/test-barony-mobile.mjs` — PASS: viewport, breakpoint, minimalne cele dotykowe 44 px, focus, etykiety lokalnej historii i separacja sygnałów od historii ataków.
+- Diagnostyka publicznego API zakończyła się poprawnie jako test, ale nie potwierdziła produkcyjnej historii PL1:
+  - `/servers`: HTTP 200, 63 wpisy, identyfikatory E4K_PL1 i E4K_PL1_BETA obecne.
+  - `/servers/catalog`: produkcyjny E4K_PL1 ma `enabled=true`, ale `fortress=false`; Beta ma `fortress=true`.
+  - `/dungeons`: E4K_PL1 HTTP 400 `Invalid server`; Beta HTTP 200; IT1 HTTP 200.
+  - Zgodność współrzędnych Beta ↔ IT1: 976/976 (Piaski 312/312, Lód 409/409, Ogień 255/255). To nadal nie jest dowód równoważności historii produkcyjnego PL1.
+  - Historia Beta: 5/5 próbek niepustych, 8418 rekordów, wszystkie dopasowane do współrzędnych źródłowych dungeonów — wyłącznie diagnostyka Beta.
+  - Historia produkcyjnego PL1: 3/3 próbkowanych identyfikatorów z migawki Szpiegowania nie zostały rozpoznane (`Player not found`); zapytania historii zwróciły HTTP 400 `Invalid player ID`.
+  - `empire-api.fly.dev/status`: HTTP 200, ale `target_connected=false` dla `EmpirefourkingdomsExGG2_3`; komendy mapy zostały prawidłowo pominięte, bez wysyłania ich do niepotwierdzonej sesji.
+- GitHub Pages dla commitu `1e5e5e7`: build i deploy zakończone sukcesem (workflow `42051528473`). Dla najnowszego commitu `0179ec3` build Pages zakończył się sukcesem; krok deploy był jeszcze w toku podczas tego zapisu.
+- Test mobilny jest statycznym testem DOM/CSS/JS; fizyczny telefon nie był dostępny do testu ręcznego.
+
+Wniosek tej iteracji: katalog IT1 jest poprawny i gotowy do publikacji jako mapa współrzędnych; automatyczna historia ataków na produkcyjnym PL1 nadal nie ma wiarygodnego źródła. Nie skopiowano żadnych danych Beta/IT1 do historii PL1 i nie utworzono zdarzeń ataku.

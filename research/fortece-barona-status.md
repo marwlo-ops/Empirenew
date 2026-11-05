@@ -90,3 +90,50 @@ Test statyczny w CI `42044039367` sprawdził viewport, breakpoint mobilny, minim
 ## 9. Następny krok
 
 Przygotować i przetestować własny most z matcherem GAA po KID, matcherem FNM po odpowiedzi zawierającej X/Y/gaa i dłuższym timeoutem. Następnie uruchomić ten sam test read-only na produkcyjnym PL1. Dopiero po poprawnym odczycie mapy badać, czy istnieje źródło zdarzeń ataku; GAA/FNM same nie dostarczają potwierdzonej historii. Nie publikować danych z BETA jako PL1 i nie dopisywać fikcyjnych zdarzeń.
+
+## 10. Ponowna weryfikacja GGE Tracker — 2026-11-05 14:52 UTC
+
+Dwa bezpieczne rozszerzenia skryptu diagnostycznego zostały opublikowane na main:
+- f070b8f — historia Beta pobierana po rzeczywistych player_id odczytanych z rekordów dungeonów, zamiast po arbitralnych graczach z rankingu;
+- bb87ba6 — osobny test produkcyjnego E4K_PL1 na podstawie identyfikatorów/nicków z migawki Szpiegowania.
+
+Wyniki workflow 42049184844 (uruchomienie skryptu zakończone sukcesem):
+
+| Test | Wynik | Znaczenie |
+|---|---:|---|
+| /servers | HTTP 200, 63 wpisy | Lista zawiera oba identyfikatory PL1 i PL1 Beta |
+| /servers/catalog — E4K_PL1 | enabled=true, fortress=false | Produkcyjny PL1 nie ma w tym scraperze włączonego modułu fortec |
+| /servers/catalog — E4K_PL1_BETA | enabled=true, fortress=true | Osobny serwer Beta ma włączony moduł fortec |
+| /dungeons i /dungeons/meta — E4K_PL1 | HTTP 400, Invalid server | Brak produkcyjnej historii fortec w tym API |
+| /dungeons — E4K_PL1_BETA | HTTP 200, 976 rekordów | Dane wyłącznie Beta |
+| /dungeons — IT1 | HTTP 200, 2021 rekordów | Dane wyłącznie mapy IT1 |
+| Beta ↔ IT1 | 976/976 współrzędnych zgodnych | Piaski 312/312, Lód 409/409, Ogień 255/255; zgodność mapy nie przenosi historii Beta na PL1 |
+| /dungeons/player/{id} — Beta | 5/5 historii niepustych; 8806 rekordów, 8806 zgodnych z katalogiem IT1 | Endpoint historii działa dla rzeczywistych ID atakujących z rekordów Beta |
+| /players/{name} — produkcyjny PL1 | 3/3: HTTP 200, Player not found | API nie rozpoznaje próbkowanych graczy z migawki PL1 |
+| /dungeons/player/{member_id} — produkcyjny PL1 | 3/3: HTTP 400, Invalid player ID | Brak historii produkcyjnego PL1; nie zapisano żadnego zdarzenia |
+| Most empire-api.fly.dev/status | HTTP 200, socket EmpirefourkingdomsExGG2_3=false | GAA/GAM pominięte, bo nie było potwierdzonej sesji |
+
+Wynik 5/5 historii Beta wyjaśnia wcześniejszy test z zerową liczbą wpisów: poprzednio użyto przypadkowych graczy rankingowych i pominięto nagłówek serwera. Poprawiony test bierze ID bezpośrednio z rekordów dungeonów i wysyła gge-server: E4K_PL1_BETA. To poprawia diagnostykę endpointu, ale nie daje żadnego dowodu ataku na produkcyjnym PL1. Nie kopiujemy rekordów Beta ani cooldownów IT1 do historii PL1.
+
+## 11. Alternatywna ścieżka: odczyt mapy z autoryzowanej sesji PL1
+
+Dokumentacja i kod publicznej biblioteki EmpireCore wskazują bardziej obiecujący odczyt per lokalizacja niż publiczny scraper:
+- client.map.scan_kingdom(..., item_types=[MapItemType.DUNGEON]) zwraca obiekty mapy oraz failed_chunks; częściowy skan musi być oznaczony jako niekompletny.
+- client.map.scan_around(x, y, radius, kingdom, ...) odczytuje obiekty w promieniu do 50 pól jednym żądaniem i zachowuje obiekty NPC.
+- MapAreaItem.attack_cooldown_seconds jest opisane jako liczba sekund do ponownej możliwości ataku; wartość ujemna oznacza, że blokada minęła. owner_id pozwala odróżnić obiekty NPC od obiektów graczy.
+- client.movements.get_movements() i zdarzenia ruchu dotyczą ruchów widocznych dla zalogowanego konta. Callbacki ataków obejmują konto/sojusz, a dokumentacja wyłącza ataki na obiekty typu robber baron/dungeon z części powiadomień sojuszowych.
+- Skrzynka client.messages.mailbox zawiera raporty bitew dotyczące ataków na konto lub wykonanych przez konto; nie jest to globalna historia całego serwera.
+
+Źródła:
+- https://eschnitzler.github.io/EmpireCore/guides/map-scanning/
+- https://eschnitzler.github.io/EmpireCore/guides/movements/
+- https://eschnitzler.github.io/EmpireCore/guides/messages/
+- https://github.com/eschnitzler/EmpireCore/blob/01800fa1033a4413b51f5dfe2c3e3d1a3fdcdca7/src/empire_core/map/models/items.py
+
+Ograniczenia i warunki testu:
+1. To jest kandydat do testu, a nie działające źródło potwierdzone na PL1. Biblioteka jest w fazie alpha i wymaga legalnej, autoryzowanej sesji gry.
+2. Sam cooldown mapy może potwierdzić stan konkretnej fortecy w chwili odczytu, ale nie zawiera automatycznie nicku atakującego ani serwerowego czasu rozpoczęcia ataku.
+3. Czas ataku można byłoby ograniczyć do przedziału pomiędzy próbkami; wyliczanie go z pozostałego cooldownu wymaga wcześniejszego potwierdzenia pełnej długości cooldownu na produkcyjnym PL1. Nie zakładamy 24 h bez pomiaru.
+4. Połączenie musi być wykonane lokalnie lub w zabezpieczonym środowisku operatora. Nie umieszczamy loginu, hasła ani tokenów w repozytorium, GitHub Actions ani plikach publikowanych na Pages.
+
+Następny test: na autoryzowanej sesji produkcyjnego PL1 wykonać wyłącznie odczyt kilku znanych współrzędnych w każdej krainie i zapisać surowy rekord mapy, kid/x/y, owner_id, attack_cooldown_seconds, czas próbki i status kompletności. Dopiero po pozytywnym wyniku tego testu projektować poller. Do tego czasu automatyczna historia ataków PL1 pozostaje niepotwierdzona.

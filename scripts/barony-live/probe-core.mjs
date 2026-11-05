@@ -194,6 +194,32 @@ export function isNpcBattleReportMessage(message) {
   return subtype === 2;
 }
 
+/**
+ * Select the newest account-mailbox NPC boss-dungeon reports.
+ * ggejs may leave subType at 0 while encoding the real subtype in metadata.
+ * Invalid/missing delivery timestamps sort last and remain explicitly estimates.
+ */
+export function selectLatestNpcBattleReportMessages(messages, limit = 25) {
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
+    throw new Error('NPC report limit must be an integer from 1 to 100.');
+  }
+  if (!Array.isArray(messages)) return [];
+  return messages
+    .map((message, index) => ({
+      message,
+      index,
+      deliveryTime: toIsoDate(message?.deliveryTime),
+    }))
+    .filter(({ message }) => isNpcBattleReportMessage(message))
+    .sort((left, right) => {
+      const leftTime = left.deliveryTime ? Date.parse(left.deliveryTime) : 0;
+      const rightTime = right.deliveryTime ? Date.parse(right.deliveryTime) : 0;
+      return rightTime - leftTime || left.index - right.index;
+    })
+    .slice(0, limit)
+    .map(({ message }) => message);
+}
+
 export function extractNpcBattleReportEvidence(message, battleLog) {
   if (!isNpcBattleReportMessage(message)) return null;
 

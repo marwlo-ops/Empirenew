@@ -6,7 +6,8 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
-  isGgejsGamDispatchStack, selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
+  isGgejsGamDispatchStack, parseGgejsCommandResponseEnvelope,
+  selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
 
 const require = createRequire(import.meta.url);
@@ -100,10 +101,24 @@ async function main() {
   const client=new E4KClient(instance);
   client.socketManager.reconnectTimeout=-1;
   const originalAddOrUpdate=client.movements._add_or_update;
+  const originalOnSocketMessage=client.socketManager.onSocketMessage;
   const movementGamBatches=[];
+  const movementGamResponseStatuses=[];
+  let latestGamResponseMeta=null;
   let ignoredNonGamMovementUpdates=0;
   let movementObservationPhase = 'pre_request';
   if (a.movements) {
+    // Capture only the response envelope (command, zone, error code), never its account payload.
+    // ggejs dispatches the GAM handler synchronously from onSocketMessage.
+    client.socketManager.onSocketMessage=function(clientArg,message) {
+      const parsed=parseGgejsCommandResponseEnvelope(message);
+      latestGamResponseMeta=parsed?.command==='gam' && parsed.zone===a.zone
+        ? {...parsed,phase:movementObservationPhase,received_at_utc:new Date().toISOString()}
+        : null;
+      if (latestGamResponseMeta) movementGamResponseStatuses.push(latestGamResponseMeta);
+      return originalOnSocketMessage.call(this,clientArg,message);
+    };
+
     // Only count updates dispatched by commands/gam.js; CRA/CRM/CSM also update this manager.
     client.movements._add_or_update=function(items) {
       const receivedAt=new Date().toISOString();
@@ -114,6 +129,9 @@ async function main() {
           phase:movementObservationPhase,
           received_at_utc:receivedAt,
           movement_count:batch.length,
+          response_error_code:latestGamResponseMeta?.error_code??null,
+          response_ok:latestGamResponseMeta?.ok??null,
+          response_received_at_utc:latestGamResponseMeta?.received_at_utc??null,
           evidence:batch.map(m=>extractParsedOutboundBossDungeonMovementEvidence(m,receivedAt)).filter(Boolean),
         });
       } else {
@@ -201,6 +219,7 @@ async function main() {
       const gamResult=buildGamProbeSummary({
         requestSent,preRequestBatches,responseBatches,ignoredNonGamMovementUpdates,
         requestSentAt,sampledAt,collectionComplete,timedOut,requestError,
+        responseStatuses:movementGamResponseStatuses,responseStatusCaptureEnabled:true,
       });
       movementProbe=gamResult.summary;
       movementEvidence=gamResult.evidence;
@@ -238,7 +257,10 @@ async function main() {
     }
   } finally {
     if (a.reports) client.off('mailMessageAdd',onMailMessageAdd);
-    if (a.movements) client.movements._add_or_update=originalAddOrUpdate;
+    if (a.movements) {
+      client.movements._add_or_update=originalAddOrUpdate;
+      client.socketManager.onSocketMessage=originalOnSocketMessage;
+    }
     try { await client.socketManager.disconnect(); } catch {}
   }
 

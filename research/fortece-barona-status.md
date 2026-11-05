@@ -283,3 +283,38 @@ Następny krok: operator uruchamia lokalnie najpierw domyślną próbkę 9 punkt
 - Porównanie plików main z commitem ostatniej publikacji 11f92ee: barony.html, data/baron-fortresses.json, data/server-intel-history.json i data/location-snapshots.json mają identyczne SHA. W tym wdrożeniu zmieniono wyłącznie skrypty, testy, workflow diagnostyczny i dokumentację; nie zmieniono UI ani danych publikowanych na Pages. Strona pozostaje więc treściowo identyczna z ostatnią potwierdzoną publikacją; nie twierdzę, że wykonano nowy deploy dla commitów skryptowych.
 
 Wniosek: ścieżka odczytu mapy E4K jest teraz opisana i przygotowana jako lokalny, read-only probe, ale **nie ma jeszcze live odczytu z produkcyjnego PL1**. Brakuje autoryzowanej sesji operatora i dwóch kolejnych próbek PL1, które potwierdzą zachowanie attackCount/cooldown. Do tego czasu żaden sygnał nie jest zapisywany jako potwierdzony atak.
+
+
+## 17. E4K protokół mapy i raporty NPC — 2026-11-05
+
+### Zweryfikowane w źródłach ggejs 2.2.0
+
+- `DungeonMapobject`: `data[4]` → `attackCount`, `data[5]` → pozostały cooldown, `data[6]` → KID. X/Y pochodzą z `data[1:3]`, typ z `data[0]`.
+- `attackCooldownEnd` powstaje jako lokalne `Date.now() + data[5] * 1000`; nie jest to serwerowy czas ataku.
+- `attackCount` trafia do `DungeonConst.getLevel(victories, KID)`, więc biblioteka używa go jako licznika zwycięstw/postępu poziomu, a nie pełnego rejestru prób ataku.
+- NPC owner IDs dla KID 1/2/3 to odpowiednio -220/-221/-222. Obecne mapowanie w probe jest zgodne z `WorldMapOwnerInfoData`.
+- `WorldMapManager.getSector` pobiera sektor 100×100 przez `gaa` i wymaga, aby konto miało zamek w danej krainie.
+
+Źródła: [DungeonMapobject](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/structures/mapobjects/DungeonMapobject.js), [DungeonConst](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/utils/DungeonConst.js), [WorldMapOwnerInfoData](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/utils/WorldMapOwnerInfoData.js), [WorldMapManager](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/managers/WorldMapManager.js), [gaa](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/gaa.js).
+
+### Raporty walki
+
+Klient ma `sne` i typ raportu NPC attack (battle-log subtype 2). Raport zawiera KID/owner ID, a pobrany przez `bls` battle log zawiera mapobject z X/Y oraz uczestników walki. To może potwierdzić atak na konkretne współrzędne dla konta, które otrzymało raport. Nie jest to feed globalny: `sne` pobiera skrzynkę zalogowanego konta. `BasicMessage.deliveryTime` jest wyliczane z wieku wiadomości i nie jest potwierdzonym czasem rozpoczęcia ataku.
+
+Źródła: [sne](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/sne.js), [BasicBattleLogMessage](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/structures/messages/BasicBattleLogMessage.js), [BasicMessage](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/structures/messages/BasicMessage.js), [bls](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/bls.js).
+
+### Różnica względem GGE Tracker
+
+Kod GGE Tracker przechowuje `dungeons_history` z `player_id` i `attacked_at`, ale scraper desktopowego GGE używa `dungeon[6]` jako player ID. W E4K ggejs `data[6]` jest KID. To różne schematy protokołu; parsera desktopowego nie wolno przenosić do PL1. Produkcyjny `E4K_PL1` pozostawał wyłączony w ostatnim potwierdzonym teście API; Beta jest oddzielnym środowiskiem.
+
+Źródła: [API dungeons](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts), [dungeon truth](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-truth.ts), [scraper](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts).
+
+### Testy i publikacja
+
+- Lokalnie na kopii aktualnych plików z main: `node --check probe-core.mjs` PASS, `node --check probe.mjs` PASS, `node --test probe-core.test.mjs` **12/12 PASS**.
+- Plan-only na syntetycznym katalogu: 9 celów, 9 sektorów, 90 000 pól, bez połączenia sieciowego.
+- Brak live logowania PL1 i dwóch próbek; środowisko automatyzacji nie ma poświadczeń. Nie zapisano ataków.
+- Workflow 42052367160 zakończył się sukcesem, ale nie zawierał jeszcze nowego kroku testującego E4K probe. Status-check API dla commitu 3c8f413 zwrócił pustą listę; nie deklaruję nowego PASS Actions.
+- Pages build/deploy 42052460959: success. SHA `barony.html`, katalogu fortec, historii Szpiegowania i snapshotów lokalizacji są identyczne jak w deploy commicie `11f92ee`; UI/dane strony nie zmieniły się w tej iteracji.
+
+Wniosek: statyczny kontrakt E4K i ograniczony kanał raportów własnego konta są potwierdzone w kodzie biblioteki, ale brak live PL1 nadal uniemożliwia potwierdzenie ataków i dokładnego czasu.

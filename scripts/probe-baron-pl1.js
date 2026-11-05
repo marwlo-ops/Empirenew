@@ -377,14 +377,14 @@ async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
       signal: AbortSignal.timeout(20000)
     });
     const xml = await catalogResponse.text();
-    const blocks = xml.match(/<server>[\\s\\S]*?<\\/server>/g) || [];
-    const block = blocks.find(item => new RegExp("<name>\\\\s*E4K_PL1\\\\s*</name>").test(item));
+    const blocks = xml.match(/<server>[\s\S]*?<\/server>/g) || [];
+    const block = blocks.find(item => new RegExp("<name>\\s*E4K_PL1\\s*</name>").test(item));
     const readTag = name => {
-      const match = block?.match(new RegExp("<" + name + ">\\\\s*([^<]+?)\\\\s*</" + name + ">"));
+      const match = block?.match(new RegExp("<" + name + ">\\s*([^<]+?)\\s*</" + name + ">"));
       return match ? match[1].trim() : null;
     };
     const code = readTag("code");
-    if (!catalogResponse.ok || !/^\\d{3}$/.test(code || "")) {
+    if (!catalogResponse.ok || !/^\d{3}$/.test(code || "")) {
       console.log(JSON.stringify({
         probe: "production-pl1-player-history-with-catalog-code-suffix",
         catalog_status: catalogResponse.status,
@@ -466,7 +466,7 @@ async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
       profiles_matched: results.filter(result => result.profile_identity_matched_to_spy_snapshot).length,
       histories_checked: results.length,
       nonempty_matched_histories: results.filter(result => result.profile_identity_matched_to_spy_snapshot && result.history_records > 0).length,
-      total_confirmed_target_matches: results.reduce((total, result) => total + Number(result.map_target_matches || 0), 0),
+      total_profile_matched_target_history_rows: results.reduce((total, result) => total + Number(result.map_target_matches || 0), 0),
       results,
       timestamp_warning: "API attacked_at is not treated as exact attack time: the public scraper INSERT omits attacked_at, so its database timestamp semantics are not proven to be the game event time."
     }));

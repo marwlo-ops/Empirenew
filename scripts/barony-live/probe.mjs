@@ -166,6 +166,11 @@ async function main() {
       const mailbox=Array.isArray(client.mailMessages)?client.mailMessages:[];
       const reportMessages=mailbox
         .filter(isNpcBattleReportMessage)
+        .sort((left,right)=>{
+          const leftTime=new Date(left?.deliveryTime??0).getTime();
+          const rightTime=new Date(right?.deliveryTime??0).getTime();
+          return (Number.isFinite(leftTime)?leftTime:0)-(Number.isFinite(rightTime)?rightTime:0);
+        })
         .slice(-a.reportLimit);
       let battleLogsLoaded=0,fetchErrors=0,rejectedReports=0;
       for (const message of reportMessages) {

@@ -398,7 +398,7 @@ Na podstawie kodu przypiętego `ggejs 2.2.0` potwierdzono:
 
 Wprowadzono w module Barony:
 1. `extractParsedOutboundBossDungeonMovementEvidence` — waliduje typ ruchu 11, kierunek wychodzący, typ celu 11, zgodny KID i właściciela NPC (-230/-231/-232), dodatni ID właściciela źródła oraz dokładne X/Y;
-2. `node scripts/barony-live/probe.mjs --movements` — opcjonalnie wysyła read-only `GAM` po lokalnym, autoryzowanym zalogowaniu; oczekuje na odpowiedź maksymalnie 3 sekundy (regulowane `--movement-wait-ms`);
+2. `node scripts/barony-live/probe.mjs --movements` — opcjonalnie pasywnie obserwuje aktualizacje `GAM` wypychane przez serwer po lokalnym, autoryzowanym zalogowaniu; nie wysyła nieudokumentowanej komendy i obserwuje maksymalnie 3 sekundy (regulowane `--movement-wait-ms`);
 3. ruchy są wyłącznie wypisywane w wyniku lokalnego probe — nie są zapisywane do pliku stanu ani repozytorium;
 4. klasyfikacja została zmieniona na `observed_outbound_npc_attack_movement_to_boss_dungeon`, aby nie mylić ruchu w drodze z zakończoną bitwą.
 

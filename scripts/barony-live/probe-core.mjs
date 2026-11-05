@@ -452,14 +452,40 @@ export function isGgejsGamDispatchStack(stack) {
 
 
 /**
- * Summarize an account-scoped, read-only GAM movement snapshot request.
- * GAM may arrive in several response batches. Deduplicate evidence by MID,
- * but preserve local receive timestamps and never infer global coverage.
+ * Parse the SmartFox XT response envelope before ggejs dispatches its command
+ * handler. The wire layout consumed by ggejs is:
+ *   %xt%<command>%<zone>%<errorCode>%<payload>%
+ * Only the envelope is retained; payloads may contain account data.
  */
+export function parseGgejsCommandResponseEnvelope(message) {
+  if (typeof message !== 'string' || message.length === 0) return null;
+  let raw = message;
+  if (raw.startsWith('%')) raw = raw.slice(1);
+  if (raw.endsWith('%')) raw = raw.slice(0, -1);
+  const parts = raw.split('%');
+  if (parts[0] !== 'xt' || parts.length < 4) return null;
+
+  const command = String(parts[1] ?? '').toLowerCase();
+  if (!command) return null;
+  const zone = String(parts[2] ?? '');
+  const codeText = String(parts[3] ?? '');
+  const errorCode = /^-?\\d+$/.test(codeText) ? Number(codeText) : null;
+  return {
+    command,
+    zone,
+    error_code: Number.isSafeInteger(errorCode) ? errorCode : null,
+    ok: Number.isSafeInteger(errorCode) ? errorCode === 0 || errorCode === 10005 : null,
+  };
+}
+
+/**
+ * Summarize an account-scoped, read-only GAM movement snapshot request.
 export function buildGamProbeSummary({
   requestSent = false,
   preRequestBatches = [],
   responseBatches = [],
+  responseStatuses = [],
+  responseStatusCaptureEnabled = false,
   ignoredNonGamMovementUpdates = 0,
   requestSentAt = null,
   sampledAt = new Date().toISOString(),
@@ -473,9 +499,18 @@ export function buildGamProbeSummary({
   const before = Array.isArray(preRequestBatches) ? preRequestBatches : [];
   const after = Array.isArray(responseBatches) ? responseBatches : [];
   const allBatches = [...before, ...after];
+  const captureStatus = responseStatusCaptureEnabled === true;
+  const statuses = Array.isArray(responseStatuses) ? responseStatuses : [];
+  const requestStatuses = statuses.filter((item) => item?.phase === 'request');
+  const successfulStatuses = requestStatuses.filter((item) => item?.ok === true);
+  const failedStatuses = requestStatuses.filter((item) => item?.ok === false);
+  const unknownStatuses = requestStatuses.filter((item) => item?.ok !== true && item?.ok !== false);
+  const isAcceptedBatch = (batch) => !captureStatus || batch?.response_ok === true;
+  const acceptedBatches = allBatches.filter(isAcceptedBatch);
+  const acceptedResponseBatches = after.filter(isAcceptedBatch);
   const evidenceByMovementId = new Map();
 
-  for (const batch of allBatches) {
+  for (const batch of acceptedBatches) {
     for (const item of Array.isArray(batch?.evidence) ? batch.evidence : []) {
       const movementId = Number(item?.movement_id);
       if (Number.isSafeInteger(movementId) && movementId > 0) {
@@ -487,26 +522,46 @@ export function buildGamProbeSummary({
     }
   }
 
-  const movementCount = allBatches.reduce((total, batch) => {
+  const movementCount = acceptedBatches.reduce((total, batch) => {
     const count = Number(batch?.movement_count);
     return total + (Number.isSafeInteger(count) && count >= 0 ? count : 0);
   }, 0);
   const sent = requestSent === true;
-  const status = !sent
-    ? 'gam_request_not_sent'
-    : after.length === 0
-      ? 'gam_request_no_response'
-      : collectionComplete
-        ? 'gam_response_collection_complete'
-        : 'gam_response_collection_incomplete';
+  let status;
+  if (!sent) {
+    status = 'gam_request_not_sent';
+  } else if (captureStatus && requestStatuses.length === 0) {
+    status = after.length > 0 ? 'gam_response_status_unobserved' : 'gam_request_no_response';
+  } else if (captureStatus && failedStatuses.length > 0 && successfulStatuses.length === 0) {
+    status = 'gam_response_rejected';
+  } else if (captureStatus && failedStatuses.length > 0) {
+    status = 'gam_response_partial_error';
+  } else if (captureStatus && unknownStatuses.length > 0) {
+    status = 'gam_response_status_unverified';
+  } else if (captureStatus && successfulStatuses.length > 0 && after.length === 0) {
+    status = 'gam_response_without_parsed_batch';
+  } else if (captureStatus && acceptedResponseBatches.length === 0) {
+    status = 'gam_response_without_accepted_batch';
+  } else if (!captureStatus && after.length === 0) {
+    status = 'gam_request_no_response';
+  } else if (collectionComplete) {
+    status = 'gam_response_collection_complete';
+  } else {
+    status = 'gam_response_collection_incomplete';
+  }
 
-  const note = !sent
-    ? 'The read-only GAM request was not sent; this is not evidence that no movements exist.'
-    : after.length === 0
-      ? 'No GAM response was observed after the request timeout; this does not prove that no active movement exists.'
-      : collectionComplete
-        ? 'GAM response batches were collected until the quiet window; coverage is limited to movements returned to this account.'
-        : 'At least one GAM response arrived, but the response stream did not become quiet before the collection limit.';
+  const notes = {
+    gam_request_not_sent: 'The read-only GAM request was not sent; this is not evidence that no movements exist.',
+    gam_request_no_response: 'No GAM response was observed after the request timeout; this does not prove that no active movement exists.',
+    gam_response_status_unobserved: 'A GAM handler batch was observed, but its raw XT response status could not be verified; no movement evidence from that batch is accepted.',
+    gam_response_rejected: 'The server returned a non-success GAM error code; the resulting empty or partial handler batch is not treated as a successful snapshot.',
+    gam_response_partial_error: 'The GAM request produced a mixture of successful and failed response envelopes; the snapshot is incomplete.',
+    gam_response_status_unverified: 'At least one GAM response envelope had an unparseable status code; no unverified batch is accepted as movement evidence.',
+    gam_response_without_parsed_batch: 'A successful GAM response envelope arrived, but the ggejs GAM handler did not produce a movement batch.',
+    gam_response_without_accepted_batch: 'GAM response envelopes arrived, but no corresponding movement batch had a verified successful status.',
+    gam_response_collection_complete: 'Successful GAM response batches were collected until the quiet window; coverage is limited to movements returned to this account.',
+    gam_response_collection_incomplete: 'At least one successful GAM response arrived, but the response stream did not become quiet before the collection limit.',
+  };
 
   return {
     summary: {
@@ -516,15 +571,29 @@ export function buildGamProbeSummary({
       observation_mode: 'active_read_only_snapshot_request',
       request_sent_at_utc: toIsoDate(requestSentAt),
       sampled_at_utc: sampledAtIso,
+      response_status_capture_enabled: captureStatus,
       pre_request_push_batches: before.length,
       gam_response_batches: after.length,
       response_batch_count: after.length,
+      accepted_response_batch_count: acceptedResponseBatches.length,
+      response_status_count: requestStatuses.length,
+      response_status_success_count: successfulStatuses.length,
+      response_status_error_count: failedStatuses.length,
+      response_status_unverified_count: unknownStatuses.length,
+      response_statuses: statuses.map((item) => ({
+        phase: item?.phase === 'request' ? 'request' : 'pre_request',
+        received_at_utc: toIsoDate(item?.received_at_utc),
+        command: typeof item?.command === 'string' ? item.command : null,
+        zone: typeof item?.zone === 'string' ? item.zone : null,
+        error_code: Number.isSafeInteger(item?.error_code) ? item.error_code : null,
+        ok: item?.ok === true ? true : item?.ok === false ? false : null,
+      })),
       ignored_non_gam_movement_updates: Number.isSafeInteger(ignoredNonGamMovementUpdates) && ignoredNonGamMovementUpdates >= 0
         ? ignoredNonGamMovementUpdates
         : 0,
       movement_count: movementCount,
       matching_count: evidenceByMovementId.size,
-      collection_complete: collectionComplete === true,
+      collection_complete: collectionComplete === true && status === 'gam_response_collection_complete',
       timed_out: timedOut === true,
       request_error: typeof requestError === 'string' && requestError
         ? requestError.slice(0, 240)
@@ -535,9 +604,12 @@ export function buildGamProbeSummary({
           ? Number(batch.movement_count)
           : 0,
         matching_count: Array.isArray(batch?.evidence) ? batch.evidence.length : 0,
+        response_error_code: Number.isSafeInteger(batch?.response_error_code) ? batch.response_error_code : null,
+        response_ok: batch?.response_ok === true ? true : batch?.response_ok === false ? false : null,
+        accepted: isAcceptedBatch(batch),
       })),
       coverage: 'Only movements returned to the authenticated account session; not a global PL1 feed.',
-      note,
+      note: notes[status],
     },
     evidence: [...evidenceByMovementId.values()],
   };

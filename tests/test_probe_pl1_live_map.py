@@ -50,9 +50,10 @@ class ProbePl1LiveMapTests(unittest.TestCase):
 
     def test_rejects_duplicate_coordinates(self):
         catalog = valid_catalog()
-        catalog["results"]["ice"]["fortresses"][0]["kid"] = 1
-        catalog["results"]["ice"]["fortresses"][0]["x"] = 10
-        catalog["results"]["ice"]["fortresses"][0]["y"] = 20
+        duplicate = dict(catalog["results"]["sands"]["fortresses"][0])
+        catalog["results"]["sands"]["fortresses"].append(duplicate)
+        catalog["results"]["sands"]["fortress_count"] = 2
+        catalog["total_count"] = 4
         with self.assertRaises(ValueError):
             PROBE.validate_catalog(catalog)
 

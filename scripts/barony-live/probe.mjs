@@ -5,7 +5,7 @@ import path from 'node:path';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildObservation, buildScanPlan, compareObservations,
-  extractParsedOutboundBossDungeonMovementEvidence, stateKey } from './probe-core.mjs';
+  extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
 
 const require = createRequire(import.meta.url);
@@ -14,7 +14,7 @@ const CATALOG = path.join(ROOT, 'data', 'baron-fortresses.json');
 const DEFAULT_STATE = path.join(homedir(), '.cache', 'empirenew', 'barony-pl1-boss-dungeon-state.json');
 
 function argsOf(argv) {
-  const a = { all:false, plan:false, noState:false, movements:false, samples:3, delay:1000, movementWaitMs:3000,
+  const a = { all:false, plan:false, noState:false, movements:false, reports:false, reportLimit:10, reportWaitMs:3000, samples:3, delay:1000, movementWaitMs:3000,
     zone:process.env.E4K_ZONE || DEFAULT_PL1_ZONE,
     stateFile:process.env.BARONY_STATE_FILE || DEFAULT_STATE };
   for (let i=0;i<argv.length;i++) {
@@ -23,6 +23,9 @@ function argsOf(argv) {
     else if (v==='--plan') a.plan=true;
     else if (v==='--no-state') a.noState=true;
     else if (v==='--movements') a.movements=true;
+    else if (v==='--reports') a.reports=true;
+    else if (v==='--report-limit') a.reportLimit=Number(argv[++i]);
+    else if (v==='--report-wait-ms') a.reportWaitMs=Number(argv[++i]);
     else if (v==='--movement-wait-ms') a.movementWaitMs=Number(argv[++i]);
     else if (v==='--samples-per-kingdom') a.samples=Number(argv[++i]);
     else if (v==='--delay-ms') a.delay=Number(argv[++i]);
@@ -34,6 +37,8 @@ function argsOf(argv) {
   if (!Number.isInteger(a.samples) || a.samples<1 || a.samples>10) throw new Error('--samples-per-kingdom must be 1..10.');
   if (!Number.isInteger(a.delay) || a.delay<1000) throw new Error('--delay-ms must be at least 1000.');
   if (!Number.isInteger(a.movementWaitMs) || a.movementWaitMs<1000 || a.movementWaitMs>10000) throw new Error('--movement-wait-ms must be 1000..10000.');
+  if (!Number.isInteger(a.reportLimit) || a.reportLimit<1 || a.reportLimit>25) throw new Error('--report-limit must be 1..25.');
+  if (!Number.isInteger(a.reportWaitMs) || a.reportWaitMs<1000 || a.reportWaitMs>10000) throw new Error('--report-wait-ms must be 1000..10000.');
   if (!a.stateFile) throw new Error('--state-file cannot be empty.');
   return a;
 }
@@ -105,6 +110,11 @@ async function main() {
   const observations=[],candidateSignals=[],sectorErrors=[];
   let movementProbe={status:'not_requested',update_batches:0,movement_count:0,matching_count:0};
   let movementEvidence=[];
+  let mailboxUpdateObserved=false;
+  const onMailMessageAdd=()=>{mailboxUpdateObserved=true;};
+  if (a.reports) client.on('mailMessageAdd',onMailMessageAdd);
+  let reportProbe={status:'not_requested',mailbox_total_messages:0,npc_reports_selected:0,battle_logs_loaded:0,evidence_count:0,fetch_errors:0,rejected_reports:0};
+  let reportEvidence=[];
   try {
     await client.connect(username,password);
     for (let i=0;i<plan.sectors.length;i++) {
@@ -148,7 +158,41 @@ async function main() {
         matching_count:movementEvidence.length,
       };
     }
+
+    if (a.reports) {
+      // SNE is requested by ggejs during GBD. Fetch only full details for matching NPC reports.
+      await sleep(a.reportWaitMs);
+      const mailbox=Array.isArray(client.mailMessages)?client.mailMessages:[];
+      const reportMessages=mailbox
+        .filter(m=>Number(m?.messageType)===6 && Number(m?.areaType)===11 && Number(m?.subType)===2)
+        .slice(-a.reportLimit);
+      let battleLogsLoaded=0,fetchErrors=0,rejectedReports=0;
+      for (const message of reportMessages) {
+        try {
+          if (typeof message.getBattleLog!=='function') { rejectedReports++; continue; }
+          const battleLog=await message.getBattleLog();
+          if (battleLog) battleLogsLoaded++;
+          const evidence=extractNpcBattleReportEvidence(message,battleLog);
+          if (evidence) reportEvidence.push(evidence);
+          else rejectedReports++;
+        } catch {
+          fetchErrors++;
+        }
+      }
+      reportProbe={
+        status:mailboxUpdateObserved?'mailbox_update_observed':(mailbox.length?'mailbox_data_present':'mailbox_update_not_observed'),
+        sampled_at_utc:new Date().toISOString(),
+        mailbox_total_messages:mailbox.length,
+        npc_reports_selected:reportMessages.length,
+        battle_logs_loaded:battleLogsLoaded,
+        evidence_count:reportEvidence.length,
+        fetch_errors:fetchErrors,
+        rejected_reports:rejectedReports,
+        coverage:'Only reports present in this authenticated account mailbox; not a global PL1 history.',
+      };
+    }
   } finally {
+    if (a.reports) client.off('mailMessageAdd',onMailMessageAdd);
     if (a.movements) client.movements._add_or_update=originalAddOrUpdate;
     try { await client.socketManager.disconnect(); } catch {}
   }
@@ -176,13 +220,15 @@ async function main() {
       cooldown_active:observations.filter(x=>x.cooldown_active===true).length,
       unverified_or_missing:observations.filter(x=>['not_confirmed','coordinate_row_unverified','ambiguous_duplicate_rows'].includes(x.status)).length,
       request_errors:sectorErrors.length,candidate_signals:candidateSignals.length,
-      outbound_boss_dungeon_movements:movementEvidence.length
+      outbound_boss_dungeon_movements:movementEvidence.length,
+      npc_battle_report_evidence:reportEvidence.length
     },
     observations,candidate_signals:candidateSignals,sector_errors:sectorErrors,
     movement_probe:movementProbe,movement_evidence:movementEvidence,
+    mailbox_report_probe:reportProbe,mailbox_report_evidence:reportEvidence,
     state_file:a.noState?null:stateFile,
     attack_history_status:'target_specific_defeater_and_cooldown_fields_available_but_PL1_live_unvalidated',
-    warning:'Map rows contain no exact attacked_at. Optional passive GAM observations show only movements pushed to this authenticated account; departure is estimated from the client clock, movement does not prove battle completion, and no global PL1 history is persisted.'
+    warning:'Map rows contain no exact attacked_at. Optional GAM observations cover only movements pushed to this account; optional NPC battle reports cover only this account mailbox. Report receipt time and movement departure are not exact attack timestamps; no global PL1 history is persisted.'
   },null,2)+'\n');
   return 0;
 }

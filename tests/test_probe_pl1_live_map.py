@@ -12,7 +12,8 @@ SPEC.loader.exec_module(PROBE)
 def valid_catalog():
     groups = {}
     for name, kid in (("sands", 1), ("ice", 2), ("fire", 3)):
-        points = [{"id": f"it1-{kid}-10-20", "kid": kid, "x": 10, "y": 20}]
+        points = [{"id": f"it1-{kid}-10-20", "kid": kid, "x": 10, "y": 20,
+                   "kingdom": name, "source_server": "IT1", "type": "dungeon"}]
         groups[name] = {"complete": True, "fortress_count": 1, "fortresses": points}
     return {"complete": True, "server_source": "IT1", "total_count": 3, "results": groups}
 
@@ -32,6 +33,18 @@ class ProbePl1LiveMapTests(unittest.TestCase):
     def test_rejects_attack_or_player_fields_in_it1_catalog(self):
         catalog = valid_catalog()
         catalog["results"]["sands"]["fortresses"][0]["last_attack"] = "not allowed"
+        with self.assertRaises(ValueError):
+            PROBE.validate_catalog(catalog)
+
+    def test_rejects_wrong_kingdom_group_or_source(self):
+        catalog = valid_catalog()
+        catalog["results"]["sands"]["fortresses"][0]["kid"] = 2
+        with self.assertRaises(ValueError):
+            PROBE.validate_catalog(catalog)
+
+    def test_rejects_coordinates_outside_map_bounds(self):
+        catalog = valid_catalog()
+        catalog["results"]["sands"]["fortresses"][0]["x"] = 1287
         with self.assertRaises(ValueError):
             PROBE.validate_catalog(catalog)
 

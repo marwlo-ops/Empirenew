@@ -589,3 +589,65 @@ Nie wykonano GAA/GAM przez most, ponieważ żaden z aliasów produkcyjnego PL1 n
 ### Zakres i status
 
 Zmiana kodu dotyczy wyłącznie observera GAM w `scripts/barony-live/**`; niniejszy dziennik dotyczy wyłącznie badań Barony. Nie zmieniono `barony.html`, danych mapy, Mapa, Szpiegowanie ani Dodatkowe. Nie zapisano żadnych ataków. `attack_time_utc` pozostaje null bez źródła serwerowego.
+
+
+## 23. Świeży import IT1, walidacja i ponowna diagnostyka PL1 — 2026-11-05 22:02–22:04 UTC
+
+### Zmiana bezpieczeństwa importera
+
+W commicie `818ca4296d5cdba4b172d1a88e78bba44e648f6e` poprawiono `integer()` w `scripts/import_it1_fortresses.py`: Python traktuje `bool` jako podtyp `int`, więc wartości `true/false` mogły wcześniej zostać zaakceptowane jako KID lub współrzędne. Importer odrzuca teraz boolean przed konwersją liczbową. Dodano test dla boolean w KID, X i Y. Zmiana dotyczy wyłącznie importera i jego testów.
+
+### Świeży odczyt GGE Tracker IT1
+
+Workflow `42117999850` wykonał rzeczywiste żądanie `GET /api/v1/dungeons` z nagłówkiem `gge-server: IT1` i zakończył się sukcesem.
+
+- Czas pobrania zapisany w katalogu: `2026-11-05T22:02:33.893503+00:00`.
+- 1 strona API, 2021 rekordów.
+- Piaski: 671; Lód: 779; Ogień: 571.
+- 2021 unikalnych współrzędnych; 0 duplikatów; 0 niepoprawnych współrzędnych.
+- Porównanie ze snapshotem `2026-11-05T20:04:20.052153Z`: 0 nowych i 0 usuniętych współrzędnych.
+- Każdy rekord ma dokładnie dozwolone pola: `id`, `kid`, `kingdom`, `x`, `y`, `type`, `source_server`. Nie ma pól cooldownu/gotowości, gracza ani historii ataków.
+- Pełny plan Barony: 2021 cele, 199 sektorów 100×100, 1 990 000 potencjalnych pól mapy do odczytu.
+
+Importer utworzył commit danych `2e71e25d8ff656f5fa4db882da6fb57937904d00`. Walidacja katalogu i planu zakończyły się PASS.
+
+### Testy i publikacja
+
+- Importer i pełny zestaw Python: 22/22 PASS.
+- Lokalny probe mapy offline: 13/13 PASS.
+- Rdzeń Barony / E4K: 28/28 PASS.
+- Walidator katalogu mapy: PASS.
+- Test mobilnego UI (statyczny): PASS; sprawdzono viewport, cele dotykowe 44 px, focus, etykiety historii lokalnej i separację dowodów.
+- Build Pages, deploy i raport statusu: PASS, workflow `42118029347`, zakończony `2026-11-05T22:04:12Z`.
+
+Test mobilny jest testem statycznym CI, nie próbą na fizycznym telefonie. W tej iteracji nie zmieniono `barony.html`, `mapa-rb.html`, `Mapa`, `Szpiegowanie` ani `Dodatkowe`.
+
+### Ponowna diagnostyka produkcyjnego PL1
+
+Workflow `42117999808` zakończył się sukcesem jako wykonanie diagnostyki, ale nie potwierdził źródła historii ataków:
+
+| Próba | Wynik |
+|---|---|
+| GGE Tracker `/dungeons`, `EmpirefourkingdomsExGG_3` | HTTP 400 — nieprawidłowy/nieobsługiwany serwer |
+| GGE Tracker `/dungeons`, `EmpirefourkingdomsExGG2_3` | HTTP 400 |
+| GGE Tracker `/dungeons`, `E4K_PL1` | HTTP 400 |
+| GGE Tracker `/dungeons`, `PL1` | HTTP 400 |
+| GGE Tracker `/dungeons`, `E4K_PL1_BETA` | HTTP 200, 976 rekordów — tylko Beta |
+| GGE Tracker `/dungeons`, `IT1` | HTTP 200, 2021 rekordów |
+| Historia 5 graczy z rekordów Beta | 5/5 niepustych; 2664 rekordy — wyłącznie Beta |
+| Historia 3 próbkowanych graczy produkcyjnego PL1 | 3/3 `Invalid player ID`; wyszukiwanie gracza 3/3 `Player not found` |
+| Historia z sufiksem zoneId 259 | 3/3 `Invalid player ID` |
+| `empire-api.fly.dev/status` | HTTP 200, ale `EmpirefourkingdomsExGG_3` `target_connected=false` |
+| GAA/GAM przez most | Pominięte, bo socket PL1 nie był połączony |
+
+Beta nadal nie jest źródłem produkcyjnego PL1 i jej 2664 rekordy nie zostały skopiowane. GAA/GAM nie zostały wysłane do niepołączonej sesji. Nie wykonano autoryzowanego lokalnego logowania do gry; w tej iteracji nie uzyskano więc globalnego feedu ruchów ani raportów z konta operatora.
+
+### Błąd CI i odrębny workflow
+
+Wcześniejszy przebieg `42106187877` zakończył się błędem składni wyrażenia regularnego w filtrze stosu GAM. Poprawka normalizacji ścieżki i sprawdzania fragmentu `/commands/gam.js:` została wprowadzona w commicie `5011eda`; bieżące 28 testów obejmuje selekcję wyłącznie odpowiedzi handlera GAM i przechodzi.
+
+Niezależny workflow `Empirenew location tracker` `42116900931` nadal zakończył się błędem `ain: HTTP 500`, odpowiedź `Server not connected` na aliasie `EmpirefourkingdomsExGG2_3`. To nie jest workflow Barony; nie zmieniano go w tej iteracji.
+
+### Wniosek
+
+Katalog IT1 został ponownie pobrany z API, zweryfikowany i wdrożony na Pages. Importer ma dodatkową ochronę przed boolean jako współrzędną. Produkcyjny PL1 nadal nie udostępnił przez sprawdzone źródła historii fortec; nie zapisano żadnego zdarzenia ataku. `attacked_at` pozostaje nieustalone.

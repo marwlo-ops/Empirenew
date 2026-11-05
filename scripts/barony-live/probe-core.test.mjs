@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
+  extractParsedOutboundBossDungeonMovementEvidence,
   pickSamples, validateMapOnlyCatalog,
 } from './probe-core.mjs';
 
@@ -226,7 +227,7 @@ test('extracts a confirmed outbound NPC movement to the exact BossDungeonMapobje
     TA: [11, 321, 654, -1, 72, 0, 1234567, 1],
   };
   const evidence = extractOutboundBossDungeonMovementEvidence(movement, '2026-11-05T20:00:00Z');
-  assert.equal(evidence.classification, 'confirmed_outbound_attack_movement_to_boss_dungeon');
+  assert.equal(evidence.classification, 'observed_outbound_npc_attack_movement_to_boss_dungeon');
   assert.equal(evidence.movement_id, 77123);
   assert.equal(evidence.attacker_player_id, 1234567);
   assert.deepEqual(evidence.target, {
@@ -262,4 +263,54 @@ test('rejects returning, expired, untimed or unattributed NPC movements', () => 
   assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, SID: 0 }), null);
   assert.equal(extractOutboundBossDungeonMovementEvidence({ ...movement, MID: 0 }), null);
   assert.throws(() => extractOutboundBossDungeonMovementEvidence(movement, 'not-a-date'), /Invalid movement sample timestamp/);
+});
+
+
+test('normalizes a parsed ggejs movement with exact boss target and positive source owner', () => {
+  const movement = {
+    movementType: 11, direction: 0, movementId: 77124, kingdomId: 1, attackType: 2,
+    departureTime: new Date('2026-11-05T19:57:55Z'),
+    arrivalTime: new Date('2026-11-05T20:07:55Z'),
+    sourceArea: {
+      areaType: 1, position: { X: 200, Y: 300 }, ownerInfo: { playerId: 1234567 },
+    },
+    targetArea: {
+      areaType: 11, kingdomId: 1, position: { X: 321, Y: 654 }, ownerInfo: { playerId: -230 },
+    },
+  };
+  const evidence = extractParsedOutboundBossDungeonMovementEvidence(movement, '2026-11-05T20:00:00Z');
+  assert.equal(evidence.classification, 'observed_outbound_npc_attack_movement_to_boss_dungeon');
+  assert.equal(evidence.attacker_player_id, 1234567);
+  assert.equal(evidence.movement_id, 77124);
+  assert.deepEqual(evidence.target, {
+    kid: 1, kingdom: 'sands', x: 321, y: 654, area_type: 11, owner_id: -230,
+  });
+  assert.equal(evidence.movement_departure_estimate_utc, '2026-11-05T19:57:55.000Z');
+  assert.equal(evidence.estimated_arrival_at_utc, '2026-11-05T20:07:55.000Z');
+  assert.equal(evidence.attack_time_utc, null);
+  assert.match(evidence.coverage, /not a global PL1 feed/);
+});
+
+test('rejects parsed movements with wrong direction/type/owner, missing player or expired timing', () => {
+  const movement = {
+    movementType: 11, direction: 0, movementId: 77124, kingdomId: 2,
+    departureTime: new Date('2026-11-05T19:59:00Z'),
+    arrivalTime: new Date('2026-11-05T20:05:00Z'),
+    sourceArea: { ownerInfo: { playerId: 1234567 } },
+    targetArea: {
+      areaType: 11, kingdomId: 2, position: { X: 321, Y: 654 }, ownerInfo: { playerId: -231 },
+    },
+  };
+  assert.equal(extractParsedOutboundBossDungeonMovementEvidence({ ...movement, direction: 1 }, '2026-11-05T20:00:00Z'), null);
+  assert.equal(extractParsedOutboundBossDungeonMovementEvidence({ ...movement, movementType: 0 }, '2026-11-05T20:00:00Z'), null);
+  assert.equal(extractParsedOutboundBossDungeonMovementEvidence({
+    ...movement, targetArea: { ...movement.targetArea, ownerInfo: { playerId: -230 } },
+  }, '2026-11-05T20:00:00Z'), null);
+  assert.equal(extractParsedOutboundBossDungeonMovementEvidence({
+    ...movement, sourceArea: { ownerInfo: { playerId: -231 } },
+  }, '2026-11-05T20:00:00Z'), null);
+  assert.equal(extractParsedOutboundBossDungeonMovementEvidence({
+    ...movement, arrivalTime: new Date('2026-11-05T19:59:59Z'),
+  }, '2026-11-05T20:00:00Z'), null);
+  assert.throws(() => extractParsedOutboundBossDungeonMovementEvidence(movement, 'not-a-date'), /Invalid parsed movement sample timestamp/);
 });

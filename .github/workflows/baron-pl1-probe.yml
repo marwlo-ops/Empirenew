@@ -10,6 +10,9 @@ on:
       - "scripts/test-barony-mobile.mjs"
       - "scripts/test-baron-map-catalog.mjs"
       - "scripts/barony-live/**"
+      - "scripts/import_it1_fortresses.py"
+      - "tests/test_import_it1_fortresses.py"
+      - ".github/workflows/import-it1-fortresses.yml"
       - "research/fortece-barona-status.md"
       - ".github/workflows/baron-pl1-probe.yml"
   workflow_dispatch:

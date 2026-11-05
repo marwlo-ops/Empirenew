@@ -44,7 +44,7 @@ Wynik zawiera KID, X/Y, właściciela NPC, ID atakującego, ID ruchu, pozycję �
 W tym commicie nie ma autoryzowanej, potwierdzonej sesji mostu PL1. Nowy ekstraktor jest sprawdzany testami syntetycznymi i zostanie użyty przez istniejący odczyt `GAM` tylko wtedy, gdy status mostu potwierdzi połączenie z `EmpirefourkingdomsExGG_3`.
 
 
-## Nowe ustalenie: jawne żądanie GAM — 2026-11-05 21:07 UTC
+## Nowe ustalenie: jawne żądanie GAM — 2026-11-05 21:18 UTC
 
 ### Niezależny klient potwierdza żądanie snapshotu
 
@@ -76,8 +76,13 @@ To usuwa wcześniejsze ograniczenie „tylko pasywny push”. Nadal jest to snap
 
 ### Ograniczenia live
 
-Odczyt statusu mostu o 21:07 UTC:
-- `EmpirefourkingdomsExGG_3=false`;
-- nie ma autoryzowanej sesji operatora w tym środowisku.
+Odczyt live z workflow 42111337522 (2026-11-05 21:18 UTC):
+- GGE Tracker catalog: `E4K_PL1` ma `enabled=true`, `fortress=false`; lista wspieranych serwerów dla `/dungeons` wyklucza `E4K_PL1`.
+- `/dungeons` i `/dungeons/meta` dla `E4K_PL1`: HTTP 400, Invalid server.
+- `E4K_PL1_BETA`: HTTP 200, 976 fortec; wynik pozostaje wyłącznie Beta.
+- trzy profile PL1 z migawki Szpiegowania: 3/3 Player not found; historia: 3/3 Invalid player ID.
+- most: HTTP 200, `target_connected=false` dla `EmpirefourkingdomsExGG_3`; komendy mapy pominięte.
+
+Workflow testowy #barony `42111337522` zakończył się SUCCESS. GitHub Pages build/deploy `42111336561` zakończył się SUCCESS. Nie uruchomiono lokalnego probe `--movements`, bo nie ma w tym środowisku autoryzowanej sesji PL1.
 
 Nie wykonano żądania GAM do produkcyjnego PL1 i nie zapisano żadnych zdarzeń ataku. Do testu live nadal potrzebna jest działająca, autoryzowana sesja produkcyjnego PL1. Nie użyto cooldownu ani historii IT1/Beta.

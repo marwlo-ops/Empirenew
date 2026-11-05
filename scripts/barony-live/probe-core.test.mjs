@@ -111,6 +111,14 @@ test('reports counter and cooldown transitions only as unvalidated candidate sig
   assert.equal(signals[0].interval_end_utc, current.sampled_at_utc);
 });
 
+test('maps all three kingdom dungeon owners to their exact KID', () => {
+  for (const [kid, kingdom, ownerId] of [[1, 'sands', -220], [2, 'ice', -221], [3, 'fire', -222]]) {
+    const target = { id: `it1-${kid}-40-50`, kid, kingdom, x: 40, y: 50 };
+    const row = { areaType: 2, kingdomId: kid, position: { X: 40, Y: 50 }, ownerInfo: { playerId: ownerId }, attackCount: 0 };
+    assert.equal(buildObservation(target, [row]).status, 'fortress_row_found');
+  }
+});
+
 test('does not create signals from missing or unverified previous samples', () => {
   const current = { status: 'fortress_row_found', attack_count: 13, cooldown_active: true };
   assert.deepEqual(compareObservations(null, current), []);

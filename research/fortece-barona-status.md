@@ -442,3 +442,81 @@ Pierwszy CI uruchomiony bezpośrednio po zmianie etykiety ekstraktora zakończy�
 - Nie wykonano autoryzowanego logowania operatora, nie odczytano live GAM z PL1 i nie zapisano żadnych zdarzeń ataku.
 
 Następny krok: operator uruchamia lokalnie `node scripts/barony-live/probe.mjs --movements` w autoryzowanej sesji PL1, a następnie powtarza próbkę po kilku minutach. Ruchy pozostają obserwacją aktywnego ataku w drodze; do historii zakończonych ataków potrzebny będzie wiarygodny raport walki lub serwerowy dziennik zdarzeń z czasem.
+
+
+## 20. Raporty bitew NPC ze skrzynki konta i najnowsza weryfikacja Pages — 2026-11-05 20:18 UTC
+
+### Ostateczne porównanie opublikowanej mapy z żywym IT1
+
+Bezpośrednie zapytanie GGE Tracker wykonane po imporcie:
+- IT1 `/dungeons`: HTTP 200, 2021/2021 rekordów na jednej stronie;
+- KID 1/2/3: 671/779/571;
+- 0 duplikatów, 0 nieprawidłowych współrzędnych;
+- `/dungeons/meta.last_scan_at=2026-11-05T20:07:36.656Z`;
+- porównanie zbiorów `kid/x/y`: żywe API i opublikowany katalog mają identyczne 2021 współrzędne;
+- opublikowany JSON przez GitHub Pages: HTTP 200, `captured_at=2026-11-05T20:04:20.052153+00:00`, 2021 rekordów, wyłącznie pola mapowe.
+
+W źródłowym wierszu IT1 nadal występują dynamiczne pola gracza/ataku/cooldownu, ale nie ma ich w publicznym katalogu. Importer nie został rozszerzony o te dane.
+
+### Nowe źródło dowodów: raporty bitew NPC w skrzynce zalogowanego konta
+
+Inspekcja przypiętego `ggejs 2.2.0` potwierdziła:
+- `GBD` wywołuje `requestMessagesData()`, które pobiera skrzynkę przez `SNE`;
+- `BattleLogNPCAttackMessage` jest wybierany dla `messageType=6`, area type 11 i subtype NPC attack 2;
+- ważny szczegół implementacyjny: klasa `BasicBattleLogMessage` nie ustawia właściwości `message.subType` (pozostaje domyślne 0); subtype jest zakodowany w `message.metadata` jako część `areaType+subType+result`;
+- szczegóły raportu są pobierane read-only przez `getBattleLog()`, czyli `BLS`, `BLM` i `BLD`;
+- `BattleParticipant` udostępnia `playerId` oraz `ownerInfo.playerName`, jeśli dane właściciela są obecne w odpowiedzi.
+
+Wprowadzono:
+1. `isNpcBattleReportMessage` — wybiera subtype 2 z `message.metadata`, nie z nieustawionej właściwości;
+2. opcję lokalną `--reports` — po logowaniu wybiera najnowsze raporty NPC z własnej skrzynki i pobiera ich szczegóły;
+3. ekstrakcję dokładnego KID/X/Y, ID atakującego, nazwy gracza (jeśli dostępna), wyniku bitwy, ID wiadomości/raportu oraz czasu dostarczenia raportu;
+4. limit domyślny 10 raportów, maksymalnie 25; nie usuwa, nie oznacza jako przeczytane i nie przekazuje wiadomości;
+5. wynik jest tylko wyświetlany lokalnie — nie jest dopisywany do historii, pliku stanu ani repozytorium.
+
+Ograniczenia czasu:
+- `BasicMessage.deliveryTime` jest wyliczany jako lokalne `Date.now() - data[5] * 1000`, czyli wiek wiadomości ze skrzynki;
+- parsery `BLS/BLM/BLD` nie wystawiają pola dokładnego czasu rozpoczęcia ataku;
+- dlatego `report_received_at_utc` jest czasem dostarczenia/odczytu raportu, a `attack_time_utc` pozostaje null;
+- raporty są widoczne tylko dla zalogowanego konta (w tym ewentualnie raporty przekazane dalej); nie są globalnym rejestrem wszystkich ataków PL1.
+
+Opcja `--movements` pozostaje pasywnym obserwatorem pushy `GAM`; nie wysyła nieudokumentowanej komendy. Ruch w drodze daje atakującego i cel dla sesji konta, ale czas wyjścia jest lokalną estymacją i nie dowodzi zakończenia bitwy.
+
+### Najnowsze testy i stan produkcyjny
+
+Workflow `42102074057` dla commitu `3a596514adc11d323e07c9b67a9b2ebbd4eb5b7d`:
+- testy Python: 13/13 PASS;
+- testy Node: 23/23 PASS;
+- kontrola klienta `ggejs`/metadanych PL1: PASS;
+- test mobilny Barony: PASS;
+- walidator katalogu IT1: PASS;
+- diagnostyka API PL1: wykonana, lecz nie uzyskała historii produkcyjnej.
+
+Aktualne wyniki PL1:
+- katalog serwerów: `E4K_PL1 enabled=true, fortress=false`; Beta ma `fortress=true`;
+- `/dungeons` i `/dungeons/meta` dla `E4K_PL1`: HTTP 400 / Invalid server;
+- trzy identyfikatory z migawki Szpiegowania: 3/3 `Player not found`, historia 3/3 `Invalid player ID`;
+- wariant z sufiksem `zoneId=259`: 3/3 `Invalid player ID`;
+- brak trzycyfrowego kodu w katalogu serwerów, więc test sufiksu kodu został bezpiecznie pominięty;
+- most `empire-api.fly.dev`: HTTP 200, ale produkcyjny socket `EmpirefourkingdomsExGG_3=false`; GAA/GAM przez most pominięto.
+
+Najświeższy Pages workflow dla commitu `3a596514adc11d323e07c9b67a9b2ebbd4eb5b7d` jest śledzony osobno; wcześniejszy Pages run dla snapshotu katalogu i kodu probe zakończył się sukcesem. Nie deklarować nowej publikacji do czasu zakończenia najnowszego runu.
+
+### Błędy przejściowe i osobny workflow
+
+Podczas kolejnych małych commitów CI wykrył:
+- starą asercję po zmianie nazwy klasyfikacji ruchu;
+- brak dodanego pola `attacker_player_name` w normalizatorze parsed movement.
+
+Obie przyczyny zostały poprawione; najnowszy probe workflow przechodzi 23/23 testy.
+
+Osobny workflow `Empirenew location tracker` (`42101624821`) nadal kończy się błędem poza modułem Barony: komenda `ain` dla serwera Beta zwróciła HTTP 500 `Server not connected` na `EmpirefourkingdomsExGG2_3`. Nie zmieniano tego modułu w tej iteracji.
+
+### Wniosek
+
+- IT1: aktualne współrzędne 2021/2021 są zgodne z opublikowanym katalogiem map-only.
+- Barony: testy offline, walidacja i test mobilny przechodzą.
+- Nowe lokalne źródło raportów NPC może dostarczyć konkretny cel i atakującego z raportów dostępnych na koncie, ale nie dokładny czas ataku ani globalną historię.
+- Produkcyjny PL1 nadal nie udostępnia potwierdzonego publicznego katalogu fortec/historii, a automatyzacja nie ma lokalnych poświadczeń operatora. Nie wykonano live `--reports` ani `--movements`, nie zapisano żadnych zdarzeń ataków.
+
+Następny krok: po lokalnym, autoryzowanym uruchomieniu `node scripts/barony-live/probe.mjs --reports` porównać raporty z konkretnymi współrzędnymi; osobno uruchomić `--movements` i sprawdzić, czy serwer wypycha aktualizacje GAM. Każdy rekord powinien zachować rozdział między czasem raportu, estymowanym odjazdem ruchu i nieznanym dokładnym czasem ataku.

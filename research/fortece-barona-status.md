@@ -477,7 +477,7 @@ Wprowadzono:
 Ograniczenia czasu:
 - `BasicMessage.deliveryTime` jest wyliczany jako lokalne `Date.now() - data[5] * 1000`, czyli wiek wiadomości ze skrzynki;
 - parsery `BLS/BLM/BLD` nie wystawiają pola dokładnego czasu rozpoczęcia ataku;
-- dlatego `report_received_at_utc` jest czasem dostarczenia/odczytu raportu, a `attack_time_utc` pozostaje null;
+- dlatego `report_delivery_time_estimate_utc` jest czasem dostarczenia/odczytu raportu, a `attack_time_utc` pozostaje null;
 - raporty są widoczne tylko dla zalogowanego konta (w tym ewentualnie raporty przekazane dalej); nie są globalnym rejestrem wszystkich ataków PL1.
 
 Opcja `--movements` pozostaje pasywnym obserwatorem pushy `GAM`; nie wysyła nieudokumentowanej komendy. Ruch w drodze daje atakującego i cel dla sesji konta, ale czas wyjścia jest lokalną estymacją i nie dowodzi zakończenia bitwy.

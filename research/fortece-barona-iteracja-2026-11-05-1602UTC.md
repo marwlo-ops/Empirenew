@@ -41,7 +41,7 @@ Uruchomiono kod rdzenia pobrany z aktualnego `main` w izolowanym środowisku Jav
 - niepoprawny timestamp jest odrzucany — PASS;
 - wzrost licznika nadal jest oznaczany wyłącznie jako kandydacki sygnał — PASS.
 
-Testów `node --test` w runnerze GitHub Actions nie można w tej iteracji potwierdzić: status commitu zwrócił pustą listę statusów, a dostępny konektor nie udostępnia listowania runów uruchomionych zdarzeniem `push`. Nie deklarujemy zatem PASS CI ani nowego deploymentu.
+Dodatkowo wykonano wszystkie 12 przypadków z `probe-core.test.mjs` w izolowanym środowisku JavaScript, po załadowaniu aktualnego źródła rdzenia i fixture testowego — 12/12 PASS. Nie jest to jednak uruchomienie natywnego `node --test` w GitHub Actions. Status commitu zwrócił pustą listę statusów, a dostępny konektor nie udostępnia listowania runów uruchomionych zdarzeniem `push`. Nie deklarujemy zatem PASS CI ani nowego deploymentu.
 
 ## PL1 — historia ataków
 

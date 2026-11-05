@@ -1,3 +1,4 @@
+// Read-only probes only; do not persist player names or inferred attack events.
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
 const targetServer = "EmpirefourkingdomsExGG2_3";

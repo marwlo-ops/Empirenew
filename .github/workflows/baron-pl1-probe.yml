@@ -8,6 +8,7 @@ on:
       - "scripts/probe-pl1-live-map.py"
       - "tests/test_probe_pl1_live_map.py"
       - "scripts/test-barony-mobile.mjs"
+      - "scripts/test-baron-map-catalog.mjs"
       - ".github/workflows/baron-pl1-probe.yml"
   workflow_dispatch:
 
@@ -32,5 +33,7 @@ jobs:
           node-version: 22
       - name: Test Barony mobile UI
         run: node scripts/test-barony-mobile.mjs
+      - name: Validate published IT1 map catalog
+        run: node scripts/test-baron-map-catalog.mjs
       - name: Probe read-only PL1 dungeon map API
         run: node scripts/probe-baron-pl1.js

@@ -237,11 +237,11 @@ export function extractNpcBattleReportEvidence(message, battleLog) {
     outcome: typeof message.hasAttackerWon === 'boolean'
       ? (message.hasAttackerWon ? 'attacker_won' : 'attacker_lost')
       : null,
-    report_received_at_utc: toIsoDate(message.deliveryTime),
+    report_delivery_time_estimate_utc: toIsoDate(message.deliveryTime),
     message_is_forwarded: Boolean(message.isForwarded),
     report_delivery_kind: message.isForwarded ? 'forwarded_to_this_account' : 'original_mailbox_entry',
     attack_time_utc: null,
-    time_semantics: 'BasicMessage.deliveryTime is derived from mailbox message age; it is not the attack start time.',
+    time_semantics: 'BasicMessage.deliveryTime is estimated from mailbox message age against the local clock; it is not an exact server receipt time or attack start time.',
     source_fields: [
       'message.messageType=6',
       'message.areaType=11',

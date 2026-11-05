@@ -7,6 +7,7 @@ on:
       - "scripts/probe-baron-pl1.js"
       - "scripts/probe-pl1-live-map.py"
       - "tests/test_probe_pl1_live_map.py"
+      - "scripts/test-barony-mobile.mjs"
       - ".github/workflows/baron-pl1-probe.yml"
   workflow_dispatch:
 
@@ -29,5 +30,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Test Barony mobile UI
+        run: node scripts/test-barony-mobile.mjs
       - name: Probe read-only PL1 dungeon map API
         run: node scripts/probe-baron-pl1.js

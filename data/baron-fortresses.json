@@ -19,7 +19,13 @@
       "failed_chunks": null,
       "complete": false,
       "fortresses": []
+    },
+    "islands": {
+      "fortress_count": null,
+      "failed_chunks": null,
+      "complete": false,
+      "fortresses": []
     }
   },
-  "note": "Template only. No live fortress coordinates have been collected yet."
+  "note": "Template only. Live coordinates require an authenticated EmpireCore game session; no coordinates have been fabricated."
 }

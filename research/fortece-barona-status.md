@@ -210,3 +210,7 @@ Końcowa kontrola:
 - ostatni live test publicznego API nadal wykazuje `E4K_PL1 fortress=false`, `/dungeons` HTTP 400 oraz `target_connected=false` w publicznym moście. Żaden rekord Beta/IT1 nie został przeniesiony do historii PL1.
 
 Aktualny stan: mapa IT1 jest świeżo pobrana, zweryfikowana i opublikowana; automatyczna historia „kto i kiedy zaatakował” dla produkcyjnego PL1 pozostaje niepotwierdzona. Lokalny skrypt testowy nadal wymaga potwierdzenia obsługi E4K przez EmpireCore, poprawnych identyfikatorów game/network oraz uruchomienia przez operatora w autoryzowanej sesji. Nie zapisano żadnych fikcyjnych ataków.
+
+Dodatkowy błąd testów i poprawka:
+- po zaostrzeniu walidacji KID/krainy/źródła/typu pierwsze uruchomienie `42052101151` zatrzymało się na teście fixture, ponieważ przykładowe rekordy testowe nie zawierały wymaganych pól `kingdom`, `source_server` i `type`;
+- uzupełniono fixture oraz test duplikatów; kolejne uruchomienia `42052107856`, `42052135745` i `42052367160` zakończyły się sukcesem, w ostatnim przebiegu 12/12 testów offline PASS.

@@ -1,0 +1,54 @@
+name: NPC map API diagnostics
+
+on:
+  workflow_dispatch:
+    inputs:
+      kingdom:
+        description: "Kingdom ID to probe (read-only)"
+        required: true
+        default: "1"
+      x:
+        description: "Top-left X coordinate for gaa chunk"
+        required: true
+        default: "0"
+      y:
+        description: "Top-left Y coordinate for gaa chunk"
+        required: true
+        default: "0"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npc-map-diagnostics
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Empirenew
+        uses: actions/checkout@v4
+      - name: Run read-only gaa/fnm diagnostic
+        id: probe
+        continue-on-error: true
+        run: |
+          python3 scripts/scan_npc_map.py \
+            --kingdom "${{ inputs.kingdom }}" \
+            --x "${{ inputs.x }}" \
+            --y "${{ inputs.y }}" \
+            --chunk-size 12 \
+            --diagnostic npc-map-diagnostic.json
+      - name: Upload diagnostic report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npc-map-diagnostic
+          path: npc-map-diagnostic.json
+          if-no-files-found: warn
+      - name: Fail when API/map response is not validated
+        if: steps.probe.outcome != 'success'
+        run: |
+          echo "::error::Map API diagnostics failed. No production snapshot was modified."
+          exit 1

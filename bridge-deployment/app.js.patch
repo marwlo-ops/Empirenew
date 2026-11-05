@@ -1,0 +1,28 @@
+diff --git a/app.js b/app.js
+--- a/app.js
++++ b/app.js
+@@
+-                    let responseHeaders = {};
+-                    if (req.params.command in commands) {
++                    let responseHeaders = {};
++                    if (["gaa", "fnm"].includes(req.params.command)) {
++                        // Map replies do not have to echo the request parameters.
++                        // BaseSocket treats false as command-only matching.
++                        responseHeaders = false;
++                    } else if (req.params.command in commands) {
+                         for (const [messageKey, responsePath] of Object.entries(commands[req.params.command])) {
+                             if (messageKey in messageHeaders) {
+                                 setNestedValue(responseHeaders, responsePath, messageHeaders[messageKey]);
+                             }
+                         }    
+                     } else {
+                         responseHeaders = messageHeaders;
+                     }
+ 
+-                    const response = await sockets[req.params.server].socket.waitForJsonResponse(req.params.command, responseHeaders, timeout = 1000);
++                    const responseTimeout = ["gaa", "fnm"].includes(req.params.command) ? 15000 : 1000;
++                    const response = await sockets[req.params.server].socket.waitForJsonResponse(
++                        req.params.command,
++                        responseHeaders,
++                        responseTimeout
++                    );

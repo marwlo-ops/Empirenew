@@ -156,6 +156,23 @@ Publiczny endpoint `/dungeons/player/{playerId}` odczytuje potem `kid/x/y/attack
 - Wszystkie 976 współrzędnych z poprzedniego testu Beta pokrywały się z katalogiem IT1, a użytkownik potwierdził zgodność siatki IT1 i PL1. To potwierdza wybór współrzędnych, nie cooldown ani historię ataków.
 - Nie używamy żadnego cooldownu IT1 ani Beta do wyliczania czasu ataku PL1.
 
+### 4.1. Test identyfikatora gracza z końcówką zoneId (2026-11-05)
+
+Endpoint historii `/dungeons/player/{playerId}` nie wybiera serwera z nagłówka `gge-server`. Waliduje numeryczny identyfikator, bierze jego ostatnie trzy cyfry jako kod serwera i przez `getPgSqlPoolFromRequestId` szuka aktywnego wpisu z takim `code`.
+
+Wykonałem dodatkowy test, bo `member_id` z `location-snapshots.json` jest surowym identyfikatorem liczbowym (w próbce 109 członków: 4–7 cyfr), bez widocznej końcówki serwera:
+- wziąłem 3 identyfikatory z migawki PL1;
+- pobrałem `zoneId=259` z przypiętego `e4k-data` dla produkcyjnego `EmpirefourkingdomsExGG_3`;
+- sprawdziłem `/dungeons/player/{member_id}259?lastDays=365`, bez nagłówka serwera;
+- wynik: **3/3 HTTP 400 — Invalid player ID**, 0 rekordów historii.
+
+Wniosek: `zoneId=259` nie jest potwierdzonym kodem serwera GGE Tracker. Nie dopisujemy go do ID w aplikacji. Do dalszego testu brakuje rzeczywistego trzycyfrowego `code` z aktywnej konfiguracji serwerów GGE Tracker albo niezależnego, potwierdzonego identyfikatora PL1 z ich bazy.
+
+Źródła:
+- GGE Tracker — `verifyIdWithCountryCode` i pobieranie ostatnich trzech cyfr: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/helper/api-helper.ts
+- GGE Tracker — wybór puli bazy przez `code`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/managers/api.manager.ts
+- GGE Tracker — zapytanie historii po ID: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts
+
 ### 5. Aktualny stan implementacji i następny test
 
 Probe `scripts/barony-live/probe.mjs` sprawdza teraz `areaType=11`, właściciela -230/-231/-232, `defeaterPlayerId` oraz cooldown dokładnie na współrzędnych katalogu. Surowe obserwacje trafiają do prywatnego pliku stanu; kandydackie sygnały pozostają tylko w wyniku uruchomienia.

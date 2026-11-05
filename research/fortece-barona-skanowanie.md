@@ -184,3 +184,25 @@ Następny wymagany test to odczyt kilku próbek na autoryzowanej sesji produkcyj
 4. raportu NPC z konta, które otrzymało raport.
 
 Dopiero po potwierdzeniu długości cooldownu i zachowania pola `defeaterPlayerId` na PL1 będzie można wyznaczać przedział ataku. Dokładny czas serwerowy nadal wymaga źródła, które go rzeczywiście udostępnia.
+
+### 4.2. Źródło właściwego kodu serwera i nowy test routingu ID (2026-11-05)
+
+Niezależny projekt GGE Assistant mapuje e4k_pl1 na strefę EmpirefourkingdomsExGG_3. To potwierdza wartość używaną przez przypięty e4k-data i scripts/barony-live/probe-core.mjs. Wcześniejszy scripts/probe-baron-pl1.js używał starej wartości EmpirefourkingdomsExGG2_3 dla statusu mostu, więc mógł sprawdzać niewłaściwy klucz. Probe korzysta teraz ze wspólnej stałej DEFAULT_PL1_ZONE i nadal porównuje starą wartość jako osobny wariant diagnostyczny.
+
+Źródła:
+- GGE Assistant — mapa serwerów E4K: https://github.com/nathael-aa/gge-assistant-bot/blob/91cb8a16d2175ddfbdd435c9b5eb87d178e0cc13/utils.py
+- GGE Tracker — verifyIdWithCountryCode, getCountryCode, removeCountryCode i addCountryCode: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/helper/api-helper.ts
+- GGE Tracker — routing historii po kodzie z ostatnich trzech cyfr ID: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/managers/api.manager.ts
+- GGE Tracker — profil gracza zawiera server_code i player.player_id: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-profiles.ts
+
+Nowy test production-pl1-player-history-with-catalog-code-suffix:
+1. Pobiera XML /servers/catalog i odczytuje <code> dla E4K_PL1 (nie używa zoneId z e4k-data).
+2. Dopisuje ten kod do trzech member_id z migawki Szpiegowania.
+3. Sprawdza /players/{id}/profile?include=none; dopiero zgodność server_code, pełnego player_id i nazwy z migawką potwierdza tożsamość.
+4. Sprawdza /dungeons/player/{id} i porównuje kid/x/y z katalogiem fortec. Rekordy z niepotwierdzoną tożsamością nie są zaliczane do PL1.
+
+Poprzedni test z sufiksem zoneId=259 pozostaje w logu jako nieudana hipoteza (3/3 HTTP 400). Nowy test ma odrębne źródło kodu i nie zakłada, że zoneId jest kodem GGE Tracker. W chwili dodania testu jego wynik live oczekuje na wykonanie workflow; nie zapisujemy żadnych wyników przed otrzymaniem odpowiedzi.
+
+Ograniczenie czasu: scraper GGE Tracker w collectDungeonCooldowns wybiera rekordy typu 11 z dodatnim pozostałym cooldownem, a następnie wykonuje INSERT INTO dungeons_history (kid, position_x, position_y, player_id) bez jawnego pola attacked_at. API odczytuje później DH.attacked_at. Dopóki schemat i domyślna wartość kolumny nie potwierdzą pochodzenia czasu, nie traktujemy attacked_at jako dokładnego czasu zdarzenia gry. Kod scrapera może również zapisywać obserwacje tego samego aktywnego cooldownu w kolejnych przebiegach; nie liczymy automatycznie każdego wiersza jako nowego ataku.
+
+Źródło: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts

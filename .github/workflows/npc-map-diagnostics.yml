@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/scan_npc_map.py'
+      - 'scripts/probe_gge_tracker.py'
       - '.github/workflows/npc-map-diagnostics.yml'
       - 'research/npc-map-bridge-fix.md'
   workflow_dispatch:
@@ -46,12 +47,19 @@ jobs:
             --y "${{ inputs.y || '0' }}" \
             --chunk-size 12 \
             --diagnostic npc-map-diagnostic.json
+      - name: Probe public GGE Tracker API for production PL1
+        id: tracker
+        continue-on-error: true
+        run: |
+          python3 scripts/probe_gge_tracker.py > gge-tracker-probe.json
       - name: Upload diagnostic report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: npc-map-diagnostic
-          path: npc-map-diagnostic.json
+          path: |
+            npc-map-diagnostic.json
+            gge-tracker-probe.json
           if-no-files-found: warn
       - name: Fail when API/map response is not validated
         if: steps.probe.outcome != 'success'

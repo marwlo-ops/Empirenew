@@ -158,7 +158,8 @@ async function loadServerIntel(){
    if(response.ok)locations=await response.json();
   }catch(_){}
   const positions=new Map();
-  for(const alliance of locations?.alliances||[]){
+  const alliances=Array.isArray(locations?.alliances)?locations.alliances:[];
+  for(const alliance of alliances){
    for(const member of alliance.members||[]){
     positions.set(String(member.member_id),[...(member.ap||[]),...(member.vp||[])]);
    }

@@ -19,23 +19,33 @@ class ImportIt1FortressesTests(unittest.TestCase):
         self.assertIsNone(IMPORTER.records_from({"unexpected": []}))
         self.assertIsNone(IMPORTER.records_from(None))
 
-    def test_normalizes_known_kingdom_and_coordinates(self):
+    def test_normalizes_known_kingdom_to_public_map_only_schema(self):
         point = IMPORTER.normalize({
             "id": 77, "kid": 2, "position_x": 123, "position_y": 456,
+            "area_type": 11,
             "attacked_at": "must-not-be-imported",
-            "cooldown": 999
+            "cooldown": 999,
+            "player_id": 12345,
+            "ready_at": "must-not-be-imported",
         })
         self.assertEqual(
             point,
             {
-                "id": "77", "kid": 2, "x": 123, "y": 456,
-                "kingdom": "ice", "source_server": "IT1",
-                "source": "GGE Tracker map data",
-                "match_verified_on_target": False
+                "id": "77", "kid": 2, "kingdom": "ice",
+                "x": 123, "y": 456, "type": "dungeon",
+                "source_server": "IT1",
             }
         )
-        self.assertNotIn("attacked_at", point)
-        self.assertNotIn("cooldown", point)
+        forbidden = {"attacked_at", "cooldown", "player_id", "ready_at", "source"}
+        self.assertTrue(forbidden.isdisjoint(point.keys()))
+
+    def test_rejects_non_boss_dungeon_rows_when_area_type_is_present(self):
+        self.assertIsNone(IMPORTER.normalize({
+            "kid": 1, "x": 10, "y": 20, "areaType": 2
+        }))
+        self.assertIsNotNone(IMPORTER.normalize({
+            "kid": 1, "x": 10, "y": 20, "areaType": 11
+        }))
 
     def test_generates_stable_id_when_source_id_is_missing(self):
         point = IMPORTER.normalize({"kid": 3, "x": 8, "y": 9})
@@ -45,6 +55,8 @@ class ImportIt1FortressesTests(unittest.TestCase):
         self.assertIsNone(IMPORTER.normalize({"kid": 4, "x": 1, "y": 2}))
         self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": -1, "y": 2}))
         self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": "bad", "y": 2}))
+        self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": 1287, "y": 2}))
+        self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": 2, "y": 1287}))
 
     def test_does_not_accept_fractional_coordinate_strings(self):
         self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": "1.5", "y": 2}))

@@ -30,6 +30,18 @@ Nie przekazuj loginu/hasła jako argumentów, nie zapisuj ich w repozytorium, Gi
 
 Domyślnie odpytuje maksymalnie 3 punkty na krainę. Każdy odczyt sektora obejmuje 100×100 pól; przerwa między zapytaniami wynosi co najmniej 1000 ms. Według dokumentacji `ggejs` odczyt krainy jest dozwolony tylko wtedy, gdy konto ma w niej zamek; błąd takiego odczytu nie oznacza braku fortecy.
 
+## Ruchy atakujące NPC (opcjonalnie)
+
+Po lokalnym, autoryzowanym połączeniu z produkcyjnym PL1 można dodatkowo poprosić o bieżący snapshot komendy `GAM`:
+
+```sh
+node scripts/barony-live/probe.mjs --movements
+```
+
+To jest wyłącznie odczyt ruchów widocznych dla zalogowanego konta. Ekstraktor przyjmuje tylko ruch typu 11, kierunek wychodzący, cel typu 11, zgodny KID i właściciela NPC oraz dodatni ID właściciela źródła. Wynik zawiera ID gracza, dokładne X/Y celu i szacowany czas wyjścia/przybycia wyliczony przez `ggejs` z lokalnego zegara. `attack_time_utc` pozostaje `null`; ruch w drodze nie dowodzi zakończenia bitwy i nie obejmuje całego serwera. Dane ruchów są wypisywane tylko w wyniku lokalnego uruchomienia i nie są dopisywane do pliku stanu ani repozytorium.
+
+Jeśli odpowiedź `GAM` nie nadejdzie w ciągu 3 sekund, wynik ma status `timeout_no_gam_response`. Czas oczekiwania można zmienić przez `--movement-wait-ms 1000..10000`. Nie uruchamiaj tego w GitHub Actions; poświadczenia są przeznaczone wyłącznie do lokalnej sesji operatora.
+
 ## Pełny plan
 
 ```sh

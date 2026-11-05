@@ -78,7 +78,8 @@ jobs:
           if (!socket.includes('sendCommand(commandId, paramObject)')) throw new Error('Pinned ggejs SocketManager no longer exposes the generic command sender.');
           if (!socket.includes('onResponse(client, params.splice(1, params.length - 1))')) throw new Error('Pinned ggejs XT response dispatch layout changed.');
           const commandShift = commandIndex.indexOf('const commandId = params.shift();');
-          const contextShift = commandIndex.indexOf('params.shift();', commandShift);
+          const commandShiftEnd = commandShift + 'const commandId = params.shift();'.length;
+          const contextShift = commandIndex.indexOf('params.shift();', commandShiftEnd);
           const errorCodeShift = commandIndex.indexOf('const errorCode = parseInt(params.shift());', contextShift);
           if (commandShift < 0 || contextShift < 0 || errorCodeShift < contextShift) throw new Error('Pinned ggejs response command/context/error-code parsing order changed.');
           if (!gam.includes('client.movements._add_or_update(movements);') || !gam.includes('baseExecuteCommand(client, movements, errorCode, params, callbacks);')) throw new Error('Pinned ggejs GAM handler dispatch order changed.');

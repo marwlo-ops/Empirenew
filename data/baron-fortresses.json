@@ -1,14 +1,34 @@
 {
   "captured_at": "2026-11-05T11:17:00+01:00",
-  "source": "GGE Tracker public dungeon list · server IT1 · user-provided screenshots",
+  "source": "GGE Tracker IT1 · map coordinates only · partial screenshot fallback",
   "server_source": "IT1",
   "target_server": "E4K_PL1",
   "complete": false,
   "results": {
-    "sands": {"fortress_count": null, "failed_chunks": null, "complete": false, "fortresses": []},
-    "ice": {"fortress_count": null, "failed_chunks": null, "complete": false, "fortresses": []},
-    "fire": {"fortress_count": null, "failed_chunks": null, "complete": false, "fortresses": []},
-    "islands": {"fortress_count": null, "failed_chunks": null, "complete": false, "fortresses": []},
+    "sands": {
+      "fortress_count": null,
+      "failed_chunks": null,
+      "complete": false,
+      "fortresses": []
+    },
+    "ice": {
+      "fortress_count": null,
+      "failed_chunks": null,
+      "complete": false,
+      "fortresses": []
+    },
+    "fire": {
+      "fortress_count": null,
+      "failed_chunks": null,
+      "complete": false,
+      "fortresses": []
+    },
+    "islands": {
+      "fortress_count": null,
+      "failed_chunks": null,
+      "complete": false,
+      "fortresses": []
+    },
     "unassigned": {
       "fortress_count": 3,
       "failed_chunks": null,
@@ -25,10 +45,7 @@
           "source_server": "IT1",
           "target_server": "E4K_PL1",
           "verification": "visible_in_user_screenshot",
-          "match_verified_on_target": false,
-          "last_attack_at": null,
-          "last_attacked_by": null,
-          "cooldown_until": null
+          "match_verified_on_target": false
         },
         {
           "id": "it1-867-321",
@@ -41,10 +58,7 @@
           "source_server": "IT1",
           "target_server": "E4K_PL1",
           "verification": "visible_in_user_screenshot",
-          "match_verified_on_target": false,
-          "last_attack_at": null,
-          "last_attacked_by": null,
-          "cooldown_until": null
+          "match_verified_on_target": false
         },
         {
           "id": "it1-789-516",
@@ -57,14 +71,10 @@
           "source_server": "IT1",
           "target_server": "E4K_PL1",
           "verification": "coordinate_matches_in_game_screenshot",
-          "match_verified_on_target": true,
-          "last_attack_at": null,
-          "last_attacked_by": "Zabster",
-          "cooldown_until": null,
-          "observed_remaining_cooldown": "05:56:00"
+          "match_verified_on_target": true
         }
       ]
     }
   },
-  "note": "Seed list transcribed from the user's GGE Tracker IT1 screenshot. Coordinate [789,516] also appears in the user's in-game screenshot as a Barbarzyńska forteca; the in-game label says it was defeated by Zabster and showed 05:56:00 remaining at capture. The other two coordinates are visible in the IT1 list but have not yet been independently confirmed on PL1. Kingdoms, levels, current cooldowns and attack timestamps are deliberately left unknown. This is a partial seed list, not a complete PL1 scan."
+  "note": "Partial list transcribed from the user's screenshots. These points are not the complete IT1 map import. Only kingdom and coordinates are stored here; attack data is intentionally excluded and is obtained separately from E4K PL1 when a point is checked."
 }

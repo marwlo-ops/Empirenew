@@ -116,6 +116,65 @@ try {
   console.log(JSON.stringify({ probe: "beta-dungeon-coordinate-overlap", error: String(error) }));
 }
 
+async function probePlayerDungeonHistory() {
+  try {
+    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
+    const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
+    const known = new Set();
+    for (const data of Object.values(map.results || {})) {
+      for (const f of data.fortresses || []) known.add(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y));
+    }
+    const members = (snapshot.alliances || []).flatMap(a => a.members || [])
+      .filter(m => m.name && m.member_id != null)
+      .slice(0, 3);
+    for (const member of members) {
+      try {
+        const lookup = await fetch(base + "/players/" + encodeURIComponent(member.name), {
+          headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
+          signal: AbortSignal.timeout(20000)
+        });
+        const player = await lookup.json();
+        if (!lookup.ok || !player.player_id) {
+          console.log(JSON.stringify({
+            probe: "player-dungeon-history",
+            lookup_status: lookup.status,
+            player_resolved: false,
+            api_error: player.error ?? null
+          }));
+          continue;
+        }
+        const historyResponse = await fetch(base + "/dungeons/player/" + encodeURIComponent(player.player_id) + "?lastDays=30", {
+          headers: { Accept: "application/json" },
+          signal: AbortSignal.timeout(20000)
+        });
+        const history = await historyResponse.json();
+        const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
+        const sample = rows.slice(0, 10).map(d => ({
+          kid: Number(d.kid),
+          x: Number(d.position_x),
+          y: Number(d.position_y),
+          attacked_at: d.attacked_at,
+          matches_it1_fortress: known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))
+        }));
+        console.log(JSON.stringify({
+          probe: "player-dungeon-history",
+          lookup_status: lookup.status,
+          player_resolved: true,
+          history_status: historyResponse.status,
+          history_error: history.error ?? null,
+          records_last_30_days: rows.length,
+          it1_fortress_matches: sample.filter(d => d.matches_it1_fortress).length,
+          sample
+        }));
+      } catch (error) {
+        console.log(JSON.stringify({ probe: "player-dungeon-history", error: String(error) }));
+      }
+    }
+  } catch (error) {
+    console.log(JSON.stringify({ probe: "player-dungeon-history", setup_error: String(error) }));
+  }
+}
+
 async function probeBridge() {
   try {
     const response = await fetch(bridgeBase + "/status", {
@@ -192,4 +251,5 @@ async function probeBridge() {
   }
 }
 
+await probePlayerDungeonHistory();
 await probeBridge();

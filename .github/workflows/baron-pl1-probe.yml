@@ -37,6 +37,7 @@ jobs:
         run: |
           node --check scripts/barony-live/probe.mjs
           node --check scripts/barony-live/probe-core.mjs
+          node --check scripts/barony-live/prepare-e4k-data.mjs
           node --test scripts/barony-live/probe-core.test.mjs
           node scripts/barony-live/probe.mjs --plan --all > "$RUNNER_TEMP/barony-plan.json"
           node - <<'NODE'
@@ -50,6 +51,7 @@ jobs:
       - name: Verify pinned E4K client and PL1 server metadata
         run: |
           npm install --prefix scripts/barony-live --ignore-scripts --no-audit --no-fund
+          node scripts/barony-live/prepare-e4k-data.mjs
           node - <<'NODE'
           const fs = require('node:fs');
           const { network } = require('./scripts/barony-live/node_modules/e4k-data');

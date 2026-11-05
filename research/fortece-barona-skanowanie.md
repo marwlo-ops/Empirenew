@@ -151,7 +151,7 @@ Publiczny endpoint `/dungeons/player/{playerId}` odczytuje potem `kid/x/y/attack
 
 ### 4. Wyniki serwerów i granica PL1/Beta
 
-- `E4K_PL1` pozostaje wyłączony dla publicznego katalogu fortec GGE Tracker (`fortress=false)); endpoint `/dungeons` odrzuca produkcyjny PL1.
+- `E4K_PL1` pozostaje wyłączony dla publicznego katalogu fortec GGE Tracker (`fortress=false`); endpoint `/dungeons` odrzuca produkcyjny PL1.
 - `E4K_PL1_BETA` udostępnia osobny katalog i historię. Nie wolno używać tych danych jako historii produkcyjnego PL1.
 - Wszystkie 976 współrzędnych z poprzedniego testu Beta pokrywały się z katalogiem IT1, a użytkownik potwierdził zgodność siatki IT1 i PL1. To potwierdza wybór współrzędnych, nie cooldown ani historię ataków.
 - Nie używamy żadnego cooldownu IT1 ani Beta do wyliczania czasu ataku PL1.

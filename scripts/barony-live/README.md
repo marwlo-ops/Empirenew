@@ -1,6 +1,6 @@
 # Lokalny odczyt mapy fortec E4K PL1
 
-Narzędzie jest **read-only**. Korzysta z klienta E4K `ggejs` i danych serwerów `e4k-data`; nie wysyła ataków ani szpiegowania.
+Narzędzie jest **read-only**. Korzysta z klienta E4K `ggejs` i danych serwerów `e4k-data`; nie wysyła ataków ani szpiegowania. Przed importem klienta uruchamia wąski helper zgodności, który omija wyłącznie brakujący, nieużywany przez `ggejs` eksport `networkPreClient`.
 
 ## Dlaczego ten klient
 
@@ -40,7 +40,7 @@ Aktualny katalog IT1 ma 2021 punktów i 199 unikalnych sektorów 100×100 (szacu
 
 ## Dane i ograniczenia
 
-Pierwsze uruchomienie zapisuje wyłącznie ostatnie surowe, zweryfikowane obserwacje w prywatnym pliku `~/.cache/empirenew/barony-pl1-boss-dungeon-state.json` (zmiana przez `BARONY_STATE_FILE`). Plik nie trafia do repozytorium ani GitHub Pages. Nowy plik stanu jest celowo oddzielony od wcześniejszego stanu typu 2.
+Pierwsze uruchomienie zapisuje wyłącznie ostatnie surowe, zweryfikowane obserwacje w prywatnym pliku `~/.cache/empirenew/barony-pl1-boss-dungeon-state.json` (zmiana przez `BARONY_STATE_FILE`). Plik nie trafia do repozytorium ani GitHub Pages. Nowy plik stanu jest celowo oddzielony od wcześniejszego stanu typu 2. Helper `prepare-e4k-data.mjs` patchuje wyłącznie opcjonalny eksport `networkPreClient`, jeśli pakiet odwołuje się do nieobecnego `network/77.json`; nie zmienia `network.json` ani danych gry.
 
 Każda próbka sprawdza dokładnie `kid/x/y`, `areaType=11` i oczekiwanego właściciela NPC. Z poprawnego wiersza zapisuje:
 - `defeater_player_id` — identyfikator gracza z pola `BossDungeonMapobject.defeaterPlayerId`;

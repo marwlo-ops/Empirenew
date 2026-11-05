@@ -5,6 +5,7 @@ import path from 'node:path';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildObservation, buildScanPlan, compareObservations, stateKey } from './probe-core.mjs';
+import { prepareE4kData } from './prepare-e4k-data.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -75,6 +76,7 @@ async function main() {
   const username=process.env.E4K_USERNAME, password=process.env.E4K_PASSWORD;
   if (!username || !password) throw new Error('Set E4K_USERNAME and E4K_PASSWORD locally. Do not place credentials in GitHub Actions or send them in chat.');
 
+  const compatibility=await prepareE4kData();
   const {E4KClient}=require('ggejs');
   const {network}=require('e4k-data');
   const instance=network?.instances?.find(x=>x.zone===a.zone);
@@ -132,6 +134,7 @@ async function main() {
     network_version_no:network.versionNo??null,
     network_deploy_time_utc:Number.isFinite(deployTime)?new Date(deployTime*1000).toISOString():null,
     source:'ggejs 2.2.0 + e4k-data 4.144.21-788.RC.3',
+    dependency_compatibility:compatibility,
     selection:a.all?'all_catalog_targets':`${a.samples}_samples_per_kingdom`,
     summary:{
       requested_targets:plan.summary.target_count,sectors_requested:plan.summary.sector_count,

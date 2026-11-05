@@ -93,6 +93,15 @@ async function main() {
   const state=a.noState?{schema_version:2,last_observations:{}}:await readState(stateFile);
   const client=new E4KClient(instance);
   client.socketManager.reconnectTimeout=-1;
+  const originalAddOrUpdate=client.movements._add_or_update;
+  let movementUpdateBatches=0;
+  if (a.movements) {
+    // Passive observer only: ggejs exposes GAM response parsing but no documented request method.
+    client.movements._add_or_update=function(items) {
+      movementUpdateBatches++;
+      return originalAddOrUpdate.call(this,items);
+    };
+  }
   const observations=[],candidateSignals=[],sectorErrors=[];
   let movementProbe={status:'not_requested',response_received:false,movement_count:0,matching_count:0};
   let movementEvidence=[];
@@ -124,36 +133,23 @@ async function main() {
     }
 
     if (a.movements) {
-      const originalAddOrUpdate=client.movements._add_or_update;
-      let gamResponseReceived=false;
-      client.movements._add_or_update=function(items) {
-        gamResponseReceived=true;
-        return originalAddOrUpdate.call(this,items);
+      // Wait for any server-pushed GAM update; do not send an undocumented command.
+      await sleep(a.movementWaitMs);
+      const sampledAt=new Date().toISOString();
+      const parsedMovements=movementUpdateBatches>0?client.movements.get():[];
+      movementEvidence=parsedMovements
+        .map(m=>extractParsedOutboundBossDungeonMovementEvidence(m,sampledAt))
+        .filter(Boolean);
+      movementProbe={
+        status:movementUpdateBatches>0?'server_push_observed':'no_server_push_observed',
+        update_batches:movementUpdateBatches,
+        sampled_at_utc:sampledAt,
+        movement_count:parsedMovements.length,
+        matching_count:movementEvidence.length,
       };
-      try {
-        const sent=client.socketManager.sendCommand('gam',{M:{}});
-        if (!sent) {
-          movementProbe={status:'send_failed',response_received:false,movement_count:0,matching_count:0};
-        } else {
-          await sleep(a.movementWaitMs);
-          const sampledAt=new Date().toISOString();
-          const parsedMovements=gamResponseReceived?client.movements.get():[];
-          movementEvidence=parsedMovements
-            .map(m=>extractParsedOutboundBossDungeonMovementEvidence(m,sampledAt))
-            .filter(Boolean);
-          movementProbe={
-            status:gamResponseReceived?'response_received':'timeout_no_gam_response',
-            response_received:gamResponseReceived,
-            sampled_at_utc:sampledAt,
-            movement_count:parsedMovements.length,
-            matching_count:movementEvidence.length,
-          };
-        }
-      } finally {
-        client.movements._add_or_update=originalAddOrUpdate;
-      }
     }
   } finally {
+    if (a.movements) client.movements._add_or_update=originalAddOrUpdate;
     try { await client.socketManager.disconnect(); } catch {}
   }
 
@@ -186,7 +182,7 @@ async function main() {
     movement_probe:movementProbe,movement_evidence:movementEvidence,
     state_file:a.noState?null:stateFile,
     attack_history_status:'target_specific_defeater_and_cooldown_fields_available_but_PL1_live_unvalidated',
-    warning:'Map rows contain no exact attacked_at. Optional GAM results show only outbound NPC movements visible to this authenticated account; departure is estimated from the client clock, movement does not prove battle completion, and no global PL1 history is persisted.'
+    warning:'Map rows contain no exact attacked_at. Optional passive GAM observations show only movements pushed to this authenticated account; departure is estimated from the client clock, movement does not prove battle completion, and no global PL1 history is persisted.'
   },null,2)+'\n');
   return 0;
 }

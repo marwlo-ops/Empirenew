@@ -11,6 +11,7 @@ assert.match(html, /Z wpisem lokalnym/);
 assert.match(html, /Wpis ręczny/);
 assert.match(html, /Obserwowane lokalnie/);
 assert.match(html, /Źródło nieoznaczone/);
+assert.match(html, /sourceLabel\+' · minęło odnowienie/);
 assert.doesNotMatch(html, /Obserwowane w PL1/);
 assert.match(html, /id="intelSignals"/);
 assert.match(html, /Nie zawiera współrzędnych celu/);

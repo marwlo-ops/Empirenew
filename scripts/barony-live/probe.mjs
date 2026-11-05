@@ -103,7 +103,7 @@ async function main() {
     };
   }
   const observations=[],candidateSignals=[],sectorErrors=[];
-  let movementProbe={status:'not_requested',response_received:false,movement_count:0,matching_count:0};
+  let movementProbe={status:'not_requested',update_batches:0,movement_count:0,matching_count:0};
   let movementEvidence=[];
   try {
     await client.connect(username,password);

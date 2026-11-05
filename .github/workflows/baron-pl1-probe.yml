@@ -5,6 +5,8 @@ on:
     branches: ["**"]
     paths:
       - "scripts/probe-baron-pl1.js"
+      - "scripts/probe-pl1-live-map.py"
+      - "tests/test_probe_pl1_live_map.py"
       - ".github/workflows/baron-pl1-probe.yml"
   workflow_dispatch:
 
@@ -17,6 +19,13 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test local PL1 map probe offline
+        run: |
+          python -m py_compile scripts/probe-pl1-live-map.py
+          python -m unittest discover -s tests -p "test_probe_pl1_live_map.py" -v
       - uses: actions/setup-node@v4
         with:
           node-version: 22

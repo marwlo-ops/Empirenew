@@ -44,6 +44,8 @@ def records_from(payload):
 def integer(record, keys):
     for key in keys:
         value = record.get(key)
+        if isinstance(value, bool):
+            return None
         if value is not None and value != "":
             try:
                 n = int(value)

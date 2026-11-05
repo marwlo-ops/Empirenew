@@ -89,6 +89,11 @@ class ImportIt1FortressesTests(unittest.TestCase):
     def test_does_not_accept_fractional_coordinate_strings(self):
         self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": "1.5", "y": 2}))
 
+    def test_rejects_boolean_kingdom_and_coordinates(self):
+        self.assertIsNone(IMPORTER.normalize({"kid": True, "x": 10, "y": 20}))
+        self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": False, "y": 20}))
+        self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": 10, "y": True}))
+
 
 if __name__ == "__main__":
     unittest.main()

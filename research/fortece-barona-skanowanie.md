@@ -107,11 +107,12 @@ Każdy odczyt powinien zachować:
 | Ogniste Szczyty | Tak | 571 | Nie |
 | **Łącznie** | **Tak** | **2021** | **Nie** |
 
-Katalog został pobrany z publicznego API GGE Tracker dla serwera **IT1**. Odczyt z 2026-11-05 14:16:52 UTC zwrócił jedną stronę i 2021 unikalnych lokalizacji. Kontrola pliku opublikowanego w repozytorium potwierdziła 0 duplikatów, 0 niepoprawnych współrzędnych i brak pól gracza, ataku, cooldownu lub gotowości. Współrzędne nie są potwierdzone dla E4K PL1.
+Katalog został pobrany z publicznego API GGE Tracker dla serwera **IT1**. Odczyt z 2026-11-05 14:20:35 UTC zwrócił jedną stronę i 2021 unikalnych lokalizacji. Kontrola pliku opublikowanego w repozytorium potwierdziła 0 duplikatów, 0 niepoprawnych współrzędnych i brak pól gracza, ataku, cooldownu lub gotowości. Współrzędne nie są potwierdzone dla E4K PL1.
 
 Testy zgodności API z 2026-11-05:
 - `gge-server: IT1` na `GET /dungeons` — HTTP 200; użyte do importu mapy.
 - `gge-server: E4K_PL1` — HTTP 400; odpowiedź wymienia `E4K_PL1_BETA`, ale nie produkcyjne `E4K_PL1`.
+- `gge-server: E4K_PL1_BETA` — HTTP 200, 976 stron przy próbce `size=1`, z polami ataku; tylko porównanie, nie dane produkcyjnego PL1.
 - `gge-server: EmpirefourkingdomsExGG2_3` oraz `PL1` — HTTP 400 (nieprawidłowa nazwa serwera w GGE Tracker).
 - Nie wolno zastępować produkcyjnego PL1 serwerem BETA.
 

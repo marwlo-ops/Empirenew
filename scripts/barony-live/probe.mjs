@@ -6,7 +6,7 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
-  isNpcBattleReportMessage, stateKey } from './probe-core.mjs';
+  selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
 
 const require = createRequire(import.meta.url);
@@ -164,14 +164,7 @@ async function main() {
       // SNE is requested by ggejs during GBD. Fetch only full details for matching NPC reports.
       await sleep(a.reportWaitMs);
       const mailbox=Array.isArray(client.mailMessages)?client.mailMessages:[];
-      const reportMessages=mailbox
-        .filter(isNpcBattleReportMessage)
-        .sort((left,right)=>{
-          const leftTime=new Date(left?.deliveryTime??0).getTime();
-          const rightTime=new Date(right?.deliveryTime??0).getTime();
-          return (Number.isFinite(leftTime)?leftTime:0)-(Number.isFinite(rightTime)?rightTime:0);
-        })
-        .slice(-a.reportLimit);
+      const reportMessages=selectLatestNpcBattleReportMessages(mailbox,a.reportLimit);
       let battleLogsLoaded=0,fetchErrors=0,rejectedReports=0;
       for (const message of reportMessages) {
         try {

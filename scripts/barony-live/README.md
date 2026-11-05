@@ -41,6 +41,6 @@ Aktualny katalog IT1 ma 2021 punktów i 199 unikalnych sektorów 100×100 (szacu
 
 Pierwsze uruchomienie zapisuje wyłącznie ostatnie surowe, zweryfikowane obserwacje w prywatnym pliku `~/.cache/empirenew/barony-pl1-state.json` (zmiana przez `BARONY_STATE_FILE`). Plik nie trafia do repozytorium ani GitHub Pages.
 
-Kolejne uruchomienia mogą pokazać **kandydackie sygnały** zmiany `attackCount` lub rozpoczęcia cooldownu konkretnej fortecy. Sygnały są oznaczone jako niezweryfikowane live i nie są zapisywane jako potwierdzone ataki. Czas jest przedziałem między próbkami, nie dokładnym `attacked_at`. Skrypt nie ustala nicku atakującego.
+Kolejne uruchomienia mogą pokazać **kandydackie sygnały** zmiany `attackCount` lub rozpoczęcia cooldownu konkretnej fortecy. Sygnały są oznaczone jako niezweryfikowane live i nie są zapisywane jako potwierdzone ataki. Czas jest przedziałem między próbkami, nie dokładnym `attacked_at`. Skrypt nie ustala nicku atakującego. Brak pola cooldown jest stanem „nieznany”, a nie „brak cooldownu”; nie może sam wywołać sygnału rozpoczęcia cooldownu. Znacznik próbki jest ustawiany po otrzymaniu odpowiedzi mapy.
 
 Brak wiersza, błąd zapytania lub niezgodny typ/właściciel nie tworzy zdarzenia. Katalog IT1 służy wyłącznie do wyboru współrzędnych; cooldown i historia IT1 nie są używane.

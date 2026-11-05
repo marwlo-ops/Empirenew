@@ -467,12 +467,14 @@ export function parseGgejsCommandResponseEnvelope(message) {
 
   const command = String(parts[1] ?? '').toLowerCase();
   if (!command) return null;
-  const zone = String(parts[2] ?? '');
+  // ggejs/pygge skip this field when decoding the XT response; its semantics
+  // are not established here, so preserve it as opaque context rather than a zone.
+  const contextField2 = String(parts[2] ?? '');
   const codeText = String(parts[3] ?? '');
   const errorCode = /^-?\d+$/.test(codeText) ? Number(codeText) : null;
   return {
     command,
-    zone,
+    context_field_2: contextField2,
     error_code: Number.isSafeInteger(errorCode) ? errorCode : null,
     ok: Number.isSafeInteger(errorCode) ? errorCode === 0 || errorCode === 10005 : null,
   };
@@ -588,7 +590,8 @@ export function buildGamProbeSummary({
         phase: item?.phase === 'request' ? 'request' : 'pre_request',
         received_at_utc: toIsoDate(item?.received_at_utc),
         command: typeof item?.command === 'string' ? item.command : null,
-        zone: typeof item?.zone === 'string' ? item.zone : null,
+        connection_zone: typeof item?.connection_zone === 'string' ? item.connection_zone : null,
+        context_field_2: typeof item?.context_field_2 === 'string' ? item.context_field_2 : null,
         error_code: Number.isSafeInteger(item?.error_code) ? item.error_code : null,
         ok: item?.ok === true ? true : item?.ok === false ? false : null,
       })),

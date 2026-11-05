@@ -1,6 +1,17 @@
 name: Barony source and UI checks
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - "barony.html"
+      - "data/baron-fortresses.json"
+      - "scripts/probe-baron-pl1.js"
+      - "scripts/validate-baron-fortresses.js"
+      - "scripts/check-barony-html.js"
+      - "research/fortece-barona-skanowanie.md"
+      - ".github/workflows/barony-probe.yml"
   pull_request:
     paths:
       - "barony.html"

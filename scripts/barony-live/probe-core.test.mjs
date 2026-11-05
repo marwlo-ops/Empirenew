@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
+  isNpcBattleReportMessage,
   extractParsedOutboundBossDungeonMovementEvidence,
   pickSamples, validateMapOnlyCatalog,
 } from './probe-core.mjs';
@@ -146,6 +147,19 @@ test('rejects an invalid observation timestamp instead of classifying cooldown s
   assert.throws(() => buildObservation(target, [], 'not-a-date'), /Invalid observation timestamp/);
 });
 
+
+test('recognizes ggejs NPC report subtype from metadata when the parsed property remains default zero', () => {
+  const message = {
+    messageType: 6, areaType: 11, subType: 0,
+    metadata: '11+2+0#1+-230', kingdomId: 1, ownerId: -230,
+  };
+  assert.equal(isNpcBattleReportMessage(message), true);
+  assert.equal(extractNpcBattleReportEvidence(message, {
+    mapobject: { areaType: 11, kingdomId: 1, position: { X: 321, Y: 654 } },
+    attacker: { playerId: 1234567 }, defender: { playerId: -230 },
+  }).attacker_player_id, 1234567);
+  assert.equal(isNpcBattleReportMessage({ ...message, metadata: '11+0+0#1+-230' }), false);
+});
 
 test('extracts exact target and attacker from a matching NPC boss-dungeon battle report', () => {
   const message = {

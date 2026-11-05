@@ -246,7 +246,7 @@ Dopiero taki rekord jest klasyfikowany jako `confirmed_battle_report_target_and_
 
 **Ograniczenia:**
 - `client.mailMessages` / `sne.showMessages` zwraca skrzynkę zalogowanego konta, a nie wszystkie raporty na serwerze. To źródło potwierdza tylko ataki, których raport znajduje się w tej skrzynce.
-- `BasicMessage.deliveryTime` jest wyliczane jako `Date.now() - data[5] * 1000`. To czas dostarczenia/age wiadomości, nie dokładny moment rozpoczęcia ataku.
+- `BasicMessage.deliveryTime` jest wyliczane jako `Date.now() - data[5] * 1000`. To czas wpisu w skrzynce odbiorczej, nie dokładny moment rozpoczęcia ataku. Wynik zawiera też `message_is_forwarded` i `report_delivery_kind`; dla przekazanego raportu czas oznacza dostarczenie/przekazanie do tego konta, a nie pierwotne otrzymanie raportu przez atakującego.
 - `BattleLog` zwraca uczestników i obiekt mapy, ale parser `bls` nie wystawia pola dokładnego czasu startu ataku. Dlatego `attack_time_utc` pozostaje `null`; skrypt raportuje wyłącznie `report_received_at_utc`.
 - Do uruchomienia potrzebne są lokalne zmienne `E4K_USERNAME` i `E4K_PASSWORD`. Nie przekazujemy ich do GitHub Actions, repozytorium ani czatu.
 

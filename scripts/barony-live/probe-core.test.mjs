@@ -147,7 +147,7 @@ test('rejects an invalid observation timestamp instead of classifying cooldown s
 test('extracts exact target and attacker from a matching NPC boss-dungeon battle report', () => {
   const message = {
     messageType: 6, areaType: 11, subType: 2, kingdomId: 1, ownerId: -230,
-    messageId: 501, deliveryTime: new Date('2026-11-05T18:00:00Z'), hasAttackerWon: true,
+    messageId: 501, deliveryTime: new Date('2026-11-05T18:00:00Z'), hasAttackerWon: true, isForwarded: false,
   };
   const battleLog = {
     battleLogId: 9001,
@@ -160,6 +160,8 @@ test('extracts exact target and attacker from a matching NPC boss-dungeon battle
   assert.equal(evidence.attacker_player_id, 1234567);
   assert.equal(evidence.outcome, 'attacker_won');
   assert.equal(evidence.report_received_at_utc, '2026-11-05T18:00:00.000Z');
+  assert.equal(evidence.message_is_forwarded, false);
+  assert.equal(evidence.report_delivery_kind, 'original_mailbox_entry');
   assert.equal(evidence.attack_time_utc, null);
   assert.equal(evidence.classification, 'confirmed_battle_report_target_and_attacker');
 });
@@ -195,4 +197,20 @@ test('does not create mailbox report evidence without a positive attacker and ex
   assert.equal(extractNpcBattleReportEvidence(message, {
     ...base, attacker: { playerId: 98765 }, mapobject: { ...base.mapobject, position: { X: null, Y: 200 } },
   }), null);
+});
+
+
+test('marks forwarded NPC battle reports so delivery time is not mistaken for original report time', () => {
+  const message = {
+    messageType: 6, areaType: 11, subType: 2, kingdomId: 2, ownerId: -231,
+    deliveryTime: new Date('2026-11-05T18:05:00Z'), isForwarded: true,
+  };
+  const battleLog = {
+    mapobject: { areaType: 11, kingdomId: 2, position: { X: 400, Y: 500 } },
+    attacker: { playerId: 987654 }, defender: { playerId: -231 },
+  };
+  const evidence = extractNpcBattleReportEvidence(message, battleLog);
+  assert.equal(evidence.message_is_forwarded, true);
+  assert.equal(evidence.report_delivery_kind, 'forwarded_to_this_account');
+  assert.equal(evidence.attack_time_utc, null);
 });

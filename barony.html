@@ -139,8 +139,8 @@ async function checkTarget(x,silent=false){
  const button=document.querySelector('[data-check="'+keyOf(x)+'"]');
  if(button&&!silent){button.disabled=true;button.textContent='Sprawdzam PL1…';}
  try{
-  const step=13,x1=Math.floor(x.x/step)*(step+1),y1=Math.floor(x.y/step)*(step+1);
-  const x2=Math.min(x1+step-1,1286),y2=Math.min(y1+step-1,1286);
+  const tileSize=12,spacing=13,x1=Math.floor(x.x/spacing)*spacing,y1=Math.floor(x.y/spacing)*spacing;
+  const x2=Math.min(x1+tileSize,1286),y2=Math.min(y1+tileSize,1286);
   const params='"KID":'+x.kid+',"AX1":'+x1+',"AY1":'+y1+',"AX2":'+x2+',"AY2":'+y2;
   const url=encodeURI(TARGET_API+'/'+encodeURIComponent(TARGET_SERVER)+'/gaa/'+params);
   const response=await fetch(url,{headers:{Accept:'application/json'},cache:'no-store'});
@@ -152,7 +152,7 @@ async function checkTarget(x,silent=false){
   const row=rows.find(v=>Array.isArray(v)&&String(v[0])==='11'&&Number(v[1])===x.x&&Number(v[2])===x.y);
   const sampledAt=new Date().toISOString();
   if(!row){
-   saveObservation(x,{status:'not_found',sampled_at:sampledAt});
+   saveObservation(x,{status:'not_found',sampled_at:sampledAt});render();
    if(!silent)throw Error('PL1 nie zwróciło fortecy pod tymi współrzędnymi. Współrzędne z IT1 nie muszą pokrywać się z PL1.');
    return;
   }

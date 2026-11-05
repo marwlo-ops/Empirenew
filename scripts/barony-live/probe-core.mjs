@@ -295,7 +295,7 @@ export function extractOutboundBossDungeonMovementEvidence(movement, sampledAt =
 
   return {
     evidence_kind: 'live_outbound_npc_attack_movement',
-    classification: 'confirmed_outbound_attack_movement_to_boss_dungeon',
+    classification: 'observed_outbound_npc_attack_movement_to_boss_dungeon',
     movement_id: movementId,
     movement_type: 11,
     attack_type: Number.isFinite(Number(movement.ATT)) ? Number(movement.ATT) : null,
@@ -320,5 +320,76 @@ export function extractOutboundBossDungeonMovementEvidence(movement, sampledAt =
     attack_time_utc: null,
     time_semantics: 'PT is elapsed travel time; departure is estimated from the local sample timestamp and is not an exact server-issued event time.',
     coverage: 'Only movements returned to the authenticated bridge session; not a global PL1 feed.',
+  };
+}
+
+
+/**
+ * Normalize a ggejs MovementManager object for a live outbound NPC attack
+ * to a BossDungeonMapobject. ggejs derives departure/arrival from PT/TT
+ * against the local parse clock; these remain estimates, not server event time.
+ */
+export function extractParsedOutboundBossDungeonMovementEvidence(movement, sampledAt = new Date().toISOString()) {
+  if (!movement || typeof movement !== 'object') return null;
+
+  const kid = Number(movement.kingdomId);
+  const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[kid];
+  const targetArea = movement.targetArea;
+  const sourceArea = movement.sourceArea;
+  if (
+    Number(movement.movementType) !== 11 ||
+    Number(movement.direction) !== 0 ||
+    !Number.isInteger(expectedOwner) ||
+    Number(targetArea?.areaType) !== 11 ||
+    Number(targetArea?.kingdomId) !== kid ||
+    Number(targetArea?.ownerInfo?.playerId) !== expectedOwner
+  ) return null;
+
+  const x = Number(targetArea?.position?.X);
+  const y = Number(targetArea?.position?.Y);
+  const attackerId = Number(sourceArea?.ownerInfo?.playerId);
+  const movementId = Number(movement.movementId);
+  const departureAt = toIsoDate(movement.departureTime);
+  const arrivalAt = toIsoDate(movement.arrivalTime);
+  const sampledAtIso = toIsoDate(sampledAt);
+  if (!sampledAtIso) throw new Error('Invalid parsed movement sample timestamp.');
+  const sampledAtMs = Date.parse(sampledAtIso);
+
+  if (
+    ![x, y].every((value) => Number.isInteger(value) && value >= 0 && value <= 1286) ||
+    !Number.isSafeInteger(attackerId) || attackerId <= 0 ||
+    !Number.isSafeInteger(movementId) || movementId <= 0 ||
+    !departureAt || !arrivalAt ||
+    Date.parse(departureAt) > sampledAtMs ||
+    Date.parse(arrivalAt) <= sampledAtMs
+  ) return null;
+
+  const sourceX = Number(sourceArea?.position?.X);
+  const sourceY = Number(sourceArea?.position?.Y);
+  return {
+    evidence_kind: 'live_outbound_npc_attack_movement',
+    classification: 'observed_outbound_npc_attack_movement_to_boss_dungeon',
+    movement_id: movementId,
+    movement_type: 11,
+    attack_type: Number.isFinite(Number(movement.attackType)) ? Number(movement.attackType) : null,
+    direction: 0,
+    sampled_at_utc: sampledAtIso,
+    movement_departure_estimate_utc: departureAt,
+    estimated_arrival_at_utc: arrivalAt,
+    target: {
+      kid,
+      kingdom: KINGDOM_NAME_BY_KID[kid],
+      x,
+      y,
+      area_type: 11,
+      owner_id: expectedOwner,
+    },
+    attacker_player_id: attackerId,
+    source: sourceArea && [sourceX, sourceY].every(Number.isFinite)
+      ? { area_type: Number(sourceArea.areaType), x: sourceX, y: sourceY }
+      : null,
+    attack_time_utc: null,
+    time_semantics: 'ggejs computes departureTime and arrivalTime locally from elapsed/remaining travel seconds; departure is an estimate, not a server-issued attack timestamp.',
+    coverage: 'Only movements returned to the authenticated E4K account session; not a global PL1 feed.',
   };
 }

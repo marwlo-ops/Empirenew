@@ -80,7 +80,7 @@ function historySummary(x){
  if(e.status==='not_found')return 'Niezweryfikowane współrzędne';
  const sourceLabel=e.source==='manual-confirmation'?'Wpis ręczny':(e.source?'Źródło: '+e.source:'Źródło nieoznaczone');
  if(e.status==='cooldown')return sourceLabel+' · atak: '+fmt(e.attacked_at)+' · '+(e.player_name||('ID '+(e.player_id??'nieznane')))+' · gotowa '+fmt(e.available_at);
- if(e.status==='ready')return 'Minęło odnowienie · ostatni atak: '+(e.attacked_at?fmt(e.attacked_at):'brak aktywnego odnowienia');
+ if(e.status==='ready')return sourceLabel+' · minęło odnowienie · ostatni atak: '+(e.attacked_at?fmt(e.attacked_at):'brak aktywnego odnowienia');
  return 'PL1: wynik odczytu nieznany';
 }
 

@@ -680,7 +680,7 @@ Dodano testy:
 - odrzucenia batcha bez zweryfikowanego statusu;
 - przyjęcia batcha wyłącznie po zweryfikowanym sukcesie.
 
-Testy wcześniejszej logiki pozostają bez zmiany. Wykonano wszystkie 32 przypadki z scripts/barony-live/probe-core.test.mjs w izolowanym harnessie JavaScript: 32/32 PASS. To nie jest uruchomienie node --test ani GitHub Actions. Dostępny odczyt status checks dla najnowszych commitów zwrócił pustą listę, więc pełny wynik CI pozostaje niepotwierdzony.
+Testy wcześniejszej logiki pozostają bez zmiany. Wykonano wszystkie 32 przypadki z scripts/barony-live/probe-core.test.mjs w izolowanym harnessie JavaScript: 32/32 PASS. To nie jest uruchomienie node --test ani GitHub Actions. Siedem kontroli kontraktu na publicznym źródle upstream ggejs (dispatch XT, kolejność pól, handler GAM) również przeszło. Workflow .github/workflows/baron-pl1-probe.yml rozszerzono tak, aby w CI sprawdzał tę samą kolejność w faktycznie zainstalowanej, przypiętej wersji ggejs. Dostępny odczyt status checks dla najnowszych commitów zwrócił pustą listę, więc pełny wynik CI dla zmian pozostaje niepotwierdzony.
 
 ### Ograniczenia
 

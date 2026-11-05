@@ -130,113 +130,67 @@ try {
   console.log(JSON.stringify({ probe: "beta-dungeon-coordinate-overlap", error: String(error) }));
 }
 
-async function probePlayerDungeonHistory() {
+async function probePlayerRosterOverlap() {
   try {
     const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
     const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
+    const memberNames = new Set((snapshot.alliances || []).flatMap(a => a.members || [])
+      .map(m => String(m.name || "").trim().toLowerCase()).filter(Boolean));
     const known = new Set();
     for (const data of Object.values(map.results || {})) {
       for (const f of data.fortresses || []) known.add(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y));
     }
-    const members = (snapshot.alliances || []).flatMap(a => a.members || [])
-      .filter(m => m.name && m.member_id != null)
-      .slice(0, 3);
-    for (const member of members) {
-      try {
-        const lookup = await fetch(base + "/players/" + encodeURIComponent(member.name), {
-          headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
-          signal: AbortSignal.timeout(20000)
-        });
-        const player = await lookup.json();
-        if (!lookup.ok || !player.player_id) {
-          console.log(JSON.stringify({
-            probe: "player-dungeon-history",
-            lookup_status: lookup.status,
-            player_resolved: false,
-            api_error: player.error ?? null
-          }));
-          continue;
-        }
-        const historyResponse = await fetch(base + "/dungeons/player/" + encodeURIComponent(player.player_id) + "?lastDays=30", {
-          headers: { Accept: "application/json" },
-          signal: AbortSignal.timeout(20000)
-        });
-        const history = await historyResponse.json();
-        const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
-        const sample = rows.slice(0, 10).map(d => ({
-          kid: Number(d.kid),
-          x: Number(d.position_x),
-          y: Number(d.position_y),
+    const apiPlayers = [];
+    let totalPlayers = null;
+    for (let page = 1; page <= 2; page++) {
+      const response = await fetch(base + "/players?page=" + page + "&size=100", {
+        headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
+        signal: AbortSignal.timeout(20000)
+      });
+      const body = await response.json();
+      if (!response.ok) {
+        console.log(JSON.stringify({
+          probe: "player-roster-overlap",
+          http_status: response.status,
+          error: body.error ?? null
+        }));
+        return;
+      }
+      totalPlayers = body.pagination?.total_items_count ?? totalPlayers;
+      apiPlayers.push(...(Array.isArray(body.players) ? body.players : []));
+      if (apiPlayers.length >= Number(totalPlayers || 0)) break;
+    }
+    const matches = apiPlayers.filter(p => memberNames.has(String(p.player_name || "").trim().toLowerCase()));
+    const historySamples = [];
+    for (const player of matches.slice(0, 5)) {
+      const response = await fetch(base + "/dungeons/player/" + encodeURIComponent(player.player_id) + "?lastDays=365", {
+        headers: { Accept: "application/json" },
+        signal: AbortSignal.timeout(20000)
+      });
+      const body = await response.json();
+      const rows = Array.isArray(body.dungeons) ? body.dungeons : [];
+      historySamples.push({
+        history_status: response.status,
+        records: rows.length,
+        target_matches: rows.filter(d => known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))).length,
+        sample: rows.slice(0, 5).map(d => ({
+          kid: Number(d.kid), x: Number(d.position_x), y: Number(d.position_y),
           attacked_at: d.attacked_at,
           matches_it1_fortress: known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))
-        }));
-        console.log(JSON.stringify({
-          probe: "player-dungeon-history",
-          lookup_status: lookup.status,
-          player_resolved: true,
-          history_status: historyResponse.status,
-          history_error: history.error ?? null,
-          records_last_30_days: rows.length,
-          it1_fortress_matches: sample.filter(d => d.matches_it1_fortress).length,
-          sample
-        }));
-      } catch (error) {
-        console.log(JSON.stringify({ probe: "player-dungeon-history", error: String(error) }));
-      }
+        }))
+      });
     }
-  } catch (error) {
-    console.log(JSON.stringify({ probe: "player-dungeon-history", setup_error: String(error) }));
-  }
-}
-
-async function probeRankedPlayerDungeonHistory() {
-  try {
-    const playersResponse = await fetch(base + "/players?page=1&size=1", {
-      headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
-      signal: AbortSignal.timeout(20000)
-    });
-    const playersBody = await playersResponse.json();
-    const first = Array.isArray(playersBody.players) ? playersBody.players[0] : null;
-    if (!playersResponse.ok || !first?.player_id) {
-      console.log(JSON.stringify({
-        probe: "ranked-player-dungeon-history",
-        players_status: playersResponse.status,
-        total_players: playersBody.pagination?.total_items_count ?? null,
-        player_available: false,
-        error: playersBody.error ?? null
-      }));
-      return;
-    }
-    const historyResponse = await fetch(base + "/dungeons/player/" + encodeURIComponent(first.player_id) + "?lastDays=365", {
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(20000)
-    });
-    const history = await historyResponse.json();
-    const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
-    const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
-    const known = new Set();
-    for (const data of Object.values(map.results || {})) {
-      for (const f of data.fortresses || []) known.add(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y));
-    }
-    const sample = rows.slice(0, 20).map(d => ({
-      kid: Number(d.kid),
-      x: Number(d.position_x),
-      y: Number(d.position_y),
-      attacked_at: d.attacked_at,
-      matches_it1_fortress: known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))
-    }));
     console.log(JSON.stringify({
-      probe: "ranked-player-dungeon-history",
-      players_status: playersResponse.status,
-      total_players: playersBody.pagination?.total_items_count ?? null,
-      history_status: historyResponse.status,
-      history_error: history.error ?? null,
-      records_last_365_days: rows.length,
-      it1_fortress_matches: sample.filter(d => d.matches_it1_fortress).length,
-      sample
+      probe: "player-roster-overlap",
+      api_players_fetched: apiPlayers.length,
+      api_total_players: totalPlayers,
+      snapshot_member_count: memberNames.size,
+      name_overlap_count: matches.length,
+      histories_checked: historySamples.length,
+      histories: historySamples
     }));
   } catch (error) {
-    console.log(JSON.stringify({ probe: "ranked-player-dungeon-history", error: String(error) }));
+    console.log(JSON.stringify({ probe: "player-roster-overlap", error: String(error) }));
   }
 }
 
@@ -316,6 +270,5 @@ async function probeBridge() {
   }
 }
 
-await probePlayerDungeonHistory();
-await probeRankedPlayerDungeonHistory();
+await probePlayerRosterOverlap();
 await probeBridge();

@@ -214,3 +214,59 @@ Aktualny stan: mapa IT1 jest świeżo pobrana, zweryfikowana i opublikowana; aut
 Dodatkowy błąd testów i poprawka:
 - po zaostrzeniu walidacji KID/krainy/źródła/typu pierwsze uruchomienie `42052101151` zatrzymało się na teście fixture, ponieważ przykładowe rekordy testowe nie zawierały wymaganych pól `kingdom`, `source_server` i `type`;
 - uzupełniono fixture oraz test duplikatów; kolejne uruchomienia `42052107856`, `42052135745` i `42052367160` zakończyły się sukcesem, w ostatnim przebiegu 12/12 testów offline PASS.
+
+
+## 15. Korekta transportu i lokalny klient E4K PL1 — 2026-11-05
+
+### Nowe, istotne rozróżnienie: klient GGE ≠ klient E4K
+
+Poprzedni lokalny skrypt scripts/probe-pl1-live-map.py korzystał z EmpireCore. Po sprawdzeniu kodu E4K-specyficznej biblioteki ggejs uznaję tę ścieżkę za niepotwierdzoną dla produkcyjnego PL1 i skrypt został zabezpieczony tak, aby odmawiał pracy na strefach E4K przed odczytaniem poświadczeń.
+
+Źródła i ustalenia:
+
+- Repozytorium danych E4K E4K-data, plik network/network.json, wskazuje wpis PL1: value=3, host e4k-live-pl1-game.goodgamestudios.com, strefa EmpirefourkingdomsExGG_3, zoneId=259.
+- Pakiet npm e4k-data ma wersję 4.144.21-788.RC.3; jego wpis sieciowy podaje deployTime=1767612028, czyli 2026-01-05 11:20:28 UTC. To metadane pakietu, nie świeży test połączenia; skrypt sprawdza dokładny host i strefę i odmawia przełączenia na inny serwer.
+- ggejs 2.2.0 udostępnia osobny E4KClient. W SocketManager.js transport jest wybierany jako TCP dla stref zaczynających się od EmpirefourkingdomsExGG, a WSS dla pozostałych. To wyjaśnia, dlaczego nie wolno traktować adresu WSS generowanego przez EmpireCore jako potwierdzonej konfiguracji E4K.
+- Kod ggejs używa game ID 16 w integracji kont E4K. Network ID jest odczytywany z odpowiedzi core_gpi; nowy probe nie zgaduje ani nie wpisuje network ID na sztywno.
+- WorldMapManager.getSector(kid, x, y) pobiera sektor 100×100 przez komendę gaa. gaa.js wysyła KID, AX1, AY1, AX2, AY2, a odpowiedź mapy jest parsowana z AI i OI.
+- MapObjectParser.js kieruje typ mapy 2 do DungeonMapobject. W DungeonMapobject.js pola wiersza są mapowane jako data[4] → attackCount, data[5] → attackCooldownEnd (wyliczane jako lokalne Date.now() + data[5] * 1000), data[6] → kingdomId. WorldMapOwnerInfoData mapuje właścicieli dungeonów krain KID 1/2/3 na ID -220/-221/-222.
+
+Wniosek techniczny: istnieje E4K-specyficzna, read-only ścieżka pobrania stanu konkretnego wiersza mapy. Wiersz może dostarczyć X/Y, KID, typ, NPC owner ID, licznik attackCount i pozostały cooldown. Nie zawiera automatycznie nicku atakującego ani dokładnego czasu rozpoczęcia ataku. Sam kod biblioteki nie potwierdza jeszcze semantyki licznika i cooldownu na produkcyjnym PL1.
+
+### Nowy lokalny probe
+
+Dodano wyłącznie powiązane pliki modułu Barony:
+
+- scripts/barony-live/probe.mjs — lokalny odczyt produkcyjnego PL1 przez E4KClient, tylko po ustawieniu lokalnych zmiennych E4K_USERNAME i E4K_PASSWORD.
+- scripts/barony-live/probe-core.mjs i probe-core.test.mjs — walidacja katalogu IT1, grupowanie celów w sektory 100×100, dopasowanie dokładnych X/Y, KID i oczekiwanego NPC owner ID, porównanie kolejnych próbek.
+- scripts/barony-live/package.json i README.md — przypięte wersje ggejs@2.2.0 oraz e4k-data@4.144.21-788.RC.3, instrukcja uruchomienia lokalnego.
+- scripts/probe-pl1-live-map.py — teraz odmawia użycia EmpireCore dla stref E4K przed pobraniem loginu/hasła; domyślna nazwa strefy została poprawiona na EmpirefourkingdomsExGG_3.
+- tests/test_probe_pl1_live_map.py — dodano test blokady niepotwierdzonego transportu.
+
+Zasady działania nowego probe:
+
+- Domyślnie planuje 3 punkty na krainę: 9 celów i 9 sektorów w aktualnym katalogu.
+- --plan --all planuje 2021 celów w 199 sektorach (szacunkowo 1 990 000 pól mapy). Jest to tylko plan; pełnego skanu nie uruchamiano.
+- Live odczyt jest ograniczony do produkcyjnego hosta i strefy PL1. Skrypt odmawia innego hosta/strefy.
+- Każdy sektor jest odpytany osobno, z przerwą co najmniej 1000 ms. Nie zakładamy, że ten limit jest już zweryfikowany dla PL1; dlatego pełny skan jest wyłączony domyślnie.
+- Wiersz uznawany za pasujący musi mieć dokładne X/Y, areaType=2, zgodny KID i oczekiwany owner ID (-220/-221/-222). Sam obiekt w tej samej lokalizacji nie wystarczy.
+- Lokalny plik stanu przechowuje tylko ostatnie surowe, zweryfikowane obserwacje. Zmiana attackCount lub przejście cooldownu z nieaktywnego do aktywnego jest na razie wypisywane wyłącznie jako kandydacki sygnał z przedziałem między próbkami; sygnały nie są zapisywane jako potwierdzone ataki.
+- attack_time_utc pozostaje null; nie wyliczamy dokładnej godziny z pozostałego cooldownu i nie ustalamy atakującego.
+- Login/hasło są pobierane wyłącznie z lokalnych zmiennych środowiskowych. Nie są używane w GitHub Actions ani zapisywane w repozytorium.
+
+### Testy i ograniczenia tej iteracji
+
+Testy lokalne wykonane na kodzie probe:
+
+- node --check — PASS.
+- node --test probe-core.test.mjs — 10/10 PASS.
+- Test trybu plan-only na syntetycznym katalogu — PASS: 9 celów, 9 sektorów, 90 000 pól; tryb plan nie wykonuje połączenia sieciowego.
+
+Rzeczywisty katalog z repozytorium (snapshot 2026-11-05 15:11:37 UTC) został niezależnie przeliczony przez API GitHub:
+- 2021 punktów: Piaski 671, Lód 779, Ogień 571;
+- 199 unikalnych sektorów 100×100;
+- plan próbki 3/kraina: 9 celów, 9 sektorów.
+
+Nie wykonano live logowania ani odczytu PL1 w tej iteracji, ponieważ środowisko automatyzacji nie ma poświadczeń operatora. Nie wysłano żadnych danych logowania. W tej chwili nie ma potwierdzonego ataku PL1 i nie utworzono wpisów historii ataków.
+
+Następny krok: operator uruchamia lokalnie najpierw domyślną próbkę 9 punktów na produkcyjnym PL1. Po uzyskaniu wierszy mapy trzeba wykonać drugą próbkę po około 10 minutach i sprawdzić, czy attackCount oraz cooldown zmieniają się zgodnie z rzeczywistym atakiem. Dopiero po takim teście można rozważyć zmianę kandydackiego sygnału na potwierdzone zdarzenie z przedziałem czasu.

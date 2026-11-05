@@ -309,6 +309,64 @@ async function probeProductionPlayerHistoryFromSpySnapshot() {
   }
 }
 
+async function probeProductionPlayerHistoryWithZoneIdSuffix() {
+  try {
+    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
+    const network = JSON.parse(await readFile(new URL("./barony-live/node_modules/e4k-data/network/network.json", import.meta.url), "utf8"));
+    const pl1 = network.instances.find(item => item.zone === "EmpirefourkingdomsExGG_3");
+    if (!pl1 || !Number.isInteger(pl1.zoneId)) {
+      console.log(JSON.stringify({
+        probe: "production-pl1-player-history-with-zone-id-suffix",
+        skipped: true,
+        reason: "Pinned e4k-data has no numeric zoneId for production PL1"
+      }));
+      return;
+    }
+    const members = (snapshot.alliances || []).flatMap(a => a.members || [])
+      .filter(m => Number.isInteger(m.member_id) && m.member_id > 999)
+      .slice(0, 3);
+    const results = [];
+    for (const member of members) {
+      const candidateId = String(member.member_id) + String(pl1.zoneId).padStart(3, "0");
+      try {
+        const response = await fetch(
+          base + "/dungeons/player/" + encodeURIComponent(candidateId) + "?lastDays=365",
+          { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
+        );
+        const body = await response.json();
+        const rows = Array.isArray(body.dungeons) ? body.dungeons : [];
+        results.push({
+          http_status: response.status,
+          error: body.error ?? null,
+          records: rows.length,
+          target_matches: rows.filter(d =>
+            Number.isInteger(Number(d.kid)) &&
+            Number.isInteger(Number(d.position_x)) &&
+            Number.isInteger(Number(d.position_y))
+          ).length
+        });
+      } catch (error) {
+        results.push({ error: String(error) });
+      }
+    }
+    console.log(JSON.stringify({
+      probe: "production-pl1-player-history-with-zone-id-suffix",
+      api_route: "/dungeons/player/{playerId}",
+      suffix_source: "pinned e4k-data production PL1 zoneId",
+      candidate_suffix: pl1.zoneId,
+      snapshot_members_sampled: members.length,
+      histories_checked: results.length,
+      http_200: results.filter(x => x.http_status === 200).length,
+      nonempty_histories: results.filter(x => Number(x.records) > 0).length,
+      total_history_records: results.reduce((n, x) => n + Number(x.records || 0), 0),
+      results,
+      note: "Appending zoneId to a raw map member ID is only a routing hypothesis. Count records only as production PL1 if the suffix resolves to the PL1 database and the returned player identity is independently matched; this probe does not persist events."
+    }));
+  } catch (error) {
+    console.log(JSON.stringify({ probe: "production-pl1-player-history-with-zone-id-suffix", error: String(error) }));
+  }
+}
+
 async function probeBridge() {
   try {
     const response = await fetch(bridgeBase + "/status", {
@@ -387,4 +445,5 @@ async function probeBridge() {
 
 await probeBetaPlayerHistoryFromDungeonRows();
 await probeProductionPlayerHistoryFromSpySnapshot();
+await probeProductionPlayerHistoryWithZoneIdSuffix();
 await probeBridge();

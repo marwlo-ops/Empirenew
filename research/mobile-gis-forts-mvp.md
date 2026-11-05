@@ -10,8 +10,9 @@ Lekki, darmowy odpowiednik prywatnej mapy GIS do zaznaczania i analizowania fort
 Aktualnie dostępne API nie dostarcza wiarygodnych danych o fortach/baronach PL1. Nie wolno udawać, że dane pochodzą z API, ani wpisywać współrzędnych na podstawie niepotwierdzonych identyfikatorów typów.
 MVP musi działać również bez API:
 - użytkownik może dodać punkt ręcznie na mapie;
-- użytkownik może zaimportować własny obraz/screenshot mapy z telefonu;
-- użytkownik kalibruje obraz na podstawie znanych współrzędnych, a następnie zaznacza obiekty dotknięciem;
+- nie zakładamy importowania setek/tysięcy zrzutów ekranu ani ręcznego składania mapy z obrazów;
+- główny kierunek badawczy to odczyt danych mapy z ruchu sieciowego gry przechwyconego na tym samym telefonie (np. eksport PCAP/PCAPNG z narzędzia diagnostycznego), o ile komunikaty są dostępne do odczytu;
+- parser ma działać lokalnie na telefonie lub w aplikacji webowej Empirenew i wyciągać wyłącznie rekordy mapy, bez danych logowania, haseł, tokenów sesji i innych sekretów;
 - import/eksport JSON/CSV umożliwia przenoszenie kopii danych;
 - źródło i pewność każdego punktu są zapisywane (ręczny, import, potwierdzony odczyt).
 Jeśli później pojawi się legalne i wiarygodne źródło danych, można dodać adapter bez przebudowy interfejsu.
@@ -38,13 +39,16 @@ Jeśli później pojawi się legalne i wiarygodne źródło danych, można doda�
 - notatka i data ostatniej aktualizacji.
 
 ## Funkcje MVP
-1. Dodanie punktu ręcznie przez dotknięcie mapy lub formularz współrzędnych.
-2. Własny obraz mapy z telefonu jako podkład; kalibracja współrzędnych przed użyciem.
-3. Filtry po krainie, typie, statusie i gotowości do ponownego ataku.
-4. Lista punktów z wyszukiwaniem i sortowaniem.
-5. Oznaczenie pokonania z zapisem czasu; przypomnienie wizualne, gdy minie 24 h.
-6. Eksport kopii JSON/CSV i import kopii na tym samym lub innym telefonie.
-7. Brak nadpisywania danych użytkownika przez pustą lub niekompletną synchronizację.
+1. Import przechwyconego pliku PCAP/PCAPNG z telefonu albo danych JSON wyeksportowanych przez narzędzie diagnostyczne.
+2. Parser filtruje wyłącznie komunikaty gry zawierające dane mapy; nie zapisuje danych uwierzytelniających ani tokenów.
+3. Rozpoznanie formatu rekordów mapy i identyfikatorów typów obiektów na podstawie potwierdzonych obserwacji, nie zgadywania.
+4. Deduplicacja i łączenie kolejnych porcji mapy z różnych komunikatów/przejść po krainie.
+5. Dodanie punktu ręcznie, jeśli parser nie rozpozna obiektu.
+6. Filtry po krainie, typie, statusie i gotowości do ponownego ataku.
+7. Lista punktów z wyszukiwaniem i sortowaniem.
+8. Oznaczenie pokonania z zapisem czasu; przypomnienie wizualne, gdy minie 24 h.
+9. Eksport kopii JSON/CSV i import kopii na tym samym lub innym telefonie.
+10. Brak nadpisywania danych użytkownika przez pustą lub niekompletną synchronizację.
 
 ## Prywatność i trwałość
 Pierwsza wersja przechowuje dane lokalnie w przeglądarce telefonu (IndexedDB/localStorage zależnie od implementacji), z eksportem kopii zapasowej. Synchronizacja w chmurze jest osobnym, późniejszym etapem i nie jest wymagana do działania MVP.
@@ -55,3 +59,7 @@ Pierwsza wersja przechowuje dane lokalnie w przeglądarce telefonu (IndexedDB/lo
 - Dodanie, edycja, oznaczenie pokonania, filtrowanie i eksport działają na ekranie dotykowym.
 - Aplikacja jasno oznacza dane ręczne/importowane i nie przedstawia ich jako danych API.
 - Istniejące moduły Empirenew pozostają nietknięte.
+
+
+## Bezpieczeństwo przechwyconych danych
+Pliki PCAP mogą zawierać dane wrażliwe. Parser powinien przetwarzać plik lokalnie, odrzucać pola uwierzytelniające i nie wysyłać surowego przechwycenia do repozytorium, logów ani publicznego serwera. Przed analizą należy sprawdzić, czy ruch zawiera czytelne komunikaty mapy. Jeśli dane są szyfrowane lub niekompletne, nie obiecujemy ekstrakcji całej mapy i nie próbujemy obchodzić zabezpieczeń.

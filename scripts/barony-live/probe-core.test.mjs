@@ -116,3 +116,23 @@ test('does not create signals from missing or unverified previous samples', () =
   assert.deepEqual(compareObservations(null, current), []);
   assert.deepEqual(compareObservations({ status: 'not_confirmed' }, current), []);
 });
+
+test('keeps a missing cooldown as unknown and does not create a false cooldown-start signal', () => {
+  const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
+  const previous = buildObservation(target, [{
+    areaType: 2, kingdomId: 1, attackCount: 12, position: { X: 10, Y: 20 },
+    ownerInfo: { playerId: -220 },
+  }], '2026-11-05T15:00:00Z');
+  const current = buildObservation(target, [{
+    areaType: 2, kingdomId: 1, attackCount: 12, position: { X: 10, Y: 20 },
+    ownerInfo: { playerId: -220 }, attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
+  }], '2026-11-05T15:10:00Z');
+  assert.equal(previous.cooldown_active, null);
+  assert.equal(current.cooldown_active, true);
+  assert.deepEqual(compareObservations(previous, current), []);
+});
+
+test('rejects an invalid observation timestamp instead of classifying cooldown state', () => {
+  const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
+  assert.throws(() => buildObservation(target, [], 'not-a-date'), /Invalid observation timestamp/);
+});

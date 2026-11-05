@@ -52,7 +52,7 @@ node scripts/barony-live/probe.mjs --reports
 
 Po logowaniu `ggejs` pobiera skrzynkę przez `SNE`. Probe wybiera wyłącznie raporty typu battle log, area type 11 i subtype NPC attack 2, a następnie pobiera ich szczegóły przez read-only `BLS/BLM/BLD`. Ekstraktor wymaga zgodności KID/właściciela, dokładnych współrzędnych mapobject oraz dodatniego ID atakującego i zgodnego obrońcy NPC. Maksymalnie 10 raportów jest sprawdzanych domyślnie; limit można zmienić przez `--report-limit 1..25`.
 
-Wynik zawiera lokalizację, ID atakującego, wynik bitwy i `report_received_at_utc`. To **czas dostarczenia/odczytu wiadomości wyliczony z wieku skrzynki**, nie dokładny czas rozpoczęcia ataku; `attack_time_utc` pozostaje `null`. Raport dotyczy wyłącznie wiadomości dostępnych temu kontu, nie wszystkich graczy PL1. Probe niczego nie usuwa, nie oznacza jako przeczytane, nie przekazuje dalej i nie zapisuje raportów do pliku stanu ani repozytorium.
+Wynik zawiera lokalizację, ID atakującego, nazwę gracza jeśli `ownerInfo` ją udostępnia (w przeciwnym razie pozostaje sam ID), wynik bitwy i `report_received_at_utc`. Probe wybiera najnowsze raporty według czasu dostarczenia wiadomości. To **czas dostarczenia/odczytu wiadomości wyliczony z wieku skrzynki**, nie dokładny czas rozpoczęcia ataku; `attack_time_utc` pozostaje `null`. Raport dotyczy wyłącznie wiadomości dostępnych temu kontu, nie wszystkich graczy PL1. Probe niczego nie usuwa, nie oznacza jako przeczytane, nie przekazuje dalej i nie zapisuje raportów do pliku stanu ani repozytorium.
 
 Jeżeli odpowiedź skrzynki nie nadejdzie w ciągu 3 sekund, status będzie `mailbox_update_not_observed`; okno można zmienić przez `--report-wait-ms 1000..10000`.
 

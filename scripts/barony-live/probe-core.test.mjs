@@ -169,12 +169,13 @@ test('extracts exact target and attacker from a matching NPC boss-dungeon battle
   const battleLog = {
     battleLogId: 9001,
     mapobject: { areaType: 11, kingdomId: 1, position: { X: 321, Y: 654 } },
-    attacker: { playerId: 1234567 },
+    attacker: { playerId: 1234567, ownerInfo: { playerName: 'Test Attacker' } },
     defender: { playerId: -230 },
   };
   const evidence = extractNpcBattleReportEvidence(message, battleLog);
   assert.deepEqual(evidence.target, { kid: 1, kingdom: 'sands', x: 321, y: 654, area_type: 11, owner_id: -230 });
   assert.equal(evidence.attacker_player_id, 1234567);
+  assert.equal(evidence.attacker_player_name, 'Test Attacker');
   assert.equal(evidence.outcome, 'attacker_won');
   assert.equal(evidence.report_received_at_utc, '2026-11-05T18:00:00.000Z');
   assert.equal(evidence.message_is_forwarded, false);
@@ -286,7 +287,7 @@ test('normalizes a parsed ggejs movement with exact boss target and positive sou
     departureTime: new Date('2026-11-05T19:57:55Z'),
     arrivalTime: new Date('2026-11-05T20:07:55Z'),
     sourceArea: {
-      areaType: 1, position: { X: 200, Y: 300 }, ownerInfo: { playerId: 1234567 },
+      areaType: 1, position: { X: 200, Y: 300 }, ownerInfo: { playerId: 1234567, playerName: 'Movement Attacker' },
     },
     targetArea: {
       areaType: 11, kingdomId: 1, position: { X: 321, Y: 654 }, ownerInfo: { playerId: -230 },
@@ -295,6 +296,7 @@ test('normalizes a parsed ggejs movement with exact boss target and positive sou
   const evidence = extractParsedOutboundBossDungeonMovementEvidence(movement, '2026-11-05T20:00:00Z');
   assert.equal(evidence.classification, 'observed_outbound_npc_attack_movement_to_boss_dungeon');
   assert.equal(evidence.attacker_player_id, 1234567);
+  assert.equal(evidence.attacker_player_name, 'Movement Attacker');
   assert.equal(evidence.movement_id, 77124);
   assert.deepEqual(evidence.target, {
     kid: 1, kingdom: 'sands', x: 321, y: 654, area_type: 11, owner_id: -230,

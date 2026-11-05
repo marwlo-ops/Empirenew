@@ -3,6 +3,7 @@ export const EXPECTED_BOSS_DUNGEON_OWNER_BY_KID = Object.freeze({ 1: -230, 2: -2
 export const MAP_SECTOR_SIZE = 100;
 
 const KINGDOMS = Object.freeze({ sands: 1, ice: 2, fire: 3 });
+const KINGDOM_NAME_BY_KID = Object.freeze({ 1: 'sands', 2: 'ice', 3: 'fire' });
 const FORBIDDEN_CATALOG_KEY = /(attack|cooldown|player|defeater|ready|attacked)/i;
 
 export function validateMapOnlyCatalog(payload) {
@@ -175,4 +176,70 @@ export function compareObservations(previous, current) {
 
 export function stateKey(target) {
   return `${target.kid}:${target.x}:${target.y}`;
+}
+
+
+/**
+ * Extract direct, account-mailbox evidence for an NPC boss-dungeon battle.
+ * The report confirms target + attacker, but its delivery timestamp is not
+ * the attack start time and mailbox coverage is limited to the logged-in account.
+ */
+export function extractNpcBattleReportEvidence(message, battleLog) {
+  if (
+    Number(message?.messageType) !== 6 ||
+    Number(message?.areaType) !== 11 ||
+    Number(message?.subType) !== 2
+  ) return null;
+
+  const kid = Number(message.kingdomId);
+  const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[kid];
+  if (!Number.isInteger(expectedOwner) || Number(message.ownerId) !== expectedOwner) return null;
+
+  const mapObject = battleLog?.mapobject;
+  if (Number(mapObject?.areaType) !== 11 || Number(mapObject?.kingdomId) !== kid) return null;
+
+  const rawX = mapObject?.position?.X;
+  const rawY = mapObject?.position?.Y;
+  if (rawX === null || rawX === undefined || rawY === null || rawY === undefined) return null;
+  const x = Number(rawX);
+  const y = Number(rawY);
+  if (![x, y].every((value) => Number.isInteger(value) && value >= 0 && value <= 1286)) return null;
+
+  const attackerId = Number(battleLog?.attacker?.playerId);
+  const defenderId = Number(battleLog?.defender?.playerId);
+  if (!Number.isSafeInteger(attackerId) || attackerId <= 0 || defenderId !== expectedOwner) return null;
+
+  const messageId = Number(message.messageId);
+  const battleLogId = Number(battleLog.battleLogId);
+  return {
+    evidence_kind: 'mailbox_npc_battle_report',
+    classification: 'confirmed_battle_report_target_and_attacker',
+    message_id: Number.isSafeInteger(messageId) ? messageId : null,
+    battle_log_id: Number.isSafeInteger(battleLogId) ? battleLogId : null,
+    target: {
+      kid,
+      kingdom: KINGDOM_NAME_BY_KID[kid],
+      x,
+      y,
+      area_type: 11,
+      owner_id: expectedOwner,
+    },
+    attacker_player_id: attackerId,
+    outcome: typeof message.hasAttackerWon === 'boolean'
+      ? (message.hasAttackerWon ? 'attacker_won' : 'attacker_lost')
+      : null,
+    report_received_at_utc: toIsoDate(message.deliveryTime),
+    attack_time_utc: null,
+    time_semantics: 'BasicMessage.deliveryTime is derived from mailbox message age; it is not the attack start time.',
+    source_fields: [
+      'message.messageType=6',
+      'message.areaType=11',
+      'message.subType=2',
+      'message.kingdomId',
+      'message.ownerId',
+      'battleLog.mapobject.position',
+      'battleLog.attacker.playerId',
+      'battleLog.defender.playerId',
+    ],
+  };
 }

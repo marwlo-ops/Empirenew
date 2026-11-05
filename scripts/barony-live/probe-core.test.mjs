@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  buildObservation, buildScanPlan, compareObservations, pickSamples, validateMapOnlyCatalog,
+  buildObservation, buildScanPlan, compareObservations, extractNpcBattleReportEvidence, pickSamples, validateMapOnlyCatalog,
 } from './probe-core.mjs';
 
 function catalog() {
@@ -141,4 +141,58 @@ test('keeps a missing cooldown as unknown and does not create a false cooldown-s
 test('rejects an invalid observation timestamp instead of classifying cooldown state', () => {
   const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
   assert.throws(() => buildObservation(target, [], 'not-a-date'), /Invalid observation timestamp/);
+});
+
+
+test('extracts exact target and attacker from a matching NPC boss-dungeon battle report', () => {
+  const message = {
+    messageType: 6, areaType: 11, subType: 2, kingdomId: 1, ownerId: -230,
+    messageId: 501, deliveryTime: new Date('2026-11-05T18:00:00Z'), hasAttackerWon: true,
+  };
+  const battleLog = {
+    battleLogId: 9001,
+    mapobject: { areaType: 11, kingdomId: 1, position: { X: 321, Y: 654 } },
+    attacker: { playerId: 1234567 },
+    defender: { playerId: -230 },
+  };
+  const evidence = extractNpcBattleReportEvidence(message, battleLog);
+  assert.deepEqual(evidence.target, { kid: 1, kingdom: 'sands', x: 321, y: 654, area_type: 11, owner_id: -230 });
+  assert.equal(evidence.attacker_player_id, 1234567);
+  assert.equal(evidence.outcome, 'attacker_won');
+  assert.equal(evidence.report_received_at_utc, '2026-11-05T18:00:00.000Z');
+  assert.equal(evidence.attack_time_utc, null);
+  assert.equal(evidence.classification, 'confirmed_battle_report_target_and_attacker');
+});
+
+test('rejects non-NPC and non-boss-dungeon battle report metadata', () => {
+  const message = { messageType: 6, areaType: 2, subType: 2, kingdomId: 1, ownerId: -230 };
+  const battleLog = {
+    mapobject: { areaType: 2, kingdomId: 1, position: { X: 321, Y: 654 } },
+    attacker: { playerId: 1234567 }, defender: { playerId: -230 },
+  };
+  assert.equal(extractNpcBattleReportEvidence(message, battleLog), null);
+  assert.equal(extractNpcBattleReportEvidence({ ...message, areaType: 11, subType: 0 }, battleLog), null);
+});
+
+test('rejects a report when message owner, battle defender or map kingdom disagree', () => {
+  const message = { messageType: 6, areaType: 11, subType: 2, kingdomId: 2, ownerId: -231 };
+  const base = {
+    mapobject: { areaType: 11, kingdomId: 2, position: { X: 321, Y: 654 } },
+    attacker: { playerId: 1234567 }, defender: { playerId: -231 },
+  };
+  assert.equal(extractNpcBattleReportEvidence(message, { ...base, defender: { playerId: -230 } }), null);
+  assert.equal(extractNpcBattleReportEvidence(message, { ...base, mapobject: { ...base.mapobject, kingdomId: 1 } }), null);
+  assert.equal(extractNpcBattleReportEvidence({ ...message, ownerId: -230 }, base), null);
+});
+
+test('does not create mailbox report evidence without a positive attacker and exact coordinates', () => {
+  const message = { messageType: 6, areaType: 11, subType: 2, kingdomId: 3, ownerId: -232 };
+  const base = {
+    mapobject: { areaType: 11, kingdomId: 3, position: { X: 100, Y: 200 } },
+    attacker: { playerId: 0 }, defender: { playerId: -232 },
+  };
+  assert.equal(extractNpcBattleReportEvidence(message, base), null);
+  assert.equal(extractNpcBattleReportEvidence(message, {
+    ...base, attacker: { playerId: 98765 }, mapobject: { ...base.mapobject, position: { X: null, Y: 200 } },
+  }), null);
 });

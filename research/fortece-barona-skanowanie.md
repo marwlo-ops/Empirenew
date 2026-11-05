@@ -225,3 +225,39 @@ Sprawdzono też GET /server/movements. Implementacja czyta tabelę player_castle
 - GGE Tracker ApiServer — GET /server/movements oparty o player_castle_movements_history: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-server.ts
 
 Wniosek: publiczny GGE Tracker udostępnia historię fortec tylko per playerId przez /dungeons/player/{playerId}; nie znaleziono globalnego feedu ataków na NPC. Dlatego nowy test routingu ID z kodem katalogowym jest obecnie najbardziej konkretnym sposobem sprawdzenia, czy da się uzyskać historię graczy PL1. Nie zastępuje on jeszcze globalnego monitoringu wszystkich atakujących.
+
+
+### 4.4. Raporty walki NPC z własnej skrzynki (2026-11-05)
+
+Dodano lokalny, tylko do odczytu skrypt `scripts/barony-live/reports.mjs`. Po zalogowaniu na produkcyjne PL1 pobiera wiadomości przez `sne.showMessages(client)`, wybiera wyłącznie raporty typu:
+- `messageType=6` — battle log;
+- `areaType=11` — BossDungeonMapobject;
+- `subType=2` — atak NPC;
+- `kingdomId=1..3` i `ownerId=-230/-231/-232` — zgodny właściciel NPC dla krainy.
+
+Dla każdego raportu pobiera szczegóły przez `getBattleLog()` (komendy `bls`, `blm`, `bld`) i wymaga zgodności:
+- `battleLog.mapobject.areaType=11`;
+- `battleLog.mapobject.kingdomId` z metadanymi wiadomości;
+- dokładnych współrzędnych `battleLog.mapobject.position.X/Y`;
+- `battleLog.defender.playerId` z oczekiwanym ID NPC;
+- dodatniego `battleLog.attacker.playerId`.
+
+Dopiero taki rekord jest klasyfikowany jako `confirmed_battle_report_target_and_attacker`. Współrzędne są dopasowywane do katalogu IT1 wyłącznie jako identyfikator katalogowy, przy założeniu zgodności siatki potwierdzonej przez operatora. Skrypt nie zapisuje wyników do repozytorium ani pliku stanu i nie wypisuje nazw graczy ani treści raportów.
+
+**Ograniczenia:**
+- `client.mailMessages` / `sne.showMessages` zwraca skrzynkę zalogowanego konta, a nie wszystkie raporty na serwerze. To źródło potwierdza tylko ataki, których raport znajduje się w tej skrzynce.
+- `BasicMessage.deliveryTime` jest wyliczane jako `Date.now() - data[5] * 1000`. To czas dostarczenia/age wiadomości, nie dokładny moment rozpoczęcia ataku.
+- `BattleLog` zwraca uczestników i obiekt mapy, ale parser `bls` nie wystawia pola dokładnego czasu startu ataku. Dlatego `attack_time_utc` pozostaje `null`; skrypt raportuje wyłącznie `report_received_at_utc`.
+- Do uruchomienia potrzebne są lokalne zmienne `E4K_USERNAME` i `E4K_PASSWORD`. Nie przekazujemy ich do GitHub Actions, repozytorium ani czatu.
+
+Uruchomienie lokalne:
+```bash
+E4K_USERNAME='...' E4K_PASSWORD='...' node scripts/barony-live/reports.mjs --limit 25
+```
+
+Źródła protokołu i parsera:
+- ggejs `MessageConst`: `MESSAGE_TYPE_BATTLE_LOG=6`, `SUBTYPE_ATTACK_NPC=2`: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/utils/MessageConst.js
+- ggejs `sne`: wybór klasy raportu NPC i `showMessages`: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/sne.js
+- ggejs `BasicBattleLogMessage`: parsowanie areaType/subType/KID/ownerId i pobieranie treści raportu: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/structures/messages/BasicBattleLogMessage.js
+- ggejs `bls`: mapObject, attacker i defender: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/bls.js
+- ggejs `BasicMessage`: wyliczanie `deliveryTime`: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/structures/messages/BasicMessage.js

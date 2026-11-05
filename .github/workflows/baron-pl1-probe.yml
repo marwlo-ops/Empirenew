@@ -39,6 +39,7 @@ jobs:
       - name: Test E4K PL1 read-only probe core
         run: |
           node --check scripts/barony-live/probe.mjs
+          node --check scripts/barony-live/reports.mjs
           node --check scripts/barony-live/probe-core.mjs
           node --check scripts/barony-live/prepare-e4k-data.mjs
           node --test scripts/barony-live/probe-core.test.mjs

@@ -108,48 +108,62 @@ W repozytorium znajduje się katalog `data/baron-fortresses.json` z mapą pobran
 
 Użytkownik potwierdził, że siatka współrzędnych IT1 i produkcyjnego PL1 się pokrywa. Pochodzenie katalogu nadal oznaczamy jako IT1; dane są używane wyłącznie jako mapa celów, nie jako historia ataków.
 
-## Wykrywanie ataków — ustalenia protokołu
+## Wykrywanie ataków — korekta parsera i ustalenia protokołu (2026-11-05)
 
-### 1. Najbardziej obiecujący odczyt: GAA / mapa obiektu
+### 1. Katalog fortec GGE Tracker odpowiada obiektom typu 11
 
-Dokumentacja i modele EmpireCore pokazują, że odpowiedź na skan mapy `gaa` zawiera rekordy obiektów z polami zależnymi od typu obiektu. Dla desktopowego `MapItemType.DUNGEON = 2` parser odczytuje `attack_cooldown_seconds` z indeksu 5; indeks 6 jest tam kodem krainy, a nie identyfikatorem atakującego. Dla `BOSS_DUNGEON = 11` indeks 5 także przechowuje cooldown, a indeks 6 może być identyfikatorem gracza, który pokonał obiekt. Nie wolno przenosić indeksów między typami bez potwierdzenia rzeczywistej odpowiedzi E4K PL1.
+Wewnętrzny scraper GGE Tracker filtruje odpowiedź `gaa` warunkiem `dungeon[0] == '11'` zarówno przy odkrywaniu lokalizacji, jak i przy aktualizacji cooldownów. Dla tego rekordu używa:
+- `data[1]`, `data[2]` — X/Y;
+- `data[5]` — pozostały cooldown;
+- `data[6]` — `player_id`.
 
-Źródła:
-- EmpireCore — modele obiektów mapy: https://github.com/eschnitzler/EmpireCore/blob/01800fa1033a4413b51f5dfe2c3e3d1a3fdcdca7/src/empire_core/map/models/items.py
-- EmpireCore — skanowanie mapy: https://github.com/eschnitzler/EmpireCore/blob/01800fa1033a4413b51f5dfe2c3e3d1a3fdcdca7/src/empire_core/map/models/areas.py
+Parser `ggejs` mapuje `areaType=11` na `BossDungeonMapobject`, gdzie `defeaterPlayerId=data[6]`, `kingdomId=data[7]`, a `attackCooldownEnd` jest wyliczany z `data[5]`. Właściciel obiektu jest pobierany jako `getKingdomBossDungeonOwnerByKingdomId(kid)`, co daje -230/-231/-232 dla KID 1/2/3.
 
-### 2. Sprawdzony wzorzec scrapera GGE Tracker
-
-Kod wewnętrznego scrapera GGE Tracker wykonuje zapytania `gaa` dla fragmentów mapy, odczytuje pozostały cooldown z rekordu obiektu i zapisuje historię dla współrzędnych `kid/x/y`. W implementacji dla obiektów typu `11` używa indeksu 5 jako pozostałego cooldownu i indeksu 6 jako `player_id`. Aktualizuje też `global_available_at` na podstawie czasu pobrania i pozostałych sekund cooldownu.
-
-Ważne ograniczenie: pole `last_attack` w API GGE Tracker jest czasem zarejestrowania zdarzenia przez scraper, a nie dowiedzionym, serwerowym timestampem ataku. Dokładność zależy od częstotliwości odczytu. To jednak daje wiarygodny, celowy punkt odniesienia dla konkretnego obiektu, znacznie lepszy niż globalny wzrost łupu.
+**Korekta poprzedniej implementacji:** katalog 2021 współrzędnych z GGE Tracker nie powinien być sprawdzany jako `areaType=2` z właścicielem -220/-221/-222. To inny obiekt. Probe został przełączony na `areaType=11` i pole `defeaterPlayerId`.
 
 Źródła:
-- GGE Tracker — pobieranie i aktualizacja cooldownów: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
-- GGE Tracker — worker aktualizacji dungeonów: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/dungeon-update.worker.ts
-- GGE Tracker — mapowanie odpowiedzi `gaa` po `KID`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/empire-api/src/data/commands.json
+- `ggejs` — parser typów mapy: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/MapObjectParser.js
+- `ggejs` — BossDungeonMapobject: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/mapobjects/BossDungeonMapobject.js
+- `ggejs` — zwykły DungeonMapobject, odrębny typ 2: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/mapobjects/DungeonMapobject.js
+- `ggejs` — identyfikatory właścicieli NPC: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/WorldMapOwnerInfoData.js
 
-### 3. Wyniki testów produkcyjnego PL1 i serwera Beta
+### 2. Co można, a czego nie można uznać za dowód
 
-Odczyty z GitHub Actions z 2026-11-05:
-- `https://api.gge-tracker.com/api/v1/servers` zwrócił 63 identyfikatory i zawierał zarówno `E4K_PL1`, jak i `E4K_PL1_BETA`.
-- `/servers/catalog` zwrócił wpis produkcyjnego `E4K_PL1` z nazwą „Empire Four Kingdoms - Poland 1” i flagą `fortress=false`; wpis `E4K_PL1_BETA` ma `fortress=true`.
-- `/dungeons` odrzuca `E4K_PL1` komunikatem „Invalid server”; akceptuje `E4K_PL1_BETA`.
-- Dla Beta API zwróciło 976 rekordów z polami `last_attack`, `player_id`, `global_available_at` i `effective_cooldown_until`. Wszystkie 976 współrzędnych z odpowiedzi Beta wystąpiły w katalogu IT1: Piaski 312/312, Lód 409/409, Ogień 255/255.
-- Zbieżność współrzędnych Beta z IT1 potwierdza wspólną siatkę dla tych rekordów, ale nie dowodzi, że ataki Beta są atakami na produkcyjnym PL1. Danych Beta nie wolno zapisywać do historii produkcyjnego PL1.
+`BossDungeonMapobject.defeaterPlayerId` jest polem przypisanym do konkretnego obiektu mapy, a GGE Tracker zapisuje tę wartość jako `player_id` dla tego samego `kid/x/y`. To znacznie silniejszy sygnał niż łup, honor lub odległość zamku. Po uzyskaniu prawidłowego wiersza z produkcyjnego PL1 możemy zapisać dokładny cel i ID gracza wskazane przez mapę.
 
-### 4. Test mostu E4K PL1
+Sam wiersz nie zawiera jednak dokładnego czasu ataku. Zmiana ID gracza lub rozpoczęcie cooldownu pomiędzy dwiema próbkami daje najwyżej przedział czasu między próbkami. Nie wolno zapisywać go jako dokładnego `attacked_at` ani nazywać potwierdzonym zdarzeniem PL1, dopóki nie przejdzie kontrolowanego testu live.
 
-Most `https://empire-api.fly.dev` wykazał wcześniej, że socket `EmpirefourkingdomsExGG2_3` bywał połączony. Gdy był połączony, próby odczytu `gaa`, `fnm` oraz `gam` kończyły się HTTP 400 „Invalid command or headers”. W późniejszym pomiarze socket był już rozłączony. Nie uzyskano żadnej odpowiedzi mapy PL1 ani rekordu ruchu, który można przypisać do współrzędnych fortec.
+Dla porównania, typ 2 `DungeonMapobject` ma `attackCount=data[4]`, używany przez klienta jako licznik zwycięstw/postępu poziomu, `attackCooldownEnd` z `data[5]` i KID z `data[6]`. Nie zawiera pola gracza, który pokonał obiekt. Nie używamy go do identyfikacji atakującego fortecy z katalogu GGE Tracker.
 
-To nie dowodzi, że serwer nie udostępnia tych danych. Pokazuje, że obecny publiczny most nie ma działającego dopasowania odpowiedzi dla tych komend albo nie ma aktywnej sesji/obsługi danego żądania. GGE Tracker ma mapowanie odpowiedzi `gaa` wyłącznie po `KID`; w obecnym moście nie potwierdziliśmy takiego mapowania.
+### 3. Ograniczenie publicznego API GGE Tracker
 
-### 5. Reguły zapisu i dalszy plan
+Wewnętrzny scraper:
+- dodaje do katalogu tylko rekordy `areaType=11`;
+- przy aktualizacji cooldownu używa `data[5]` i `data[6]`;
+- zapisuje historię w tabeli `dungeons_history` przez `INSERT (kid, position_x, position_y, player_id)`, bez przekazania pola `attacked_at`.
 
-1. Nie zapisuj ataku na podstawie łupu, honoru, potęgi ani położenia zamku gracza.
-2. Nie używaj danych Beta jako historii PL1.
-3. Gdy uzyskamy prawidłową odpowiedź `gaa` z PL1, zapisz surowy rekord, `kid/x/y`, typ obiektu, cooldown, `sampled_at` i źródło. Zachowaj dowód surowego odczytu.
-4. Po potwierdzeniu typu obiektu i całkowitego cooldownu 24 h wyliczaj `available_at = sampled_at + remaining_cooldown`. Czas ataku można szacować z cooldownu tylko po walidacji pełnej długości cooldownu; zapisuj przedział niepewności wynikający z interwału odczytu.
-5. Dla zwykłego barona nie zakładaj, że rekord mapy zawiera identyfikator atakującego. Jeżeli potrzebny jest nick atakującego, wymagany będzie osobny dowód z ruchu lub raportu walki.
-6. Następny wymagany element techniczny: most do produkcyjnego E4K PL1 z obsługą odpowiedzi `gaa` (dopasowanie co najmniej po `KID`) albo włączenie produkcyjnego `E4K_PL1` do scrapera GGE Tracker. Bez tego nie ma potwierdzonego źródła automatycznej historii PL1.
+Publiczny endpoint `/dungeons/player/{playerId}` odczytuje potem `kid/x/y/attacked_at`. Ponieważ scraper nie przekazuje `attacked_at` w INSERT, nie traktujemy tego pola jako dokładnego serwerowego czasu ataku; jest to znacznik po stronie bazy/scrapera i jego dokładność wymaga osobnej walidacji.
 
+Źródła:
+- GGE Tracker — discovery i mapowanie `areaType=11`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+- GGE Tracker — endpoint historii gracza: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts
+- GGE Tracker — mapowanie odpowiedzi `gaa`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/empire-api/src/data/commands.json
+
+### 4. Wyniki serwerów i granica PL1/Beta
+
+- `E4K_PL1` pozostaje wyłączony dla publicznego katalogu fortec GGE Tracker (`fortress=false)); endpoint `/dungeons` odrzuca produkcyjny PL1.
+- `E4K_PL1_BETA` udostępnia osobny katalog i historię. Nie wolno używać tych danych jako historii produkcyjnego PL1.
+- Wszystkie 976 współrzędnych z poprzedniego testu Beta pokrywały się z katalogiem IT1, a użytkownik potwierdził zgodność siatki IT1 i PL1. To potwierdza wybór współrzędnych, nie cooldown ani historię ataków.
+- Nie używamy żadnego cooldownu IT1 ani Beta do wyliczania czasu ataku PL1.
+
+### 5. Aktualny stan implementacji i następny test
+
+Probe `scripts/barony-live/probe.mjs` sprawdza teraz `areaType=11`, właściciela -230/-231/-232, `defeaterPlayerId` oraz cooldown dokładnie na współrzędnych katalogu. Surowe obserwacje trafiają do prywatnego pliku stanu; kandydackie sygnały pozostają tylko w wyniku uruchomienia.
+
+Następny wymagany test to odczyt kilku próbek na autoryzowanej sesji produkcyjnego PL1 i porównanie:
+1. surowego wiersza `gaa` typu 11;
+2. `kid/x/y` oraz `defeaterPlayerId`;
+3. przejścia cooldownu pomiędzy próbkami;
+4. raportu NPC z konta, które otrzymało raport.
+
+Dopiero po potwierdzeniu długości cooldownu i zachowania pola `defeaterPlayerId` na PL1 będzie można wyznaczać przedział ataku. Dokładny czas serwerowy nadal wymaga źródła, które go rzeczywiście udostępnia.

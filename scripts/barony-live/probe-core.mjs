@@ -1,5 +1,5 @@
 export const DEFAULT_PL1_ZONE = 'EmpirefourkingdomsExGG_3';
-export const EXPECTED_OWNER_BY_KID = Object.freeze({ 1: -220, 2: -221, 3: -222 });
+export const EXPECTED_BOSS_DUNGEON_OWNER_BY_KID = Object.freeze({ 1: -230, 2: -231, 3: -232 });
 export const MAP_SECTOR_SIZE = 100;
 
 const KINGDOMS = Object.freeze({ sands: 1, ice: 2, fire: 3 });
@@ -90,8 +90,11 @@ function serializeExactRow(row, sampledAt) {
     area_type: Number.isInteger(row.areaType) ? row.areaType : null,
     kingdom_id: Number.isInteger(row.kingdomId) ? row.kingdomId : null,
     owner_id: Number.isInteger(row.ownerInfo?.playerId) ? row.ownerInfo.playerId : null,
-    attack_count: Number.isInteger(row.attackCount) ? row.attackCount : null,
-    attack_count_semantics: 'ggejs_uses_as_victories_for_level_progression',
+    dungeon_level: Number.isInteger(row.dungeonLevel) ? row.dungeonLevel : null,
+    defeater_player_id: Number.isInteger(row.defeaterPlayerId) && row.defeaterPlayerId > 0
+      ? row.defeaterPlayerId
+      : null,
+    last_spy_at_utc: toIsoDate(row.lastSpyDate),
     cooldown_until_utc: cooldownUntil,
     cooldown_remaining_seconds_at_sample: cooldownMs === null ? null : Math.max(0, Math.ceil(cooldownMs / 1000)),
   };
@@ -103,9 +106,9 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
   const exactRows = (Array.isArray(mapObjects) ? mapObjects : []).filter((row) =>
     row?.position?.X === target.x && row?.position?.Y === target.y
   );
-  const expectedOwner = EXPECTED_OWNER_BY_KID[target.kid];
+  const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[target.kid];
   const validRows = exactRows.filter((row) =>
-    row.areaType === 2 && row.kingdomId === target.kid && row.ownerInfo?.playerId === expectedOwner
+    row.areaType === 11 && row.kingdomId === target.kid && row.ownerInfo?.playerId === expectedOwner
   );
   let status = 'not_confirmed';
   if (validRows.length === 1) status = 'fortress_row_found';
@@ -113,18 +116,25 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
   else if (exactRows.length > 0) status = 'coordinate_row_unverified';
 
   const observation = {
-    target: { catalog_id_it1: target.id, kid: target.kid, kingdom: target.kingdom, x: target.x, y: target.y, expected_npc_owner_id: expectedOwner },
-    sampled_at_utc: sampledAtIso, status,
+    target: {
+      catalog_id_it1: target.id, kid: target.kid, kingdom: target.kingdom, x: target.x, y: target.y,
+      expected_area_type: 11, expected_boss_dungeon_owner_id: expectedOwner,
+    },
+    sampled_at_utc: sampledAtIso,
+    status,
     rows: exactRows.map((row) => serializeExactRow(row, sampledAtIso)),
+    defeater_player_id: null,
     attack_time_utc: null,
-    note: 'Map observation only. attackCount is a progression/victory counter in the client parser, not a complete attack log. No exact attack timestamp or attacker is inferred.',
+    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. The player ID is target-specific, but the row has no exact attack timestamp. No time is inferred until PL1 live semantics are validated.',
   };
   if (validRows.length === 1) {
-    const row = serializeExactRow(validRows[0], sampledAt);
+    const row = serializeExactRow(validRows[0], sampledAtIso);
     observation.owner_id = row.owner_id;
-    observation.attack_count = row.attack_count;
-    observation.attack_count_semantics = row.attack_count_semantics;
+    observation.dungeon_level = row.dungeon_level;
+    observation.defeater_player_id = row.defeater_player_id;
+    observation.last_spy_at_utc = row.last_spy_at_utc;
     observation.cooldown_until_utc = row.cooldown_until_utc;
+    observation.cooldown_remaining_seconds_at_sample = row.cooldown_remaining_seconds_at_sample;
     observation.cooldown_active = row.cooldown_until_utc === null
       ? null
       : Date.parse(row.cooldown_until_utc) > Date.parse(sampledAtIso);
@@ -135,19 +145,29 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
 export function compareObservations(previous, current) {
   if (!previous || !current || previous.status !== 'fortress_row_found' || current.status !== 'fortress_row_found') return [];
   const signals = [];
-  if (Number.isInteger(previous.attack_count) && Number.isInteger(current.attack_count) && current.attack_count > previous.attack_count) {
+  if (
+    Number.isInteger(current.defeater_player_id) && current.defeater_player_id > 0 &&
+    current.defeater_player_id !== previous.defeater_player_id
+  ) {
     signals.push({
-      kind: 'dungeon_progress_counter_increased', metric: 'DungeonMapobject.attackCount',
-      counter_semantics: 'ggejs_uses_as_victories_for_level_progression',
-      classification: 'candidate_signal_not_yet_live_validated',
-      delta: current.attack_count - previous.attack_count,
-      interval_start_utc: previous.sampled_at_utc, interval_end_utc: current.sampled_at_utc, target: current.target,
+      kind: 'target_defeater_id_changed',
+      metric: 'BossDungeonMapobject.defeaterPlayerId',
+      player_id: current.defeater_player_id,
+      classification: 'candidate_target_specific_player_change_not_yet_live_validated',
+      interval_start_utc: previous.sampled_at_utc,
+      interval_end_utc: current.sampled_at_utc,
+      target: current.target,
     });
   }
   if (previous.cooldown_active === false && current.cooldown_active === true) {
     signals.push({
-      kind: 'target_cooldown_started', classification: 'candidate_signal_not_yet_live_validated',
-      interval_start_utc: previous.sampled_at_utc, interval_end_utc: current.sampled_at_utc, target: current.target,
+      kind: 'target_cooldown_started',
+      metric: 'BossDungeonMapobject.attackCooldownEnd',
+      player_id: current.defeater_player_id ?? null,
+      classification: 'candidate_target_specific_cooldown_transition_not_yet_live_validated',
+      interval_start_utc: previous.sampled_at_utc,
+      interval_end_utc: current.sampled_at_utc,
+      target: current.target,
     });
   }
   return signals;

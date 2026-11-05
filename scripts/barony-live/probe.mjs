@@ -9,7 +9,7 @@ import { DEFAULT_PL1_ZONE, buildObservation, buildScanPlan, compareObservations,
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const CATALOG = path.join(ROOT, 'data', 'baron-fortresses.json');
-const DEFAULT_STATE = path.join(homedir(), '.cache', 'empirenew', 'barony-pl1-state.json');
+const DEFAULT_STATE = path.join(homedir(), '.cache', 'empirenew', 'barony-pl1-boss-dungeon-state.json');
 
 function argsOf(argv) {
   const a = { all:false, plan:false, noState:false, samples:3, delay:1000,
@@ -38,10 +38,10 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 async function readState(file) {
   try {
     const s=JSON.parse(await readFile(file,'utf8'));
-    if (s.schema_version!==1 || !s.last_observations || typeof s.last_observations!=='object') throw new Error('Invalid state schema; refusing to overwrite.');
+    if (s.schema_version!==2 || !s.last_observations || typeof s.last_observations!=='object') throw new Error('Invalid state schema; refusing to overwrite.');
     return s;
   } catch(e) {
-    if (e.code==='ENOENT') return {schema_version:1,source:'E4K PL1 live map observations',last_observations:{}};
+    if (e.code==='ENOENT') return {schema_version:2,source:'E4K PL1 live map observations',last_observations:{}};
     throw e;
   }
 }
@@ -84,7 +84,7 @@ async function main() {
   }
 
   const stateFile=path.resolve(a.stateFile);
-  const state=a.noState?{schema_version:1,last_observations:{}}:await readState(stateFile);
+  const state=a.noState?{schema_version:2,last_observations:{}}:await readState(stateFile);
   const client=new E4KClient(instance);
   client.socketManager.reconnectTimeout=-1;
   const observations=[],candidateSignals=[],sectorErrors=[];
@@ -122,7 +122,7 @@ async function main() {
     state.updated_at_utc=new Date().toISOString();
     state.server_zone=a.zone;
     state.server_host=instance.server;
-    state.note='Raw verified map observations only. Candidate signals are not persisted as confirmed attacks.';
+    state.note='Raw verified BossDungeonMapobject type 11 observations only. Candidate signals are not persisted as confirmed attacks.';
     await writeState(stateFile,state);
   }
   const deployTime=Number(network.deployTime);
@@ -136,13 +136,15 @@ async function main() {
     summary:{
       requested_targets:plan.summary.target_count,sectors_requested:plan.summary.sector_count,
       fortress_rows_found:observations.filter(x=>x.status==='fortress_row_found').length,
+      defeater_ids_observed:observations.filter(x=>Number.isInteger(x.defeater_player_id)&&x.defeater_player_id>0).length,
+      cooldown_active:observations.filter(x=>x.cooldown_active===true).length,
       unverified_or_missing:observations.filter(x=>['not_confirmed','coordinate_row_unverified','ambiguous_duplicate_rows'].includes(x.status)).length,
       request_errors:sectorErrors.length,candidate_signals:candidateSignals.length
     },
     observations,candidate_signals:candidateSignals,sector_errors:sectorErrors,
     state_file:a.noState?null:stateFile,
-    attack_history_status:'not_confirmed_until_live_semantics_are_validated',
-    warning:'No attacker or exact attacked_at timestamp is inferred. Candidate transitions are sample intervals only.'
+    attack_history_status:'target_specific_defeater_and_cooldown_fields_available_but_PL1_live_unvalidated',
+    warning:'BossDungeonMapobject.defeaterPlayerId is target-specific, but no exact attacked_at is present in the map row. Candidate transitions are sample intervals only; no attack is persisted as confirmed.'
   },null,2)+'\n');
   return 0;
 }

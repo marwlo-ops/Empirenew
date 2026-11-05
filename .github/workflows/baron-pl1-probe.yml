@@ -59,12 +59,16 @@ jobs:
           if (typeof E4KClient !== 'function') throw new Error('Pinned ggejs does not export E4KClient.');
           const root = './scripts/barony-live/node_modules/ggejs/src';
           const socket = fs.readFileSync(root + '/managers/SocketManager.js', 'utf8');
-          const dungeon = fs.readFileSync(root + '/structures/mapobjects/DungeonMapobject.js', 'utf8');
+          const bossDungeon = fs.readFileSync(root + '/structures/mapobjects/BossDungeonMapobject.js', 'utf8');
+          const regularDungeon = fs.readFileSync(root + '/structures/mapobjects/DungeonMapobject.js', 'utf8');
           const parser = fs.readFileSync(root + '/utils/MapObjectParser.js', 'utf8');
+          const owners = fs.readFileSync(root + '/utils/WorldMapOwnerInfoData.js', 'utf8');
           if (!socket.includes("serverInstance.zone.startsWith('EmpirefourkingdomsExGG') ? 'tcp' : 'wss'")) throw new Error('E4K TCP transport selection is not present in pinned ggejs.');
-          if (!dungeon.includes('this.attackCount = data[4]') || !dungeon.includes('this.attackCooldownEnd = new Date(Date.now() + data[5] * 1000)')) throw new Error('Dungeon attack counter/cooldown row mapping changed.');
-          if (!parser.includes('case 2:') || !parser.includes('return new DungeonMapobject(client, data)')) throw new Error('DUNGEON rows are not parsed by DungeonMapobject.');
-          console.log(JSON.stringify({zone: pl1.zone, host: pl1.server, instance: pl1.value, zone_id: pl1.zoneId, loca_id: pl1.instanceLocaId, network_version: network.versionNo, network_deploy_time: new Date(network.deployTime * 1000).toISOString(), transport: 'TCP', e4k_client_export: 'PASS'}));
+          if (!bossDungeon.includes('this.attackCooldownEnd = new Date(Date.now() + data[5] * 1000)') || !bossDungeon.includes('this.defeaterPlayerId = data[6]') || !bossDungeon.includes('this.kingdomId = data[7]')) throw new Error('BossDungeonMapobject type 11 field mapping changed.');
+          if (!parser.includes('case 11:') || !parser.includes('return new BossDungeonMapobject(client, data)')) throw new Error('Type 11 rows are not parsed by BossDungeonMapobject.');
+          if (!owners.includes('getKingdomBossDungeonOwnerByKingdomId = (kID) => this.getOwnerInfo(-229 - kID)')) throw new Error('Boss dungeon NPC owner mapping changed.');
+          if (!regularDungeon.includes('this.attackCount = data[4]') || !regularDungeon.includes('this.kingdomId = data[6]')) throw new Error('Type 2 DungeonMapobject distinction changed.');
+          console.log(JSON.stringify({zone: pl1.zone, host: pl1.server, instance: pl1.value, zone_id: pl1.zoneId, loca_id: pl1.instanceLocaId, network_version: network.versionNo, network_deploy_time: new Date(network.deployTime * 1000).toISOString(), transport: 'TCP', target_map_type: 11, boss_owner_ids_by_kid: [-230,-231,-232], e4k_client_export: 'PASS'}));
           NODE
       - name: Test Barony mobile UI
         run: node scripts/test-barony-mobile.mjs

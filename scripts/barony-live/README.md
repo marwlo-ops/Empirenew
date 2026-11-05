@@ -4,9 +4,10 @@ Narzędzie jest **read-only**. Korzysta z klienta E4K `ggejs` i danych serwerów
 
 ## Dlaczego ten klient
 
-- Dane `e4k-data` wskazują PL1 jako `EmpirefourkingdomsExGG_3`, host `e4k-live-pl1-game.goodgamestudios.com`, instancję 3.
-- `ggejs` wybiera transport TCP dla stref zaczynających się od `EmpirefourkingdomsExGG`. Klient `EmpireCore` tworzy URL WSS, więc jego obsługa E4K PL1 nie jest potwierdzona.
-- Odczyt `gaa` zwraca wiersze mapy. `ggejs` parsuje typ `DUNGEON` (2), X/Y, `attackCount`, `attackCooldownEnd` i KID. Dla KID 1/2/3 mapuje właściciela NPC na -220/-221/-222.
+- Dane `e4k-data` wskazują produkcyjny PL1 jako `EmpirefourkingdomsExGG_3`, host `e4k-live-pl1-game.goodgamestudios.com`, instancję 3, `zoneId=259`, `generic_country_PL`.
+- `ggejs` wybiera transport TCP dla stref zaczynających się od `EmpirefourkingdomsExGG`.
+- Katalog GGE Tracker `/dungeons` powstaje z rekordów mapy o `areaType=11`. Parser `ggejs` mapuje je na `BossDungeonMapobject`: `data[5]` to pozostały cooldown, `data[6]` to `defeaterPlayerId`, a `data[7]` to KID. Właściciele NPC dla KID 1/2/3 to odpowiednio -230/-231/-232.
+- **Nie myl tego z typem 2 (`DungeonMapobject`)**: tam `data[4]` to licznik zwycięstw/postępu, `data[5]` cooldown, a `data[6]` KID. Typ 2 nie zawiera `defeaterPlayerId` i nie jest typem używanym przez katalog GGE Tracker fortec.
 
 ## Uruchomienie
 
@@ -27,7 +28,7 @@ node scripts/barony-live/probe.mjs
 
 Nie przekazuj loginu/hasła jako argumentów, nie zapisuj ich w repozytorium, GitHub Actions, GitHub Secrets ani w czacie. Skrypt odmawia połączenia z inną strefą/hostem niż produkcyjny PL1.
 
-Domyślnie odpytuje maksymalnie 3 punkty na krainę. Każdy odczyt sektora obejmuje 100×100 pól; przerwa między zapytaniami wynosi co najmniej 1000 ms. Według dokumentacji ggejs odczyt krainy jest dozwolony tylko wtedy, gdy konto ma w niej zamek; błąd takiego odczytu nie oznacza braku fortecy.
+Domyślnie odpytuje maksymalnie 3 punkty na krainę. Każdy odczyt sektora obejmuje 100×100 pól; przerwa między zapytaniami wynosi co najmniej 1000 ms. Według dokumentacji `ggejs` odczyt krainy jest dozwolony tylko wtedy, gdy konto ma w niej zamek; błąd takiego odczytu nie oznacza braku fortecy.
 
 ## Pełny plan
 
@@ -39,8 +40,16 @@ Aktualny katalog IT1 ma 2021 punktów i 199 unikalnych sektorów 100×100 (szacu
 
 ## Dane i ograniczenia
 
-Pierwsze uruchomienie zapisuje wyłącznie ostatnie surowe, zweryfikowane obserwacje w prywatnym pliku `~/.cache/empirenew/barony-pl1-state.json` (zmiana przez `BARONY_STATE_FILE`). Plik nie trafia do repozytorium ani GitHub Pages.
+Pierwsze uruchomienie zapisuje wyłącznie ostatnie surowe, zweryfikowane obserwacje w prywatnym pliku `~/.cache/empirenew/barony-pl1-boss-dungeon-state.json` (zmiana przez `BARONY_STATE_FILE`). Plik nie trafia do repozytorium ani GitHub Pages. Nowy plik stanu jest celowo oddzielony od wcześniejszego stanu typu 2.
 
-Kolejne uruchomienia mogą pokazać **kandydackie sygnały** zmiany pola `attackCount` lub rozpoczęcia cooldownu konkretnej fortecy. Kod `ggejs` przekazuje `attackCount` do `DungeonConst.getLevel(victories, KID)`, więc pole jest używane jako licznik zwycięstw/postępu poziomu, a nie pełny rejestr wszystkich prób ataku. Sygnał zmiany licznika ma typ `dungeon_progress_counter_increased`, zawiera semantykę źródłową i nadal jest niezweryfikowany live; nie jest zapisywany jako potwierdzony atak. Czas jest przedziałem między próbkami, nie dokładnym `attacked_at`. Skrypt nie ustala nicku atakującego. Brak pola cooldown jest stanem „nieznany”, a nie „brak cooldownu”; nie może sam wywołać sygnału rozpoczęcia cooldownu. Znacznik próbki jest ustawiany po otrzymaniu odpowiedzi mapy.
+Każda próbka sprawdza dokładnie `kid/x/y`, `areaType=11` i oczekiwanego właściciela NPC. Z poprawnego wiersza zapisuje:
+- `defeater_player_id` — identyfikator gracza z pola `BossDungeonMapobject.defeaterPlayerId`;
+- `dungeon_level`;
+- pozostały cooldown i wyliczony czas końca cooldownu;
+- czas pobrania próbki.
 
-Brak wiersza, błąd zapytania lub niezgodny typ/właściciel nie tworzy zdarzenia. Katalog IT1 służy wyłącznie do wyboru współrzędnych; cooldown i historia IT1 nie są używane.
+Zmiana `defeater_player_id` albo przejście cooldownu z nieaktywnego na aktywny generuje **kandydacki sygnał dla konkretnej fortecy** z przedziałem między próbkami. Nie jest to dokładny czas ataku i nie jest zapisywane jako potwierdzona historia. Pierwsza próbka nie generuje zdarzenia historycznego. Brak cooldownu pozostaje stanem „nieznany”, a nie „brak cooldownu”.
+
+GGE Tracker używa typu 11 oraz pola gracza z tego samego rekordu, ale jego publiczne `attacked_at` nie jest potwierdzonym timestampem serwera gry: scraper nie przekazuje pola `attacked_at` przy zapisie historii. Dla produkcyjnego PL1 nie mamy jeszcze działającego live odczytu, dlatego nie wyliczamy czasu ataku z 24-godzinnego założenia ani z cooldownu IT1/Beta.
+
+Brak wiersza, błąd zapytania lub niezgodny typ/właściciel nie tworzy zdarzenia. Katalog IT1 służy wyłącznie do wyboru współrzędnych; cooldown i historia IT1/Beta nie są używane.

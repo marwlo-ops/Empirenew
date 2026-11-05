@@ -65,26 +65,29 @@ test('selects deterministic unique samples', () => {
   assert.equal(new Set(pickSamples(points, 5).map((p) => p.x)).size, 5);
 });
 
-test('accepts only a DUNGEON row with the expected kingdom NPC owner', () => {
+test('accepts only a BossDungeonMapobject type 11 row with the expected NPC owner', () => {
   const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
   const row = {
-    areaType: 2, kingdomId: 1, attackCount: 12, position: { X: 10, Y: 20 },
-    ownerInfo: { playerId: -220 }, attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
+    areaType: 11, kingdomId: 1, dungeonLevel: 72, defeaterPlayerId: 123456,
+    position: { X: 10, Y: 20 }, ownerInfo: { playerId: -230 },
+    attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
+    lastSpyDate: new Date('2026-11-05T14:00:00Z'),
   };
   const observation = buildObservation(target, [row], '2026-11-05T15:00:00Z');
   assert.equal(observation.status, 'fortress_row_found');
-  assert.equal(observation.owner_id, -220);
-  assert.equal(observation.attack_count, 12);
-  assert.equal(observation.attack_count_semantics, 'ggejs_uses_as_victories_for_level_progression');
+  assert.equal(observation.owner_id, -230);
+  assert.equal(observation.dungeon_level, 72);
+  assert.equal(observation.defeater_player_id, 123456);
   assert.equal(observation.cooldown_active, true);
   assert.equal(observation.attack_time_utc, null);
 });
 
-test('does not accept a player castle or wrong NPC owner at the same coordinates', () => {
+test('does not accept a regular type 2 dungeon, player castle or wrong type 11 NPC owner', () => {
   const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
   const rows = [
     { areaType: 1, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: 123 } },
-    { areaType: 2, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -221 } },
+    { areaType: 2, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -220 } },
+    { areaType: 11, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -231 } },
   ];
   assert.equal(buildObservation(target, rows).status, 'coordinate_row_unverified');
 });
@@ -96,26 +99,26 @@ test('reports no row as not confirmed, not as an attack', () => {
   assert.equal(observation.attack_time_utc, null);
 });
 
-test('reports counter and cooldown transitions only as unvalidated candidate signals', () => {
+test('reports defeater and cooldown transitions only as unvalidated target-specific candidates', () => {
   const previous = {
     status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:00:00Z',
-    target: { kid: 1, x: 10, y: 20 }, attack_count: 12, cooldown_active: false,
+    target: { kid: 1, x: 10, y: 20 }, defeater_player_id: 111, cooldown_active: false,
   };
   const current = {
     status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:10:00Z',
-    target: previous.target, attack_count: 13, cooldown_active: true,
+    target: previous.target, defeater_player_id: 222, cooldown_active: true,
   };
   const signals = compareObservations(previous, current);
-  assert.deepEqual(signals.map((s) => s.kind), ['dungeon_progress_counter_increased', 'target_cooldown_started']);
-  assert.ok(signals.every((s) => s.classification === 'candidate_signal_not_yet_live_validated'));
-  assert.equal(signals[0].metric, 'DungeonMapobject.attackCount');
-  assert.equal(signals[0].counter_semantics, 'ggejs_uses_as_victories_for_level_progression');
+  assert.deepEqual(signals.map((s) => s.kind), ['target_defeater_id_changed', 'target_cooldown_started']);
+  assert.ok(signals.every((s) => s.classification.includes('candidate_target_specific')));
+  assert.equal(signals[0].metric, 'BossDungeonMapobject.defeaterPlayerId');
+  assert.equal(signals[0].player_id, 222);
   assert.equal(signals[0].interval_start_utc, previous.sampled_at_utc);
   assert.equal(signals[0].interval_end_utc, current.sampled_at_utc);
 });
 
 test('does not create signals from missing or unverified previous samples', () => {
-  const current = { status: 'fortress_row_found', attack_count: 13, cooldown_active: true };
+  const current = { status: 'fortress_row_found', defeater_player_id: 123456, cooldown_active: true };
   assert.deepEqual(compareObservations(null, current), []);
   assert.deepEqual(compareObservations({ status: 'not_confirmed' }, current), []);
 });
@@ -123,12 +126,12 @@ test('does not create signals from missing or unverified previous samples', () =
 test('keeps a missing cooldown as unknown and does not create a false cooldown-start signal', () => {
   const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
   const previous = buildObservation(target, [{
-    areaType: 2, kingdomId: 1, attackCount: 12, position: { X: 10, Y: 20 },
-    ownerInfo: { playerId: -220 },
+    areaType: 11, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -230 },
+    defeaterPlayerId: 123456,
   }], '2026-11-05T15:00:00Z');
   const current = buildObservation(target, [{
-    areaType: 2, kingdomId: 1, attackCount: 12, position: { X: 10, Y: 20 },
-    ownerInfo: { playerId: -220 }, attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
+    areaType: 11, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -230 },
+    defeaterPlayerId: 123456, attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
   }], '2026-11-05T15:10:00Z');
   assert.equal(previous.cooldown_active, null);
   assert.equal(current.cooldown_active, true);

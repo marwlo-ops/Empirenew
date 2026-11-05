@@ -4,7 +4,7 @@ import { homedir } from 'node:os';
 import path from 'node:path';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { DEFAULT_PL1_ZONE, buildObservation, buildScanPlan, compareObservations,
+import { DEFAULT_PL1_ZONE, buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
   isGgejsGamDispatchStack, selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
@@ -15,7 +15,7 @@ const CATALOG = path.join(ROOT, 'data', 'baron-fortresses.json');
 const DEFAULT_STATE = path.join(homedir(), '.cache', 'empirenew', 'barony-pl1-boss-dungeon-state.json');
 
 function argsOf(argv) {
-  const a = { all:false, plan:false, noState:false, movements:false, reports:false, reportLimit:10, reportWaitMs:3000, samples:3, delay:1000, movementWaitMs:3000,
+  const a = { all:false, plan:false, noState:false, movements:false, reports:false, reportLimit:10, reportWaitMs:3000, samples:3, delay:1000, movementWaitMs:5000,
     zone:process.env.E4K_ZONE || DEFAULT_PL1_ZONE,
     stateFile:process.env.BARONY_STATE_FILE || DEFAULT_STATE };
   for (let i=0;i<argv.length;i++) {
@@ -67,7 +67,7 @@ async function writeState(file,state) {
 async function main() {
   const a=argsOf(process.argv.slice(2));
   if (a.help) {
-    process.stdout.write('Read-only E4K PL1 probe. Default: 3 map samples per kingdom. Optional --movements observes server-pushed GAM; --reports reads NPC battle reports from this account mailbox. Credentials: E4K_USERNAME/E4K_PASSWORD. Use --plan --all to preview the full sector plan. No exact attack time is inferred.\n');
+    process.stdout.write('Read-only E4K PL1 probe. Default: 3 map samples per kingdom. Optional --movements requests a read-only GAM movement snapshot; --reports reads NPC battle reports from this account mailbox. Credentials: E4K_USERNAME/E4K_PASSWORD. Use --plan --all to preview the full sector plan. No exact attack time is inferred.\n');
     return 0;
   }
   const catalog=JSON.parse(await readFile(CATALOG,'utf8'));
@@ -102,15 +102,16 @@ async function main() {
   const originalAddOrUpdate=client.movements._add_or_update;
   const movementGamBatches=[];
   let ignoredNonGamMovementUpdates=0;
+  let movementObservationPhase = 'pre_request';
   if (a.movements) {
-    // GAM is an incoming response handler. Other ggejs commands also update MovementManager,
-    // so count and inspect only batches whose call stack identifies commands/gam.js.
+    // Only count updates dispatched by commands/gam.js; CRA/CRM/CSM also update this manager.
     client.movements._add_or_update=function(items) {
       const receivedAt=new Date().toISOString();
       const stack=new Error().stack||'';
       if (isGgejsGamDispatchStack(stack)) {
         const batch=Array.isArray(items)?items:[];
         movementGamBatches.push({
+          phase:movementObservationPhase,
           received_at_utc:receivedAt,
           movement_count:batch.length,
           evidence:batch.map(m=>extractParsedOutboundBossDungeonMovementEvidence(m,receivedAt)).filter(Boolean),
@@ -157,22 +158,52 @@ async function main() {
     }
 
     if (a.movements) {
-      // Observe incoming GAM response batches only; no undocumented GAM request is sent.
-      await sleep(a.movementWaitMs);
+      const preRequestBatches=movementGamBatches.filter(batch=>batch.phase==='pre_request');
+      movementObservationPhase='request';
+      const requestSentAt=new Date().toISOString();
+      let requestSent=false,requestError=null,collectionComplete=false,timedOut=false;
+      try {
+        requestSent=client.socketManager.sendCommand('gam',{})===true;
+        if (!requestSent) requestError='SocketManager.sendCommand returned false';
+      } catch (error) {
+        requestError=String(error?.message||error).slice(0,240);
+      }
+
+      if (requestSent) {
+        const firstResponseDeadline=Date.now()+a.movementWaitMs;
+        while (!movementGamBatches.some(batch=>batch.phase==='request') && Date.now()<firstResponseDeadline) await sleep(50);
+        let responseBatches=movementGamBatches.filter(batch=>batch.phase==='request');
+        if (responseBatches.length===0) {
+          timedOut=true;
+        } else {
+          let observedCount=responseBatches.length;
+          let lastBatchAt=Date.now();
+          const collectionDeadline=Date.now()+Math.min(10000,Math.max(1000,a.movementWaitMs));
+          while (Date.now()<collectionDeadline) {
+            const currentCount=movementGamBatches.filter(batch=>batch.phase==='request').length;
+            if (currentCount!==observedCount) {
+              observedCount=currentCount;
+              lastBatchAt=Date.now();
+            }
+            if (Date.now()-lastBatchAt>=250) {
+              collectionComplete=true;
+              break;
+            }
+            await sleep(50);
+          }
+          responseBatches=movementGamBatches.filter(batch=>batch.phase==='request');
+          if (!collectionComplete) timedOut=true;
+        }
+      }
+      movementObservationPhase='post_request';
+      const responseBatches=movementGamBatches.filter(batch=>batch.phase==='request');
       const sampledAt=new Date().toISOString();
-      movementEvidence=movementGamBatches.flatMap(batch=>batch.evidence);
-      movementProbe={
-        status:movementGamBatches.length>0?'gam_response_observed':'no_gam_response_observed',
-        gam_response_batches:movementGamBatches.length,
-        ignored_non_gam_movement_updates:ignoredNonGamMovementUpdates,
-        sampled_at_utc:sampledAt,
-        movement_count:movementGamBatches.reduce((total,batch)=>total+batch.movement_count,0),
-        matching_count:movementEvidence.length,
-        response_batches:movementGamBatches.map(batch=>({
-          received_at_utc:batch.received_at_utc,
-          movement_count:batch.movement_count,
-        })),
-      };
+      const gamResult=buildGamProbeSummary({
+        requestSent,preRequestBatches,responseBatches,ignoredNonGamMovementUpdates,
+        requestSentAt,sampledAt,collectionComplete,timedOut,requestError,
+      });
+      movementProbe=gamResult.summary;
+      movementEvidence=gamResult.evidence;
     }
 
     if (a.reports) {
@@ -242,7 +273,7 @@ async function main() {
     mailbox_report_probe:reportProbe,mailbox_report_evidence:reportEvidence,
     state_file:a.noState?null:stateFile,
     attack_history_status:'optional_account_scoped_mailbox_and_movement_evidence; no_global_PL1_history; exact_attack_time_unavailable',
-    warning:'Map rows contain no exact attacked_at. Optional GAM observations cover only movements pushed to this account; optional NPC battle reports cover only this account mailbox. Report receipt time and movement departure are not exact attack timestamps; no global PL1 history is persisted.'
+    warning:'Map rows contain no exact attacked_at. Optional GAM snapshots cover only movements returned to this account; optional NPC battle reports cover only this account mailbox. Report receipt time and movement departure are not exact attack timestamps; no global PL1 history is persisted.'
   },null,2)+'\n');
   return 0;
 }

@@ -65,11 +65,16 @@ jobs:
           if (typeof E4KClient !== 'function') throw new Error('Pinned ggejs does not export E4KClient.');
           const root = './scripts/barony-live/node_modules/ggejs/src';
           const socket = fs.readFileSync(root + '/managers/SocketManager.js', 'utf8');
+          const gam = fs.readFileSync(root + '/commands/gam.js', 'utf8');
+          const probe = fs.readFileSync('scripts/barony-live/probe.mjs', 'utf8');
           const bossDungeon = fs.readFileSync(root + '/structures/mapobjects/BossDungeonMapobject.js', 'utf8');
           const regularDungeon = fs.readFileSync(root + '/structures/mapobjects/DungeonMapobject.js', 'utf8');
           const parser = fs.readFileSync(root + '/utils/MapObjectParser.js', 'utf8');
           const owners = fs.readFileSync(root + '/utils/WorldMapOwnerInfoData.js', 'utf8');
           if (!socket.includes("serverInstance.zone.startsWith('EmpirefourkingdomsExGG') ? 'tcp' : 'wss'")) throw new Error('E4K TCP transport selection is not present in pinned ggejs.');
+          if (!socket.includes('sendCommand(commandId, paramObject)')) throw new Error('Pinned ggejs SocketManager no longer exposes the generic command sender.');
+          if (!gam.includes('client.movements._add_or_update(movements)')) throw new Error('Pinned ggejs GAM response handler no longer updates MovementManager.');
+          if (!probe.includes("client.socketManager.sendCommand('gam',{})") || !probe.includes('buildGamProbeSummary')) throw new Error('Barony probe no longer sends and summarizes the read-only GAM snapshot request.');
           if (!bossDungeon.includes('this.attackCooldownEnd = new Date(Date.now() + data[5] * 1000)') || !bossDungeon.includes('this.defeaterPlayerId = data[6]') || !bossDungeon.includes('this.kingdomId = data[7]')) throw new Error('BossDungeonMapobject type 11 field mapping changed.');
           if (!parser.includes('case 11:') || !parser.includes('return new BossDungeonMapobject(client, data)')) throw new Error('Type 11 rows are not parsed by BossDungeonMapobject.');
           if (!owners.includes('getKingdomBossDungeonOwnerByKingdomId = (kID) => this.getOwnerInfo(-229 - kID)')) throw new Error('Boss dungeon NPC owner mapping changed.');

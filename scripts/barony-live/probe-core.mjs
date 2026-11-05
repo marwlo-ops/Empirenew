@@ -449,3 +449,96 @@ export function isGgejsGamDispatchStack(stack) {
     .split(String.fromCharCode(10))
     .some((line) => line.includes('/commands/gam.js:'));
 }
+
+
+/**
+ * Summarize an account-scoped, read-only GAM movement snapshot request.
+ * GAM may arrive in several response batches. Deduplicate evidence by MID,
+ * but preserve local receive timestamps and never infer global coverage.
+ */
+export function buildGamProbeSummary({
+  requestSent = false,
+  preRequestBatches = [],
+  responseBatches = [],
+  ignoredNonGamMovementUpdates = 0,
+  requestSentAt = null,
+  sampledAt = new Date().toISOString(),
+  collectionComplete = false,
+  timedOut = false,
+  requestError = null,
+} = {}) {
+  const sampledAtIso = toIsoDate(sampledAt);
+  if (!sampledAtIso) throw new Error('Invalid GAM sample timestamp.');
+
+  const before = Array.isArray(preRequestBatches) ? preRequestBatches : [];
+  const after = Array.isArray(responseBatches) ? responseBatches : [];
+  const allBatches = [...before, ...after];
+  const evidenceByMovementId = new Map();
+
+  for (const batch of allBatches) {
+    for (const item of Array.isArray(batch?.evidence) ? batch.evidence : []) {
+      const movementId = Number(item?.movement_id);
+      if (Number.isSafeInteger(movementId) && movementId > 0) {
+        evidenceByMovementId.set(movementId, {
+          ...item,
+          gam_batch_received_at_utc: toIsoDate(batch?.received_at_utc),
+        });
+      }
+    }
+  }
+
+  const movementCount = allBatches.reduce((total, batch) => {
+    const count = Number(batch?.movement_count);
+    return total + (Number.isSafeInteger(count) && count >= 0 ? count : 0);
+  }, 0);
+  const sent = requestSent === true;
+  const status = !sent
+    ? 'gam_request_not_sent'
+    : after.length === 0
+      ? 'gam_request_no_response'
+      : collectionComplete
+        ? 'gam_response_collection_complete'
+        : 'gam_response_collection_incomplete';
+
+  const note = !sent
+    ? 'The read-only GAM request was not sent; this is not evidence that no movements exist.'
+    : after.length === 0
+      ? 'No GAM response was observed after the request timeout; this does not prove that no active movement exists.'
+      : collectionComplete
+        ? 'GAM response batches were collected until the quiet window; coverage is limited to movements returned to this account.'
+        : 'At least one GAM response arrived, but the response stream did not become quiet before the collection limit.';
+
+  return {
+    summary: {
+      status,
+      request_command: 'gam',
+      request_sent: sent,
+      observation_mode: 'active_read_only_snapshot_request',
+      request_sent_at_utc: toIsoDate(requestSentAt),
+      sampled_at_utc: sampledAtIso,
+      pre_request_push_batches: before.length,
+      gam_response_batches: after.length,
+      response_batch_count: after.length,
+      ignored_non_gam_movement_updates: Number.isSafeInteger(ignoredNonGamMovementUpdates) && ignoredNonGamMovementUpdates >= 0
+        ? ignoredNonGamMovementUpdates
+        : 0,
+      movement_count: movementCount,
+      matching_count: evidenceByMovementId.size,
+      collection_complete: collectionComplete === true,
+      timed_out: timedOut === true,
+      request_error: typeof requestError === 'string' && requestError
+        ? requestError.slice(0, 240)
+        : null,
+      response_batches: after.map((batch) => ({
+        received_at_utc: toIsoDate(batch?.received_at_utc),
+        movement_count: Number.isSafeInteger(Number(batch?.movement_count)) && Number(batch.movement_count) >= 0
+          ? Number(batch.movement_count)
+          : 0,
+        matching_count: Array.isArray(batch?.evidence) ? batch.evidence.length : 0,
+      })),
+      coverage: 'Only movements returned to the authenticated account session; not a global PL1 feed.',
+      note,
+    },
+    evidence: [...evidenceByMovementId.values()],
+  };
+}

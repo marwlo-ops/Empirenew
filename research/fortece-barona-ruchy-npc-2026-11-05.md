@@ -42,3 +42,42 @@ Wynik zawiera KID, X/Y, właściciela NPC, ID atakującego, ID ruchu, pozycję �
 ## Status live
 
 W tym commicie nie ma autoryzowanej, potwierdzonej sesji mostu PL1. Nowy ekstraktor jest sprawdzany testami syntetycznymi i zostanie użyty przez istniejący odczyt `GAM` tylko wtedy, gdy status mostu potwierdzi połączenie z `EmpirefourkingdomsExGG_3`.
+
+
+## Nowe ustalenie: jawne żądanie GAM — 2026-11-05 21:07 UTC
+
+### Niezależny klient potwierdza żądanie snapshotu
+
+W publicznym repozytorium `danadum/pygge` znaleziono `Movements.get_movements()`:
+- wysyła `send_json_command("gam", {})`;
+- w trybie synchronicznym czeka na odpowiedzi `gam` z `count=-1`;
+- scala kolejne `M` i `O`;
+- deduplikuje ruchy po `M.MID` i rekordy owner info po `OID`.
+
+Źródła:
+- https://github.com/danadum/pygge/blob/f0ed456bd7b522f3f33b4f14fbb4856aa54ced64/pygge/map/movements.py
+- https://github.com/danadum/pygge/blob/f0ed456bd7b522f3f33b4f14fbb4856aa54ced64/pygge/base_gge_socket.py
+
+W `BaseGgeSocket.wait_for_json_response` `count=-1` oznacza: czekaj na pierwszą odpowiedź do 5 sekund, a następnie zbieraj kolejne odpowiedzi, dopóki nie nastąpi 100 ms ciszy. To potwierdza, że `GAM` może zwrócić kilka batchy.
+
+### Zastosowanie w Empirenew
+
+W #barony probe używa teraz standardowego, read-only żądania:
+`client.socketManager.sendCommand('gam', {})`.
+
+- Hook `MovementManager._add_or_update` jest filtrowany po stosie `commands/gam.js`.
+- Batch przed żądaniem i batch odpowiedzi po żądaniu są rozróżniane.
+- Odpowiedzi wieloczęściowe są zbierane do 250 ms ciszy (z ograniczeniem maksymalnego oczekiwania).
+- Dowody są deduplikowane po `movement_id`.
+- Wynik rozróżnia `gam_request_not_sent`, `gam_request_no_response`, `gam_response_collection_complete` i `gam_response_collection_incomplete`.
+- Timeout nie jest interpretowany jako brak aktywnych ruchów.
+
+To usuwa wcześniejsze ograniczenie „tylko pasywny push”. Nadal jest to snapshot ruchów zwróconych dla jednej autoryzowanej sesji/konta, nie globalny feed PL1. Ruch dowodzi armii w drodze do dokładnego KID/X/Y; czas wyjścia jest estymacją lokalną z `PT`, nie dokładnym czasem serwerowym.
+
+### Ograniczenia live
+
+Odczyt statusu mostu o 21:07 UTC:
+- `EmpirefourkingdomsExGG_3=false`;
+- nie ma autoryzowanej sesji operatora w tym środowisku.
+
+Nie wykonano żądania GAM do produkcyjnego PL1 i nie zapisano żadnych zdarzeń ataku. Do testu live nadal potrzebna jest działająca, autoryzowana sesja produkcyjnego PL1. Nie użyto cooldownu ani historii IT1/Beta.

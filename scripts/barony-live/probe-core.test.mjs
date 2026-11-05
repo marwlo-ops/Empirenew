@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  buildObservation, buildScanPlan, compareObservations,
+  buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
   isNpcBattleReportMessage, isGgejsGamDispatchStack,
   extractParsedOutboundBossDungeonMovementEvidence,
@@ -369,4 +369,81 @@ test('recognizes only the ggejs GAM response handler stack', () => {
   assert.equal(isGgejsGamDispatchStack(otherStack), false);
   assert.equal(isGgejsGamDispatchStack(''), false);
   assert.equal(isGgejsGamDispatchStack(null), false);
+});
+
+
+test('summarizes a read-only GAM request, collects response batches and deduplicates movement IDs', () => {
+  const first = { movement_id: 7001, target: { kid: 1, x: 321, y: 654 } };
+  const second = { movement_id: 7002, target: { kid: 2, x: 400, y: 500 } };
+  const result = buildGamProbeSummary({
+    requestSent: true,
+    requestSentAt: '2026-11-05T21:00:00Z',
+    sampledAt: '2026-11-05T21:00:01Z',
+    preRequestBatches: [{
+      received_at_utc: '2026-11-05T20:59:59Z',
+      movement_count: 1,
+      evidence: [first],
+    }],
+    responseBatches: [
+      {
+        received_at_utc: '2026-11-05T21:00:00.100Z',
+        movement_count: 2,
+        evidence: [first, second],
+      },
+      {
+        received_at_utc: '2026-11-05T21:00:00.250Z',
+        movement_count: 1,
+        evidence: [{ ...second, attacker_player_id: 1234567 }],
+      },
+    ],
+    ignoredNonGamMovementUpdates: 3,
+    collectionComplete: true,
+    timedOut: false,
+  });
+
+  assert.equal(result.summary.status, 'gam_response_collection_complete');
+  assert.equal(result.summary.request_command, 'gam');
+  assert.equal(result.summary.request_sent, true);
+  assert.equal(result.summary.observation_mode, 'active_read_only_snapshot_request');
+  assert.equal(result.summary.pre_request_push_batches, 1);
+  assert.equal(result.summary.gam_response_batches, 2);
+  assert.equal(result.summary.movement_count, 4);
+  assert.equal(result.summary.matching_count, 2);
+  assert.equal(result.summary.ignored_non_gam_movement_updates, 3);
+  assert.equal(result.summary.collection_complete, true);
+  assert.equal(result.evidence.length, 2);
+  assert.equal(result.evidence.find((item) => item.movement_id === 7002).attacker_player_id, 1234567);
+  assert.match(result.summary.coverage, /not a global PL1 feed/);
+});
+
+test('does not infer an empty movement map when a read-only GAM request gets no response', () => {
+  const result = buildGamProbeSummary({
+    requestSent: true,
+    requestSentAt: '2026-11-05T21:00:00Z',
+    sampledAt: '2026-11-05T21:00:05Z',
+    responseBatches: [],
+    collectionComplete: false,
+    timedOut: true,
+  });
+
+  assert.equal(result.summary.status, 'gam_request_no_response');
+  assert.equal(result.summary.request_sent, true);
+  assert.equal(result.summary.movement_count, 0);
+  assert.equal(result.summary.matching_count, 0);
+  assert.equal(result.summary.timed_out, true);
+  assert.match(result.summary.note, /does not prove that no active movement exists/);
+  assert.deepEqual(result.evidence, []);
+});
+
+test('marks a disconnected GAM request as not sent instead of as an empty snapshot', () => {
+  const result = buildGamProbeSummary({
+    requestSent: false,
+    sampledAt: '2026-11-05T21:00:00Z',
+    requestError: 'SocketManager.sendCommand returned false',
+  });
+
+  assert.equal(result.summary.status, 'gam_request_not_sent');
+  assert.equal(result.summary.request_sent, false);
+  assert.equal(result.summary.request_error, 'SocketManager.sendCommand returned false');
+  assert.equal(result.summary.timed_out, false);
 });

@@ -32,15 +32,19 @@ Domyślnie odpytuje maksymalnie 3 punkty na krainę. Każdy odczyt sektora obejm
 
 ## Ruchy atakujące NPC (opcjonalnie)
 
-Po lokalnym, autoryzowanym połączeniu z produkcyjnym PL1 można opcjonalnie obserwować aktualizacje ruchów `GAM` wypychane przez serwer:
+Po lokalnym, autoryzowanym połączeniu z produkcyjnym PL1 można pobrać ruchy widoczne dla zalogowanego konta:
 
 ```sh
 node scripts/barony-live/probe.mjs --movements
 ```
 
-To jest wyłącznie pasywny odczyt ruchów widocznych dla zalogowanego konta. Probe nie wysyła komendy `GAM`: w przypiętym `ggejs` potwierdzono parser odpowiedzi i `MovementManager`, ale nie udokumentowano metody żądania snapshotu. Ekstraktor przyjmuje tylko ruch typu 11, kierunek wychodzący, cel typu 11, zgodny KID i właściciela NPC oraz dodatni ID właściciela źródła. Wynik zawiera ID gracza, dokładne X/Y celu i szacowany czas wyjścia/przybycia wyliczony przez `ggejs` z lokalnego zegara. `attack_time_utc` pozostaje `null`; ruch w drodze nie dowodzi zakończenia bitwy i nie obejmuje całego serwera. Dane ruchów są wypisywane tylko w wyniku lokalnego uruchomienia i nie są dopisywane do pliku stanu ani repozytorium.
+Probe wysyła **read-only** komendę `GAM` z pustym payloadem (`client.socketManager.sendCommand('gam', {})`). To nie jest już wyłącznie nasłuch pasywny. Niezależne repozytorium klienta `pygge` opisuje `Movements.get_movements()` jako pobranie ruchów gracza i wykonuje `send_json_command("gam", {})`, a następnie zbiera wszystkie odpowiedzi `gam` (`count=-1`), scala je i deduplikuje po `MID`. Zobacz [pygge movements.py](https://github.com/danadum/pygge/blob/f0ed456bd7b522f3f33b4f14fbb4856aa54ced64/pygge/map/movements.py) oraz [BaseGgeSocket](https://github.com/danadum/pygge/blob/f0ed456bd7b522f3f33b4f14fbb4856aa54ced64/pygge/base_gge_socket.py).
 
-Jeśli w oknie obserwacji 3 sekund nie nadejdzie aktualizacja `GAM`, wynik ma status `no_server_push_observed`; nie oznacza to, że serwer nie ma aktywnych ruchów. Okno obserwacji można zmienić przez `--movement-wait-ms 1000..10000`. Nie uruchamiaj tego w GitHub Actions; poświadczenia są przeznaczone wyłącznie do lokalnej sesji operatora.
+W przypiętym `ggejs` odpowiedź `gam` jest parsowana przez `commands/gam.js` i trafia do `MovementManager`; probe rozpoznaje wyłącznie batch wywołany przez ten handler, odrzucając aktualizacje CRA/CRM/CSM. Zbiera wiele batchy aż do 250 ms ciszy, z ograniczonym czasem oczekiwania. Jeżeli żądanie nie zostanie wysłane albo serwer nie odpowie, wynik wyraźnie to rozróżnia; brak odpowiedzi nie oznacza braku ruchów.
+
+Ekstraktor przyjmuje tylko ruch typu 11, kierunek wychodzący, cel typu 11, zgodny KID i właściciela NPC oraz dodatni ID właściciela źródła. Wynik zawiera ID gracza, dokładne X/Y celu i szacowany czas wyjścia/przybycia. `PT` i `TT` są interpretowane względem lokalnego czasu próbki, więc `movement_departure_estimate_utc` nadal **nie jest dokładnym serwerowym czasem ataku**. Ruch w drodze nie dowodzi, że bitwa się zakończyła.
+
+GAM zwraca ruchy dostępne dla bieżącej autoryzowanej sesji/konta; nie potwierdzono globalnej kompletności wszystkich ruchów PL1. Dane ruchów są wypisywane wyłącznie w wyniku lokalnego uruchomienia i nie są dopisywane do pliku stanu ani repozytorium. Nie uruchamiaj tego w GitHub Actions; poświadczenia są przeznaczone wyłącznie do lokalnej sesji operatora.
 
 ## Raporty bitew NPC z własnej skrzynki (opcjonalnie)
 

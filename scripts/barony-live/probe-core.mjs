@@ -184,12 +184,18 @@ export function stateKey(target) {
  * The report confirms target + attacker, but its delivery timestamp is not
  * the attack start time and mailbox coverage is limited to the logged-in account.
  */
+export function isNpcBattleReportMessage(message) {
+  if (Number(message?.messageType) !== 6 || Number(message?.areaType) !== 11) return false;
+  const metadataPrefix = typeof message?.metadata === 'string'
+    ? message.metadata.split('#')[0].split('+')
+    : [];
+  const metadataSubtype = metadataPrefix.length > 1 ? Number(metadataPrefix[1]) : NaN;
+  const subtype = Number.isInteger(metadataSubtype) ? metadataSubtype : Number(message?.subType);
+  return subtype === 2;
+}
+
 export function extractNpcBattleReportEvidence(message, battleLog) {
-  if (
-    Number(message?.messageType) !== 6 ||
-    Number(message?.areaType) !== 11 ||
-    Number(message?.subType) !== 2
-  ) return null;
+  if (!isNpcBattleReportMessage(message)) return null;
 
   const kid = Number(message.kingdomId);
   const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[kid];

@@ -209,7 +209,7 @@ async function loadServerIntel(){
   const esc=s=>String(s??'').replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
   list.innerHTML=candidates.length?candidates.slice(0,40).map(p=>{
    const e=p.latest,fort=p.fortress;
-   return '<article class="item"><strong>Kandydat w pobliżu · '+esc(p.player||'Gracz')+'</strong><small>'+esc(p.alliance_name||'')+' · PID '+esc(p.player_id)+'</small><small>Sygnał: '+esc(e.kind)+' · '+(Number(e.delta)>0?'+':'')+fmtNum(e.delta)+' · '+fmt(e.detected_at)+'</small><small>Pozycja gracza: '+p.position.x+':'+p.position.y+' · Forteca IT1: '+fort.x+':'+fort.y+' · odległość: '+p.distance.toFixed(1)+'</small><small>To korelacja przestrzenna i czasowa, nie potwierdzenie ataku. Współrzędne IT1 nie są zweryfikowane jako identyczne z PL1.</small></article>';
+   return '<article class="item"><strong>Kandydat w pobliżu · '+esc(p.player||'Gracz')+'</strong><small>'+esc(p.alliance_name||'')+' · PID '+esc(p.player_id)+'</small><small>Sygnał: '+esc(e.kind)+' · '+(Number(e.delta)>0?'+':'')+Number(e.delta||0).toLocaleString('pl-PL')+' · '+fmt(e.detected_at)+'</small><small>Pozycja gracza: '+p.position.x+':'+p.position.y+' · Forteca IT1: '+fort.x+':'+fort.y+' · odległość: '+p.distance.toFixed(1)+'</small><small>To korelacja przestrzenna i czasowa, nie potwierdzenie ataku. Współrzędne IT1 nie są zweryfikowane jako identyczne z PL1.</small></article>';
   }).join(''):'<div class="empty">Brak graczy z sygnałem aktywności w promieniu 30 pól od fortec IT1. Sygnały aktywności nie wskazują celu ataku.</div>';
  }catch(error){
   summary.textContent='Nie udało się połączyć Szpiegowania z mapą: '+error.message;

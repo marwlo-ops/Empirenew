@@ -688,3 +688,42 @@ GAM nadal zwraca ruchy widoczne dla autoryzowanego konta, a nie globalną histor
 
 Zmodyfikowano wyłącznie skrypty scripts/barony-live/** i niniejszy dziennik badań. Nie zmieniono barony.html, danych mapy, Mapa, Szpiegowanie ani Dodatkowe.
 
+## 25. Semantyka `dungeons_history.attacked_at` i identyfikatora gracza — audyt źródła GGE Tracker, 2026-11-06
+
+### Wynik audytu
+
+Przeanalizowano kod GGE Tracker przypięty do commita `7d620820a76cde4176c752f6972ce6f0c9ad7ab1`. W publicznym kodzie scrapera **nie ma przekazania czasu ataku z odpowiedzi gry do kolumny `dungeons_history.attacked_at`**.
+
+1. `appendDungeons()` przyjmuje tylko obiekty typu `11`; odczytuje `dungeon[5]` jako pozostały cooldown i `dungeon[6]` jako ID gracza, a `updatedAt` ustawia lokalnie przez `new Date()`.
+2. `updateDungeonsList()` wybiera rekordy fortec, których zapisany `global_available_at <= NOW()`, a następnie wywołuje `scanDungeonCooldowns()`.
+3. `collectDungeonCooldowns()` ponownie odczytuje GAA. Dla typu `11` z dodatnim `dungeon[5]` tworzy wpis z `player_id = dungeon[6]` i wylicza nowe terminy cooldownu względem lokalnego `currentTime`. Nie odczytuje pola serwerowego z czasem ataku. Komentarz w kodzie mówi o obliczeniu daty ostatniego ataku, ale implementacja zapisuje tylko pozostały cooldown, ID gracza i terminy wyliczone od czasu próbki.
+4. `persistDungeonUpdates()` wykonuje `INSERT INTO dungeons_history (kid, position_x, position_y, player_id)`; kolumna `attacked_at` nie występuje w INSERT i nie jest parametrem przekazywanym przez scraper.
+5. Publiczne API `getDungeonsByPlayer()` odczytuje `DH.attacked_at` i zwraca je jako `attacked_at`. To dowodzi, że API wystawia wartość z bazy, ale **nie dowodzi, skąd produkcyjna baza ją otrzymuje**. W przejrzanym publicznym kodzie nie znaleziono schematu tabeli, defaultu ani triggera dla tej kolumny.
+6. Testy API używają osobnej ścieżki fixture: `seedScenario()` jawnie wstawia `attacked_at` z kontrolowanego czasu scenariusza. Testy potwierdzają mapowanie kolumny w API, a nie semantykę timestampu zapisywanego przez produkcyjny scraper.
+
+### Wniosek o czasie
+
+Nie wolno traktować pola GGE Tracker `attacked_at` jako dokładnego czasu rozpoczęcia ataku PL1 na podstawie samej odpowiedzi API. Publiczny scraper nie przekazuje czasu zdarzenia z gry. Jeśli produkcyjna tabela nadaje kolumnie domyślny czas INSERT, byłby to co najwyżej czas rejestracji przez scraper; tej hipotezy nie potwierdzono bez schematu/triggera lub odczytu produkcyjnej bazy.
+
+### Wniosek o ID gracza
+
+Endpoint historii gracza oczekuje identyfikatora z trzyznakowym sufiksem kraju/serwera: `getCountryCode()` bierze ostatnie 3 znaki, a `removeCountryCode()` usuwa je przed zapytaniem do bazy. Wewnętrzny scraper czyta mapę `outer-name -> code` z `servers.xml` przez `readPublicPlayerIdCodes()`. Ten plik konfiguracyjny nie jest częścią publicznego repozytorium. `zoneId=259` z `e4k-data` nie jest potwierdzonym zamiennikiem trzyznakowego kodu. Dotychczasowe próby z ID ze Szpiegowania oraz sufiksem `259` zakończyły się odpowiednio `Player not found` i `Invalid player ID`; nie dopisano historii PL1.
+
+### Co z tego można wykorzystać
+
+- Odczyt GAA typu `11` może dostarczyć dla konkretnej współrzędnej target-specific `defeaterPlayerId` i pozostały cooldown. Wzrost cooldownu/zmiana defeater ID pozostaje sygnałem kandydującym do czasu walidacji kontrolowanym atakiem na produkcyjnym PL1.
+- GGE Tracker wykonuje cooldown sweep tylko dla fortec, których zapisany globalny termin dostępności już minął. Jego historia może więc być próbkowana po zmianie stanu, a nie dokładnie w chwili rozpoczęcia ataku.
+- `GAM` i raporty NPC w Empirenew pozostają źródłami konta zalogowanego, nie globalnym feedem serwera. Czas wyjścia ruchu i czas dostarczenia wiadomości pozostają estymacjami.
+- Nie użyto cooldownu IT1/Beta do PL1. Katalog IT1 nadal dostarcza wyłącznie współrzędne.
+
+### Źródła kodu
+
+- `appendDungeons()`, `collectDungeonCooldowns()`, `scanDungeonCooldowns()`, `persistDungeonUpdates()`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+- `getDungeonsByPlayer()` i odczyt `DH.attacked_at`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts
+- `getCountryCode()` / `removeCountryCode()`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/helper/api-helper.ts
+- `readPublicPlayerIdCodes()` z prywatnego pliku konfiguracyjnego: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/servers-file.ts
+- Fixture z jawnie ustawionym `attacked_at`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-scenario.ts
+
+### Następny test
+
+Na autoryzowanej sesji produkcyjnego PL1 wykonać przed i po jednym kontrolowanym ataku odczyt tej samej fortecy przez GAA: `kid/x/y`, `owner_id`, `defeaterPlayerId`, cooldown i dokładny czas lokalnego odbioru. Równolegle zebrać GAM i raport NPC z konta wykonującego atak. To pozwoli ustalić, czy GAA zmienia `defeaterPlayerId` dopiero po zwycięstwie oraz zawęzić przedział obserwacji. Dla dokładnego timestampu nadal potrzebne jest pole serwerowe albo potwierdzony schemat produkcyjnej kolumny `attacked_at`.

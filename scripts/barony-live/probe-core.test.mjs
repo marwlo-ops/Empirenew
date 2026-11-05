@@ -5,7 +5,8 @@ import {
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
   isNpcBattleReportMessage, isGgejsGamDispatchStack,
   extractParsedOutboundBossDungeonMovementEvidence,
-  pickSamples, selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
+  parseGgejsCommandResponseEnvelope, pickSamples,
+  selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
 } from './probe-core.mjs';
 
 function catalog() {
@@ -447,3 +448,98 @@ test('marks a disconnected GAM request as not sent instead of as an empty snapsh
   assert.equal(result.summary.request_error, 'SocketManager.sendCommand returned false');
   assert.equal(result.summary.timed_out, false);
 });
+
+test('parses the ggejs XT response envelope without retaining account payload data', () => {
+  const success = parseGgejsCommandResponseEnvelope(
+    '%xt%gam%EmpirefourkingdomsExGG_3%0%{"M":[],"O":[]}%'
+  );
+  assert.deepEqual(success, {
+    command: 'gam', zone: 'EmpirefourkingdomsExGG_3', error_code: 0, ok: true,
+  });
+  const acceptedLegacyCode = parseGgejsCommandResponseEnvelope(
+    '%xt%gam%EmpirefourkingdomsExGG_3%10005%{}%'
+  );
+  assert.equal(acceptedLegacyCode.ok, true);
+  const rejected = parseGgejsCommandResponseEnvelope(
+    '%xt%gam%EmpirefourkingdomsExGG_3%42%{}%'
+  );
+  assert.equal(rejected.error_code, 42);
+  assert.equal(rejected.ok, false);
+  assert.equal(parseGgejsCommandResponseEnvelope('%xt%gaa%EmpirefourkingdomsExGG_3%0%{}%').command, 'gaa');
+  assert.equal(parseGgejsCommandResponseEnvelope('%xt%gam%EmpirefourkingdomsExGG_3%bad%{}%').ok, null);
+  assert.equal(parseGgejsCommandResponseEnvelope('<msg t="sys"></msg>'), null);
+  assert.equal(parseGgejsCommandResponseEnvelope(null), null);
+});
+
+test('does not label an error-code GAM handler batch as a successful empty snapshot', () => {
+  const result = buildGamProbeSummary({
+    requestSent: true,
+    requestSentAt: '2026-11-05T22:30:00Z',
+    sampledAt: '2026-11-05T22:30:01Z',
+    responseStatusCaptureEnabled: true,
+    responseStatuses: [{
+      phase: 'request', command: 'gam', zone: 'EmpirefourkingdomsExGG_3',
+      error_code: 42, ok: false, received_at_utc: '2026-11-05T22:30:00.100Z',
+    }],
+    responseBatches: [{
+      phase: 'request', movement_count: 0, evidence: [],
+      response_error_code: 42, response_ok: false,
+      received_at_utc: '2026-11-05T22:30:00.101Z',
+    }],
+    collectionComplete: true,
+  });
+  assert.equal(result.summary.status, 'gam_response_rejected');
+  assert.equal(result.summary.collection_complete, false);
+  assert.equal(result.summary.response_status_error_count, 1);
+  assert.equal(result.summary.accepted_response_batch_count, 0);
+  assert.equal(result.summary.movement_count, 0);
+  assert.deepEqual(result.evidence, []);
+  assert.match(result.summary.note, /non-success GAM error code/);
+});
+
+test('does not accept a GAM batch when the raw response status could not be verified', () => {
+  const result = buildGamProbeSummary({
+    requestSent: true,
+    responseStatusCaptureEnabled: true,
+    responseStatuses: [{
+      phase: 'request', command: 'gam', zone: 'EmpirefourkingdomsExGG_3',
+      error_code: null, ok: null,
+    }],
+    responseBatches: [{
+      phase: 'request', movement_count: 1, evidence: [{ movement_id: 7003 }],
+      response_error_code: null, response_ok: null,
+    }],
+    collectionComplete: true,
+  });
+  assert.equal(result.summary.status, 'gam_response_status_unverified');
+  assert.equal(result.summary.collection_complete, false);
+  assert.equal(result.summary.movement_count, 0);
+  assert.equal(result.summary.matching_count, 0);
+  assert.deepEqual(result.evidence, []);
+});
+
+test('accepts a parsed GAM batch only when its response envelope reports success', () => {
+  const result = buildGamProbeSummary({
+    requestSent: true,
+    requestSentAt: '2026-11-05T22:40:00Z',
+    sampledAt: '2026-11-05T22:40:01Z',
+    responseStatusCaptureEnabled: true,
+    responseStatuses: [{
+      phase: 'request', command: 'gam', zone: 'EmpirefourkingdomsExGG_3',
+      error_code: 0, ok: true, received_at_utc: '2026-11-05T22:40:00.100Z',
+    }],
+    responseBatches: [{
+      phase: 'request', movement_count: 1, evidence: [{ movement_id: 7004 }],
+      response_error_code: 0, response_ok: true,
+      received_at_utc: '2026-11-05T22:40:00.101Z',
+    }],
+    collectionComplete: true,
+  });
+  assert.equal(result.summary.status, 'gam_response_collection_complete');
+  assert.equal(result.summary.response_status_success_count, 1);
+  assert.equal(result.summary.accepted_response_batch_count, 1);
+  assert.equal(result.summary.movement_count, 1);
+  assert.equal(result.summary.matching_count, 1);
+  assert.equal(result.evidence[0].movement_id, 7004);
+});
+

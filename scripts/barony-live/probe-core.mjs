@@ -250,6 +250,7 @@ export function extractNpcBattleReportEvidence(message, battleLog) {
       'message.ownerId',
       'battleLog.mapobject.position',
       'battleLog.attacker.playerId',
+      'battleLog.attacker.ownerInfo.playerName',
       'battleLog.defender.playerId',
     ],
   };

@@ -18,7 +18,7 @@ assert.match(html, /id="intelSignals"/);
 assert.match(html, /Nie zawiera współrzędnych celu/);
 assert.doesNotMatch(html, /Sprawdzone w PL1/);
 assert.match(html, /Brak potwierdzonego celu ataku w tych sygnałach/);
-assert.match(html, /nie jest dowodem ataku na fortecę/);
+assert.match(html, /nie jest dowodem ataku na fortecę/i);
 assert.doesNotMatch(html, /kandydaci w pobliżu fortec IT1/i);
 assert.doesNotMatch(html, /Kandydat w pobliżu/);
 

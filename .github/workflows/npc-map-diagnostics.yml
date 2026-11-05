@@ -41,9 +41,9 @@ jobs:
         continue-on-error: true
         run: |
           python3 scripts/scan_npc_map.py \
-            --kingdom "${{ inputs.kingdom }}" \
-            --x "${{ inputs.x }}" \
-            --y "${{ inputs.y }}" \
+            --kingdom "${{ inputs.kingdom || '1' }}" \
+            --x "${{ inputs.x || '0' }}" \
+            --y "${{ inputs.y || '0' }}" \
             --chunk-size 12 \
             --diagnostic npc-map-diagnostic.json
       - name: Upload diagnostic report

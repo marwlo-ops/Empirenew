@@ -101,7 +101,7 @@ function render(){
  $('list').innerHTML=targets.length?targets.map(x=>{
   const k=keyOf(x),h=hist[k],state=historySummary(x);
   const events=(h?.events||[]).slice(-3).reverse().map(e=>'<small>Atak: '+fmt(e.attacked_at)+' · '+(e.player_name||('ID '+(e.player_id??'nieznane')) )+'</small>').join('');
-  return '<article class="item"><strong>Forteca · '+names[x.kingdom]+'</strong><small>X: '+x.x+' · Y: '+x.y+' · źródło mapy: IT1</small><small>'+state+'</small>'+events+'<button data-check="'+k+'" type="button">Sprawdź aktywność PL1</button></article>';
+  return '<article class="item"><strong>Forteca · '+names[x.kingdom]+'</strong><small>X: '+x.x+' · Y: '+x.y+' · źródło mapy: IT1</small><small>'+state+'</small>'+events+'<button data-attack="'+k+'" type="button">Zapisz atak · blokada 24 h</button></article>';
  }).join(''):'<div class="empty">'+(records.length?'Brak wyników dla wybranych filtrów.':'Brak lokalizacji w tej krainie.')+'</div>';
  const pts=targets.filter(x=>Number.isFinite(x.x)&&Number.isFinite(x.y));
  if(pts.length){

@@ -444,7 +444,8 @@ export function extractParsedOutboundBossDungeonMovementEvidence(movement, sampl
  */
 export function isGgejsGamDispatchStack(stack) {
   if (typeof stack !== 'string' || stack.length === 0) return false;
-  return stack.split('\\n').some((line) =>
-    /[\\/]commands[\\/]gam\\.js(?::\\d+:\\d+)?(?:\\)|\\s|$)/.test(line)
-  );
+  const normalizedStack = stack.split(String.fromCharCode(92)).join('/');
+  return normalizedStack
+    .split(String.fromCharCode(10))
+    .some((line) => line.includes('/commands/gam.js:'));
 }

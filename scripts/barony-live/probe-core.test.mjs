@@ -348,17 +348,24 @@ test('rejects parsed movements with wrong direction/type/owner, missing player o
 
 
 test('recognizes only the ggejs GAM response handler stack', () => {
+  const newline = String.fromCharCode(10);
+  const backslash = String.fromCharCode(92);
   const gamStack = [
     'Error',
     '    at Object.execute (/opt/app/node_modules/ggejs/src/commands/gam.js:13:22)',
     '    at executeResponse (/opt/app/node_modules/ggejs/src/commands/index.js:55:13)',
-  ].join('\\n');
+  ].join(newline);
+  const windowsGamStack = 'Error' + newline +
+    '    at Object.execute (C:' + backslash + 'app' + backslash +
+    'node_modules' + backslash + 'ggejs' + backslash + 'src' + backslash +
+    'commands' + backslash + 'gam.js:13:22)';
   const otherStack = [
     'Error',
     '    at Object.execute (/opt/app/node_modules/ggejs/src/commands/cra.js:20:22)',
     '    at executeResponse (/opt/app/node_modules/ggejs/src/commands/index.js:55:13)',
-  ].join('\\n');
+  ].join(newline);
   assert.equal(isGgejsGamDispatchStack(gamStack), true);
+  assert.equal(isGgejsGamDispatchStack(windowsGamStack), true);
   assert.equal(isGgejsGamDispatchStack(otherStack), false);
   assert.equal(isGgejsGamDispatchStack(''), false);
   assert.equal(isGgejsGamDispatchStack(null), false);

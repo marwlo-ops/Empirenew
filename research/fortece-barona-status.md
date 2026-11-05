@@ -559,3 +559,33 @@ Wniosek: raport NPC może potwierdzić dokładny cel (KID/X/Y) i ID atakującego
 - https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/bld.js
 
 Zakres repozytorium: wyłącznie dokumentacja badawcza. Nie zmieniono kodu UI, mapy ani danych publikowanych. Nie wykonano live połączenia PL1 i nie zapisano zdarzeń ataku.
+
+
+## 22. Audyt aktualnego katalogu i czasu historii — 2026-11-05 20:46 UTC
+
+### Publiczny katalog serwerów — ponowny odczyt live
+
+Bezpośredni odczyt `GET https://api.gge-tracker.com/api/v1/servers/catalog` (HTTP 200, cache bypass) potwierdził:
+- `E4K_PL1`: `enabled=true`, `fortress=false`;
+- `E4K_PL1_BETA`: `enabled=true`, `fortress=true`;
+- publiczny wpis nie zawiera `code`, `zone` ani `zone-id`. Nie ma podstaw do konstruowania trzycyfrowego sufiksu ID gracza na podstawie tego katalogu.
+Lista `/servers` zawiera nazwy serwerów, ale nie publikuje kodu routingu.
+
+### Semantyka `attacked_at` — wynik audytu scrapera
+
+W kodzie live scrapera GGE Tracker `persistDungeonUpdates()` zapisuje do `dungeons_history` wyłącznie `kid`, `position_x`, `position_y`, `player_id`; nie przekazuje `attacked_at`. `scanDungeonCooldowns()` wybiera tylko rekordy, których poprzedni cooldown globalny wygasł, a następnie zapisuje obserwację, jeśli bieżący cooldown jest dodatni. Worker ma domyślny interwał 120 sekund. API odczytuje `DH.attacked_at`, lecz w przeglądanym repozytorium nie znaleziono definicji schematu/triggera wyjaśniającego jego źródło. Pole pozostaje niepotwierdzonym czasem bazy/obserwacji, a nie serwerowym timestampem ataku.
+
+### GAM — zawężenie obserwatora
+
+`ggejs` ma handler odpowiedzi `commands/gam.js`, który aktualizuje `MovementManager`; nie znaleziono udokumentowanego żądania wychodzącego GAM. Probe pozostaje pasywny. Zmieniono filtr, by rozpoznawał wyłącznie stos wywołań `commands/gam.js`; inne handlery aktualizujące `MovementManager` nie są liczone jako GAM. Test obejmuje ścieżkę Unix i Windows. Batch jest opatrzony czasem jego otrzymania. To nadal obserwacja ruchów widocznych dla jednego zalogowanego konta, nie globalny feed.
+
+### Most PL1 — odczyt live
+
+Odczyt `GET https://empire-api.fly.dev/status` (HTTP 200) o 20:46 UTC:
+- `EmpirefourkingdomsExGG_3=false`;
+- `EmpirefourkingdomsExGG2_3=false`.
+Nie wykonano GAA/GAM przez most, ponieważ żaden z aliasów produkcyjnego PL1 nie zgłasza połączenia. Nie było autoryzowanej sesji operatora, więc lokalnego probe mapy/ruchów/raportów nie uruchomiono.
+
+### Zakres i status
+
+Zmiana kodu dotyczy wyłącznie observera GAM w `scripts/barony-live/**`; niniejszy dziennik dotyczy wyłącznie badań Barony. Nie zmieniono `barony.html`, danych mapy, Mapa, Szpiegowanie ani Dodatkowe. Nie zapisano żadnych ataków. `attack_time_utc` pozostaje null bez źródła serwerowego.

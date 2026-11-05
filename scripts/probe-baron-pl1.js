@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 // Read-only probes only; do not persist player names or inferred attack events.
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
@@ -27,6 +28,28 @@ console.log(JSON.stringify({
   candidate_entries: serverCandidates
 }));
 
+try {
+  const catalogResponse = await fetch(base + "/servers/catalog", {
+    headers: { Accept: "application/xml, text/xml, */*" },
+    signal: AbortSignal.timeout(20000)
+  });
+  const xml = await catalogResponse.text();
+  const snippets = {};
+  for (const alias of ["E4K_PL1", "E4K_PL1_BETA"]) {
+    const index = xml.indexOf(alias);
+    snippets[alias] = index < 0 ? null : xml.slice(Math.max(0, index - 350), Math.min(xml.length, index + 700)).replace(/\\s+/g, " ");
+  }
+  console.log(JSON.stringify({
+    probe: "server-catalog",
+    http_status: catalogResponse.status,
+    content_type: catalogResponse.headers.get("content-type"),
+    bytes: xml.length,
+    server_entries: snippets
+  }));
+} catch (error) {
+  console.log(JSON.stringify({ probe: "server-catalog", error: String(error) }));
+}
+
 for (const server of [targetServer, "E4K_PL1", "E4K_PL1_BETA", "PL1", "IT1"]) {
   try {
     const url = base + "/dungeons?page=1&size=1&filterByKid=" + encodeURIComponent("[1,2,3]");
@@ -55,6 +78,42 @@ for (const server of [targetServer, "E4K_PL1", "E4K_PL1_BETA", "PL1", "IT1"]) {
   } catch (error) {
     console.log(JSON.stringify({ probe: "dungeons", server, error: String(error) }));
   }
+}
+
+try {
+  const url = base + "/dungeons?page=1&size=4000&filterByKid=" + encodeURIComponent("[1,2,3]");
+  const response = await fetch(url, {
+    headers: { "gge-server": "E4K_PL1_BETA", Accept: "application/json" },
+    signal: AbortSignal.timeout(30000)
+  });
+  const body = await response.json();
+  const dungeons = Array.isArray(body.dungeons) ? body.dungeons : [];
+  const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
+  const known = new Map();
+  for (const data of Object.values(map.results || {})) {
+    for (const f of data.fortresses || []) known.set(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y), true);
+  }
+  const byKid = {};
+  for (const d of dungeons) {
+    const kid = Number(d.kid);
+    const key = kid + "/" + Number(d.position_x) + "/" + Number(d.position_y);
+    const row = byKid[kid] ||= { total: 0, overlap_with_it1: 0, with_last_attack: 0, with_player_id: 0 };
+    row.total++;
+    if (known.has(key)) row.overlap_with_it1++;
+    if (d.last_attack) row.with_last_attack++;
+    if (d.player_id !== null && d.player_id !== undefined) row.with_player_id++;
+  }
+  console.log(JSON.stringify({
+    probe: "beta-dungeon-coordinate-overlap",
+    http_status: response.status,
+    error: body.error ?? null,
+    pagination: body.pagination ?? null,
+    rows: dungeons.length,
+    by_kingdom: byKid,
+    note: "E4K_PL1_BETA is a separate beta identifier; overlap does not establish production PL1 equivalence."
+  }));
+} catch (error) {
+  console.log(JSON.stringify({ probe: "beta-dungeon-coordinate-overlap", error: String(error) }));
 }
 
 async function probeBridge() {

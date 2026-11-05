@@ -1,6 +1,12 @@
 name: NPC map API diagnostics
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/scan_npc_map.py'
+      - '.github/workflows/npc-map-diagnostics.yml'
+      - 'research/npc-map-bridge-fix.md'
   workflow_dispatch:
     inputs:
       kingdom:

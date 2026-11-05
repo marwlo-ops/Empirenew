@@ -227,6 +227,88 @@ async function probeBetaPlayerHistoryFromDungeonRows() {
   }
 }
 
+async function probeProductionPlayerHistoryFromSpySnapshot() {
+  try {
+    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
+    const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
+    const known = new Set();
+    for (const data of Object.values(map.results || {})) {
+      for (const f of data.fortresses || []) known.add(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y));
+    }
+    const members = (snapshot.alliances || []).flatMap(a => a.members || [])
+      .filter(m => m.name && m.member_id != null)
+      .slice(0, 3);
+    const results = [];
+    for (const member of members) {
+      let playerId = String(member.member_id);
+      let lookupStatus = null;
+      let lookupError = null;
+      try {
+        const lookup = await fetch(base + "/players/" + encodeURIComponent(member.name), {
+          headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
+          signal: AbortSignal.timeout(20000)
+        });
+        const player = await lookup.json();
+        lookupStatus = lookup.status;
+        lookupError = player.error ?? null;
+        if (lookup.ok && player.player_id != null) playerId = String(player.player_id);
+      } catch (error) {
+        lookupError = String(error);
+      }
+
+      try {
+        const historyResponse = await fetch(
+          base + "/dungeons/player/" + encodeURIComponent(playerId) + "?lastDays=365",
+          {
+            headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
+            signal: AbortSignal.timeout(20000)
+          }
+        );
+        const history = await historyResponse.json();
+        const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
+        const targetRows = rows.filter(d =>
+          known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))
+        );
+        results.push({
+          lookup_status: lookupStatus,
+          lookup_resolved: lookupStatus === 200 && lookupError === null,
+          lookup_error: lookupError,
+          history_status: historyResponse.status,
+          history_error: history.error ?? null,
+          records: rows.length,
+          target_matches: targetRows.length,
+          sample_target_events: targetRows.slice(0, 5).map(d => ({
+            kid: Number(d.kid),
+            x: Number(d.position_x),
+            y: Number(d.position_y),
+            attacked_at: d.attacked_at
+          }))
+        });
+      } catch (error) {
+        results.push({
+          lookup_status: lookupStatus,
+          lookup_resolved: lookupStatus === 200 && lookupError === null,
+          lookup_error: lookupError,
+          history_error: String(error)
+        });
+      }
+    }
+    console.log(JSON.stringify({
+      probe: "production-pl1-player-history-from-spy-snapshot",
+      api_server: "E4K_PL1",
+      snapshot_members_sampled: members.length,
+      histories_checked: results.length,
+      nonempty_histories: results.filter(x => Number(x.records) > 0).length,
+      total_history_records: results.reduce((n, x) => n + Number(x.records || 0), 0),
+      total_target_matches: results.reduce((n, x) => n + Number(x.target_matches || 0), 0),
+      results,
+      note: "Only E4K_PL1 responses count as production evidence; no Beta or IT1 cooldown is reused."
+    }));
+  } catch (error) {
+    console.log(JSON.stringify({ probe: "production-pl1-player-history-from-spy-snapshot", error: String(error) }));
+  }
+}
+
 async function probeBridge() {
   try {
     const response = await fetch(bridgeBase + "/status", {
@@ -304,4 +386,5 @@ async function probeBridge() {
 }
 
 await probeBetaPlayerHistoryFromDungeonRows();
+await probeProductionPlayerHistoryFromSpySnapshot();
 await probeBridge();

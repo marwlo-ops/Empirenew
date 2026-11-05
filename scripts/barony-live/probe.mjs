@@ -112,8 +112,8 @@ async function main() {
     // ggejs dispatches the GAM handler synchronously from onSocketMessage.
     client.socketManager.onSocketMessage=function(clientArg,message) {
       const parsed=parseGgejsCommandResponseEnvelope(message);
-      latestGamResponseMeta=parsed?.command==='gam' && parsed.zone===a.zone
-        ? {...parsed,phase:movementObservationPhase,received_at_utc:new Date().toISOString()}
+      latestGamResponseMeta=parsed?.command==='gam'
+        ? {...parsed,connection_zone:a.zone,phase:movementObservationPhase,received_at_utc:new Date().toISOString()}
         : null;
       if (latestGamResponseMeta) movementGamResponseStatuses.push(latestGamResponseMeta);
       return originalOnSocketMessage.call(this,clientArg,message);

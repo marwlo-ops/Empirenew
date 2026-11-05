@@ -651,3 +651,40 @@ Niezależny workflow `Empirenew location tracker` `42116900931` nadal zakończy�
 ### Wniosek
 
 Katalog IT1 został ponownie pobrany z API, zweryfikowany i wdrożony na Pages. Importer ma dodatkową ochronę przed boolean jako współrzędną. Produkcyjny PL1 nadal nie udostępnił przez sprawdzone źródła historii fortec; nie zapisano żadnego zdarzenia ataku. `attacked_at` pozostaje nieustalone.
+
+## 24. Walidacja kodu odpowiedzi GAM przed przyjęciem batcha — 2026-11-05 23:10 UTC
+
+### Ustalenie z kodu klienta
+
+Audyt źródła przypiętego klienta ggejs wykazał, że SocketManager.sendCommand() zwraca wynik zapisu do socketu, a nie potwierdzenie przyjęcia komendy przez serwer. Odpowiedź XT jest następnie rozdzielana w SocketManager.onSocketMessage() i przekazywana do commands/index.js, gdzie onResponse() odczytuje commandId, pomija pole strefy i parsuje serwerowy errorCode.
+
+Istotny szczegół: handler commands/gam.js wywołuje MovementManager._add_or_update() przed obsługą callbacku i robi to również dla odpowiedzi, której errorCode jest niezerowy. Samo zaobserwowanie wywołania _add_or_update([]) nie wystarcza zatem do uznania pustej migawki za udany odczyt.
+
+Źródła upstream:
+- SocketManager.sendCommand(), onSocketMessage() i writeToSocket(): https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/managers/SocketManager.js
+- parsowanie kodu odpowiedzi i dispatch handlera: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/main/src/commands/index.js
+- handler GAM i bezwarunkowe _add_or_update(): https://github.com/476f6f6467616d6553747564696d6553747564696f73/ggejs/blob/main/src/commands/gam.js
+- niezależna implementacja pygge.get_movements() wysyła gam {} i czeka na kolejne odpowiedzi: https://github.com/danadum/pygge/blob/f0ed456bd7b522f3f33b4f14fbb4856aa54ced64/pygge/map/movements.py
+
+### Poprawka
+
+W scripts/barony-live/probe.mjs observer przechwytuje teraz przed dispatch handlera wyłącznie metadane odpowiedzi XT: nazwę komendy, strefę, kod błędu i czas odbioru. Nie przechowuje payloadu odpowiedzi. Batch ruchów otrzymuje powiązany response_ok i response_error_code.
+
+W scripts/barony-live/probe-core.mjs dodano parseGgejsCommandResponseEnvelope() oraz rozszerzono buildGamProbeSummary(). Batch jest przyjmowany jako źródło ruchów tylko wtedy, gdy odpowiedź dla dokładnej strefy PL1 ma kod sukcesu 0 lub 10005. Kody błędów, nieparsowalne statusy, brak envelope albo brak batcha są raportowane osobnymi statusami; nie mogą zostać przedstawione jako udana pusta migawka.
+
+### Testy
+
+Dodano testy:
+- parsowania sukcesu, kodu zgodności 10005, błędu i nieparsowalnego envelope;
+- odrzucenia batcha z niezerowym kodem serwera;
+- odrzucenia batcha bez zweryfikowanego statusu;
+- przyjęcia batcha wyłącznie po zweryfikowanym sukcesie.
+
+Testy wcześniejszej logiki pozostają bez zmiany. Wynik uruchomienia CI dla nowego commitu należy sprawdzić osobno; nie deklaruje się PASS przed otrzymaniem statusu workflow.
+
+### Ograniczenia
+
+GAM nadal zwraca ruchy widoczne dla autoryzowanego konta, a nie globalną historię serwera. W tej zmianie nie wykonano logowania do PL1 ani nie uzyskano odpowiedzi live z PL1. Nie zapisano ataków. attack_time_utc pozostaje null; czas lokalnego odbioru i wyliczony czas wyjścia ruchu nie są dokładnym serwerowym timestampem ataku.
+
+Zmodyfikowano wyłącznie skrypty scripts/barony-live/** i niniejszy dziennik badań. Nie zmieniono barony.html, danych mapy, Mapa, Szpiegowanie ani Dodatkowe.
+

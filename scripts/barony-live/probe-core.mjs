@@ -397,6 +397,9 @@ export function extractParsedOutboundBossDungeonMovementEvidence(movement, sampl
       owner_id: expectedOwner,
     },
     attacker_player_id: attackerId,
+    attacker_player_name: typeof sourceArea?.ownerInfo?.playerName === 'string' && sourceArea.ownerInfo.playerName.trim()
+      ? sourceArea.ownerInfo.playerName.trim()
+      : null,
     source: sourceArea && [sourceX, sourceY].every(Number.isFinite)
       ? { area_type: Number(sourceArea.areaType), x: sourceX, y: sourceY }
       : null,

@@ -94,6 +94,25 @@ for (const server of [targetServer, "E4K_PL1", "E4K_PL1_BETA", "PL1", "IT1"]) {
   }
 }
 
+for (const server of ["E4K_PL1", "E4K_PL1_BETA", "IT1"]) {
+  try {
+    const response = await fetch(base + "/dungeons/meta", {
+      headers: { "gge-server": server, Accept: "application/json" },
+      signal: AbortSignal.timeout(20000)
+    });
+    const body = await response.json();
+    console.log(JSON.stringify({
+      probe: "dungeons-meta",
+      server,
+      http_status: response.status,
+      error: body.error ?? null,
+      last_scan_at: body.last_scan_at ?? null
+    }));
+  } catch (error) {
+    console.log(JSON.stringify({ probe: "dungeons-meta", server, error: String(error) }));
+  }
+}
+
 try {
   const url = base + "/dungeons?page=1&size=4000&filterByKid=" + encodeURIComponent("[1,2,3]");
   const response = await fetch(url, {

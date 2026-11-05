@@ -1,0 +1,36 @@
+name: Barony source and UI checks
+
+on:
+  pull_request:
+    paths:
+      - "barony.html"
+      - "data/baron-fortresses.json"
+      - "scripts/probe-baron-pl1.js"
+      - "scripts/validate-baron-fortresses.js"
+      - "scripts/check-barony-html.js"
+      - "research/fortece-barona-skanowanie.md"
+      - ".github/workflows/barony-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  barony:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate IT1 catalog (map fields only)
+        run: node scripts/validate-baron-fortresses.js
+      - name: Check Barony JavaScript and mobile layout
+        run: node scripts/check-barony-html.js
+      - name: Check probe script syntax
+        run: node --check scripts/probe-baron-pl1.js
+      - name: Run read-only PL1 and GGE Tracker probes
+        run: node scripts/probe-baron-pl1.js

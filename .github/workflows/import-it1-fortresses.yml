@@ -2,6 +2,12 @@ name: Refresh IT1 fortress map catalog
 
 on:
   workflow_dispatch:
+  push:
+    branches: ["main"]
+    paths:
+      - "scripts/import_it1_fortresses.py"
+      - "tests/test_import_it1_fortresses.py"
+      - ".github/workflows/import-it1-fortresses.yml"
   schedule:
     - cron: "17 */6 * * *"
 

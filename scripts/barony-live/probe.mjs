@@ -152,7 +152,7 @@ async function main() {
   }
   const observations=[],candidateSignals=[],sectorErrors=[];
   let movementProbe={status:'not_requested',gam_response_batches:0,ignored_non_gam_movement_updates:0,movement_count:0,matching_count:0};
-  let movementEvidence=[];
+  let movementEvidence=[];\n  let movementPreRequestEvidence=[];
   let mailboxUpdateObserved=false;
   const onMailMessageAdd=()=>{mailboxUpdateObserved=true;};
   if (a.reports) client.on('mailMessageAdd',onMailMessageAdd);
@@ -232,7 +232,7 @@ async function main() {
         responseStatuses:movementGamResponseStatuses,responseStatusCaptureEnabled:true,
       });
       movementProbe=gamResult.summary;
-      movementEvidence=gamResult.evidence;
+      movementEvidence=gamResult.evidence;\n      movementPreRequestEvidence=gamResult.pre_request_evidence;
     }
 
     if (a.reports) {
@@ -312,7 +312,7 @@ async function main() {
       npc_battle_report_time_estimates:reportEvidence.filter(item=>item.battle_time_estimate_utc).length
     },
     observations,candidate_signals:candidateSignals,sector_errors:sectorErrors,
-    movement_probe:movementProbe,movement_evidence:movementEvidence,
+    movement_probe:movementProbe,movement_evidence:movementEvidence,movement_pre_request_evidence:movementPreRequestEvidence,
     mailbox_report_probe:reportProbe,mailbox_report_evidence:reportEvidence,
     state_file:a.noState?null:stateFile,
     attack_history_status:'optional_account_scoped_mailbox_and_movement_evidence; BLS.PS_may_estimate_battle_occurrence; no_global_PL1_history; exact_attack_launch_time_unavailable',

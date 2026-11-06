@@ -44,7 +44,7 @@ W przypiętym `ggejs` odpowiedź `gam` jest parsowana przez `commands/gam.js` i 
 
 Ekstraktor przyjmuje tylko ruch typu 11, kierunek wychodzący, cel typu 11, zgodny KID i właściciela NPC oraz dodatni ID właściciela źródła. Wynik zawiera ID gracza, dokładne X/Y celu i szacowany czas wyjścia/przybycia. `PT` i `TT` są interpretowane względem lokalnego czasu próbki, więc `movement_departure_estimate_utc` nadal **nie jest dokładnym serwerowym czasem ataku**. Ruch w drodze nie dowodzi, że bitwa się zakończyła.
 
-GAM zwraca ruchy dostępne dla bieżącej autoryzowanej sesji/konta; nie potwierdzono globalnej kompletności wszystkich ruchów PL1. Dane ruchów są wypisywane wyłącznie w wyniku lokalnego uruchomienia i nie są dopisywane do pliku stanu ani repozytorium. Nie uruchamiaj tego w GitHub Actions; poświadczenia są przeznaczone wyłącznie do lokalnej sesji operatora.
+GAM zwraca ruchy dostępne dla bieżącej autoryzowanej sesji/konta; nie potwierdzono globalnej kompletności wszystkich ruchów PL1. Aktualizacja GAM zauważona przed wysłaniem jawnego żądania jest raportowana osobno jako `movement_pre_request_evidence` i nie jest wliczana do `movement_evidence`, `movement_count` ani statusu migawki z tego żądania. Dzięki temu wcześniejszy push nie może wyglądać jak odpowiedź na późniejsze żądanie. Dane ruchów są wypisywane wyłącznie w wyniku lokalnego uruchomienia i nie są dopisywane do pliku stanu ani repozytorium. Nie uruchamiaj tego w GitHub Actions; poświadczenia są przeznaczone wyłącznie do lokalnej sesji operatora.
 
 ## Raporty bitew NPC z własnej skrzynki (opcjonalnie)
 

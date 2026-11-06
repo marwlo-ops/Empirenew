@@ -772,26 +772,34 @@ export function buildGamProbeSummary({
   const failedStatuses = requestStatuses.filter((item) => item?.ok === false);
   const unknownStatuses = requestStatuses.filter((item) => item?.ok !== true && item?.ok !== false);
   const isAcceptedBatch = (batch) => !captureStatus || batch?.response_ok === true;
-  const acceptedBatches = allBatches.filter(isAcceptedBatch);
+  // Pushes received before the explicit GAM request may be valid observations,
+  // but they are not part of that request's snapshot and must never be merged
+  // into its evidence/counts.
+  const acceptedPreRequestBatches = before.filter(isAcceptedBatch);
   const acceptedResponseBatches = after.filter(isAcceptedBatch);
-  const evidenceByMovementId = new Map();
-
-  for (const batch of acceptedBatches) {
-    for (const item of Array.isArray(batch?.evidence) ? batch.evidence : []) {
-      const movementId = Number(item?.movement_id);
-      if (Number.isSafeInteger(movementId) && movementId > 0) {
-        evidenceByMovementId.set(movementId, {
-          ...item,
-          gam_batch_received_at_utc: toIsoDate(batch?.received_at_utc),
-        });
+  const collectEvidence = (batches) => {
+    const byMovementId = new Map();
+    for (const batch of batches) {
+      for (const item of Array.isArray(batch?.evidence) ? batch.evidence : []) {
+        const movementId = Number(item?.movement_id);
+        if (Number.isSafeInteger(movementId) && movementId > 0) {
+          byMovementId.set(movementId, {
+            ...item,
+            gam_batch_received_at_utc: toIsoDate(batch?.received_at_utc),
+          });
+        }
       }
     }
-  }
-
-  const movementCount = acceptedBatches.reduce((total, batch) => {
+    return byMovementId;
+  };
+  const preRequestEvidenceByMovementId = collectEvidence(acceptedPreRequestBatches);
+  const evidenceByMovementId = collectEvidence(acceptedResponseBatches);
+  const countMovements = (batches) => batches.reduce((total, batch) => {
     const count = Number(batch?.movement_count);
     return total + (Number.isSafeInteger(count) && count >= 0 ? count : 0);
   }, 0);
+  const preRequestMovementCount = countMovements(acceptedPreRequestBatches);
+  const movementCount = countMovements(acceptedResponseBatches);
   const sent = requestSent === true;
   let status;
   if (!sent) {
@@ -839,6 +847,9 @@ export function buildGamProbeSummary({
       sampled_at_utc: sampledAtIso,
       response_status_capture_enabled: captureStatus,
       pre_request_push_batches: before.length,
+      pre_request_accepted_batch_count: acceptedPreRequestBatches.length,
+      pre_request_movement_count: preRequestMovementCount,
+      pre_request_matching_count: preRequestEvidenceByMovementId.size,
       gam_response_batches: after.length,
       response_batch_count: after.length,
       accepted_response_batch_count: acceptedResponseBatches.length,
@@ -879,5 +890,6 @@ export function buildGamProbeSummary({
       note: notes[status],
     },
     evidence: [...evidenceByMovementId.values()],
+    pre_request_evidence: [...preRequestEvidenceByMovementId.values()],
   };
 }

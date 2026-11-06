@@ -397,8 +397,9 @@ test('summarizes a read-only GAM request, collects response batches and deduplic
     sampledAt: '2026-11-05T21:00:01Z',
     preRequestBatches: [{
       received_at_utc: '2026-11-05T20:59:59Z',
-      movement_count: 1,
-      evidence: [first],
+      movement_count: 2,
+      evidence: [first, { movement_id: 6999, target: { kid: 3, x: 111, y: 222 } }],
+      response_ok: true,
     }],
     responseBatches: [
       {
@@ -422,9 +423,14 @@ test('summarizes a read-only GAM request, collects response batches and deduplic
   assert.equal(result.summary.request_sent, true);
   assert.equal(result.summary.observation_mode, 'active_read_only_snapshot_request');
   assert.equal(result.summary.pre_request_push_batches, 1);
+  assert.equal(result.summary.pre_request_accepted_batch_count, 1);
+  assert.equal(result.summary.pre_request_movement_count, 2);
+  assert.equal(result.summary.pre_request_matching_count, 2);
   assert.equal(result.summary.gam_response_batches, 2);
-  assert.equal(result.summary.movement_count, 4);
+  assert.equal(result.summary.movement_count, 3);
   assert.equal(result.summary.matching_count, 2);
+  assert.deepEqual(result.evidence.map((item) => item.movement_id).sort(), [7001, 7002]);
+  assert.deepEqual(result.pre_request_evidence.map((item) => item.movement_id).sort(), [6999, 7001]);
   assert.equal(result.summary.ignored_non_gam_movement_updates, 3);
   assert.equal(result.summary.collection_complete, true);
   assert.equal(result.evidence.length, 2);
@@ -449,6 +455,32 @@ test('does not infer an empty movement map when a read-only GAM request gets no 
   assert.equal(result.summary.timed_out, true);
   assert.match(result.summary.note, /does not prove that no active movement exists/);
   assert.deepEqual(result.evidence, []);
+});
+
+test('keeps pre-request push evidence separate when the explicit GAM request gets no response', () => {
+  const result = buildGamProbeSummary({
+    requestSent: true,
+    requestSentAt: '2026-11-05T21:10:00Z',
+    sampledAt: '2026-11-05T21:10:05Z',
+    responseStatusCaptureEnabled: true,
+    preRequestBatches: [{
+      phase: 'pre_request',
+      received_at_utc: '2026-11-05T21:09:59Z',
+      movement_count: 1,
+      response_ok: true,
+      evidence: [{ movement_id: 7010, target: { kid: 1, x: 10, y: 20 } }],
+    }],
+    responseStatuses: [],
+    responseBatches: [],
+    collectionComplete: false,
+    timedOut: true,
+  });
+
+  assert.equal(result.summary.status, 'gam_request_no_response');
+  assert.equal(result.summary.pre_request_movement_count, 1);
+  assert.equal(result.summary.movement_count, 0);
+  assert.deepEqual(result.evidence, []);
+  assert.deepEqual(result.pre_request_evidence.map((item) => item.movement_id), [7010]);
 });
 
 test('marks a disconnected GAM request as not sent instead of as an empty snapshot', () => {

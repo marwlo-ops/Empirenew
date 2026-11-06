@@ -2016,3 +2016,79 @@ To pozostaje kandydatem zdarzenia per forteca, a nie potwierdzoną globalną his
 - GGE Tracker scenariusz testowy z jawnie wstawionym `attacked_at`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-scenario.ts
 
 Zakres tej aktualizacji: wyłącznie dziennik badań modułu Barony. Bez zmian w kodzie, Mapie, Szpiegowaniu, Dodatkowych, UI ani katalogu współrzędnych.
+
+
+## 55. Audyt pochodzenia czasu cooldownu, mapowania właścicieli i zabezpieczenie mostu — 2026-11-06
+
+### 1. Dokładniejsza analiza czasu w GGE Tracker
+
+Prześledziłem pełny cykl scrapera dla fortec:
+
+- dungeon-update.worker.ts używa domyślnego INTERVAL_MS = 120_000 (cykl około 2 minut; czas wykonania skanu jest odejmowany od przerwy).
+- updateDungeonsList() wybiera tylko rekordy, dla których global_available_at <= NOW(), a następnie odświeża ich sektory przez GAA.
+- refreshDungeonSquare() ustawia currentTime po otrzymaniu odpowiedzi GAA.
+- collectDungeonCooldowns() odczytuje dungeon[5] jako pozostały cooldown i oblicza global_available_at = currentTime + remainingCooldown24h.
+- persistDungeonUpdates() aktualizuje dungeons.global_available_at i wstawia do dungeons_history tylko kid, position_x, position_y, player_id; nie przekazuje jawnie attacked_at.
+
+W konsekwencji publiczny kod scrapera nie przekazuje serwerowego czasu ataku. Historia jest zapisywana przy odświeżeniu fortecy, a timestamp attacked_at musi pochodzić z mechanizmu bazy (domyślna wartość/trigger), którego schematu nie ma w publicznym repozytorium. API /dungeons/player/{playerId} czyta DH.attacked_at, natomiast lista /dungeons czyta D.last_attack_at. Testowe scenariusze API wstawiają attacked_at jawnie, więc potwierdzają kontrakt testowy, a nie produkcyjne pochodzenie czasu.
+
+W próbkach Beta/IT1 z wcześniejszego runu 42269802737 różnica global_available_at - last_attack wynosiła 86 284–86 397 sekund, czyli 24 godziny minus 3–116 sekund. To jest zgodne z hipotezą, że last_attack odzwierciedla moment wykrycia przez scraper, a różnica odpowiada opóźnieniu wykrycia po ataku. Nie jest to dowód: brak schematu/triggera i niezależnego czasu referencyjnego. Nie używamy tej hipotezy do wyznaczania attack_time_utc, a danych Beta/IT1 nie przenosimy do PL1.
+
+**Wniosek:** last_attack z GGE Tracker pozostaje znacznikiem o niepotwierdzonym pochodzeniu, nie dokładnym czasem serwerowego ataku. global_available_at - 24h również pozostaje hipotezą dla tamtych serwerów, nie metodą zatwierdzoną dla PL1.
+
+### 2. Korekta i potwierdzenie ID właścicieli NPC
+
+W przypiętym ggejs WorldMapOwnerInfoData.js są dwie osobne funkcje:
+
+- getKingdomDungeonOwnerByKingdomId(kID) = getOwnerInfo(-219 - kID) — dotyczy zwykłego typu mapy 2 i daje ID -220/-221/-222.
+- getKingdomBossDungeonOwnerByKingdomId(kID) = getOwnerInfo(-229 - kID) — dotyczy typu mapy 11 i daje ID -230/-231/-232.
+
+MapObjectParser.js mapuje typ 11 na BossDungeonMapobject. Jego konstruktor odczytuje data[5] jako pozostały cooldown, data[6] jako defeaterPlayerId, a data[7] jako KID. Zatem bieżąca stała w probe-core.mjs (1:-230, 2:-231, 3:-232) jest poprawna. Wcześniejsze odniesienie do -220/-221/-222 dotyczyło typu 2, nie fortec typu 11; nie wymaga to zmiany kodu.
+
+Źródła:
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/WorldMapOwnerInfoData.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/MapObjectParser.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/mapobjects/BossDungeonMapobject.js
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/dungeon-update.worker.ts
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-scenario.ts
+
+### 3. Zabezpieczenie custom bridge powiązanego z Barony
+
+Scaliłem PR #32, który usuwał lukę w deklarowanym trybie read-only: wcześniejszy patch wymagał Bearer tokenu, ale nadal przekazywał dowolną nazwę komendy z trasy do socketu gry.
+
+- Dozwolone są wyłącznie gaa, fnm, gam.
+- Każda inna komenda jest odrzucana HTTP 403 przed dostępem do socketu.
+- Dodano osobny moduł allowlisty i testy pozytywne/negatywne.
+- Workflow kopiuje moduł do przypiętego upstream przed zastosowaniem patcha.
+
+PR #32: https://github.com/marwlo-ops/Empirenew/pull/32  
+Merge commit: 1895ade5b2552d0a0b3fd36b9f98e4418d61c0cb  
+Workflow security po scaleniu: 42276064051 — SUCCESS, Node 16/16 PASS, patch zastosowany do upstream dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d, składnia upstream app.js i trzech modułów — PASS.  
+GitHub Pages dla tego commitu: 42276063475 — SUCCESS.
+
+To jest zabezpieczenie pakietu wdrożeniowego, nie wdrożenie nowej usługi. Nie ustawiano sekretów, nie logowano konta gry i nie wysyłano komend do gry.
+
+Otwarty draft PR #13 pozostaje nieaktualny: jego head b52c4a06 jest 28 commitów przed i 49 za bieżącym main w porównaniu Git. Nie należy scalać go w obecnej postaci; zawiera starszą wersję patcha i nie ma aktualnej walidacji na bieżącej bazie.
+
+### 4. Ostatnie potwierdzone dane live i ograniczenia
+
+Ostatni dostępny test publicznego mostu w runie 42269802737 (2026-11-06 18:20 UTC):
+
+- /status: produkcyjny socket PL1 zgłoszony jako połączony.
+- GAA: pominięte — publiczny adapter nie ma bezpiecznego mapowania odpowiedzi GAA; żądania nie wysłano.
+- GAM: HTTP 200, return_code=0, sekcje M/O, ale 0 ruchów w tej odpowiedzi i 0 dopasowanych ataków typu 11.
+- Zakres GAM to tylko ruchy widoczne dla sesji publicznego mostu, nie globalna historia serwera.
+
+GGE Tracker nadal odrzuca produkcyjny PL1 (/dungeons HTTP 400, katalog fortress=false, code=null). Beta i IT1 pozostają osobnymi źródłami i nie są używane jako historia PL1. Nie wykonano lokalnego logowania do autoryzowanej sesji operatora, więc w tej iteracji nie ma nowego potwierdzonego ataku PL1; attack_time_utc pozostaje null.
+
+### 5. Następny test
+
+Wymagany jest lokalny, autoryzowany odczyt produkcyjnego PL1:
+
+    node scripts/barony-live/probe.mjs --movements --reports --no-state
+
+Poświadczenia muszą pozostać w lokalnych zmiennych środowiskowych. Najpierw potrzebna jest świeża próbka GAA z typu 11 i porównanie jej z ruchem GAM lub raportem SNE/BLS/BLM dla tego samego KID/X/Y i gracza. Czas ataku pozostaje przedziałem między próbkami, dopóki nie zostanie niezależnie zweryfikowana semantyka czasu albo pełna długość cooldownu na produkcyjnym PL1. Nie zakładamy 24 godzin na podstawie Beta/IT1.
+
+Zakres: wyłącznie dokumentacja i pakiet mostu powiązany z Barony. Bez zmian w Mapie, Szpiegowaniu, Dodatkowych, UI i katalogu współrzędnych.

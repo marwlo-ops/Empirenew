@@ -361,9 +361,10 @@ export function extractNpcBattleReportEvidence(
   const defenderId = Number(battleLog?.defender?.playerId);
   if (!Number.isSafeInteger(attackerId) || attackerId <= 0 || defenderId !== expectedOwner) return null;
 
-  const messageId = Number(message.messageId);
-  const battleLogId = Number(battleLog.battleLogId);
-  if (!Number.isSafeInteger(messageId) || messageId <= 0 || !Number.isSafeInteger(battleLogId) || battleLogId <= 0) return null;
+  const rawMessageId = Number(message.messageId);
+  const rawBattleLogId = Number(battleLog.battleLogId);
+  const messageId = Number.isSafeInteger(rawMessageId) && rawMessageId > 0 ? rawMessageId : null;
+  const battleLogId = Number.isSafeInteger(rawBattleLogId) && rawBattleLogId > 0 ? rawBattleLogId : null;
 
   const expectedTarget = { area_type: 11, kid, x, y };
   const targetFields = ['area_type', 'kid', 'x', 'y'];
@@ -381,6 +382,8 @@ export function extractNpcBattleReportEvidence(
     );
   };
   const matchesReport = (candidate, command) =>
+    messageId !== null &&
+    battleLogId !== null &&
     candidate?.command === command &&
     candidate?.ok === true &&
     Number(candidate?.message_id) === messageId &&

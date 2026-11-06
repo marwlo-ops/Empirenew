@@ -2,21 +2,26 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const patch = await readFile(new URL('./app.js.patch', import.meta.url), 'utf8');
+const patchScript = await readFile(new URL('./apply-bridge-patch.mjs', import.meta.url), 'utf8');
 const environment = await readFile(new URL('./ENVIRONMENT.md', import.meta.url), 'utf8');
 const render = await readFile(new URL('./render.yaml', import.meta.url), 'utf8');
-const addedLines = patch.split('\n').filter((line) => line.startsWith('+'));
 
-test('bridge patch never adds raw upstream error messages to logs or responses', () => {
-  assert.ok(addedLines.some((line) => line.includes("console.log('Bridge command failed:', error?.name || 'Error')")));
-  assert.ok(!addedLines.some((line) => line.includes('error.message')));
+test('guarded patch script rejects changed or already patched upstream files', () => {
+  assert.match(patchScript, /replaceExactlyOnce/);
+  assert.match(patchScript, /Refusing to patch an app\\.js that already contains bridge middleware/);
+  assert.match(patchScript, /Pinned upstream app\\.js shape mismatch/);
 });
 
-test('map commands use command-only response matching and bounded waits', () => {
-  assert.ok(patch.includes('responseHeaders = false;'));
-  assert.ok(patch.includes('waitForJsonResponse'));
-  assert.ok(patch.includes('responseTimeout'));
-  assert.ok(patch.includes('runMapCommand'));
+test('patch script redacts upstream error details', () => {
+  assert.match(patchScript, /Bridge command failed/);
+  assert.doesNotMatch(patchScript, /console\\.log\\(error\\.message\\)/);
+  assert.match(patchScript, /error_log: 'type_only'/);
+});
+
+test('map commands use command-only response matching and a 15 second timeout', () => {
+  assert.match(patchScript, /responseHeaders = false/);
+  assert.match(patchScript, /responseTimeout/);
+  assert.match(patchScript, /runMapCommand/);
 });
 
 test('deployment template keeps credentials as unsynced secrets', () => {

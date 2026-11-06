@@ -97,11 +97,13 @@ function serializeExactRow(row, sampledAt) {
     ? Date.parse(cooldownUntil) - sampledAtMs
     : null;
   return {
+    x: Number.isInteger(row.position?.X) ? row.position.X : null,
+    y: Number.isInteger(row.position?.Y) ? row.position.Y : null,
     area_type: Number.isInteger(row.areaType) ? row.areaType : null,
     kingdom_id: Number.isInteger(row.kingdomId) ? row.kingdomId : null,
     owner_id: Number.isInteger(row.ownerInfo?.playerId) ? row.ownerInfo.playerId : null,
     dungeon_level: Number.isInteger(row.dungeonLevel) ? row.dungeonLevel : null,
-    defeater_player_id: Number.isInteger(row.defeaterPlayerId) && row.defeaterPlayerId > 0
+    defeater_player_id: Number.isSafeInteger(row.defeaterPlayerId) && row.defeaterPlayerId > 0
       ? row.defeaterPlayerId
       : null,
     last_spy_at_utc: toIsoDate(row.lastSpyDate),
@@ -110,9 +112,65 @@ function serializeExactRow(row, sampledAt) {
   };
 }
 
+function isValidFortressTarget(target) {
+  const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[target?.kid];
+  return Boolean(
+    target &&
+    typeof target.id === 'string' && target.id.trim().length > 0 &&
+    Number.isInteger(target.kid) && Number.isInteger(expectedOwner) &&
+    target.kingdom === KINGDOM_NAME_BY_KID[target.kid] &&
+    Number.isInteger(target.x) && target.x >= 0 && target.x <= 1286 &&
+    Number.isInteger(target.y) && target.y >= 0 && target.y <= 1286
+  );
+}
+
+function isTrustedFortressObservation(observation) {
+  if (!observation || observation.status !== 'fortress_row_found') return false;
+  const target = observation.target;
+  const sampleAt = toIsoDate(observation.sampled_at_utc);
+  const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[target?.kid];
+  if (
+    !sampleAt ||
+    !target ||
+    typeof target.catalog_id_it1 !== 'string' || !target.catalog_id_it1.trim() ||
+    !Number.isInteger(target.kid) ||
+    target.kingdom !== KINGDOM_NAME_BY_KID[target.kid] ||
+    !Number.isInteger(target.x) || target.x < 0 || target.x > 1286 ||
+    !Number.isInteger(target.y) || target.y < 0 || target.y > 1286 ||
+    target.expected_area_type !== 11 ||
+    target.expected_boss_dungeon_owner_id !== expectedOwner ||
+    !Number.isInteger(expectedOwner) ||
+    !Array.isArray(observation.rows) || observation.rows.length !== 1
+  ) return false;
+
+  const row = observation.rows[0];
+  if (
+    row?.x !== target.x ||
+    row?.y !== target.y ||
+    row?.area_type !== 11 ||
+    row?.kingdom_id !== target.kid ||
+    row?.owner_id !== expectedOwner ||
+    observation.owner_id !== expectedOwner
+  ) return false;
+
+  const rowDefeater = Number.isSafeInteger(row.defeater_player_id) && row.defeater_player_id > 0
+    ? row.defeater_player_id
+    : null;
+  if (observation.defeater_player_id !== rowDefeater) return false;
+
+  const cooldownUntil = toIsoDate(row.cooldown_until_utc);
+  if (observation.cooldown_until_utc !== cooldownUntil) return false;
+  const expectedCooldownActive = cooldownUntil === null
+    ? null
+    : Date.parse(cooldownUntil) > Date.parse(sampleAt);
+  return observation.cooldown_active === expectedCooldownActive;
+}
+
 export function buildObservation(target, mapObjects, sampledAt = new Date().toISOString()) {
   const sampledAtIso = toIsoDate(sampledAt);
   if (!sampledAtIso) throw new Error('Invalid observation timestamp.');
+  if (!isValidFortressTarget(target)) throw new Error('Invalid fortress target.');
+
   const exactRows = (Array.isArray(mapObjects) ? mapObjects : []).filter((row) =>
     row?.position?.X === target.x && row?.position?.Y === target.y
   );
@@ -121,9 +179,9 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     row.areaType === 11 && row.kingdomId === target.kid && row.ownerInfo?.playerId === expectedOwner
   );
   let status = 'not_confirmed';
-  if (validRows.length === 1) status = 'fortress_row_found';
-  else if (validRows.length > 1) status = 'ambiguous_duplicate_rows';
-  else if (exactRows.length > 0) status = 'coordinate_row_unverified';
+  if (exactRows.length > 1) status = 'ambiguous_duplicate_rows';
+  else if (exactRows.length === 1 && validRows.length === 1) status = 'fortress_row_found';
+  else if (exactRows.length === 1) status = 'coordinate_row_unverified';
 
   const observation = {
     target: {
@@ -135,9 +193,9 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     rows: exactRows.map((row) => serializeExactRow(row, sampledAtIso)),
     defeater_player_id: null,
     attack_time_utc: null,
-    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. The player ID is target-specific, but the row has no exact attack timestamp. No time is inferred until PL1 live semantics are validated.',
+    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. A comparison candidate requires exactly one row at the exact coordinate, type 11 and the expected NPC owner. The row has no exact attack timestamp.',
   };
-  if (validRows.length === 1) {
+  if (status === 'fortress_row_found') {
     const row = serializeExactRow(validRows[0], sampledAtIso);
     observation.owner_id = row.owner_id;
     observation.dungeon_level = row.dungeon_level;
@@ -152,31 +210,23 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
   return observation;
 }
 
+const MAX_CANDIDATE_INTERVAL_SECONDS = 2 * 60 * 60;
+
 export function compareObservations(previous, current) {
-  if (!previous || !current || previous.status !== 'fortress_row_found' || current.status !== 'fortress_row_found') return [];
+  if (!isTrustedFortressObservation(previous) || !isTrustedFortressObservation(current)) return [];
 
   const previousTarget = previous.target;
   const currentTarget = current.target;
-  const sameCoordinates = ['kid', 'x', 'y'].every((key) => {
-    const before = Number(previousTarget?.[key]);
-    const after = Number(currentTarget?.[key]);
-    return Number.isInteger(before) && Number.isInteger(after) && before === after;
-  });
-  const optionalTargetFieldsMatch = ['area_type', 'expected_boss_dungeon_owner_id'].every((key) => {
-    const before = previousTarget?.[key];
-    const after = currentTarget?.[key];
-    return before === null || before === undefined || after === null || after === undefined ||
-      Number(before) === Number(after);
-  });
+  const sameTarget = [
+    'catalog_id_it1', 'kid', 'kingdom', 'x', 'y',
+    'expected_area_type', 'expected_boss_dungeon_owner_id',
+  ].every((key) => previousTarget[key] === currentTarget[key]);
   const previousAt = toIsoDate(previous.sampled_at_utc);
   const currentAt = toIsoDate(current.sampled_at_utc);
-  if (
-    !sameCoordinates ||
-    !optionalTargetFieldsMatch ||
-    !previousAt ||
-    !currentAt ||
-    Date.parse(currentAt) <= Date.parse(previousAt)
-  ) return [];
+  if (!sameTarget || !previousAt || !currentAt) return [];
+
+  const intervalSeconds = (Date.parse(currentAt) - Date.parse(previousAt)) / 1000;
+  if (intervalSeconds <= 0 || intervalSeconds > MAX_CANDIDATE_INTERVAL_SECONDS) return [];
 
   const previousDefeaterId = Number(previous.defeater_player_id);
   const currentDefeaterId = Number(current.defeater_player_id);
@@ -199,8 +249,9 @@ export function compareObservations(previous, current) {
       classification: 'candidate_same_target_cooldown_transition_with_positive_defeater',
       interval_start_utc: previousAt,
       interval_end_utc: currentAt,
+      interval_seconds: intervalSeconds,
       attack_time_utc: null,
-      time_semantics: 'The same target changed from no active cooldown to active cooldown and a positive defeaterPlayerId was observed. The event is bounded by these two sample times; no exact point timestamp is inferred.',
+      time_semantics: 'The same verified target changed from no active cooldown to active cooldown and a positive defeaterPlayerId was observed. The event is bounded by these two sample times, which must be no more than two hours apart; no exact point timestamp is inferred.',
       target: currentTarget,
     });
     return signals;
@@ -214,6 +265,7 @@ export function compareObservations(previous, current) {
       classification: 'candidate_target_specific_player_change_not_yet_live_validated',
       interval_start_utc: previousAt,
       interval_end_utc: currentAt,
+      interval_seconds: intervalSeconds,
       target: currentTarget,
     });
   }
@@ -225,6 +277,7 @@ export function compareObservations(previous, current) {
       classification: 'candidate_target_specific_cooldown_transition_not_yet_live_validated',
       interval_start_utc: previousAt,
       interval_end_utc: currentAt,
+      interval_seconds: intervalSeconds,
       target: currentTarget,
     });
   }

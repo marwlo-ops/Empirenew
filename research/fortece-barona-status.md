@@ -727,3 +727,48 @@ Endpoint historii gracza oczekuje identyfikatora z trzyznakowym sufiksem kraju/s
 ### Następny test
 
 Na autoryzowanej sesji produkcyjnego PL1 wykonać przed i po jednym kontrolowanym ataku odczyt tej samej fortecy przez GAA: `kid/x/y`, `owner_id`, `defeaterPlayerId`, cooldown i dokładny czas lokalnego odbioru. Równolegle zebrać GAM i raport NPC z konta wykonującego atak. To pozwoli ustalić, czy GAA zmienia `defeaterPlayerId` dopiero po zwycięstwie oraz zawęzić przedział obserwacji. Dla dokładnego timestampu nadal potrzebne jest pole serwerowe albo potwierdzony schemat produkcyjnej kolumny `attacked_at`.
+
+
+## 26. Czas bitwy z BLS.PS — audyt i bezpieczna estymacja, 2026-11-06
+
+### Nowe ustalenie protokołu
+
+Niezależna implementacja EmpireCore opisuje odpowiedź `bls` (Battle Log Short) z polem `PS` jako `seconds_since_battle`. Jej test oparty na zanonimizowanym kształcie odpowiedzi gry sprawdza `PS=678547`. To jest mocniejsza informacja o czasie niż wiek wiadomości w skrzynce, ale nadal wartość względna, nie absolutny timestamp.
+
+Kod `ggejs`:
+- `BasicMessage` wylicza `deliveryTime` jako lokalne `Date.now() - data[5] * 1000`; to wiek/dostarczenie wiadomości, nie czas rozpoczęcia ataku.
+- `BasicBattleLogMessage.getBattleLog()` pobiera krótki log przez `BLS`, a następnie `BLM` i `BLD`.
+- `ggejs bls.js` mapuje m.in. `MID`, `LID`, uczestników i obiekt mapy, ale nie wystawia `PS` w zwracanym obiekcie `BattleLog`. Zwykłe `message.getBattleLog()` gubi więc to pole.
+
+### Zmiana w Empirenew
+
+`scripts/barony-live/probe-core.mjs`:
+- dodano `parseGgejsBattleLogShortResponse()`, który analizuje wyłącznie udaną odpowiedź XT `bls` (kod 0 lub 10005);
+- z payloadu zachowuje wyłącznie `MID`, `LID`, `PS`, lokalny czas odbioru i opcjonalne `AI.AT/K/X/Y`; nie przechowuje surowego payloadu;
+- wylicza `battle_time_estimate_utc = received_at_utc - PS`;
+- do raportu NPC dołącza estymację tylko wtedy, gdy `MID` i `LID` zgadzają się z wiadomością i pełnym raportem, a jeśli BLS podał cel, zgadzają się też kraina i X/Y.
+
+`attack_time_utc` pozostaje `null`. Pole `battle_time_estimate_utc` oznacza **szacowany czas wystąpienia bitwy**, a nie czas wysłania armii. Niepewność obejmuje opóźnienie sieci i różnicę zegara lokalnego względem serwera. Źródło jest ograniczone do raportów w skrzynce zalogowanego konta; nie jest to globalny feed PL1.
+
+### Testy offline
+
+Dodano testy:
+- poprawne parsowanie `BLS.PS` i wyliczenie estymacji;
+- odrzucenie błędnego kodu odpowiedzi, niepoprawnego JSON, brakującego/ujemnego `PS` i nieprawidłowego czasu próbki;
+- korelacja `MID`, `LID` i `AI` z dokładnym celem raportu;
+- odmowa dołączenia estymacji przy niezgodnym celu, identyfikatorze wiadomości lub logu.
+
+Testy nie używają danych konta ani połączenia z grą. W tej iteracji nie wykonano live logowania do produkcyjnego PL1, więc nie ma nowego potwierdzonego zdarzenia ataku.
+
+### Źródła
+
+- EmpireCore — model `BattleLogShortResponse`, pole `PS`: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/src/empire_core/messages/models/battle_logs.py
+- EmpireCore — test odpowiedzi BLS z `PS=678547`: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/tests/messages/test_battle_logs.py
+- EmpireCore — zanonimizowany fixture BLS: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/tests/messages/battle_log_payloads.py
+- ggejs — `BasicMessage.deliveryTime`: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/messages/BasicMessage.js
+- ggejs — `BasicBattleLogMessage.getBattleLog()`: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/messages/BasicBattleLogMessage.js
+- ggejs — parser BLS, który nie wystawia `PS`: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/bls.js
+
+### Wniosek i dalszy test
+
+To pozwala uzyskać lepszą estymację chwili bitwy dla raportu, ale nie rozwiązuje czasu rozpoczęcia ruchu ani globalnej historii. Następny test live powinien porównać dla tej samej fortecy: `GAM` (ruch i czas podróży), `BLS.PS` (wiek bitwy), `SNE` (wiek wiadomości) oraz odczyt GAA po bitwie. Bez kontrolowanego testu na produkcyjnym PL1 nie należy podnosić `battle_time_estimate_utc` do rangi dokładnego czasu ataku.

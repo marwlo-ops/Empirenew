@@ -5,7 +5,7 @@ import {
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
   isNpcBattleReportMessage, isGgejsGamDispatchStack,
   extractParsedOutboundBossDungeonMovementEvidence,
-  parseGgejsCommandResponseEnvelope, pickSamples,
+  parseGgejsCommandResponseEnvelope, parseGgejsBattleLogShortResponse, pickSamples,
   selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
 } from './probe-core.mjs';
 
@@ -544,3 +544,70 @@ test('accepts a parsed GAM batch only when its response envelope reports success
   assert.equal(result.evidence[0].movement_id, 7004);
 });
 
+
+
+test('extracts BLS.PS as an estimated battle-occurrence time without retaining the raw payload', () => {
+  const payload = {
+    MID: 501, LID: 9001, PS: 120,
+    AI: { AT: 11, K: 1, X: 321, Y: 654 },
+  };
+  const raw = '%xt%bls%opaque-context%0%' + JSON.stringify(payload) + '%';
+  const result = parseGgejsBattleLogShortResponse(raw, '2026-11-06T00:00:00Z');
+  assert.equal(result.command, 'bls');
+  assert.equal(result.source, 'BLS.PS');
+  assert.equal(result.message_id, 501);
+  assert.equal(result.battle_log_id, 9001);
+  assert.equal(result.seconds_since_battle, 120);
+  assert.equal(result.received_at_utc, '2026-11-06T00:00:00.000Z');
+  assert.equal(result.battle_time_estimate_utc, '2026-11-05T23:58:00.000Z');
+  assert.deepEqual(result.target, { area_type: 11, kid: 1, x: 321, y: 654 });
+  assert.equal(Object.hasOwn(result, 'payload'), false);
+  assert.equal(Object.hasOwn(result, 'raw'), false);
+});
+
+test('rejects BLS time metadata unless the XT response succeeds and PS is valid', () => {
+  const payload = { MID: 501, LID: 9001, PS: 120, AI: { AT: 11, K: 1, X: 321, Y: 654 } };
+  const json = JSON.stringify(payload);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%gam%opaque%0%' + json + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%42%' + json + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%not-json%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: null }) + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: -1 }) + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, MID: 0 }) + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + json + '%', 'not-a-date'), null);
+});
+
+test('attaches BLS.PS time only when mailbox message, battle log and BLS target all match', () => {
+  const message = {
+    messageType: 6, areaType: 11, subType: 2, kingdomId: 1, ownerId: -230,
+    messageId: 501, deliveryTime: new Date('2026-11-05T18:00:00Z'), hasAttackerWon: true, isForwarded: false,
+  };
+  const battleLog = {
+    battleLogId: 9001,
+    mapobject: { areaType: 11, kingdomId: 1, position: { X: 321, Y: 654 } },
+    attacker: { playerId: 1234567, ownerInfo: { playerName: 'Test Attacker' } },
+    defender: { playerId: -230 },
+  };
+  const raw = '%xt%bls%opaque%0%' + JSON.stringify({
+    MID: 501, LID: 9001, PS: 90, AI: { AT: 11, K: 1, X: 321, Y: 654 },
+  }) + '%';
+  const shortLog = parseGgejsBattleLogShortResponse(raw, '2026-11-05T18:00:00Z');
+  const evidence = extractNpcBattleReportEvidence(message, battleLog, shortLog);
+  assert.equal(evidence.battle_time_estimate_utc, '2026-11-05T17:58:30.000Z');
+  assert.equal(evidence.battle_time_seconds_since_report, 90);
+  assert.equal(evidence.battle_time_source, 'BLS.PS_seconds_since_battle');
+  assert.equal(evidence.attack_time_utc, null);
+  assert.match(evidence.time_semantics, /not the attack launch time/);
+
+  const wrongTarget = parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({
+    MID: 501, LID: 9001, PS: 90, AI: { AT: 11, K: 1, X: 999, Y: 654 },
+  }) + '%', '2026-11-05T18:00:00Z');
+  const rejectedTime = extractNpcBattleReportEvidence(message, battleLog, wrongTarget);
+  assert.equal(rejectedTime.battle_time_estimate_utc, null);
+  assert.equal(rejectedTime.attack_time_utc, null);
+
+  const wrongLog = { ...shortLog, battle_log_id: 9002 };
+  assert.equal(extractNpcBattleReportEvidence(message, battleLog, wrongLog).battle_time_estimate_utc, null);
+  const wrongMessage = { ...shortLog, message_id: 502 };
+  assert.equal(extractNpcBattleReportEvidence(message, battleLog, wrongMessage).battle_time_estimate_utc, null);
+});

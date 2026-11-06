@@ -6,7 +6,7 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
-  isGgejsGamDispatchStack, parseGgejsCommandResponseEnvelope,
+  isGgejsGamDispatchStack, parseGgejsCommandResponseEnvelope, parseGgejsBattleLogShortResponse,
   selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
 
@@ -68,7 +68,7 @@ async function writeState(file,state) {
 async function main() {
   const a=argsOf(process.argv.slice(2));
   if (a.help) {
-    process.stdout.write('Read-only E4K PL1 probe. Default: 3 map samples per kingdom. Optional --movements requests a read-only GAM movement snapshot; --reports reads NPC battle reports from this account mailbox. Credentials: E4K_USERNAME/E4K_PASSWORD. Use --plan --all to preview the full sector plan. No exact attack time is inferred.\n');
+    process.stdout.write('Read-only E4K PL1 probe. Default: 3 map samples per kingdom. Optional --movements requests a read-only GAM movement snapshot; --reports reads NPC battle reports and captures BLS.PS battle-age metadata from this account mailbox. BLS.PS yields an approximate battle-occurrence time, not the exact attack launch time. Credentials: E4K_USERNAME/E4K_PASSWORD. Use --plan --all to preview the full sector plan. No exact attack time is inferred.\n');
     return 0;
   }
   const catalog=JSON.parse(await readFile(CATALOG,'utf8'));
@@ -104,21 +104,26 @@ async function main() {
   const originalOnSocketMessage=client.socketManager.onSocketMessage;
   const movementGamBatches=[];
   const movementGamResponseStatuses=[];
+  const battleLogShortResponses=[];
   let latestGamResponseMeta=null;
   let ignoredNonGamMovementUpdates=0;
   let movementObservationPhase = 'pre_request';
-  if (a.movements) {
-    // Capture only the response envelope (command, zone, error code), never its account payload.
-    // ggejs dispatches the GAM handler synchronously from onSocketMessage.
+  if (a.movements || a.reports) {
+    // Capture only small response metadata. BLS.PS is retained as a battle-age value;
+    // the raw account payload and report contents are never stored.
     client.socketManager.onSocketMessage=function(clientArg,message) {
+      const receivedAt=new Date().toISOString();
       const parsed=parseGgejsCommandResponseEnvelope(message);
       latestGamResponseMeta=parsed?.command==='gam'
-        ? {...parsed,connection_zone:a.zone,phase:movementObservationPhase,received_at_utc:new Date().toISOString()}
+        ? {...parsed,connection_zone:a.zone,phase:movementObservationPhase,received_at_utc:receivedAt}
         : null;
       if (latestGamResponseMeta) movementGamResponseStatuses.push(latestGamResponseMeta);
+      const shortLog=parseGgejsBattleLogShortResponse(message,receivedAt);
+      if (shortLog) battleLogShortResponses.push(shortLog);
       return originalOnSocketMessage.call(this,clientArg,message);
     };
-
+  }
+  if (a.movements) {
     // Only count updates dispatched by commands/gam.js; CRA/CRM/CSM also update this manager.
     client.movements._add_or_update=function(items) {
       const receivedAt=new Date().toISOString();
@@ -236,7 +241,9 @@ async function main() {
           if (typeof message.getBattleLog!=='function') { rejectedReports++; continue; }
           const battleLog=await message.getBattleLog();
           if (battleLog) battleLogsLoaded++;
-          const evidence=extractNpcBattleReportEvidence(message,battleLog);
+          const shortLogTimeEvidence=battleLogShortResponses.slice().reverse().find(item =>
+            item.message_id===Number(message.messageId) && item.battle_log_id===Number(battleLog?.battleLogId));
+          const evidence=extractNpcBattleReportEvidence(message,battleLog,shortLogTimeEvidence);
           if (evidence) reportEvidence.push(evidence);
           else rejectedReports++;
         } catch {
@@ -249,6 +256,8 @@ async function main() {
         mailbox_total_messages:mailbox.length,
         npc_reports_selected:reportMessages.length,
         battle_logs_loaded:battleLogsLoaded,
+        battle_log_short_responses_captured:battleLogShortResponses.length,
+        battle_time_estimates:reportEvidence.filter(item=>item.battle_time_estimate_utc).length,
         evidence_count:reportEvidence.length,
         fetch_errors:fetchErrors,
         rejected_reports:rejectedReports,
@@ -257,10 +266,8 @@ async function main() {
     }
   } finally {
     if (a.reports) client.off('mailMessageAdd',onMailMessageAdd);
-    if (a.movements) {
-      client.movements._add_or_update=originalAddOrUpdate;
-      client.socketManager.onSocketMessage=originalOnSocketMessage;
-    }
+    if (a.movements) client.movements._add_or_update=originalAddOrUpdate;
+    if (a.movements || a.reports) client.socketManager.onSocketMessage=originalOnSocketMessage;
     try { await client.socketManager.disconnect(); } catch {}
   }
 
@@ -288,14 +295,15 @@ async function main() {
       unverified_or_missing:observations.filter(x=>['not_confirmed','coordinate_row_unverified','ambiguous_duplicate_rows'].includes(x.status)).length,
       request_errors:sectorErrors.length,candidate_signals:candidateSignals.length,
       outbound_boss_dungeon_movements:movementEvidence.length,
-      npc_battle_report_evidence:reportEvidence.length
+      npc_battle_report_evidence:reportEvidence.length,
+      npc_battle_report_time_estimates:reportEvidence.filter(item=>item.battle_time_estimate_utc).length
     },
     observations,candidate_signals:candidateSignals,sector_errors:sectorErrors,
     movement_probe:movementProbe,movement_evidence:movementEvidence,
     mailbox_report_probe:reportProbe,mailbox_report_evidence:reportEvidence,
     state_file:a.noState?null:stateFile,
-    attack_history_status:'optional_account_scoped_mailbox_and_movement_evidence; no_global_PL1_history; exact_attack_time_unavailable',
-    warning:'Map rows contain no exact attacked_at. Optional GAM snapshots cover only movements returned to this account; optional NPC battle reports cover only this account mailbox. Report receipt time and movement departure are not exact attack timestamps; no global PL1 history is persisted.'
+    attack_history_status:'optional_account_scoped_mailbox_and_movement_evidence; BLS.PS_may_estimate_battle_occurrence; no_global_PL1_history; exact_attack_launch_time_unavailable',
+    warning:'Map rows contain no exact attacked_at. Optional GAM snapshots cover only movements returned to this account; optional NPC battle reports cover only this account mailbox. BLS.PS can estimate battle occurrence from server-reported seconds-since-battle, but local receipt time adds network/clock uncertainty and is not the attack launch time; no global PL1 history is persisted.'
   },null,2)+'\n');
   return 0;
 }

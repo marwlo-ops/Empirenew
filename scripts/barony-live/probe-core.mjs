@@ -220,7 +220,7 @@ export function selectLatestNpcBattleReportMessages(messages, limit = 25) {
     .map(({ message }) => message);
 }
 
-export function extractNpcBattleReportEvidence(message, battleLog) {
+export function extractNpcBattleReportEvidence(message, battleLog, shortLogTimeEvidence = null) {
   if (!isNpcBattleReportMessage(message)) return null;
 
   const kid = Number(message.kingdomId);
@@ -243,6 +243,33 @@ export function extractNpcBattleReportEvidence(message, battleLog) {
 
   const messageId = Number(message.messageId);
   const battleLogId = Number(battleLog.battleLogId);
+  const shortMessageId = Number(shortLogTimeEvidence?.message_id);
+  const shortBattleLogId = Number(shortLogTimeEvidence?.battle_log_id);
+  const secondsSinceBattle = Number(shortLogTimeEvidence?.seconds_since_battle);
+  const shortReceivedAt = toIsoDate(shortLogTimeEvidence?.received_at_utc);
+  const shortBattleTime = toIsoDate(shortLogTimeEvidence?.battle_time_estimate_utc);
+  const shortTarget = shortLogTimeEvidence?.target;
+  const targetFields = ['area_type', 'kid', 'x', 'y'];
+  const hasShortTarget = shortTarget && targetFields.some((key) => shortTarget[key] !== null && shortTarget[key] !== undefined);
+  const shortTargetMatches = !hasShortTarget || targetFields.every((key) => {
+    if (shortTarget[key] === null || shortTarget[key] === undefined) return true;
+    const expected = key === 'area_type' ? 11 : key === 'kid' ? kid : key === 'x' ? x : y;
+    return Number(shortTarget[key]) === expected;
+  });
+  const expectedBattleTime = shortReceivedAt && Number.isFinite(secondsSinceBattle) && secondsSinceBattle >= 0
+    ? toIsoDate(Date.parse(shortReceivedAt) - secondsSinceBattle * 1000)
+    : null;
+  const hasBattleTimeEstimate = Boolean(
+    shortLogTimeEvidence?.command === 'bls' &&
+    shortLogTimeEvidence?.ok === true &&
+    shortLogTimeEvidence?.source === 'BLS.PS' &&
+    Number.isSafeInteger(messageId) && messageId > 0 && shortMessageId === messageId &&
+    Number.isSafeInteger(battleLogId) && battleLogId > 0 && shortBattleLogId === battleLogId &&
+    Number.isFinite(secondsSinceBattle) && secondsSinceBattle >= 0 &&
+    shortReceivedAt && shortBattleTime && expectedBattleTime === shortBattleTime &&
+    shortTargetMatches
+  );
+
   return {
     evidence_kind: 'mailbox_npc_battle_report',
     classification: 'confirmed_battle_report_target_and_attacker',
@@ -264,10 +291,16 @@ export function extractNpcBattleReportEvidence(message, battleLog) {
       ? (message.hasAttackerWon ? 'attacker_won' : 'attacker_lost')
       : null,
     report_delivery_time_estimate_utc: toIsoDate(message.deliveryTime),
+    battle_time_estimate_utc: hasBattleTimeEstimate ? shortBattleTime : null,
+    battle_time_seconds_since_report: hasBattleTimeEstimate ? secondsSinceBattle : null,
+    battle_time_observed_at_utc: hasBattleTimeEstimate ? shortReceivedAt : null,
+    battle_time_source: hasBattleTimeEstimate ? 'BLS.PS_seconds_since_battle' : null,
     message_is_forwarded: Boolean(message.isForwarded),
     report_delivery_kind: message.isForwarded ? 'forwarded_to_this_account' : 'original_mailbox_entry',
     attack_time_utc: null,
-    time_semantics: 'BasicMessage.deliveryTime is estimated from mailbox message age against the local clock; it is not an exact server receipt time or attack start time.',
+    time_semantics: hasBattleTimeEstimate
+      ? 'BLS.PS is the server-reported seconds since battle. Subtracting it from the local BLS response-receipt time estimates when the battle occurred; this is not the attack launch time, and uncertainty includes network transit and local/server clock skew.'
+      : 'BasicMessage.deliveryTime is estimated from mailbox message age against the local clock; it is not an exact server receipt time or attack start time. BLS.PS was unavailable or did not match this message, battle log and target.',
     source_fields: [
       'message.messageType=6',
       'message.areaType=11',
@@ -278,10 +311,10 @@ export function extractNpcBattleReportEvidence(message, battleLog) {
       'battleLog.attacker.playerId',
       'battleLog.attacker.ownerInfo.playerName',
       'battleLog.defender.playerId',
+      ...(hasBattleTimeEstimate ? ['BLS.PS (seconds_since_battle)', 'BLS.MID', 'BLS.LID', 'BLS.AI target coordinates'] : []),
     ],
   };
 }
-
 
 /**
  * Extract a live outbound NPC attack movement whose exact target is a
@@ -478,6 +511,83 @@ export function parseGgejsCommandResponseEnvelope(message) {
     context_field_2: contextField2,
     error_code: Number.isSafeInteger(errorCode) ? errorCode : null,
     ok: Number.isSafeInteger(errorCode) ? errorCode === 0 || errorCode === 10005 : null,
+  };
+}
+
+/**
+ * Read only timestamp-related fields from a successful BLS response.
+ * BLS.PS is a server-reported age in seconds since the battle. The resulting
+ * UTC value is an estimate based on the local response-receipt clock, not the
+ * exact attack launch time. The raw payload is never returned or persisted.
+ */
+export function parseGgejsBattleLogShortResponse(message, receivedAt = new Date().toISOString()) {
+  const envelope = parseGgejsCommandResponseEnvelope(message);
+  if (!envelope || envelope.command !== 'bls' || envelope.ok !== true) return null;
+
+  let raw = message;
+  if (raw.startsWith('%')) raw = raw.slice(1);
+  if (raw.endsWith('%')) raw = raw.slice(0, -1);
+  const parts = raw.split('%');
+  if (parts.length < 5) return null;
+
+  let payload;
+  try {
+    payload = JSON.parse(parts.slice(4).join('%'));
+  } catch {
+    return null;
+  }
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) return null;
+
+  const messageId = Number(payload.MID);
+  const battleLogId = Number(payload.LID);
+  const rawSeconds = payload.PS;
+  if (
+    !Number.isSafeInteger(messageId) || messageId <= 0 ||
+    !Number.isSafeInteger(battleLogId) || battleLogId <= 0 ||
+    rawSeconds === null || rawSeconds === undefined ||
+    (typeof rawSeconds === 'string' && rawSeconds.trim() === '')
+  ) return null;
+
+  const secondsSinceBattle = Number(rawSeconds);
+  const receivedAtIso = toIsoDate(receivedAt);
+  if (
+    !Number.isFinite(secondsSinceBattle) || secondsSinceBattle < 0 ||
+    secondsSinceBattle > Number.MAX_SAFE_INTEGER || !receivedAtIso
+  ) return null;
+
+  const battleTimeEstimate = toIsoDate(Date.parse(receivedAtIso) - secondsSinceBattle * 1000);
+  if (!battleTimeEstimate) return null;
+
+  const area = payload.AI && typeof payload.AI === 'object' && !Array.isArray(payload.AI)
+    ? payload.AI
+    : null;
+  const asSafeInteger = (value) => {
+    if (value === null || value === undefined || (typeof value === 'string' && value.trim() === '')) return null;
+    const number = Number(value);
+    return Number.isSafeInteger(number) ? number : null;
+  };
+  const rawTarget = area ? {
+    area_type: asSafeInteger(area.AT),
+    kid: asSafeInteger(area.K),
+    x: asSafeInteger(area.X),
+    y: asSafeInteger(area.Y),
+  } : null;
+  const target = rawTarget && Object.values(rawTarget).some(value => value !== null)
+    ? rawTarget
+    : null;
+
+  return {
+    command: 'bls',
+    ok: true,
+    error_code: envelope.error_code,
+    source: 'BLS.PS',
+    message_id: messageId,
+    battle_log_id: battleLogId,
+    seconds_since_battle: secondsSinceBattle,
+    received_at_utc: receivedAtIso,
+    battle_time_estimate_utc: battleTimeEstimate,
+    target,
+    time_basis: 'local_BLS_response_receipt_minus_server_reported_seconds_since_battle',
   };
 }
 

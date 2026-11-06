@@ -27,7 +27,7 @@ module.exports = function (sockets) {
         if (req.params.server in sockets) {
             if (sockets[req.params.server] !== null && sockets[req.params.server].connected.isSet) {
                 try {
-                    const messageHeaders = JSON.parse(`{\u0024{req.params.headers}}`);
+                    const messageHeaders = JSON.parse(`{${String.fromCharCode(36)}{req.params.headers}}`);
                     sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);
 
                     let responseHeaders = {};

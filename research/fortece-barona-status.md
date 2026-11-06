@@ -1171,3 +1171,26 @@ Poprawka w `probe-core.mjs`:
 - `attack_time_utc` pozostaje `null`; jedyny czas to przedział między dwiema obserwacjami.
 
 To nie zapisuje ani nie potwierdza ataku produkcyjnego. Wymaga dwóch poprawnych odczytów GAA tego samego celu z autoryzowanej sesji PL1; raport walki nadal jest potrzebny do niezależnego potwierdzenia atakującego i bitwy.
+
+
+## 20. Zaostrzenie korelacji obserwacji GAA — 2026-11-06
+
+### Zmiany w probe-core
+
+- Cel obserwacji musi mieć niepusty stabilny ID katalogu IT1, poprawny KID/krainę i całkowite X/Y w granicach mapy.
+- Serializowany wiersz mapy typu 11 zachowuje własne X/Y, typ, KID i właściciela NPC. Porównanie nie polega już wyłącznie na statusie `fortress_row_found`.
+- Jeżeli na tych samych X/Y zwrócono więcej niż jeden wiersz mapy, wynik jest `ambiguous_duplicate_rows`, nawet gdy tylko jeden wiersz pasuje do typu 11 i oczekiwanego właściciela.
+- Dwie obserwacje mogą być porównane tylko wtedy, gdy każda zawiera dokładnie jeden spójny wiersz typu 11, zgodny właściciel NPC, ten sam ID katalogowy, krainę, KID i X/Y oraz zgodne kopie pól defeater/cooldown.
+- Kandydacki przedział czasu jest odrzucany, gdy próbki dzieli więcej niż 2 godziny. `attack_time_utc` pozostaje `null`; sygnał nadal nie jest potwierdzonym atakiem.
+
+### Testy i zakres
+
+- Dodano regresje dla niepoprawnego celu, pojedynczych wierszy typu 1/2 i typu 11 z błędnym NPC, duplikatów na tej samej współrzędnej, niezgodnego ID katalogowego, niekompletnych obserwacji oraz zbyt szerokiego przedziału próbek.
+- Izolowany test lokalny zmienionej logiki: 8/8 PASS. Pełny zestaw `node --test` i workflow Actions dla PR nie został w tej iteracji potwierdzony; status-check API zwrócił pustą listę.
+- Zmiany są w PR #10, gałąź `barony/strict-observation-evidence-20261106`. PR pozostaje nie scalony; GitHub zwrócił `mergeable=false` przy utworzeniu.
+- Nie zmieniono `barony.html`, Mapa, Szpiegowanie, Dodatkowe ani katalogu współrzędnych. Nie było live logowania PL1 i nie zapisano ataków.
+- Ostatni potwierdzony deploy Pages dotyczy wcześniejszego `main` SHA `70d4b748326d3b577dae759a90179e20a4e82e30`; zmiany PR nie są opublikowane.
+
+### Następny krok
+
+Uzyskać rzeczywiste wyniki testów Actions dla PR i — osobno — przeprowadzić małą, autoryzowaną próbkę mapy produkcyjnego PL1. Do czasu otrzymania dwóch spójnych obserwacji tego samego punktu sygnały cooldown/defeater pozostają kandydackie.

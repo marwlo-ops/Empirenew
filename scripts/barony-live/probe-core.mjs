@@ -20,24 +20,23 @@ export async function requestMailboxMessages(client, showMessages, timeoutMs = 3
     throw new Error('Mailbox wait must be an integer from 1 to 10000 ms.');
   }
 
-  const cachedMessages = () => Array.isArray(client.mailMessages) ? client.mailMessages : [];
   let timer;
   const request = Promise.resolve()
     .then(() => showMessages(client))
     .then((messages) => ({
       status: Array.isArray(messages) ? 'response_received' : 'response_missing',
-      messages: Array.isArray(messages) ? messages : cachedMessages(),
+      messages: Array.isArray(messages) ? messages : [],
       error_type: null,
     }))
     .catch((error) => ({
       status: 'request_error',
-      messages: cachedMessages(),
+      messages: [],
       error_type: error?.constructor?.name || 'Error',
     }));
   const timeout = new Promise((resolve) => {
     timer = setTimeout(() => resolve({
       status: 'timeout',
-      messages: cachedMessages(),
+      messages: [],
       error_type: null,
     }), timeoutMs);
   });

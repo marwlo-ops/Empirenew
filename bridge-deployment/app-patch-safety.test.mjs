@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 const patch = await readFile(new URL('./app.js.patch', import.meta.url), 'utf8');
 const environment = await readFile(new URL('./ENVIRONMENT.md', import.meta.url), 'utf8');
 const render = await readFile(new URL('./render.yaml', import.meta.url), 'utf8');
-const addedLines = patch.split(/\\r?\\n/).filter((line) => line.startsWith('+'));
+const addedLines = patch.split('\n').filter((line) => line.startsWith('+'));
 
 test('bridge patch never adds raw upstream error messages to logs or responses', () => {
   assert.ok(addedLines.some((line) => line.includes("console.log('Bridge command failed:', error?.name || 'Error')")));

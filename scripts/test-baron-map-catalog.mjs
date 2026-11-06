@@ -8,8 +8,44 @@ const expected = { sands: 1, ice: 2, fire: 3 };
 const seen = new Set();
 const seenIds = new Set();
 const allowedPointKeys = ["id", "kid", "kingdom", "x", "y", "type", "source_server"].sort();
+const allowedCatalogKeys = [
+  "schema_version", "captured_at", "source", "server_source", "target_server",
+  "coordinate_alignment", "complete", "pages_read", "total_count", "results", "note"
+].sort();
+const forbiddenDynamicKey = /cooldown|attack|attacked_at|last_attack|player_id|player_name|defeater|ready|readiness|available|gotow/i;
+
+function findForbiddenKey(value, path = "catalog") {
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const found = findForbiddenKey(value[index], `${path}[${index}]`);
+      if (found) return found;
+    }
+    return null;
+  }
+  if (!value || typeof value !== "object") return null;
+  for (const [key, child] of Object.entries(value)) {
+    if (forbiddenDynamicKey.test(key)) return `${path}.${key}`;
+    const found = findForbiddenKey(child, `${path}.${key}`);
+    if (found) return found;
+  }
+  return null;
+}
 let total = 0;
 
+assert.deepEqual(Object.keys(catalog).sort(), allowedCatalogKeys,
+  "Public catalog must use the reviewed top-level map-only schema");
+assert.equal(catalog.schema_version, 2, "Catalog schema version must be 2");
+assert.equal(catalog.target_server, "E4K_PL1", "Catalog target must remain production PL1");
+assert.ok(Number.isInteger(catalog.pages_read) && catalog.pages_read > 0,
+  "Catalog must record a positive number of pages read");
+assert.match(catalog.coordinate_alignment || "", /^operator_confirmed;/,
+  "IT1-to-PL1 coordinate alignment must remain explicitly operator-confirmed");
+assert.equal(findForbiddenKey(catalog), null,
+  "No attack, player, cooldown, readiness or availability fields may appear at any catalog depth");
+const nestedPollution = structuredClone(catalog);
+nestedPollution.diagnostic = { nested: { cooldown_seconds: 3600 } };
+assert.match(findForbiddenKey(nestedPollution) || "", /diagnostic\.nested\.cooldown_seconds/,
+  "Recursive guard must detect forbidden metadata outside fortress rows");
 assert.equal(catalog.complete, true, "IT1 catalog must be complete");
 assert.equal(catalog.server_source, "IT1", "Catalog source must remain IT1");
 assert.match(catalog.source || "", /GGE Tracker/i, "Catalog must name GGE Tracker as its source");

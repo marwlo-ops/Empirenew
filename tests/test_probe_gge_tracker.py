@@ -41,6 +41,7 @@ class InvalidJsonResponse(FakeResponse):
 class ProbeGgeTrackerRedactionTests(unittest.TestCase):
     def sample_payload(self):
         return {
+            "return_code": "0",
             "dungeons": [{
                 "kid": 1,
                 "position_x": 123,
@@ -76,11 +77,21 @@ class ProbeGgeTrackerRedactionTests(unittest.TestCase):
             result = PROBE.probe("E4K_PL1_BETA")
         rendered = json.dumps(result)
         self.assertEqual(result["http_status"], 200)
+        self.assertEqual(result["return_code"], "0")
         self.assertTrue(result["ok"])
         self.assertTrue(result["player_metadata_present"])
         self.assertTrue(result["attack_metadata_present"])
         for secret in (PRIVATE_NAME, PRIVATE_ID, PRIVATE_TIMESTAMP, "1234567"):
             self.assertNotIn(secret, rendered)
+
+    def test_untrusted_return_code_is_not_echoed(self):
+        payload = self.sample_payload()
+        payload["return_code"] = PRIVATE_NAME
+        with patch.object(PROBE, "urlopen", return_value=FakeResponse(payload)):
+            result = PROBE.probe("E4K_PL1_BETA")
+        rendered = json.dumps(result)
+        self.assertIsNone(result["return_code"])
+        self.assertNotIn(PRIVATE_NAME, rendered)
 
     def test_http_error_body_is_not_read_or_emitted(self):
         error = HTTPError(

@@ -831,3 +831,21 @@ Testy są offline i nie stanowią potwierdzenia zachowania produkcyjnego PL1. Ni
 To poprawia pokrycie raportów, gdy BLS nie zawiera PS, i daje niezależny test spójności, jeśli obie odpowiedzi zawierają PS. Estymacja nadal opisuje czas bitwy, nie czas wysłania armii; nie jest dokładnym timestampem ataku. Raporty pozostają ograniczone do skrzynki autoryzowanego konta, nie do globalnej historii PL1.
 
 Następny test na autoryzowanej sesji PL1 powinien zebrać BLS i BLM dla jednego raportu z fortecy typu 11 i porównać ich PS, MID/LID, AI oraz pełny `BattleLog.mapobject.position`. Bez takiego wyniku nie podnosimy tej estymacji do potwierdzonego czasu ataku.
+
+
+## 28. Ścisła walidacja schematu katalogu mapowego — 2026-11-06
+
+### Ustalenie
+
+Przegląd bieżącego walidatora wykazał, że blokował znane nazwy pól ataku/cooldownu, ale dopuszczał nieznane dodatkowe pola w rekordzie fortecy. Nie wymagał też niepustego, unikalnego identyfikatora rekordu. Aktualny katalog został sprawdzony niezależnie: 2021 rekordów, 2021 unikalnych ID, dokładnie siedem pól w każdym rekordzie, bez dodatkowych pól.
+
+### Poprawka
+
+- `validateMapOnlyCatalog()` wymaga teraz dokładnie pól `id`, `kid`, `kingdom`, `x`, `y`, `type`, `source_server`.
+- Odrzuca brakujący/pusty identyfikator oraz powtórzone ID.
+- `scripts/test-baron-map-catalog.mjs` wykonuje tę samą kontrolę dla katalogu publikowanego.
+- Dodano regresję dla niezatwierdzonego pola, brakującego ID i duplikatu ID.
+
+### Zakres i ograniczenia
+
+Zmiana dotyczy wyłącznie walidacji katalogu fortec. Nie zmienia danych, UI, mapy ani źródeł PL1. Nie wykonano live logowania do gry. Nie powstały żadne zdarzenia ataków. Wynik testów GitHub Actions dla tego commitu należy potwierdzić po zakończeniu workflow; nie traktować samego zapisu commitów jako testu.

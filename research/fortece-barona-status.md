@@ -1515,3 +1515,55 @@ PR #13 (bezpieczny pakiet własnego mostu) nadal pozostaje draft i nie jest wdro
 ## 45. Korekta zakresu GGE WebSocket Studio — 2026-11-06 08:59 UTC
 
 Wcześniejsza wzmianka o GGE WebSocket Studio jako możliwej drodze walidacji BLS/BLM dla konta E4K została zawężona. Listing rozszerzenia ogranicza aktywność do dwóch domen przeglądarkowego Empire i opisuje przechwytywanie WebSocket. Przypięty klient ggejs dla stref `EmpirefourkingdomsExGG*` używa TCP. Nie ma dowodu, że rozszerzenie widzi transport E4K PL1, więc tę ścieżkę wykluczamy z planu testów PL1. Nie wpływa to na kod ani klasyfikację zdarzeń.
+
+
+## 46. Naprawa jawnego pobierania skrzynki NPC i świeży probe PL1 — 2026-11-06 10:34 UTC
+
+### Wykryty błąd ścieżki raportów
+
+Audyt przypiętego `ggejs` 2.2.0 z rewizji `a4980b01404ab01c9b826a267f331ae8c953d237` wykazał konkretny błąd w głównym `probe.mjs --reports`: 
+
+- `E4KClient.connect()` wykonuje połączenie, weryfikację logowania, login i ping/pong; nie wywołuje `SNE`.
+- `BaseClient.mailMessages` zaczyna jako pusta tablica. Jest zapełniana przez parser odpowiedzi `SNE` w `commands/sne.js`.
+- `commands/sne.js` udostępnia `showMessages(client)`, które jawnie wysyła `SNE` i zwraca sparsowaną skrzynkę.
+- Poprzednia ścieżka `probe.mjs --reports` jedynie czekała, a następnie czytała `client.mailMessages` bez żądania SNE. Mogła więc pomylić brak pobrania skrzynki z pustą skrzynką.
+
+### Poprawka
+
+- Commit kodu: `119189f428343fb7b8f4c3faf3f23e22553a5430`.
+- Commit korekty testu integracyjnego: `76ecfef5c1b17ae4c9ebd7f19cec3197049f26d3`.
+- `probe.mjs --reports` teraz jawnie wywołuje `showMessages(client)` przez `requestMailboxMessages()`.
+- Dodano ograniczony czas oczekiwania oraz osobne stany: odpowiedź odebrana, brak pola odpowiedzi, błąd żądania i timeout. W błędzie raportowany jest wyłącznie typ wyjątku, nie jego surowa treść.
+- Dodano testy odpowiedzi SNE, pustej/brakującej odpowiedzi, błędu, timeoutu oraz sprawdzenie połączenia helpera z głównym probe.
+- README poprawia wcześniejsze nieścisłe stwierdzenie, że samo `connect()` pobiera skrzynkę.
+
+Pierwszy CI po poprawce kodu (`42203599307`) miał 52/53 testy: jedyną porażką było zbyt mocno escapowane wyrażenie regularne w nowym teście statycznym. Poprawiono samą asercję na sprawdzenie literalnych fragmentów źródła; logika produkcyjna nie wymagała zmiany. Końcowy workflow `Probe PL1 fortress API`, run `42203696114`, zakończył się SUCCESS:
+- Python: 13/13 PASS;
+- Node: 53/53 PASS;
+- składnia skryptów, kontrola przypiętego klienta i metadanych PL1: PASS;
+- test mobilnego Barony: PASS;
+- katalog mapowy IT1: 2021 unikalnych współrzędnych, bez pól ataku/cooldownu/gracza/gotowości: PASS.
+
+Poprawka nie była testowana na zalogowanym koncie PL1 w CI. Wymaga to lokalnego uruchomienia operatora; nie użyto żadnych poświadczeń w GitHub Actions.
+
+### Świeży odczyt publicznych endpointów — run 42203696114
+
+- TCP do `e4k-live-pl1-game.goodgamestudios.com:443`: handshake PASS, 187 ms, `payload_sent=false`. To wyłącznie dostępność TCP, nie sesja gry.
+- GGE Tracker `/servers`: 63 wpisy, obecne aliasy `E4K_PL1` i `E4K_PL1_BETA`.
+- Katalog serwerów: `E4K_PL1 enabled=true, fortress=false`; `E4K_PL1_BETA enabled=true, fortress=true`.
+- `/dungeons` dla `E4K_PL1` zwrócił HTTP 400 (produkcyjny PL1 nie jest obsługiwany przez listę serwerów endpointu); `/dungeons/meta` dla `E4K_PL1` również HTTP 400.
+- Alias strefy `EmpirefourkingdomsExGG_3` i starszy wariant `EmpirefourkingdomsExGG2_3` również otrzymały HTTP 400 jako nieprawidłowe wartości nagłówka `gge-server`.
+- `E4K_PL1_BETA` zwrócił HTTP 200 i 976 rekordów, a IT1 HTTP 200 i 2021 stron przy próbce size=1. To wyłącznie osobne środowiska; ich cooldownów, historii ani timestampów nie przeniesiono do PL1.
+- Próba historii produkcyjnego PL1 dla trzech identyfikatorów z migawki Szpiegowania: lookup HTTP 200, ale każdy zwrócił `Player not found`; historia HTTP 400 `Invalid player ID`, 0 rekordów.
+- Dopisanie `zoneId=259` do surowych ID nie rozwiązało trasy: 0 odpowiedzi HTTP 200, wszystkie próbki HTTP 400 `Invalid player ID`. Kod serwera w katalogu GGE Tracker pozostaje null, więc wariant sufiksu katalogowego został pominięty.
+- Publiczny most: `/status` HTTP 200, `target_connected=false`; GAA/GAM pominięte, ponieważ połączenie z docelowym socketem PL1 nie zostało potwierdzone.
+
+### Wniosek i zakres danych
+
+W tej iteracji nie wykonano logowania do gry, nie pobrano ruchów GAM ani raportów NPC z konta, nie znaleziono potwierdzonego ataku PL1 i nie zapisano żadnego zdarzenia. Nadal brakuje działającego, autoryzowanego odczytu produkcyjnej sesji PL1 lub obsługi produkcyjnego PL1 po stronie GGE Tracker. Sam handshake TCP, wpis katalogowy `fortress=false` i nieudane próby historii gracza nie są dowodem ataku.
+
+Nie wykorzystano IT1/Beta cooldownu ani historii jako danych PL1. Nie zmieniono zakładek Mapa, Szpiegowanie ani Dodatkowe, plików `barony.html` / `mapa-rb.html` ani katalogu współrzędnych.
+
+### Publikacja
+
+GitHub Pages run `42203695548` dla commitu `76ecfef5c1b17ae4c9ebd7f19cec3197049f26d3`: build, report-build-status i deploy zakończone SUCCESS.

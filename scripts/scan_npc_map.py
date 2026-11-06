@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Read-only E4K PL1 map diagnostics with fail-safe snapshot writes.
+"""Read-only preflight for the public E4K PL1 map bridge.
 
-The public empire-api bridge may not match map-command responses reliably.
-This tool emits only redacted structural diagnostics and never overwrites the
-live snapshot unless it validates at least one explicitly NPC-labelled object
-with numeric X/Y coordinates.
+The audited public bridge has no response-key mappings for GAA/FNM. This tool
+checks the target socket first and skips those commands until the adapter can
+correlate their replies safely. It emits redacted diagnostics and never
+overwrites the live snapshot without an explicitly NPC-labelled object.
 """
 from __future__ import annotations
 
@@ -14,7 +14,6 @@ import os
 import re
 import sys
 import tempfile
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -24,6 +23,9 @@ from urllib.error import HTTPError, URLError
 
 DEFAULT_BASE = "https://empire-api.fly.dev"
 DEFAULT_SERVER = "EmpirefourkingdomsExGG_3"  # Pinned production PL1 zone from e4k-data
+# Audited upstream empire-api data/commands.json: GAA and FNM have no response-key mapping.
+BRIDGE_RESPONSE_MAPPED_COMMANDS = frozenset({"wsp", "gdi", "hgh", "ain", "llsp", "llsw", "slse"})
+MAP_COMMANDS = ("gaa", "fnm")
 NPC_WORDS = re.compile(r"(npc|baron|robber|dungeon|fortress|stronghold|camp|rozb[oó]j|baron|loch|twierd|ob[oó]z)", re.I)
 
 
@@ -103,6 +105,65 @@ def request_command(base: str, server: str, command: str,
         raise ProbeError(f"{command}: response root is not an object")
     return {"http_status": status, "payload": payload}
 
+
+
+def request_bridge_status(base: str, server: str, timeout: int) -> dict[str, Any]:
+    """Read only the bridge's server->connected status map; never emit its keys."""
+    validate_api_base(base)
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": "Empirenew-NPC-map-diagnostic/1.2",
+    }
+    api_token = os.getenv("E4K_API_TOKEN")
+    if api_token:
+        headers["Authorization"] = f"Bearer {api_token}"
+    req = Request(base.rstrip("/") + "/status", headers=headers)
+    try:
+        with urlopen(req, timeout=timeout) as response:
+            status = response.status
+            body = response.read().decode("utf-8", "replace")
+    except HTTPError as exc:
+        raise ProbeError(f"bridge status: HTTP {exc.code}; response body redacted") from exc
+    except (URLError, TimeoutError) as exc:
+        raise ProbeError(f"bridge status: transport error ({type(exc).__name__})") from exc
+
+    if status != 200:
+        raise ProbeError(f"bridge status: HTTP {status}; response body redacted")
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError as exc:
+        raise ProbeError("bridge status: HTTP 200 but invalid JSON; response body redacted") from exc
+    if not isinstance(payload, dict):
+        raise ProbeError("bridge status: response root is not an object")
+
+    connected = payload.get(server)
+    return {
+        "http_status": status,
+        "target_connected": connected if isinstance(connected, bool) else None,
+        "known_server_count": len(payload),
+    }
+
+
+def build_map_command_plan(target_connected: bool | None, kingdom: int,
+                           x: int, y: int, chunk_size: int) -> list[dict[str, Any]]:
+    """Plan only commands that the bridge can correlate; skip unmapped GAA/FNM."""
+    commands = (
+        ("gaa", {"KID": kingdom, "AX1": x, "AY1": y,
+                 "AX2": x + chunk_size, "AY2": y + chunk_size}),
+        ("fnm", {"T": 2, "KID": kingdom, "LMIN": 1, "LMAX": -1, "NID": -1}),
+    )
+    plan = []
+    for command, params in commands:
+        if target_connected is False:
+            reason = "target_socket_not_connected"
+        elif target_connected is not True:
+            reason = "bridge_status_unavailable_or_target_unknown"
+        elif command not in BRIDGE_RESPONSE_MAPPED_COMMANDS:
+            reason = "bridge_response_key_mapping_missing"
+        else:
+            reason = None
+        plan.append({"command": command, "params": params, "skip_reason": reason})
+    return plan
 
 def walk(value: Any, path: str = "$"):
     if isinstance(value, dict):
@@ -238,24 +299,50 @@ def main():
     if args.chunk_size < 1 or args.chunk_size > 50:
         parser.error("--chunk-size must be between 1 and 50")
 
-    tests = [
-        ("gaa", {"KID": args.kingdom, "AX1": args.x, "AY1": args.y,
-                 "AX2": args.x + args.chunk_size, "AY2": args.y + args.chunk_size}),
-        ("fnm", {"T": 2, "KID": args.kingdom, "LMIN": 1, "LMAX": -1, "NID": -1}),
-    ]
     report = {
         "tested_at": datetime.now(timezone.utc).isoformat(),
         "server": args.server,
         "base": safe_origin(args.base),
         "kingdom": args.kingdom,
+        "bridge_status": None,
         "tests": [],
         "validated_npc_count": 0,
         "snapshot_written": False,
     }
+
+    try:
+        bridge_status = request_bridge_status(args.base, args.server, args.timeout)
+        report["bridge_status"] = bridge_status
+        target_connected = bridge_status["target_connected"]
+    except ProbeError as exc:
+        report["bridge_status"] = {
+            "http_status": None,
+            "target_connected": None,
+            "known_server_count": None,
+            "error": str(exc),
+        }
+        target_connected = None
+
     all_npcs = []
-    for command, params in tests:
+    for planned in build_map_command_plan(
+        target_connected, args.kingdom, args.x, args.y, args.chunk_size
+    ):
+        command = planned["command"]
+        if planned["skip_reason"]:
+            report["tests"].append({
+                "command": command,
+                "ok": False,
+                "skipped": True,
+                "reason": planned["skip_reason"],
+            })
+            continue
+
+        # Retained for a future audited bridge mapping. GAA/FNM are currently
+        # absent from the public adapter's response-key map.
         try:
-            result = request_command(args.base, args.server, command, params, args.timeout)
+            result = request_command(
+                args.base, args.server, command, planned["params"], args.timeout
+            )
             payload = result["payload"]
             entry = {
                 "command": command,
@@ -268,7 +355,7 @@ def main():
             }
             if str(payload.get("return_code")) != "0":
                 entry["ok"] = False
-                entry["error"] = f"game return_code={payload.get('return_code')}"
+                entry["error"] = "game returned a non-success status"
             else:
                 try:
                     npcs = extract_explicit_npcs(payload, args.kingdom)
@@ -280,7 +367,6 @@ def main():
             report["tests"].append(entry)
         except ProbeError as exc:
             report["tests"].append({"command": command, "ok": False, "error": str(exc)})
-        time.sleep(0.5)
 
     deduped = {(n["x"], n["y"], n["label"]): n for n in all_npcs}
     all_npcs = list(deduped.values())

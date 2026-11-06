@@ -990,6 +990,6 @@ test('times out a pending SNE request without treating it as an empty response',
 
 test('live probe explicitly invokes the pinned ggejs SNE mailbox reader for reports', async () => {
   const source = await readFile(new URL('./probe.mjs', import.meta.url), 'utf8');
-  assert.match(source, /requestMailboxMessages\\(client,\\s*showMessages,\\s*a\\.reportWaitMs\\)/);
-  assert.match(source, /commands',\\s*'sne\\.js'/);
+  assert.ok(source.includes('requestMailboxMessages(client, showMessages, a.reportWaitMs)'));
+  assert.ok(source.includes("require(path.join(ggejsRoot, 'commands', 'sne.js'))"));
 });

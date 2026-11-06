@@ -1869,3 +1869,52 @@ Dotychczas walidator odrzucał niedozwolone pola w rekordzie fortecy, ale nie sp
 ### Zakres
 
 Przygotowane zmiany dotyczą wyłącznie walidatora katalogu fortec, diagnostyki mostu i ich testów. Nie zmieniają zakładek Mapa, Szpiegowanie ani Dodatkowe, ani plików `barony.html` i `mapa-rb.html`. Testowy workflow bezpieczeństwa nie korzysta z sekretów i nie wysyła żądań do serwera gry.
+
+
+## 52. Preflight mostu przed GAA/FNM — 2026-11-06
+
+### Wynik najnowszej diagnostyki przed poprawką
+
+Run 42234701996 (NPC map API diagnostics, commit f04894cd2d8c2b18e11b2fcc094aefcc6ac7632e) wykonał scripts/scan_npc_map.py bez wcześniejszego sprawdzenia /status:
+- GAA: HTTP 500, treść odpowiedzi zredagowana;
+- FNM: HTTP 500, treść odpowiedzi zredagowana;
+- validated_npc_count=0, snapshot_written=false;
+- publiczny GGE Tracker: E4K_PL1 HTTP 400; E4K_PL1_BETA HTTP 200, tylko próbka strukturalna; production_supported=false;
+- workflow zakończył się kontrolowanym błędem kroku walidacji API/mapy. Nie zmodyfikowano snapshotu.
+
+### Audyt mostu
+
+Publiczny kod danadum/empire-api pokazuje:
+- GET /status zwraca mapę server -> connected:boolean;
+- trasa /:server/:command/:headers zwraca HTTP 500 Server not connected, jeśli socket nie jest połączony;
+- po połączeniu wysyła komendę i czeka do 1000 ms na odpowiedź;
+- dla komend bez jawnego wpisu w data/commands.json używa pól żądania jako kryteriów dopasowania odpowiedzi.
+
+Audyt bieżącego data/commands.json wykazał mapowania wsp, gdi, hgh, ain, llsp, llsw, slse; brak mapowań gaa i fnm. Dlatego nawet przy target_connected=true obecny ogólny matcher nie ma potwierdzonego sposobu korelacji odpowiedzi GAA/FNM. Nie należy wysyłać tych komend przez adapter, dopóki mapowanie nie zostanie dodane i przetestowane. Osobny probe GAM używa pustego {} i jest analizowany oddzielnie; nadal wymaga połączonej sesji oraz zweryfikowanej odpowiedzi XT.
+
+Źródła:
+- https://github.com/danadum/empire-api/blob/main/app.js
+- https://github.com/danadum/empire-api/blob/main/data/commands.json
+- https://github.com/danadum/empire-api/blob/main/utils/ws/baseSocket.js
+
+### Poprawka w Empirenew
+
+W scripts/scan_npc_map.py:
+- dodano read-only preflight GET /status;
+- raport zawiera wyłącznie target_connected i liczbę znanych serwerów, bez dynamicznych nazw/kluczy;
+- jeśli target jest rozłączony lub status jest nieznany, GAA/FNM są pomijane;
+- nawet przy target_connected=true GAA/FNM są pomijane, ponieważ publiczny adapter nie ma dla nich mapowania odpowiedzi;
+- nie wysyła się żadnego payloadu GAA/FNM, a brak danych nie może utworzyć snapshotu.
+
+W tests/test_scan_npc_map_auth.py dodano testy:
+- redakcji mapy statusu;
+- bearer token wyłącznie w nagłówku;
+- redakcji błędów HTTP i niepoprawnego JSON;
+- pomijania GAA/FNM dla statusu false/unknown oraz przy braku mapowania;
+- potwierdzenia, że nawet połączony bridge nie otrzymuje niedopasowanych komend.
+
+### Ograniczenia
+
+Ta zmiana nie tworzy źródła mapy. Publiczny bridge nadal nie udostępnia potwierdzonego GAA/FNM, a produkcyjny GGE Tracker PL1 nadal wymaga obsługi serwera i prawidłowego kodu. Dane Beta/IT1 nie są używane jako ataki PL1. Nie wykonano lokalnego logowania do konta demo; nie uzyskano nowych ruchów GAM ani raportów BLS/BLM/SNE. attack_time_utc pozostaje null.
+
+Zmiana obejmuje wyłącznie skrypt diagnostyczny, jego testy i ten dziennik. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, barony.html, mapa-rb.html i katalogu współrzędnych.

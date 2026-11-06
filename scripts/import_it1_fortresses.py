@@ -63,7 +63,7 @@ def pagination_info(payload):
     hard failure so an incomplete API response cannot replace the last catalog.
     """
     if not isinstance(payload, dict) or "pagination" not in payload:
-        return None
+        raise RuntimeError("Missing GGE Tracker pagination metadata; existing catalog preserved")
     meta = payload.get("pagination")
     if not isinstance(meta, dict):
         raise RuntimeError("Invalid GGE Tracker pagination object; existing catalog preserved")
@@ -168,23 +168,22 @@ def main():
         metadata = pagination_info(payload)
         pages_read += 1
 
-        if metadata is not None:
-            if metadata["current_page"] != page:
-                raise RuntimeError("GGE Tracker returned an unexpected page number; existing catalog preserved")
-            if expected_pages is None:
-                expected_pages = metadata["total_pages"]
-                expected_total = metadata["total_items_count"]
-                if expected_pages > MAX_PAGES:
-                    raise RuntimeError("GGE Tracker pagination exceeds the configured safety limit; existing catalog preserved")
-            elif (
-                metadata["total_pages"] != expected_pages
-                or metadata["total_items_count"] != expected_total
-            ):
-                raise RuntimeError("GGE Tracker pagination changed while reading IT1; existing catalog preserved")
-            if len(rows) != metadata["current_items_count"]:
-                raise RuntimeError("GGE Tracker page item count does not match its metadata; existing catalog preserved")
-            if page > expected_pages:
-                raise RuntimeError("GGE Tracker returned more pages than declared; existing catalog preserved")
+        if metadata["current_page"] != page:
+            raise RuntimeError("GGE Tracker returned an unexpected page number; existing catalog preserved")
+        if expected_pages is None:
+            expected_pages = metadata["total_pages"]
+            expected_total = metadata["total_items_count"]
+            if expected_pages > MAX_PAGES:
+                raise RuntimeError("GGE Tracker pagination exceeds the configured safety limit; existing catalog preserved")
+        elif (
+            metadata["total_pages"] != expected_pages
+            or metadata["total_items_count"] != expected_total
+        ):
+            raise RuntimeError("GGE Tracker pagination changed while reading IT1; existing catalog preserved")
+        if len(rows) != metadata["current_items_count"]:
+            raise RuntimeError("GGE Tracker page item count does not match its metadata; existing catalog preserved")
+        if page > expected_pages:
+            raise RuntimeError("GGE Tracker returned more pages than declared; existing catalog preserved")
 
         for row in rows:
             point = normalize(row)
@@ -194,11 +193,7 @@ def main():
                     raise RuntimeError(f"Duplicate IT1 coordinate {key}; existing catalog preserved")
                 all_points[key] = point
 
-        if metadata is not None:
-            if page == metadata["total_pages"]:
-                pagination_complete = True
-                break
-        elif len(rows) < PAGE_SIZE:
+        if page == metadata["total_pages"]:
             pagination_complete = True
             break
 

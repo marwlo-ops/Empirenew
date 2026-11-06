@@ -764,7 +764,6 @@ export function buildGamProbeSummary({
 
   const before = Array.isArray(preRequestBatches) ? preRequestBatches : [];
   const after = Array.isArray(responseBatches) ? responseBatches : [];
-  const allBatches = [...before, ...after];
   const captureStatus = responseStatusCaptureEnabled === true;
   const statuses = Array.isArray(responseStatuses) ? responseStatuses : [];
   const requestStatuses = statuses.filter((item) => item?.phase === 'request');

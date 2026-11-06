@@ -152,7 +152,8 @@ async function main() {
   }
   const observations=[],candidateSignals=[],sectorErrors=[];
   let movementProbe={status:'not_requested',gam_response_batches:0,ignored_non_gam_movement_updates:0,movement_count:0,matching_count:0};
-  let movementEvidence=[];\n  let movementPreRequestEvidence=[];
+  let movementEvidence=[];
+  let movementPreRequestEvidence=[];
   let mailboxUpdateObserved=false;
   const onMailMessageAdd=()=>{mailboxUpdateObserved=true;};
   if (a.reports) client.on('mailMessageAdd',onMailMessageAdd);
@@ -232,7 +233,8 @@ async function main() {
         responseStatuses:movementGamResponseStatuses,responseStatusCaptureEnabled:true,
       });
       movementProbe=gamResult.summary;
-      movementEvidence=gamResult.evidence;\n      movementPreRequestEvidence=gamResult.pre_request_evidence;
+      movementEvidence=gamResult.evidence;
+      movementPreRequestEvidence=gamResult.pre_request_evidence;
     }
 
     if (a.reports) {

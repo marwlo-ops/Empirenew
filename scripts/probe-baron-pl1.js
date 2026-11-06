@@ -151,6 +151,49 @@ try {
   console.log(JSON.stringify({ probe: "beta-dungeon-coordinate-overlap", error: String(error) }));
 }
 
+async function probeTrackerAttackTimestampSemantics(server) {
+  try {
+    const url = base + "/dungeons?page=1&size=20&filterByKid=" +
+      encodeURIComponent("[1,2,3]") + "&filterByAttackCooldown=3";
+    const response = await fetch(url, {
+      headers: { "gge-server": server, Accept: "application/json" },
+      signal: AbortSignal.timeout(20000)
+    });
+    const body = await response.json();
+    const rows = Array.isArray(body.dungeons) ? body.dungeons : [];
+    const samples = rows.slice(0, 8).map(row => {
+      const lastAttackMs = Date.parse(row.last_attack);
+      const globalAvailableMs = Date.parse(row.global_available_at);
+      const hasTimes = Number.isFinite(lastAttackMs) && Number.isFinite(globalAvailableMs);
+      return {
+        kid: Number(row.kid),
+        x: Number(row.position_x),
+        y: Number(row.position_y),
+        last_attack_utc: Number.isFinite(lastAttackMs) ? new Date(lastAttackMs).toISOString() : null,
+        global_available_at_utc: Number.isFinite(globalAvailableMs) ? new Date(globalAvailableMs).toISOString() : null,
+        global_minus_last_attack_seconds: hasTimes ? Math.round((globalAvailableMs - lastAttackMs) / 1000) : null,
+        available_duration_seconds: Number.isFinite(Number(row.available_duration_seconds))
+          ? Number(row.available_duration_seconds) : null,
+        total_attack_count: Number.isFinite(Number(row.total_attack_count))
+          ? Number(row.total_attack_count) : null
+      };
+    });
+    console.log(JSON.stringify({
+      probe: "tracker-attacked-at-provenance",
+      server,
+      http_status: response.status,
+      error: body.error ?? null,
+      filter: "filterByAttackCooldown=3 (cooldown ends within one hour)",
+      pagination: body.pagination ?? null,
+      sample_count: samples.length,
+      samples,
+      note: "Read-only timestamp-provenance diagnostic for this named tracker server only. Beta/IT1 rows are not production PL1 attack evidence and are never copied into PL1."
+    }));
+  } catch (error) {
+    console.log(JSON.stringify({ probe: "tracker-attacked-at-provenance", server, error: String(error) }));
+  }
+}
+
 async function probeBetaPlayerHistoryFromDungeonRows() {
   try {
     const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
@@ -578,4 +621,6 @@ await probeBetaPlayerHistoryFromDungeonRows();
 await probeProductionPlayerHistoryFromSpySnapshot();
 await probeProductionPlayerHistoryWithZoneIdSuffix();
 await probeProductionPlayerHistoryWithCatalogCodeSuffix();
+await probeTrackerAttackTimestampSemantics("E4K_PL1_BETA");
+await probeTrackerAttackTimestampSemantics("IT1");
 await probeBridge();

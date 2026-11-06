@@ -1103,3 +1103,31 @@ Takie wartości nie są poprawnym typem pola protokołu i mogły wytworzyć synt
 ### Ograniczenia
 
 To zabezpieczenie poprawia walidację formatu, ale nie potwierdza, że BLS/BLM z produkcyjnego PL1 zawierają PS dla fortec typu 11. Nie wykonano sesji live; brak nowych rekordów ataków PL1. `attack_time_utc` pozostaje `null`, ponieważ PS opisuje wiek bitwy, a nie moment wysłania armii.
+
+## 36. Pochodzenie attacked_at w GGE Tracker — audyt ścieżki zapisu
+
+### Co wynika z publicznego scrapera
+
+W przypiętym commicie GGE Tracker `7d620820a76cde4176c752f6972ce6f0c9ad7ab1` ścieżka `updateDungeonsList()` wybiera z tabeli `dungeons` tylko pozycje z `global_available_at <= NOW()`, następnie odświeża ich mały sektor mapy przez GAA. `getCorrespondingSquare()` używa kroku 12 i odstępu 13.
+
+`collectDungeonCooldowns()` odczytuje `dungeon[5]` jako pozostały cooldown, a następnie wylicza `global_available_at = currentTime + remainingCooldown24h`. `persistDungeonUpdates()` aktualizuje `dungeons.global_available_at`, ale w `INSERT INTO dungeons_history` przekazuje tylko `kid`, `position_x`, `position_y` i `player_id` — nie przekazuje `attacked_at`.
+
+Publiczna trasa API odczytuje `attacked_at` z historii i zwraca je jako `last_attack`. Publiczny kod nie zawiera schematu produkcyjnej tabeli `dungeons_history` ani definicji triggera/defaultu dla `attacked_at`. Z tego powodu nie da się na podstawie samego repozytorium udowodnić, czy wartość jest ustawiana przez `DEFAULT NOW()`, trigger, czy inną warstwę bazy.
+
+### Nowy test diagnostyczny
+
+Do `scripts/probe-baron-pl1.js` dodano read-only probe `tracker-attacked-at-provenance`. Dla `E4K_PL1_BETA` i `IT1` pobiera niewielką próbkę z filtrem `filterByAttackCooldown=3` i porównuje:
+- `last_attack`;
+- `global_available_at`;
+- różnicę `global_available_at - last_attack` w sekundach;
+- `available_duration_seconds` i `total_attack_count`.
+
+Jeżeli różnica będzie bliska 86 400 sekund, będzie to zgodne z hipotezą, że `last_attack` reprezentuje chwilę ataku wyprowadzoną z 24-godzinnego cooldownu. Jeżeli będzie zbliżona do pozostałego cooldownu/krótkiego czasu skanowania, będzie zgodna z hipotezą, że `attacked_at` oznacza czas zapisu/obserwacji. Sam wynik próby nie zostanie użyty do PL1; jest wyłącznie audytem semantyki API dla wymienionych serwerów.
+
+### Kontrola kolizji skanera
+
+Na katalogu współrzędnych IT1 zapisanym `2026-11-06T04:05:23.468Z` policzono komórki skanera 13×13 (kid, floor(x/13), floor(y/13)): 2021 fortec zajmuje 2021 różnych komórek; nie ma kolizji dwóch fortec w tej samej komórce. To ogranicza ryzyko wielokrotnego zapisu tej samej fortecy przez skanowanie wspólnego sektora dla obecnego katalogu, ale nie dowodzi pochodzenia `attacked_at`.
+
+### Ograniczenia i decyzja
+
+Do czasu uzyskania próbki API z porównaniem obu timestampów i potwierdzenia schematu DB, `attacked_at` nie jest traktowane jako dokładny czas ataku PL1. `E4K_PL1` nadal jest odrzucane przez publiczne API jako Invalid server; Beta i IT1 pozostają osobnymi źródłami diagnostycznymi. Żadne ich cooldowny, historie ani timestampy nie są kopiowane do PL1.

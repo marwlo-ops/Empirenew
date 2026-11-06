@@ -993,3 +993,10 @@ test('live probe explicitly invokes the pinned ggejs SNE mailbox reader for repo
   assert.ok(source.includes('requestMailboxMessages(client, showMessages, a.reportWaitMs)'));
   assert.ok(source.includes("require(path.join(ggejsRoot, 'commands', 'sne.js'))"));
 });
+
+test('resolves the pinned ggejs command directory before loading the SNE reader', async () => {
+  const source = await readFile(new URL('./probe.mjs', import.meta.url), 'utf8');
+  const declaration = source.indexOf("const ggejsRoot = path.dirname(require.resolve('ggejs'));");
+  const use = source.indexOf("require(path.join(ggejsRoot, 'commands', 'sne.js'))");
+  assert.ok(declaration >= 0 && use > declaration, 'ggejsRoot must be initialized before the SNE command is loaded');
+});

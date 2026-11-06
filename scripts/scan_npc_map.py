@@ -117,8 +117,9 @@ def extract_explicit_npcs(payload: dict[str, Any], kingdom: int):
             continue
         # Classify only from object-type fields; never copy names or owner/player values.
         classification = " ".join(
-            str(obj.get(k, "")) for k in
+            str(obj[k]).strip() for k in
             ("type", "Type", "type_name", "category", "kind", "object_type", "npc_type")
+            if obj.get(k) not in (None, "")
         )
         if not NPC_WORDS.search(classification):
             continue

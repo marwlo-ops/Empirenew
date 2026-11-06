@@ -5,6 +5,7 @@ export const MAP_SECTOR_SIZE = 100;
 const KINGDOMS = Object.freeze({ sands: 1, ice: 2, fire: 3 });
 const KINGDOM_NAME_BY_KID = Object.freeze({ 1: 'sands', 2: 'ice', 3: 'fire' });
 const FORBIDDEN_CATALOG_KEY = /(attack|cooldown|player|defeater|ready|attacked)/i;
+const ALLOWED_FORTRESS_KEYS = new Set(['id', 'kid', 'kingdom', 'x', 'y', 'type', 'source_server']);
 
 export function validateMapOnlyCatalog(payload) {
   if (!payload || payload.complete !== true || payload.server_source !== 'IT1') {
@@ -12,6 +13,7 @@ export function validateMapOnlyCatalog(payload) {
   }
   if (!payload.results || typeof payload.results !== 'object') throw new Error('Catalog has no results object.');
   const seen = new Set();
+  const seenIds = new Set();
   const groups = {};
   let total = 0;
   for (const [kingdom, kid] of Object.entries(KINGDOMS)) {
@@ -21,6 +23,13 @@ export function validateMapOnlyCatalog(payload) {
     groups[kingdom] = group.fortresses.map((point) => {
       if (!point || typeof point !== 'object' || Array.isArray(point)) throw new Error(`Invalid record in ${kingdom}.`);
       if (Object.keys(point).some((key) => FORBIDDEN_CATALOG_KEY.test(key))) throw new Error('IT1 catalog contains attack/player state; refusing to use it.');
+      if (typeof point.id !== 'string' || point.id.trim().length === 0) throw new Error(`Invalid fortress ID in ${kingdom}.`);
+      const pointKeys = Object.keys(point);
+      if (pointKeys.length !== ALLOWED_FORTRESS_KEYS.size || pointKeys.some((key) => !ALLOWED_FORTRESS_KEYS.has(key))) {
+        throw new Error('Unexpected or missing map-only fortress fields; refusing to use catalog.');
+      }
+      if (seenIds.has(point.id)) throw new Error(`Duplicate fortress ID ${point.id}.`);
+      seenIds.add(point.id);
       if (point.kid !== kid || point.kingdom !== kingdom || point.source_server !== 'IT1' || point.type !== 'dungeon') throw new Error(`Kingdom/source/type mismatch in ${kingdom}.`);
       if (![point.x, point.y].every((v) => Number.isInteger(v) && v >= 0 && v <= 1286)) throw new Error(`Invalid coordinate in ${kingdom}.`);
       const key = `${kid}:${point.x}:${point.y}`;

@@ -15,8 +15,8 @@ diff --git a/app.js b/app.js
      app.use((req, res, next) => {
          res.header("Access-Control-Allow-Origin", "*");
          res.header("Access-Control-Allow-Methods", "GET");
-+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
 -        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
++        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
          next();
      });
  
@@ -28,10 +28,15 @@ diff --git a/app.js b/app.js
              if (sockets[req.params.server] !== null && sockets[req.params.server].connected.isSet) {
                  try {
                      const messageHeaders = JSON.parse(`{${req.params.headers}}`);
+-                    sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);
 +                    const executeCommand = async () => {
 +                        sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);
--                    sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);
  
+-                    let responseHeaders = {};
+-                    if (req.params.command in commands) {
+-                        for (const [messageKey, responsePath] of Object.entries(commands[req.params.command])) {
+-                            if (messageKey in messageHeaders) {
+-                                setNestedValue(responseHeaders, responsePath, messageHeaders[messageKey]);
 +                        let responseHeaders = {};
 +                        if (["gaa", "fnm"].includes(req.params.command)) {
 +                            // Map replies do not have to echo request parameters.
@@ -42,16 +47,16 @@ diff --git a/app.js b/app.js
 +                                if (messageKey in messageHeaders) {
 +                                    setNestedValue(responseHeaders, responsePath, messageHeaders[messageKey]);
 +                                }
--                    let responseHeaders = {};
--                    if (req.params.command in commands) {
--                        for (const [messageKey, responsePath] of Object.entries(commands[req.params.command])) {
--                            if (messageKey in messageHeaders) {
--                                setNestedValue(responseHeaders, responsePath, messageHeaders[messageKey]);
                              }
+-                        }    
+-                    } else {
+-                        responseHeaders = messageHeaders;
+-                    }
 +                        } else {
 +                            responseHeaders = messageHeaders;
 +                        }
-+
+ 
+-                    const response = await sockets[req.params.server].socket.waitForJsonResponse(req.params.command, responseHeaders, timeout = 1000);
 +                        const responseTimeout = ["gaa", "fnm"].includes(req.params.command) ? 15000 : 1000;
 +                        return await sockets[req.params.server].socket.waitForJsonResponse(
 +                            req.params.command,
@@ -59,20 +64,15 @@ diff --git a/app.js b/app.js
 +                            responseTimeout
 +                        );
 +                    };
--                        }    
--                    } else {
--                        responseHeaders = messageHeaders;
--                    }
- 
++
 +                    const isMapCommand = ["gaa", "fnm"].includes(req.params.command);
 +                    const response = isMapCommand
 +                        ? await runMapCommand(`${req.params.server}:${req.params.command}`, executeCommand)
 +                        : await executeCommand();
--                    const response = await sockets[req.params.server].socket.waitForJsonResponse(req.params.command, responseHeaders, timeout = 1000);
                      res.status(200).json({server: req.params.server, command: req.params.command, return_code: response.payload.status, content: response.payload.data});
                  } catch (error) {
-+                    console.log('Bridge command failed:', error?.name || 'Error');
 -                    console.log(error.message);
++                    console.log('Bridge command failed:', error?.name || 'Error');
                      res.status(400).json({ error: "Invalid command or headers" });
                  }
              } else {

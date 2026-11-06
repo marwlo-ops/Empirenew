@@ -23,6 +23,13 @@ test('map commands use command-only response matching and a 15 second timeout', 
   assert.ok(patchScript.includes('runMapCommand'));
 });
 
+test('generated bridge rejects every command outside the narrow read-only allowlist', () => {
+  assert.ok(patchScript.includes("require('./read-only-commands')"));
+  assert.ok(patchScript.includes('isAllowedReadOnlyCommand(req.params.command)'));
+  assert.ok(patchScript.includes('Command not allowed'));
+  assert.ok(patchScript.includes("read_only_commands: ['gaa', 'fnm', 'gam']"));
+});
+
 test('deployment template keeps credentials as unsynced secrets', () => {
   for (const key of ['USERNAME', 'PASSWORD', 'EMPIRE_API_TOKEN']) {
     const index = render.indexOf('key: ' + key);

@@ -1,0 +1,42 @@
+name: Validate secure Empire bridge patch
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "bridge-deployment/**"
+      - ".github/workflows/bridge-deployment-security.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "bridge-deployment/**"
+      - ".github/workflows/bridge-deployment-security.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run bridge unit and patch-safety tests
+        run: |
+          node --check bridge-deployment/apply-bridge-patch.mjs
+          node --test bridge-deployment/*.test.js bridge-deployment/*.test.mjs
+      - name: Verify patch against pinned upstream
+        env:
+          UPSTREAM_COMMIT: dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d
+        run: |
+          git clone --quiet https://github.com/danadum/empire-api.git "$RUNNER_TEMP/empire-api"
+          git -C "$RUNNER_TEMP/empire-api" checkout --detach "$UPSTREAM_COMMIT"
+          cp bridge-deployment/api-auth-middleware.js "$RUNNER_TEMP/empire-api/api-auth-middleware.js"
+          cp bridge-deployment/map-command-queue.js "$RUNNER_TEMP/empire-api/map-command-queue.js"
+          node "$GITHUB_WORKSPACE/bridge-deployment/apply-bridge-patch.mjs" "$RUNNER_TEMP/empire-api/app.js"
+          node --check "$RUNNER_TEMP/empire-api/app.js"
+          node --check "$RUNNER_TEMP/empire-api/api-auth-middleware.js"
+          node --check "$RUNNER_TEMP/empire-api/map-command-queue.js"

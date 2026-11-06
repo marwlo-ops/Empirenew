@@ -962,7 +962,7 @@ test('requests account mailbox messages through the explicit SNE reader', async 
 });
 
 test('distinguishes a missing SNE response from a successful empty mailbox', async () => {
-  const client = { mailMessages: [] };
+  const client = { mailMessages: [{ messageId: 77 }] };
   const result = await requestMailboxMessages(client, async () => null, 100);
   assert.equal(result.status, 'response_missing');
   assert.deepEqual(result.messages, []);
@@ -975,12 +975,12 @@ test('reports only the error type when the SNE mailbox request fails', async () 
   }, 100);
   assert.equal(result.status, 'request_error');
   assert.equal(result.error_type, 'Error');
-  assert.deepEqual(result.messages, client.mailMessages);
+  assert.deepEqual(result.messages, []);
   assert.equal(JSON.stringify(result).includes('sensitive server response'), false);
 });
 
 test('times out a pending SNE request without treating it as an empty response', async () => {
-  const client = { mailMessages: [] };
+  const client = { mailMessages: [{ messageId: 88 }] };
   const result = await requestMailboxMessages(client, () => new Promise((resolve) => {
     setTimeout(() => resolve([]), 40);
   }), 5);

@@ -2234,3 +2234,25 @@ Rozstrzygający test nadal wymaga lokalnej, autoryzowanej sesji konta demo na pr
 Poświadczenia pozostają w lokalnych zmiennych środowiskowych. W raporcie trzeba skorelować świeży rekord typu 11 z GAM lub SNE/BLS/BLM dla tego samego KID/X/Y i gracza. Bez niezależnego timestampu wynik może być tylko przedziałem obserwacji, nie dokładnym czasem ataku.
 
 Zakres tej iteracji: katalog IT1, dokumentacja fortec i pakiet mostu Barony. Bez zmian w zakładkach Mapa, Szpiegowanie, Dodatkowe oraz ich plikach UI.
+
+
+## 13. Ponowna kontrola katalogu serwerów GGE Tracker — 2026-11-06
+
+Świeża kontrola publicznego API i aktualnej gałęzi `main`:
+
+- `GET /api/v1/servers` — HTTP 200; lista zawiera `IT1`, `E4K_PL1` i `E4K_PL1_BETA`. Sama obecność na liście nie oznacza włączenia modułu fortec.
+- `GET /api/v1/servers/catalog` — HTTP 200, XML. Odczytane flagi:
+  - `IT1`: `enabled=true`, `storm=true`, `fortress=true`, `advanced-castle=true`.
+  - `E4K_PL1`: `enabled=true`, `storm=false`, `fortress=false`, `advanced-castle=false`.
+  - `E4K_PL1_BETA`: `enabled=true`, `storm=true`, `fortress=true`, `advanced-castle=true`.
+- Aktualny OpenAPI `26.04.07-beta` opisuje `GET /dungeons` jako endpoint stanu fortec, wymagający nagłówka `gge-server`. `GET /dungeons/player/{playerId}` zwraca historię wybranego gracza z polami KID/X/Y/`attacked_at`; dokumentacja nie opisuje globalnej historii ataków per lokacja.
+- Bez nagłówka `gge-server` bezpośredni odczyt `/dungeons` i `/dungeons/meta` zwraca HTTP 400 `MISSING_SERVER`; ten błąd sam w sobie nie jest testem konkretnego serwera.
+- Niezależny test nagłówka w workflow `42277954218` z 2026-11-06 19:15 UTC potwierdził: `E4K_PL1` — HTTP 400 `Invalid server`; `E4K_PL1_BETA` — HTTP 200, 976 rekordów; `IT1` — HTTP 200, 2021 rekordów. Historia 5 próbkowanych graczy Beta była dostępna, ale pozostaje wyłącznie danymi Beta i nie jest kopiowana do PL1.
+- Opublikowany katalog IT1 w repozytorium: snapshot `2026-11-06T19:04:51.840217Z`, 2021 unikalnych współrzędnych (Piaski 671, Lód 779, Ogień 571), po 7 pól na rekord. Brak pól cooldownu, gotowości, gracza i historii ataków.
+- Najnowszy sprawdzony build/deploy GitHub Pages: workflow `42283839593`, commit `ca946cb0a89c36fb5760ad9e62903d492d09142a`, zakończony sukcesem.
+
+**Wniosek:** katalog IT1 pozostaje kompletnym źródłem samych współrzędnych. GGE Tracker nadal nie udostępnia modułu fortec dla produkcyjnego `E4K_PL1`; Beta nie jest zamiennikiem. Liczba nowych potwierdzonych ataków PL1: **0**. Nie dopisano żadnych zdarzeń.
+
+**Następny krok:** test na autoryzowanej sesji produkcyjnego PL1, uruchomiony lokalnie przez operatora poleceniem `node scripts/barony-live/probe.mjs --movements --reports --no-state`. Dane logowania muszą pozostać w lokalnych zmiennych środowiskowych — nie w czacie, repozytorium ani GitHub Actions. Do czasu takiego testu automatyczna historia ataków PL1 pozostaje niepotwierdzona.
+
+Dokumentacja: https://docs.gge-tracker.com/ oraz https://api.gge-tracker.com/api/v1/docs.

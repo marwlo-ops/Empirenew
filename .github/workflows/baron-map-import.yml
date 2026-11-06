@@ -1,29 +1,28 @@
-name: Import IT1 fortress map
+name: Validate Barony map and mobile UI
 
 on:
   push:
     branches: ["**"]
     paths:
-      - "scripts/import-baron-map.js"
+      - "barony.html"
       - "scripts/test-barony-mobile.mjs"
       - "scripts/test-baron-map-catalog.mjs"
-      - "barony.html"
+      - "scripts/test-baron-import-workflows.mjs"
       - ".github/workflows/baron-map-import.yml"
-  schedule:
-    - cron: "17 */6 * * *"
+      - ".github/workflows/import-it1-fortresses.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: empirenew-it1-map-import
+  group: empirenew-barony-ui-validation
   cancel-in-progress: false
 
 jobs:
-  import-map:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,23 +32,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Verify there is exactly one scheduled map publisher
+        run: node scripts/test-baron-import-workflows.mjs
       - name: Test Barony mobile layout and local-history labels
         run: node scripts/test-barony-mobile.mjs
-      - name: Validate and import map-only data
-        run: |
-          node --check scripts/import-baron-map.js
-          node scripts/import-baron-map.js
-          node scripts/test-baron-map-catalog.mjs
-      - name: Commit imported IT1 map
-        run: |
-          if [[ -n "$(git status --porcelain data/baron-fortresses.json)" ]]; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data/baron-fortresses.json
-            git commit -m "data: import IT1 fortress map coordinates"
-            git fetch origin "${GITHUB_REF_NAME}"
-            git rebase "origin/${GITHUB_REF_NAME}"
-            git push origin HEAD:"${GITHUB_REF_NAME}"
-          else
-            echo "IT1 map has no changes."
-          fi
+      - name: Validate existing map-only catalog
+        run: node scripts/test-baron-map-catalog.mjs

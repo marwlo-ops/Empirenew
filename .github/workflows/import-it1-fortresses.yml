@@ -8,6 +8,7 @@ on:
       - "scripts/import_it1_fortresses.py"
       - "tests/test_import_it1_fortresses.py"
       - ".github/workflows/import-it1-fortresses.yml"
+      - "scripts/test-baron-import-workflows.mjs"
   schedule:
     - cron: "17 */6 * * *"
 
@@ -27,6 +28,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+      - name: Verify there is exactly one scheduled map publisher
+        run: node scripts/test-baron-import-workflows.mjs
       - name: Test importer validation
         run: |
           python -m py_compile scripts/import_it1_fortresses.py

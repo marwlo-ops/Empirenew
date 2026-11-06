@@ -19,6 +19,43 @@ class ImportIt1FortressesTests(unittest.TestCase):
         self.assertIsNone(IMPORTER.records_from({"unexpected": []}))
         self.assertIsNone(IMPORTER.records_from(None))
 
+    def test_validates_gge_tracker_pagination_metadata(self):
+        payload = {
+            "pagination": {
+                "current_page": 1,
+                "total_pages": 2,
+                "current_items_count": 4000,
+                "total_items_count": 5000,
+            }
+        }
+        self.assertEqual(
+            IMPORTER.pagination_info(payload),
+            {
+                "current_page": 1,
+                "total_pages": 2,
+                "current_items_count": 4000,
+                "total_items_count": 5000,
+            },
+        )
+
+    def test_rejects_incomplete_or_boolean_pagination_metadata(self):
+        incomplete = {"pagination": {"current_page": 1, "total_pages": 1}}
+        boolean_page = {
+            "pagination": {
+                "current_page": True,
+                "total_pages": 1,
+                "current_items_count": 1,
+                "total_items_count": 1,
+            }
+        }
+        with self.assertRaises(RuntimeError):
+            IMPORTER.pagination_info(incomplete)
+        with self.assertRaises(RuntimeError):
+            IMPORTER.pagination_info(boolean_page)
+
+    def test_accepts_legacy_payload_without_pagination_metadata(self):
+        self.assertIsNone(IMPORTER.pagination_info({"dungeons": []}))
+
     def test_normalizes_known_kingdom_to_public_map_only_schema(self):
         point = IMPORTER.normalize({
             "id": 77, "kid": 2, "position_x": 123, "position_y": 456,

@@ -30,6 +30,9 @@ jobs:
         with:
           node-version: 22
       - name: Fetch read-only fortress status snapshot
+        env:
+          BARONY_PLAYER_NAME: ${{ vars.BARONY_PLAYER_NAME }}
+          GGE_SERVER: E4K_PL1_BETA
         run: node scripts/barony-live/fortress-radar.mjs > data/fortress-radar-e4k-pl1-beta.json
       - name: Validate snapshot
         run: |

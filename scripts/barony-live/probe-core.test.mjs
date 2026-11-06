@@ -1000,3 +1000,30 @@ test('resolves the pinned ggejs command directory before loading the SNE reader'
   const use = source.indexOf("require(path.join(ggejsRoot, 'commands', 'sne.js'))");
   assert.ok(declaration >= 0 && use > declaration, 'ggejsRoot must be initialized before the SNE command is loaded');
 });
+
+
+test('rejects cooldown, readiness and availability fields at every catalog depth', () => {
+  const topLevel = catalog();
+  topLevel.global_available_at = '2026-11-06T00:00:00Z';
+  assert.throws(() => validateMapOnlyCatalog(topLevel), /forbidden cooldown\/readiness\/availability fields/);
+
+  const groupLevel = catalog();
+  groupLevel.results.sands.cooldown_until = '2026-11-06T00:00:00Z';
+  assert.throws(() => validateMapOnlyCatalog(groupLevel), /forbidden cooldown\/readiness\/availability fields/);
+
+  const nested = catalog();
+  nested.results.fire.metadata = { readiness_status: 'ready' };
+  assert.throws(() => validateMapOnlyCatalog(nested), /forbidden cooldown\/readiness\/availability fields/);
+});
+
+test('validates the committed IT1 snapshot as map-only data', async () => {
+  const snapshotUrl = new URL('../../data/baron-fortresses.json', import.meta.url);
+  const snapshot = JSON.parse(await readFile(snapshotUrl, 'utf8'));
+  const groups = validateMapOnlyCatalog(snapshot);
+  assert.deepEqual(Object.keys(groups).sort(), ['fire', 'ice', 'sands']);
+  const count = Object.values(groups).reduce((total, points) => total + points.length, 0);
+  assert.equal(count, snapshot.total_count);
+  for (const [kingdom, points] of Object.entries(groups)) {
+    assert.equal(points.length, snapshot.results[kingdom].fortress_count);
+  }
+});

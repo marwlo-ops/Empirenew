@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest.mock import patch
 
-from scripts.scan_npc_map import DEFAULT_SERVER, ProbeError, request_command
+from scripts.scan_npc_map import (DEFAULT_SERVER, ProbeError, extract_explicit_npcs,\n                                  request_command, summarize_content)
 
 
 TOKEN = "0123456789abcdef0123456789abcdef"
@@ -58,7 +58,7 @@ class ScanNpcMapAuthTests(unittest.TestCase):
             401,
             "Unauthorized",
             hdrs=None,
-            fp=BytesIO(b'{"error":"Unauthorized"}'),
+            fp=BytesIO(b'{"error":"Unauthorized","player_name":"PrivatePlayer"}'),
         )
         with patch.dict(os.environ, {"E4K_API_TOKEN": TOKEN}, clear=True), patch(
             "scripts.scan_npc_map.urlopen", side_effect=error
@@ -71,8 +71,36 @@ class ScanNpcMapAuthTests(unittest.TestCase):
                     {"KID": 1},
                     5,
                 )
-        self.assertNotIn(TOKEN, str(raised.exception))
+        self.assertNotIn(TOKEN, str(raised.exception))\n        self.assertNotIn("PrivatePlayer", str(raised.exception))
 
+    def test_diagnostic_summary_redacts_player_values(self):
+        content = [{
+            "x": 17, "y": 29, "type": "BOSS_DUNGEON",
+            "player_id": 123456, "player_name": "PrivatePlayer",
+            "owner": "PrivateAlliance", "name": "PrivatePlayer",
+        }]
+        summary = summarize_content(content)
+        rendered = str(summary)
+        self.assertIn("'x': 17", rendered)
+        self.assertIn("'y': 29", rendered)
+        self.assertNotIn("PrivatePlayer", rendered)
+        self.assertNotIn("PrivateAlliance", rendered)
+        self.assertNotIn("123456", rendered)
+
+    def test_explicit_npc_extraction_does_not_copy_player_or_raw_fields(self):
+        payload = {"content": [{
+            "x": 17, "y": 29, "type": "BOSS_DUNGEON",
+            "player_id": 123456, "player_name": "PrivatePlayer",
+            "owner": "PrivateAlliance", "name": "PrivatePlayer",
+        }]}
+        rows = extract_explicit_npcs(payload, 1)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["label"], "BOSS_DUNGEON")
+        self.assertNotIn("raw", rows[0])
+        self.assertNotIn("player_id", rows[0])
+        self.assertNotIn("player_name", rows[0])
+        self.assertNotIn("PrivatePlayer", str(rows))
+        self.assertNotIn("PrivateAlliance", str(rows))
 
 if __name__ == "__main__":
     unittest.main()

@@ -1534,3 +1534,71 @@ Workflow NPC map API diagnostics 42186787628: SUCCESS:
 ### Ograniczenia
 
 To potwierdza lokalną logikę kolejki, autoryzację i możliwość zastosowania patcha. Nie potwierdza jeszcze odpowiedzi GAA/FNM z produkcyjnego PL1. Ostatni live probe nadal raportuje target_connected=false, a GGE Tracker odrzuca produkcyjny E4K_PL1. Nie wykonano wdrożenia mostu, nie ustawiono sekretów i nie zapisano zdarzeń ataków.
+
+
+## 46. Ochrona diagnostyki przed wyciekiem danych i ponowna kontrola PL1 — 2026-11-06 08:19–08:30 UTC
+
+### Najnowszy potwierdzony katalog IT1 na main
+
+- Commit mapy: `35e23ca6ac20b6fd8f7a05600c12e9d3ad984249`.
+- `captured_at=2026-11-06T07:29:05.608532Z`.
+- Źródło: GGE Tracker public API, `gge-server: IT1`, map coordinates only.
+- 1/1 strona, 2021 rekordów: Piaski 671, Lód 779, Ogień 571.
+- Walidacja bieżącego JSON: 2021 unikalnych ID, 2021 unikalnych współrzędnych, 0 duplikatów i 0 pól cooldown/gotowości/ataku/gracza.
+- Dokładnie siedem pól na rekord: `id`, `kid`, `kingdom`, `x`, `y`, `type`, `source_server`.
+- Plan Barony: 2021 cele, 199 sektorów 100×100, 1 990 000 potencjalnych pól.
+- Commit `5511a5e472e8cb2320f5f0e3032103365e7aaab8` zawiera snapshot jako przodka. Pages run `42183722274`: build, report-build-status i deploy SUCCESS. To potwierdza publikację snapshotu na main, nie publikację kodu draft PR #13.
+
+### Produkcyjny PL1 — live probe 08:19 UTC
+
+Workflow `42186863364` wykonał read-only diagnostykę bez logowania do gry i bez wysyłania komend gry:
+
+- TCP do `e4k-live-pl1-game.goodgamestudios.com:443`: `tcp_connected` w 154 ms; `payload_sent=false`. To wyłącznie handshake TCP, nie sesja gry.
+- `GET /servers`: HTTP 200, 63 wpisy; katalog rozróżnia `E4K_PL1` i `E4K_PL1_BETA`.
+- Katalog serwera: produkcyjny `E4K_PL1 enabled=true, fortress=false`; Beta `enabled=true, fortress=true`.
+- `/dungeons`: produkcyjny `E4K_PL1` HTTP 400 (serwer nie jest na allowliście endpointu); Beta HTTP 200, 976 rekordów; IT1 HTTP 200, 2021 rekordów.
+- Beta: 976/976 współrzędnych pokrywa się z IT1. To nie potwierdza równoważności produkcyjnego PL1.
+- Pięć przykładowych historii graczy Beta: 6096 rekordów — wyłącznie Beta, nie wolno używać ich jako dowodu PL1.
+- Trzy próbki historii produkcyjnego PL1: `Player not found` / `Invalid player ID`, 0 rekordów.
+- Dopisanie zoneId 259 do próbnych ID nie zadziałało: 3/3 HTTP 400. Hipoteza routingu odrzucona jako niepotwierdzona.
+- Nie uzyskano autoryzowanej odpowiedzi GAA/GAM/FNM z produkcyjnego PL1 i nie zapisano żadnego zdarzenia ataku.
+
+### Bezpieczeństwo diagnostyki — poprawka w draft PR #13
+
+Inspekcja `scripts/scan_npc_map.py` wykazała, że wcześniejszy `content_preview` oraz pole `raw` mogły umieścić nazwy graczy, właścicieli i pełne rekordy odpowiedzi w publicznych logach/artefaktach GitHub Actions. Usunięto ten kanał wycieku:
+
+- `content_preview` zastąpiono strukturalnym `content_summary`: typ JSON, liczba elementów, nazwy kluczy, liczba obiektów ze współrzędnymi i maksymalnie pięć próbek X/Y.
+- Ekstrakcja NPC klasyfikuje wyłącznie pola typu/kategorii; nie kopiuje `name`, `owner`, identyfikatorów graczy ani surowych obiektów.
+- Snapshot diagnostyczny nie zawiera pola `raw`.
+- Treść odpowiedzi HTTP błędów jest redagowana; log zawiera status i typ błędu transportu, a nie body.
+- `E4K_API_TOKEN` nadal jest wysyłany wyłącznie w nagłówku Bearer i nie jest zapisywany w URL.
+
+Testy regresyjne dodane do `tests/test_scan_npc_map_auth.py`:
+- brak wartości `player_name`, `player_id` i `owner` w summary;
+- ekstrakcja NPC nie kopiuje nazw, ID ani surowych rekordów;
+- body HTTP błędu nie ujawnia wartości gracza.
+
+### Wyniki CI i naprawione błędy testów
+
+Końcowy workflow `42187981613`: SUCCESS:
+- Node middleware/queue: 9/9 PASS;
+- Python scanner/auth/redaction: 6/6 PASS;
+- patch `app.js.patch` zastosował się do przypiętego upstream `dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d`;
+- `node --check app.js` i middleware: PASS;
+- probe job w PR celowo SKIPPED — testy PR nie używają sekretów ani publicznego mostu.
+
+W trakcie dodawania testów wystąpiły trzy błędy samego patchowania testów i zostały poprawione:
+- `42187807293`: błędny literalny znak `\\n` w imporcie testu;
+- `42187866665`: błędny literalny znak `\\n` w asercji;
+- `42187922701`: oczekiwany label nie uwzględniał końcowych spacji z pustych pól typu. Poprawiono normalizację klasyfikacji przez pominięcie pustych wartości.
+- Końcowy run `42187981613` przeszedł wszystkie testy.
+
+### Stan wdrożenia i ograniczenia
+
+- Zmiany bezpieczeństwa pozostają w draft PR #13, gałąź `feat/custom-empire-api-bridge-secure-20261106`.
+- Nie utworzono forka upstream ani usługi Render; nie ustawiono sekretów; nie wdrożono mostu.
+- Nie potwierdzono GAA/FNM ani reconnect/re-login z produkcyjnego PL1.
+- Nie zapisano żadnego zdarzenia ataku; nie ustalono atakującego ani dokładnego czasu ataku dla żadnej lokacji.
+- Zakładki Mapa, Szpiegowanie i Dodatkowe oraz pliki `barony.html` i `mapa-rb.html` nie były zmieniane w tej iteracji.
+
+Następny krok: uzyskać autoryzowany test konta demo na produkcyjnym PL1 lub wdrożyć zabezpieczony most w kontrolowanym środowisku. Najpierw potwierdzić `hgh`, GAA i GAM/FNM oraz raport NPC na żywej sesji; dopiero potem projektować zapis historii. Dane Beta/IT1 pozostają odseparowane od historii produkcyjnego PL1.

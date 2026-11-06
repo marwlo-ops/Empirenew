@@ -18,7 +18,15 @@ main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyeb
 <section class="panel" style="margin:0 0 13px">
 <h2>📡 Radar fortec · E4K_PL1_BETA</h2>
 <p class="subtle">Odczyt według mechanizmu GGE Assistant / GGE Tracker. Status pochodzi z pola cooldown API; migawka odświeżana automatycznie co około 15 minut.</p>
-<div class="controls" style="margin:8px 0"><select id="liveKingdom"><option value="all">Wszystkie krainy</option><option value="sands">Płonące Piaski</option><option value="ice">Wieczny Lód</option><option value="fire">Ogniste Szczyty</option></select><select id="liveStatus"><option value="all">Wszystkie statusy</option><option value="available">Dostępne</option><option value="locked">Zablokowane do godziny</option></select><button id="liveRefresh" type="button">Odśwież widok</button></div>
+<div class="controls" style="margin:8px 0"><input id="livePlayer" maxlength="40" autocomplete="nickname" placeholder="Wpisz dokładny nick gracza"><button id="liveRefresh" type="button">Skanuj gracza</button></div>
+<div class="controls" style="margin:8px 0">
+<label><input type="checkbox" class="realm-choice" value="1" checked> 🏜️ Piaski</label>
+<label><input type="checkbox" class="realm-choice" value="2" checked> ❄️ Lód</label>
+<label><input type="checkbox" class="realm-choice" value="3" checked> 🔥 Ogień</label>
+<label><input type="checkbox" class="realm-choice" value="archipelago" disabled> 🏝️ Archipelag</label>
+<label><input type="checkbox" class="realm-choice" value="islands" disabled> 🌊 Wyspy</label>
+<select id="liveStatus"><option value="all">Wszystkie statusy</option><option value="available">Dostępne</option><option value="locked">Zablokowane</option></select></div>
+<div class="subtle">Archipelag i Wyspy są widoczne jako osobne obszary, ale nie włączam ich do zapytania fortec, dopóki nie ma potwierdzonego endpointu i identyfikatorów API.</div>
 <div class="subtle" id="liveRadarMeta">Oczekiwanie na pierwszy poprawny odczyt API…</div>
 <div id="liveRadarList" class="list" style="max-height:420px;margin-top:10px"><div class="empty">Dane radaru zostaną pokazane po pierwszym poprawnym skanie.</div></div>
 <div class="notice">To są dane źródłowe radaru. Pole „ostatni król” opisuje ostatniego gracza zapisanego przez API, a nie dowodzi, że to on wykonał ostatni atak. Nie wyciągamy historii ataków z samego cooldownu.</div>
@@ -202,23 +210,43 @@ async function loadServerIntel(){
 }
 async function loadLiveRadar(){
  const meta=$('liveRadarMeta'),list=$('liveRadarList');
+ const player=$('livePlayer').value.trim();
+ const selected=[...document.querySelectorAll('.realm-choice:checked')].map(x=>x.value);
+ if(!player){meta.textContent='Wpisz nick gracza, aby uruchomić skan.';list.innerHTML='<div class="empty">Czekam na nick gracza.</div>';return;}
+ const kids=selected.filter(x=>['1','2','3'].includes(x));
+ if(!kids.length){meta.textContent='Wybierz przynajmniej jedną obsługiwaną krainę.';list.innerHTML='<div class="empty">Brak wybranych krain fortecznych.</div>';return;}
+ meta.textContent='Skanuję gracza „'+player+'” w API GGE Tracker…';
+ list.innerHTML='<div class="empty">Pobieranie danych…</div>';
  try{
-  const response=await fetch('./data/fortress-radar-e4k-pl1-beta.json?t='+Date.now(),{cache:'no-store'});
-  if(!response.ok)throw Error('Migawka HTTP '+response.status);
+  const headers={'Accept':'application/json','gge-server':'E4K_PL1_BETA'};
+  const params=new URLSearchParams({
+   page:'1',size:'4000',
+   filterByKid:JSON.stringify(kids),
+   filterByPlayerName:player,
+   nearPlayerName:player
+  });
+  const response=await fetch('https://api.gge-tracker.com/api/v1/dungeons?'+params.toString(),{headers,cache:'no-store'});
+  if(!response.ok)throw Error('GGE Tracker HTTP '+response.status);
   const data=await response.json();
-  if(data.server!=='E4K_PL1_BETA'||!Array.isArray(data.targets))throw Error('Nieprawidłowy format radaru');
-  const age=Date.now()-Date.parse(data.sampled_at);
-  const ageText=Number.isFinite(age)?Math.max(0,Math.floor(age/60000))+' min temu':'wiek nieznany';
-  meta.textContent='Serwer: '+data.server+' · status: '+data.result_status+' · skan: '+fmt(data.sampled_at)+' ('+ageText+') · ostatni skan API: '+(data.last_api_scan_at?fmt(data.last_api_scan_at):'brak danych');
-  const k=$('liveKingdom').value,s=$('liveStatus').value;
-  const targets=data.targets.filter(x=>(k==='all'||x.kingdom===k)&&(s==='all'||x.status===s)).sort((a,b)=>a.kid-b.kid||a.seconds_remaining-b.seconds_remaining||a.x-b.x);
-  const kingdomNames={sands:'Płonące Piaski',ice:'Wieczny Lód',fire:'Ogniste Szczyty'};
-  const esc=v=>String(v??'—').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  if(!Array.isArray(data.dungeons))throw Error('API zwróciło nieoczekiwany format danych.');
+  const now=Date.now();
+  const kingdomNames={1:'Płonące Piaski',2:'Wieczny Lód',3:'Ogniste Szczyty'};
+  const status=$('liveStatus').value;
+  const rows=data.dungeons.map(d=>{
+   const until=d.effective_cooldown_until?Date.parse(d.effective_cooldown_until):NaN;
+   const seconds=Number.isFinite(until)?Math.max(0,Math.ceil((until-now)/1000)):0;
+   return {kid:Number(d.kid),x:d.position_x,y:d.position_y,player_name:d.player_name||'',cooldown_until:Number.isFinite(until)?new Date(until).toISOString():null,seconds_remaining:seconds,status:seconds>0?'locked':'available',distance:d.distance};
+  }).filter(x=>kids.includes(String(x.kid))&&(status==='all'||x.status===status))
+   .sort((a,b)=>a.kid-b.kid||a.seconds_remaining-b.seconds_remaining);
+  const esc=v=>String(v??'—').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const remaining=n=>{n=Math.max(0,Number(n)||0);if(n<60)return n+' s';const m=Math.ceil(n/60);return m<60?m+' min':Math.floor(m/60)+' h '+(m%60)+' min';};
-  list.innerHTML=targets.length?targets.map(x=>'<article class="item"><strong>'+(x.status==='available'?'🟢 Dostępna':'🔴 Zablokowana')+' · '+esc(kingdomNames[x.kingdom])+'</strong><small>Współrzędne: <b>'+esc(x.x)+':'+esc(x.y)+'</b> · kraina ID '+esc(x.kid)+'</small><small>Status: '+(x.status==='available'?'możliwa do ataku według API':'blokada jeszcze '+remaining(x.seconds_remaining))+'</small><small>Ostatni król w API: '+esc(x.player_name||'brak danych')+'</small><small>Cooldown do: '+esc(x.cooldown_until?fmt(x.cooldown_until):'brak aktywnej blokady')+'</small></article>').join(''):'<div class="empty">Brak fortec pasujących do filtrów w tym odczycie.</div>';
-  if(data.result_status!=='complete')meta.textContent+=' · UWAGA: odczyt niekompletny — nie traktuj braku fortec jako potwierdzenia, że nie istnieją.';
-  if(age>30*60000)meta.textContent+=' · OSTRZEŻENIE: migawka jest starsza niż 30 minut.';
- }catch(error){meta.textContent='Radar niedostępny: '+error.message;list.innerHTML='<div class="empty">Nie ma poprawnej migawki API. Nie pokazujemy statusów domyślnych ani zgadywanych.</div>';}
+  meta.textContent='Serwer E4K_PL1_BETA · gracz: '+player+' · wyników: '+rows.length+' · odczyt: '+fmt(new Date().toISOString());
+  list.innerHTML=rows.length?rows.map(x=>'<article class="item"><strong>'+(x.status==='available'?'🟢 Dostępna':'🔴 Zablokowana')+' · '+esc(kingdomNames[x.kid]||('Kraina '+x.kid))+'</strong><small>Współrzędne: <b>'+esc(x.x)+':'+esc(x.y)+'</b> · dystans: '+esc(x.distance)+'</small><small>Status: '+(x.status==='available'?'gotowa według cooldownu API':'odblokowanie za '+remaining(x.seconds_remaining))+'</small><small>Ostatni gracz zapisany przez API: '+esc(x.player_name||'brak danych')+'</small><small>Cooldown do: '+esc(x.cooldown_until?fmt(x.cooldown_until):'brak aktywnej blokady')+'</small></article>').join(''):'<div class="empty">API nie zwróciło fortec dla wybranego nicku i krain.</div>';
+  if(selected.includes('archipelago')||selected.includes('islands'))meta.textContent+=' · Archipelag/Wyspy pominięte: brak potwierdzonej obsługi w API fortec.';
+ }catch(error){
+  meta.textContent='Nie udało się wykonać skanu: '+error.message;
+  list.innerHTML='<div class="empty">Nie pokazujemy danych zastępczych. Możliwa blokada CORS albo niedostępność API.</div>';
+ }
 }
 async function load(){
  $('status').textContent='Ładowanie kompletnego katalogu mapy IT1…';
@@ -230,10 +258,10 @@ $('list').addEventListener('click',e=>{const b=e.target.closest('[data-attack]')
 ['search','filter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
 loadServerIntel();
 load();
-loadLiveRadar();
-$('liveKingdom').addEventListener('change',loadLiveRadar);
+$('liveRadarMeta').textContent='Wpisz nick gracza i uruchom skan.';
 $('liveStatus').addEventListener('change',loadLiveRadar);
 $('liveRefresh').addEventListener('click',loadLiveRadar);
+$('livePlayer').addEventListener('keydown',e=>{if(e.key==='Enter')loadLiveRadar();});
 
 })();
 </script></body></html>

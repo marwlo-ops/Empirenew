@@ -1507,3 +1507,30 @@ To wspiera hipotezę, że last_attack jest blisko początku 24-godzinnego cooldo
 Zmiany mostu są wyłącznie w draft PR #13. Nie ma forka upstream, usługi Render ani sekretów; nie ma wdrożenia mostu. Nie uruchomiono nowego Pages deploy dla tej gałęzi; publiczna strona nadal korzysta z potwierdzonego wdrożenia main z run 42183722274.
 
 W tej iteracji nie zapisano żadnego zdarzenia ataku PL1. Nie ma potwierdzonego atakującego ani dokładnego czasu ataku dla żadnej lokacji produkcyjnego PL1. attack_time_utc pozostaje null.
+
+
+## 45. Korekta współbieżności GAA/FNM — 2026-11-06 08:17–08:19 UTC
+
+### Ustalenie protokołu
+
+W przypiętym upstream BaseSocket._processResponse odpowiedź JSON jest dopasowywana po nazwie komendy. Gdy data=false, każde następne response tej samej komendy może spełnić oczekiwanie. Sam matcher command-only jest więc poprawny dla odpowiedzi GAA/FNM bez echa parametrów, ale dwa równoległe żądania tej samej komendy na jednym sockecie mogłyby otrzymać odpowiedzi w złej kolejności.
+
+### Poprawka w draft PR #13
+
+Dodano map-command-queue.js i wpięto kolejkę do patcha upstream:
+- serializacja tylko dla tej samej pary server+command (np. PL1:gaa);
+- różne komendy (GAA/FNM) i różne serwery mogą działać równolegle;
+- błąd/timeout jednego żądania nie blokuje następnego;
+- żądanie jest wysyłane dopiero po zwolnieniu kolejki, a odpowiedź jest oczekiwana w tym samym krytycznym odcinku.
+
+### Wyniki testów
+
+Workflow NPC map API diagnostics 42186787628: SUCCESS:
+- Node: 9/9 testów PASS (6 autoryzacji + 3 kolejki);
+- Python: 4/4 testy PASS (domyślna strefa PL1, Bearer header, brak nagłówka bez sekretu, brak wycieku tokenu do błędu/URL);
+- patch zastosował się do upstream danadum/empire-api commit dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d;
+- node --check app.js i api-auth-middleware.js: PASS.
+
+### Ograniczenia
+
+To potwierdza lokalną logikę kolejki, autoryzację i możliwość zastosowania patcha. Nie potwierdza jeszcze odpowiedzi GAA/FNM z produkcyjnego PL1. Ostatni live probe nadal raportuje target_connected=false, a GGE Tracker odrzuca produkcyjny E4K_PL1. Nie wykonano wdrożenia mostu, nie ustawiono sekretów i nie zapisano zdarzeń ataków.

@@ -2346,3 +2346,74 @@ Nie używać danych IT1 ani Beta do uzupełniania PL1. Nie zmieniać `attack_tim
 - Testy API: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/suites/dungeons.ts
 
 Zakres zmiany w Empirenew: wyłącznie ten dziennik badań #barony. Bez zmian w kodzie aplikacji, Mapie, Szpiegowaniu, Dodatkowych, ich UI i katalogu współrzędnych.
+
+
+## 60. Cross-check pola PS, widoczność schematu DB i audyt źródeł Szpiegowania — 2026-11-06 22:38 UTC
+
+### 1) PS w EmpireCore: mocny trop dla przeglądarkowego GGE, nie potwierdzenie dla mobilnego E4K PL1
+
+Sprawdzono przypięty kod EmpireCore `b3f892059501784c28b90e7413810d17ad1e22a6`:
+
+- `BattleLogShortResponse` (BLS) i `BattleLogMiddleResponse` (BLM) mapują pole `PS` na `seconds_since_battle`.
+- Walidator BLS zawiera komentarz z logiki klienta: `timestamp = now - e.PS * 1000`.
+- Test `tests/messages/test_battle_logs.py` sprawdza live-shaped BLS z `PS=678547`.
+- To jest niezależne potwierdzenie semantyki PS w implementacji EmpireCore dla przeglądarkowego GGE.
+
+Nie wolno jednak przenosić tego wprost na E4K PL1:
+- `src/empire_core/config.py` ustawia `EMPIRE_NETWORK_ID=1`, `EMPIRE_GAME_ID=12` i domyślny świat `EmpireEx_21`.
+- `src/empire_core/protocol/auth.py` opisuje `SID=9` i `PLFID=1` jako wartości web; `VERSION_CHECK_PLATFORM` ma wartość `web-html5`.
+- To nie jest konfiguracja mobilnej sieci E4K (`network_id=16`). Wspólna nazwa pola `PS` nie dowodzi identycznej semantyki w mobilnym protokole PL1.
+
+**Decyzja:** w Barony nadal zachowujemy BLS/BLM.PS wyłącznie jako `ps_value_unverified`. Nie wyliczamy z niego `battle_time_estimate_utc` ani `attack_time_utc` dla E4K PL1. Potrzebny jest kontrolowany, autoryzowany pomiar na mobilnym PL1, porównany z niezależnym zegarem i czasem raportu.
+
+Źródła:
+- https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/src/empire_core/messages/models/battle_logs.py
+- https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/tests/messages/test_battle_logs.py
+- https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/src/empire_core/config.py
+- https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/src/empire_core/protocol/auth.py
+
+### 2) Dodatkowa kontrola schematu GGE Tracker
+
+Pobrano rekurencyjne drzewo repozytorium GGE Tracker z rewizji `7d620820a76cde4176c752f6972ce6f0c9ad7ab1`:
+- 1393 ścieżki w całym drzewie;
+- pod `database/` widocznych jest 9 ścieżek: `.gitignore`, `Dockerfile`, katalog `conf/` z konfiguracją ClickHouse/MariaDB oraz `db_migrate.sh`;
+- nie ma śledzonego `database/postgres/structure.sql`, migracji PostgreSQL, definicji `dungeons_history` ani triggera/defaultu `attacked_at`.
+
+`database/db_migrate.sh` wskazuje oczekiwany plik `postgres/structure.sql`, ale pliku tego nie ma w przypiętym drzewie. To potwierdza, że publiczny snapshot kodu nie pozwala ustalić, czy `attacked_at` jest nadawane przez DEFAULT, trigger czy inny mechanizm bazy.
+
+**Decyzja bez zmian:** `attacked_at` pozostaje czasem zapisanym w bazie o nieustalonym pochodzeniu; nie mapować go do dokładnego czasu rozpoczęcia ataku.
+
+Źródła:
+- https://github.com/gge-tracker/gge-tracker/tree/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/database
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/database/db_migrate.sh
+
+### 3) Bezpośredni audyt danych Szpiegowania PL1 — brak sygnału ataków
+
+Odczytano aktualne pliki z commitu `3c07be67e0d29dd2df4e984e35719ae399321604` (snapshoty z 2026-11-06 około 22:06–22:07 UTC), bez ujawniania nazw ani identyfikatorów graczy:
+
+- `data/server-intel-snapshot.json`: serwer `EmpirefourkingdomsExGG2_3`, 3078 graczy, 284 sojusze, 0 zdarzeń. Rekord gracza zawiera pola rankingu, mocy, honoru, łupu, poziomu, aktywności i trendów; nie ma pól ruchów, fortec, bitew, raportów ani ataków.
+- `data/server-intel-history.json`: 19 454 zdarzenia. Rodzaje: `power_gain` 14 081, `power_drop` 4880, `honor_delta` 435, `alliance_changed` 52, `nick_changed` 4, `glory_delta` 2. Schemat nie zawiera kluczy ataku, ruchu, fortecy, cooldownu, bitwy ani raportu.
+- Zatem dane Szpiegowania mogą opisywać zmiany graczy/sojuszy, ale nie identyfikują celu NPC ani ataku na konkretną fortecę. Zmiany honoru, łupu i mocy pozostają wyłącznie metrykami, nigdy dowodem ataku.
+
+Katalog mapy `data/baron-fortresses.json` pozostaje osobnym, map-only snapshotem IT1: 2021 współrzędne (Piaski 671, Lód 779, Ogień 571), bez pól cooldownu, gracza lub historii. Zgodność siatki współrzędnych PL1/IT1 nie potwierdza aktualnego stanu fortec na produkcyjnym PL1.
+
+### 4) Kontrola istniejącej logiki Barony
+
+Statyczny audyt aktualnego `scripts/barony-live/probe-core.mjs` i `probe.mjs` potwierdza trzy odrębne klasy dowodów:
+
+1. **Mapa typu 11:** kandydat zmiany stanu wymaga tego samego KID/X/Y i ID katalogowego, dokładnie jednego obiektu typu 11 z oczekiwanym właścicielem NPC, przejścia cooldownu z nieaktywnego na aktywny i dodatniego `defeaterPlayerId`; odstęp próbek nie może przekraczać 2 godzin. Wynik jest kandydatem z przedziałem próbek, nie potwierdzoną sekundą ataku.
+2. **GAM:** parser ruchu wymaga ruchu typu 11, kierunku outbound, dokładnego celu BossDungeonMapobject typu 11 z właściwym NPC ownerem, dodatniego ID gracza ze źródła i poprawnego ID ruchu. `departureTime`/`arrivalTime` są obliczane przez klienta z PT/TT względem lokalnego czasu parsowania; dlatego `movement_departure_estimate_utc` jest estymatą, a `attack_time_utc` pozostaje null. Zakres to ruchy widoczne dla zalogowanej sesji, nie globalny PL1.
+3. **SNE/BLS/BLM:** raport jest akceptowany dopiero po zgodności typu/subtypu wiadomości, KID, NPC ownera, mapobject typu 11, X/Y, dodatniego atakującego i obrońcy NPC; korelacja MID/LID jest sprawdzana. To potwierdza cel i uczestników dla raportów w skrzynce danego konta, ale czas dostarczenia raportu i PS nie są jeszcze potwierdzonym czasem rozpoczęcia ataku.
+
+W tej iteracji nie było autoryzowanej sesji produkcyjnego PL1. Nie wykonano GAM/SNE na koncie operatora, nie dopisano zdarzeń i nie zmieniono kodu ani danych aplikacji.
+
+### 5) Wynik i następny krok
+
+- Potwierdzone nowe ataki produkcyjnego PL1: **0**.
+- `attack_time_utc`: nadal `null`.
+- Nowy trop PS: potwierdzony dla przeglądarkowego GGE, nie dla mobilnego E4K; nie używać do PL1 bez kalibracji.
+- Schemat DB GGE Tracker: brak w publicznym przypiętym drzewie, więc pochodzenie `attacked_at` pozostaje nierozstrzygnięte.
+- Szpiegowanie PL1: zawiera ranking/trendy graczy i sojuszy, nie ruchy ani ataki NPC.
+- Następny rozstrzygający test: autoryzowana lokalna sesja E4K PL1, polecenie `node scripts/barony-live/probe.mjs --movements --reports --no-state`; skorelować ten sam KID/X/Y i ID gracza z GAM oraz raportem SNE/BLS/BLM. Poświadczenia pozostają lokalnie.
+
+Zakres: wyłącznie dokumentacja badań #barony. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, ich UI, katalogu współrzędnych i istniejących danych Szpiegowania.

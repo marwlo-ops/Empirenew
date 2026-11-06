@@ -6,6 +6,8 @@ const catalog = JSON.parse(
 );
 const expected = { sands: 1, ice: 2, fire: 3 };
 const seen = new Set();
+const seenIds = new Set();
+const allowedPointKeys = ["id", "kid", "kingdom", "x", "y", "type", "source_server"].sort();
 let total = 0;
 
 assert.equal(catalog.complete, true, "IT1 catalog must be complete");
@@ -23,6 +25,12 @@ for (const [kingdom, kid] of Object.entries(expected)) {
   assert.ok(group.fortresses.length > 0, `${kingdom} must contain map points`);
 
   for (const point of group.fortresses) {
+    assert.deepEqual(Object.keys(point).sort(), allowedPointKeys,
+      "Each public fortress record must contain only the seven approved map-only fields");
+    assert.equal(typeof point.id, "string", "Each fortress must have a stable string ID");
+    assert.ok(point.id.trim().length > 0, "Fortress ID must not be empty");
+    assert.ok(!seenIds.has(point.id), `Duplicate fortress ID ${point.id}`);
+    seenIds.add(point.id);
     assert.equal(point.kid, kid, `${kingdom} point must have KID ${kid}`);
     assert.equal(point.kingdom, kingdom, `${kingdom} point must stay in its kingdom group`);
     assert.equal(point.source_server, "IT1", "Each coordinate must retain its IT1 provenance");

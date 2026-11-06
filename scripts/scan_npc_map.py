@@ -18,12 +18,12 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
 DEFAULT_BASE = "https://empire-api.fly.dev"
-DEFAULT_SERVER = "EmpirefourkingdomsExGG2_3"
+DEFAULT_SERVER = "EmpirefourkingdomsExGG_3"  # Pinned production PL1 zone from e4k-data
 NPC_WORDS = re.compile(r"(npc|baron|robber|dungeon|fortress|stronghold|camp|rozb[oó]j|baron|loch|twierd|ob[oó]z)", re.I)
 
 
@@ -41,26 +41,30 @@ def build_url(base: str, server: str, command: str, params: dict[str, Any]) -> s
 def request_command(base: str, server: str, command: str,
                     params: dict[str, Any], timeout: int) -> dict[str, Any]:
     url = build_url(base, server, command, params)
-    req = Request(url, headers={
+    headers = {
         "Accept": "application/json",
-        "User-Agent": "Empirenew-NPC-map-diagnostic/1.0",
-    })
+        "User-Agent": "Empirenew-NPC-map-diagnostic/1.1",
+    }
+    api_token = os.getenv("E4K_API_TOKEN")
+    if api_token:
+        headers["Authorization"] = f"Bearer {api_token}"
+    req = Request(url, headers=headers)
     try:
         with urlopen(req, timeout=timeout) as response:
             status = response.status
             body = response.read().decode("utf-8", "replace")
     except HTTPError as exc:
         body = exc.read().decode("utf-8", "replace")
-        raise ProbeError(f"{command}: HTTP {exc.code}; url={url}; body={body[:3000]}") from exc
+        raise ProbeError(f"{command}: HTTP {exc.code}; response body redacted") from exc
     except (URLError, TimeoutError) as exc:
-        raise ProbeError(f"{command}: transport error; url={url}; error={exc}") from exc
+        raise ProbeError(f"{command}: transport error ({type(exc).__name__})") from exc
 
     if status != 200:
-        raise ProbeError(f"{command}: HTTP {status}; url={url}; body={body[:3000]}")
+        raise ProbeError(f"{command}: HTTP {status}; response body redacted")
     try:
         payload = json.loads(body)
     except json.JSONDecodeError as exc:
-        raise ProbeError(f"{command}: HTTP 200 but invalid JSON: {body[:1000]}") from exc
+        raise ProbeError(f"{command}: HTTP 200 but invalid JSON; response body redacted") from exc
     if not isinstance(payload, dict):
         raise ProbeError(f"{command}: response root is not an object")
     return {"http_status": status, "url": url, "payload": payload}
@@ -111,27 +115,55 @@ def extract_explicit_npcs(payload: dict[str, Any], kingdom: int):
         pos = coordinate_pair(obj)
         if not pos:
             continue
-        # Do not infer NPC identity from coordinates or opaque numeric type IDs.
-        searchable = " ".join(
-            str(obj.get(k, "")) for k in
-            ("type", "Type", "type_name", "name", "N", "owner", "owner_name",
-             "category", "kind", "object_type", "npc_type")
+        # Classify only from object-type fields; never copy names or owner/player values.
+        classification = " ".join(
+            str(obj[k]).strip() for k in
+            ("type", "Type", "type_name", "category", "kind", "object_type", "npc_type")
+            if obj.get(k) not in (None, "")
         )
-        if not NPC_WORDS.search(searchable):
+        if not NPC_WORDS.search(classification):
             continue
         found.append({
             "kingdom_id": kingdom,
             "x": pos[0],
             "y": pos[1],
-            "label": searchable[:160],
+            "label": classification[:80],
             "source_path": path,
-            "raw": obj,
         })
     # Deduplicate only identical coordinate+label records.
     unique = {}
     for item in found:
         unique[(item["x"], item["y"], item["label"])] = item
     return list(unique.values())
+
+
+def summarize_content(content: Any) -> dict[str, Any]:
+    """Return a structural, PII-free summary suitable for public CI artifacts."""
+    if isinstance(content, list):
+        top_level_item_count = len(content)
+        first = content[0] if content else None
+    elif isinstance(content, dict):
+        top_level_item_count = len(content)
+        first = content
+    else:
+        top_level_item_count = None
+        first = None
+
+    coordinate_pairs = []
+    seen_coordinates = set()
+    for _, obj in walk(content):
+        pair = coordinate_pair(obj)
+        if pair and pair not in seen_coordinates:
+            seen_coordinates.add(pair)
+            coordinate_pairs.append({"x": pair[0], "y": pair[1]})
+
+    return {
+        "json_type": type(content).__name__,
+        "top_level_item_count": top_level_item_count,
+        "top_level_keys": sorted(str(key) for key in first.keys())[:40] if isinstance(first, dict) else [],
+        "coordinate_object_count": len(coordinate_pairs),
+        "coordinate_samples": coordinate_pairs[:5],
+    }
 
 
 def atomic_write(path: Path, data: dict[str, Any]):
@@ -178,7 +210,7 @@ def main():
     report = {
         "tested_at": datetime.now(timezone.utc).isoformat(),
         "server": args.server,
-        "base": args.base,
+        "base": (lambda parsed: f"{parsed.scheme}://{parsed.netloc}" if parsed.scheme and parsed.netloc else "configured endpoint")(urlsplit(args.base)),
         "kingdom": args.kingdom,
         "tests": [],
         "validated_npc_count": 0,
@@ -195,7 +227,7 @@ def main():
                 "return_code": payload.get("return_code"),
                 "response_command": payload.get("command"),
                 "content_type": type(payload.get("content")).__name__,
-                "content_preview": json.dumps(payload.get("content"), ensure_ascii=False)[:3500],
+                "content_summary": summarize_content(payload.get("content")),
                 "ok": True,
             }
             if str(payload.get("return_code")) != "0":

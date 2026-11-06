@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: empire-api-custom
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: USERNAME
+        sync: false
+      - key: PASSWORD
+        sync: false
+      - key: EMPIRE_API_TOKEN
+        sync: false

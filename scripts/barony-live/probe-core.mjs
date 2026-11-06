@@ -269,7 +269,9 @@ export function extractNpcBattleReportEvidence(
   const validateTimeCandidate = (candidate, command, source) => {
     const candidateMessageId = Number(candidate?.message_id);
     const candidateBattleLogId = Number(candidate?.battle_log_id);
-    const secondsSinceBattle = Number(candidate?.seconds_since_battle);
+    const rawSecondsSinceBattle = candidate?.seconds_since_battle;
+    // Candidates come from the validated wire parsers; do not coerce booleans or arrays here.
+    const secondsSinceBattle = typeof rawSecondsSinceBattle === 'number' ? rawSecondsSinceBattle : NaN;
     const receivedAt = toIsoDate(candidate?.received_at_utc);
     const battleTime = toIsoDate(candidate?.battle_time_estimate_utc);
     if (
@@ -625,14 +627,15 @@ export function parseGgejsBattleLogShortResponse(message, receivedAt = new Date(
   const messageId = Number(payload.MID);
   const battleLogId = Number(payload.LID);
   const rawSeconds = payload.PS;
+  const secondsWireValueIsNumeric = typeof rawSeconds === 'number' ||
+    (typeof rawSeconds === 'string' && rawSeconds.trim() !== '');
   if (
     !Number.isSafeInteger(messageId) || messageId <= 0 ||
     !Number.isSafeInteger(battleLogId) || battleLogId <= 0 ||
-    rawSeconds === null || rawSeconds === undefined ||
-    (typeof rawSeconds === 'string' && rawSeconds.trim() === '')
+    !secondsWireValueIsNumeric
   ) return null;
 
-  const secondsSinceBattle = Number(rawSeconds);
+  const secondsSinceBattle = typeof rawSeconds === 'number' ? rawSeconds : Number(rawSeconds);
   const receivedAtIso = toIsoDate(receivedAt);
   if (
     !Number.isFinite(secondsSinceBattle) || secondsSinceBattle <= 0 ||
@@ -704,16 +707,17 @@ export function parseGgejsBattleLogMiddleTimeResponse(message, receivedAt = new 
   const wireMessageId = payload.MID === null || payload.MID === undefined ? null : Number(payload.MID);
   const messageId = wireMessageId ?? contextMessageId;
   const rawSeconds = payload.PS;
+  const secondsWireValueIsNumeric = typeof rawSeconds === 'number' ||
+    (typeof rawSeconds === 'string' && rawSeconds.trim() !== '');
   if (
     !Number.isSafeInteger(battleLogId) || battleLogId <= 0 ||
     !Number.isSafeInteger(messageId) || messageId <= 0 ||
     (wireMessageId !== null && (!Number.isSafeInteger(wireMessageId) || wireMessageId <= 0)) ||
     (wireMessageId !== null && Number.isSafeInteger(contextMessageId) && contextMessageId > 0 && wireMessageId !== contextMessageId) ||
-    rawSeconds === null || rawSeconds === undefined ||
-    (typeof rawSeconds === 'string' && rawSeconds.trim() === '')
+    !secondsWireValueIsNumeric
   ) return null;
 
-  const secondsSinceBattle = Number(rawSeconds);
+  const secondsSinceBattle = typeof rawSeconds === 'number' ? rawSeconds : Number(rawSeconds);
   const receivedAtIso = toIsoDate(receivedAt);
   if (
     !Number.isFinite(secondsSinceBattle) || secondsSinceBattle <= 0 ||

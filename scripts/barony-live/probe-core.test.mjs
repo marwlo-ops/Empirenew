@@ -621,6 +621,10 @@ test('rejects BLS time metadata unless the XT response succeeds and PS is valid'
   assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: null }) + '%'), null);
   assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: -1 }) + '%'), null);
   assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: 0 }) + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: true }) + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: [120] }) + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: { seconds: 120 } }) + '%'), null);
+  assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, PS: '120' }) + '%').seconds_since_battle, 120);
   assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({ ...payload, MID: 0 }) + '%'), null);
   assert.equal(parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + json + '%', 'not-a-date'), null);
 });
@@ -659,6 +663,12 @@ test('attaches BLS.PS time only when mailbox message, battle log and BLS target 
   }) + '%', '2026-11-05T18:00:00Z');
   assert.equal(extractNpcBattleReportEvidence(message, battleLog, wrongAreaType).battle_time_estimate_utc, null);
 
+  const coercedBooleanAge = {
+    ...shortLog,
+    seconds_since_battle: true,
+    battle_time_estimate_utc: '2026-11-05T17:59:59.000Z',
+  };
+  assert.equal(extractNpcBattleReportEvidence(message, battleLog, coercedBooleanAge).battle_time_estimate_utc, null);
   const wrongLog = { ...shortLog, battle_log_id: 9002 };
   assert.equal(extractNpcBattleReportEvidence(message, battleLog, wrongLog).battle_time_estimate_utc, null);
   const wrongMessage = { ...shortLog, message_id: 502 };
@@ -687,6 +697,10 @@ test('rejects BLM.PS without a correlated MID/LID, successful response and posit
   assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%42%' + json + '%', '2026-11-05T18:00:01Z', 501), null);
   assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%0%not-json%', '2026-11-05T18:00:01Z', 501), null);
   assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%0%' + JSON.stringify({ ...payload, PS: 0 }) + '%', '2026-11-05T18:00:01Z', 501), null);
+  assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%0%' + JSON.stringify({ ...payload, PS: true }) + '%', '2026-11-05T18:00:01Z', 501), null);
+  assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%0%' + JSON.stringify({ ...payload, PS: [91] }) + '%', '2026-11-05T18:00:01Z', 501), null);
+  assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%0%' + JSON.stringify({ ...payload, PS: { seconds: 91 } }) + '%', '2026-11-05T18:00:01Z', 501), null);
+  assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%0%' + JSON.stringify({ ...payload, PS: '91' }) + '%', '2026-11-05T18:00:01Z', 501).seconds_since_battle, 91);
   assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%0%' + JSON.stringify({ ...payload, MID: 502 }) + '%', '2026-11-05T18:00:01Z', 501), null);
   assert.equal(parseGgejsBattleLogMiddleTimeResponse('%xt%blm%opaque%0%' + json + '%', '2026-11-05T18:00:01Z', null), null);
 });

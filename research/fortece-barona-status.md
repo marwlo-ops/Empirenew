@@ -1,6 +1,6 @@
 # Fortecy i historia ataków — dziennik potwierdzonych testów
 
-Ostatnia aktualizacja: 2026-11-05. Dane w tym dokumencie rozdzielają potwierdzone wyniki od hipotez i nierozwiązanych problemów.
+Ostatnia aktualizacja: 2026-11-06. Dane w tym dokumencie rozdzielają potwierdzone wyniki od hipotez i nierozwiązanych problemów.
 
 ## 1. Katalog mapy IT1
 
@@ -1075,3 +1075,31 @@ Nie było autoryzowanej sesji demo ani nowych raportów BLS/BLM/GAM z produkcyjn
 - Ochrona zakresu: bez zmian w barony.html, mapa-rb.html, Mapa, Szpiegowanie i Dodatkowe.
 
 Następny krok nadal wymaga konta demo na produkcyjnym PL1 i lokalnej, autoryzowanej sesji. Poświadczenia nie mogą trafić do czatu, repozytorium ani GitHub Actions.
+
+## 35. Ścisła walidacja pola PS w BLS/BLM — 2026-11-06 05:38 UTC
+
+### Weryfikacja semantyki upstream
+
+W przypiętym źródle EmpireCore (`b3f892059501784c28b90e7413810d17ad1e22a6`) modele `BattleLogShortResponse` i `BattleLogMiddleResponse` opisują `PS` jako sekundy od bitwy; typ pola to `int | float | None`. Walidator odwzorowuje zachowanie klienta: `now - PS * 1000`. Dlatego poprawna walidacja nie może wymuszać wyłącznie liczby całkowitej — wartości ułamkowe są dopuszczone przez model upstream.
+
+Źródło: `src/empire_core/messages/models/battle_logs.py`, pola `seconds_since_battle` i walidator `_seconds`.
+
+### Błąd wykryty w probe
+
+Wcześniejsze parsowanie wykonywało bezwarunkowe `Number(payload.PS)`. W JavaScript oznacza to m.in.:
+- `true` → `1`;
+- `[120]` → `120`.
+
+Takie wartości nie są poprawnym typem pola protokołu i mogły wytworzyć syntetyczny wiek bitwy mimo wadliwego payloadu.
+
+### Poprawka
+
+- BLS i BLM akceptują teraz wyłącznie wartość JSON typu number albo niepusty string liczbowy;
+- nadal wymagają wartości skończonej, dodatniej i nieprzekraczającej bezpiecznego zakresu;
+- nie wymuszają całkowitości, zgodnie z typem upstream;
+- walidacja kandydata czasu nie wykonuje już konwersji typu przez `Number()` — przyjmuje wyłącznie liczbę zwróconą przez parser wire;
+- testy obejmują boolean, array, object oraz prawidłowy string liczbowy.
+
+### Ograniczenia
+
+To zabezpieczenie poprawia walidację formatu, ale nie potwierdza, że BLS/BLM z produkcyjnego PL1 zawierają PS dla fortec typu 11. Nie wykonano sesji live; brak nowych rekordów ataków PL1. `attack_time_utc` pozostaje `null`, ponieważ PS opisuje wiek bitwy, a nie moment wysłania armii.

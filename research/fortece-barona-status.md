@@ -849,3 +849,21 @@ Przegląd bieżącego walidatora wykazał, że blokował znane nazwy pól ataku/
 ### Zakres i ograniczenia
 
 Zmiana dotyczy wyłącznie walidacji katalogu fortec. Nie zmienia danych, UI, mapy ani źródeł PL1. Nie wykonano live logowania do gry. Nie powstały żadne zdarzenia ataków. Wynik testów GitHub Actions dla tego commitu należy potwierdzić po zakończeniu workflow; nie traktować samego zapisu commitów jako testu.
+
+
+## 29. Bezpieczna normalizacja i unikalność ID importu IT1 — 2026-11-06
+
+### Ustalenie
+
+Nowy ścisły walidator katalogu wymaga niepustych, unikalnych identyfikatorów. Audyt importera wykazał, że puste lub składające się z białych znaków źródłowe `id` byłyby wcześniej zapisane jako pusty identyfikator zamiast otrzymać deterministyczny fallback współrzędnych. Importer nie sprawdzał też duplikatów ID, zanim przygotował katalog do publikacji.
+
+### Poprawka
+
+- Normalizacja wybiera pierwsze niepuste pole spośród `id`, `dungeon_id`, `object_id`; jeśli żadne nie jest dostępne, generuje `it1-{kid}-{x}-{y}`.
+- Dodano `validate_unique_ids()`; brakujące/puste lub powtórzone ID zatrzymują import przed zapisem i zachowują poprzedni katalog.
+- Dodano testy dla pustego ID, przejścia na alternatywne ID oraz duplikatu ID.
+- Zmiana dotyczy wyłącznie importera i testów mapy IT1; nie zmienia pól publicznych.
+
+### Testy i ograniczenia
+
+Commit importera uruchamia workflow importu z rzeczywistym odczytem IT1. Wynik pobrania i publikacji należy potwierdzić po zakończeniu Actions. Nie wykonano autoryzowanego logowania do gry ani testu ataku na PL1; nie zapisano zdarzeń ataków.

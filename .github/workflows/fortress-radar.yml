@@ -1,6 +1,12 @@
 name: Refresh E4K PL1 beta fortress radar
 
 on:
+  pull_request:
+    paths:
+      - "barony.html"
+      - "scripts/barony-live/fortress-radar.mjs"
+      - "scripts/barony-live/gge-tracker-fallback-core.mjs"
+      - ".github/workflows/fortress-radar.yml"
   workflow_dispatch:
   schedule:
     - cron: "*/15 * * * *"
@@ -19,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -36,6 +42,7 @@ jobs:
             console.log(JSON.stringify({server:x.server,status:x.result_status,targets:x.targets.length,kingdoms:x.kingdoms}));
           "
       - name: Publish changed snapshot
+        if: github.event_name != 'pull_request'
         run: |
           if git diff --quiet -- data/fortress-radar-e4k-pl1-beta.json; then
             echo "No snapshot changes."

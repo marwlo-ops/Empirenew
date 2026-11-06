@@ -1043,3 +1043,35 @@ Najnowsza poprawka składni probe cf6b453 oraz nowe zmiany importera powinny uru
 ### Zakres
 
 Zmiany obejmują tylko importer IT1, testy importera, test kontroli workflow, katalog danych i ten dziennik. Nie zmieniono barony.html, mapa-rb.html, zakładek Mapa, Szpiegowanie ani Dodatkowe.
+
+
+## 34. Końcowe wyniki Actions po imporcie 04:05Z — 2026-11-06 04:07 UTC
+
+Ta sekcja uzupełnia i zastępuje oczekujące statusy build/deployment zapisane w sekcji 33.
+
+### Potwierdzone workflow
+
+- Import IT1, run 42160358338: SUCCESS. Job import-map 127704345779. Log: 27 testów Python, wynik OK; rzeczywisty import 2021 rekordów z jednej strony API; walidacja katalogu PASS; plan 2021 celów / 199 sektorów / 1 990 000 pól; commit katalogu został utworzony.
+- Walidacja mobilna i katalogu, run 42160358384: SUCCESS. Log potwierdza viewport, cele dotykowe 44 px, focus states, etykiety lokalnej historii i rozdzielenie evidence; katalog 2021 współrzędnych PASS.
+- Probe PL1, run 42160472523: SUCCESS. 13/13 testów Python probe; Node syntax checks zakończone sukcesem; testy rdzenia Node 41/41 PASS, 0 FAIL; test pinned ggejs/e4k-data i mapy PASS; test mobilny PASS; publiczna diagnostyka endpointów zakończyła się bez błędu workflow.
+- Pages, run 42160472469: SUCCESS. Build, report-build-status i deploy zakończone sukcesem. Deploy log: Pages reported success; environment URL https://marwlo-ops.github.io/Empirenew/. Wersja wdrożona: commit 9b20b83bd50887975924e3024ce66a643b921ef5.
+
+### Interpretacja wyników PL1
+
+Sukces workflow oznacza, że diagnostyka i testy wykonały się poprawnie, nie że produkcyjny PL1 zaczął udostępniać historię ataków. Log probe nadal potwierdza:
+- E4K_PL1 /dungeons: HTTP 400 Invalid server;
+- E4K_PL1_BETA /dungeons: HTTP 200, 976 rekordów; Beta pozostaje odrębnym serwerem;
+- 3/3 produkcyjne próbki historii graczy: Player not found / Invalid player ID;
+- most: target_connected=false; komendy mapy przez most pominięto.
+
+Nie było autoryzowanej sesji demo ani nowych raportów BLS/BLM/GAM z produkcyjnego PL1. Liczba nowych potwierdzonych zdarzeń ataków: 0. Nie zapisano fikcyjnych rekordów.
+
+### Stan końcowy tej iteracji
+
+- Mapa IT1: świeży snapshot 2026-11-06T04:05:23.468562Z, 2021 rekordów, 0 duplikatów, wyłącznie siedem pól mapowych.
+- Importer: brak metadanych paginacji zatrzymuje import i zachowuje poprzedni katalog.
+- Testy: 27 testów importera, 13 testów lokalnego probe, 41 testów Node core, test mobilny i walidacja katalogu — wszystkie potwierdzone w runach powyżej.
+- Deployment: najnowszy potwierdzony Pages build/deploy SUCCESS dla commitu 9b20b83.
+- Ochrona zakresu: bez zmian w barony.html, mapa-rb.html, Mapa, Szpiegowanie i Dodatkowe.
+
+Następny krok nadal wymaga konta demo na produkcyjnym PL1 i lokalnej, autoryzowanej sesji. Poświadczenia nie mogą trafić do czatu, repozytorium ani GitHub Actions.

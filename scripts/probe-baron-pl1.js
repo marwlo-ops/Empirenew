@@ -358,147 +358,6 @@ async function probeBetaPlayerHistoryFromDungeonRows() {
   }
 }
 
-async function probeProductionPlayerHistoryFromSpySnapshot() {
-  try {
-    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
-    const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
-    const known = new Set();
-    for (const data of Object.values(map.results || {})) {
-      for (const f of data.fortresses || []) known.add(Number(f.kid) + "/" + Number(f.x) + "/" + Number(f.y));
-    }
-    const members = (snapshot.alliances || []).flatMap(a => a.members || [])
-      .filter(m => m.name && m.member_id != null)
-      .slice(0, 3);
-    const results = [];
-    for (const member of members) {
-      let playerId = String(member.member_id);
-      let lookupStatus = null;
-      let lookupError = null;
-      try {
-        const lookup = await fetch(base + "/players/" + encodeURIComponent(member.name), {
-          headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
-          signal: AbortSignal.timeout(20000)
-        });
-        const player = await lookup.json();
-        lookupStatus = lookup.status;
-        lookupError = player.error ?? null;
-        if (lookup.ok && player.player_id != null) playerId = String(player.player_id);
-      } catch (error) {
-        lookupError = String(error);
-      }
-
-      try {
-        const historyResponse = await fetch(
-          base + "/dungeons/player/" + encodeURIComponent(playerId) + "?lastDays=365",
-          {
-            headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
-            signal: AbortSignal.timeout(20000)
-          }
-        );
-        const history = await historyResponse.json();
-        const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
-        const targetRows = rows.filter(d =>
-          known.has(Number(d.kid) + "/" + Number(d.position_x) + "/" + Number(d.position_y))
-        );
-        results.push({
-          lookup_status: lookupStatus,
-          lookup_resolved: lookupStatus === 200 && lookupError === null,
-          lookup_error: lookupError,
-          history_status: historyResponse.status,
-          history_error: history.error ?? null,
-          records: rows.length,
-          target_matches: targetRows.length,
-          sample_target_events: targetRows.slice(0, 5).map(d => ({
-            kid: Number(d.kid),
-            x: Number(d.position_x),
-            y: Number(d.position_y),
-            attacked_at: d.attacked_at
-          }))
-        });
-      } catch (error) {
-        results.push({
-          lookup_status: lookupStatus,
-          lookup_resolved: lookupStatus === 200 && lookupError === null,
-          lookup_error: lookupError,
-          history_error: String(error)
-        });
-      }
-    }
-    console.log(JSON.stringify({
-      probe: "production-pl1-player-history-from-spy-snapshot",
-      api_server: "E4K_PL1",
-      snapshot_members_sampled: members.length,
-      histories_checked: results.length,
-      nonempty_histories: results.filter(x => Number(x.records) > 0).length,
-      total_history_records: results.reduce((n, x) => n + Number(x.records || 0), 0),
-      total_target_matches: results.reduce((n, x) => n + Number(x.target_matches || 0), 0),
-      results,
-      note: "Only E4K_PL1 responses count as production evidence; no Beta or IT1 cooldown is reused."
-    }));
-  } catch (error) {
-    console.log(JSON.stringify({ probe: "production-pl1-player-history-from-spy-snapshot", error: String(error) }));
-  }
-}
-
-async function probeProductionPlayerHistoryWithZoneIdSuffix() {
-  try {
-    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
-    const network = JSON.parse(await readFile(new URL("./barony-live/node_modules/e4k-data/network/network.json", import.meta.url), "utf8"));
-    const pl1 = network.instances.find(item => item.zone === targetServer);
-    if (!pl1 || !Number.isInteger(pl1.zoneId)) {
-      console.log(JSON.stringify({
-        probe: "production-pl1-player-history-with-zone-id-suffix",
-        skipped: true,
-        reason: "Pinned e4k-data has no numeric zoneId for production PL1"
-      }));
-      return;
-    }
-    const members = (snapshot.alliances || []).flatMap(a => a.members || [])
-      .filter(m => Number.isInteger(m.member_id) && m.member_id > 999)
-      .slice(0, 3);
-    const results = [];
-    for (const member of members) {
-      const candidateId = String(member.member_id) + String(pl1.zoneId).padStart(3, "0");
-      try {
-        const response = await fetch(
-          base + "/dungeons/player/" + encodeURIComponent(candidateId) + "?lastDays=365",
-          { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
-        );
-        const body = await response.json();
-        const rows = Array.isArray(body.dungeons) ? body.dungeons : [];
-        results.push({
-          http_status: response.status,
-          error: body.error ?? null,
-          records: rows.length,
-          target_matches: rows.filter(d =>
-            Number.isInteger(Number(d.kid)) &&
-            Number.isInteger(Number(d.position_x)) &&
-            Number.isInteger(Number(d.position_y))
-          ).length
-        });
-      } catch (error) {
-        results.push({ error: String(error) });
-      }
-    }
-    console.log(JSON.stringify({
-      probe: "production-pl1-player-history-with-zone-id-suffix",
-      api_route: "/dungeons/player/{playerId}",
-      suffix_source: "pinned e4k-data production PL1 zoneId",
-      candidate_suffix: pl1.zoneId,
-      snapshot_members_sampled: members.length,
-      histories_checked: results.length,
-      http_200: results.filter(x => x.http_status === 200).length,
-      nonempty_histories: results.filter(x => Number(x.records) > 0).length,
-      total_history_records: results.reduce((n, x) => n + Number(x.records || 0), 0),
-      results,
-      note: "Appending zoneId to a raw map member ID is only a routing hypothesis. Count records only as production PL1 if the suffix resolves to the PL1 database and the returned player identity is independently matched; this probe does not persist events."
-    }));
-  } catch (error) {
-    console.log(JSON.stringify({ probe: "production-pl1-player-history-with-zone-id-suffix", error: String(error) }));
-  }
-}
-
-
 async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
   try {
     const catalogResponse = await fetch(base + "/servers/catalog", {
@@ -518,7 +377,8 @@ async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
         probe: "production-pl1-player-history-with-catalog-code-suffix",
         catalog_status: catalogResponse.status,
         skipped: true,
-        reason: "GGE Tracker E4K_PL1 catalog entry did not provide a three-digit server code",
+        reason: "No verified three-digit GGE Tracker server-code suffix is available; e4k-data zoneId is not a substitute.",
+        id_format_contract: "numeric player ID + three-digit GGE Tracker server-code suffix; API extracts the trailing three digits",
         catalog_entry_found: Boolean(block),
         catalog_code: code,
         enabled: readTag("enabled"),
@@ -587,7 +447,8 @@ async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
     console.log(JSON.stringify({
       probe: "production-pl1-player-history-with-catalog-code-suffix",
       api_route: "/dungeons/player/{playerId}",
-      suffix_source: "GGE Tracker /servers/catalog E4K_PL1 <code>, not e4k-data zoneId",
+      suffix_source: "GGE Tracker /servers/catalog E4K_PL1 <code>",
+      id_format_contract: "numeric player ID + three-digit GGE Tracker server-code suffix; API extracts the trailing three digits; e4k-data zoneId is not interchangeable",
       server_code: code,
       catalog_enabled: readTag("enabled"),
       catalog_fortress: readTag("fortress"),
@@ -711,8 +572,6 @@ async function probeBridge() {
 }
 
 await probeBetaPlayerHistoryFromDungeonRows();
-await probeProductionPlayerHistoryFromSpySnapshot();
-await probeProductionPlayerHistoryWithZoneIdSuffix();
 await probeProductionPlayerHistoryWithCatalogCodeSuffix();
 await probeTrackerAttackTimestampSemantics("E4K_PL1_BETA");
 await probeTrackerAttackTimestampSemantics("IT1");

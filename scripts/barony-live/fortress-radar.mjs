@@ -11,6 +11,7 @@ import {
 
 const BASE = 'https://api.gge-tracker.com/api/v1';
 const SERVER = process.env.GGE_SERVER || 'E4K_PL1_BETA';
+const PLAYER = (process.env.BARONY_PLAYER_NAME || '').trim();
 const API_KEY = process.env.GGETRACKER_API_KEY || '';
 const TIMEOUT = Number(process.env.BARONY_TRACKER_TIMEOUT_MS || 10000);
 const KIDS = { 1: 'sands', 2: 'ice', 3: 'fire' };
@@ -30,7 +31,8 @@ async function fetchKingdom(kid) {
   let totalPages = null, totalItems = null;
   for (let page = 1; page <= MAX_TRACKER_PAGES; page++) {
     const filter = JSON.stringify([String(kid)]);
-    const result = await getJson(urlFor('dungeons', { page, size: 2000, filterByKid: filter }), {
+    const encodedPlayer = PLAYER;
+    const result = await getJson(urlFor('dungeons', { page, size: 2000, filterByKid: filter, filterByPlayerName: encodedPlayer, nearPlayerName: encodedPlayer }), {
       server: SERVER, apiKey: API_KEY, timeoutMs: TIMEOUT,
     });
     if (!result.ok) return { status: result.status === 400 ? 'unsupported_or_rejected_server' : result.error,
@@ -68,6 +70,7 @@ async function fetchKingdom(kid) {
   return { status: 'pagination_limit_exceeded', rows: rows.length };
 }
 async function main() {
+  if (!PLAYER) throw new Error('Set BARONY_PLAYER_NAME to the exact in-game player name used with /fortress scan.');
   if (!Number.isInteger(TIMEOUT) || TIMEOUT < 1000 || TIMEOUT > 30000) throw new Error('Invalid timeout.');
   const metaResult = await getJson(urlFor('dungeons/meta'), { server: SERVER, apiKey: API_KEY, timeoutMs: TIMEOUT });
   const kingdoms = {};
@@ -75,8 +78,8 @@ async function main() {
   const complete = Object.values(kingdoms).every(x => x.status === 'complete');
   const rows = Object.values(kingdoms).flatMap(x => x.status === 'complete' ? x.rows : []);
   const result = {
-    schema_version: 1, source: 'GGE Assistant fortress radar pattern / GGE Tracker API',
-    server: SERVER, sampled_at: new Date().toISOString(),
+    schema_version: 1, source: 'GGE Assistant fortress radar logic / GGE Tracker API',
+    server: SERVER, player: PLAYER, sampled_at: new Date().toISOString(),
     last_api_scan_at: metaResult.ok ? isoOrNull(metaResult.data?.last_scan_at) : null,
     meta_status: metaResult.ok ? 'ok' : (metaResult.error || 'unavailable'),
     result_status: complete ? 'complete' : (rows.length ? 'partial' : 'unavailable'),

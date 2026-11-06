@@ -596,7 +596,7 @@ test('attaches BLS.PS time only when mailbox message, battle log and BLS target 
   const shortLog = parseGgejsBattleLogShortResponse(raw, '2026-11-05T18:00:00Z');
   const evidence = extractNpcBattleReportEvidence(message, battleLog, shortLog);
   assert.equal(evidence.battle_time_estimate_utc, '2026-11-05T17:58:30.000Z');
-  assert.equal(evidence.battle_time_seconds_since_report, 90);
+  assert.equal(evidence.battle_time_seconds_since_battle, 90);
   assert.equal(evidence.battle_time_source, 'BLS.PS_seconds_since_battle');
   assert.equal(evidence.attack_time_utc, null);
   assert.match(evidence.time_semantics, /not the attack launch time/);

@@ -777,33 +777,33 @@ To pozwala uzyskać lepszą estymację chwili bitwy dla raportu, ale nie rozwią
 
 ### Nowe ustalenie protokołu
 
-Audyt modelu EmpireCore wykazał, że pole \`PS\` nie występuje wyłącznie w \`BattleLogShortResponse\` (BLS). Model \`BattleLogMiddleResponse\` (BLM) również definiuje \`PS\` jako \`seconds_since_battle\`. Dokumentacja modelu wskazuje dodatkowo kod klienta: \`BattleLogVO.fillFromParamObject\` ustawia timestamp przez \`now - e.PS * 1000\`. Walidator EmpireCore odwzorowuje tę samą semantykę; wartość \`0\` traktuje jako brak timestampu, ponieważ klient używa warunku truthy.
+Audyt modelu EmpireCore wykazał, że pole `PS` nie występuje wyłącznie w `BattleLogShortResponse` (BLS). Model `BattleLogMiddleResponse` (BLM) również definiuje `PS` jako `seconds_since_battle`. Dokumentacja modelu wskazuje dodatkowo kod klienta: `BattleLogVO.fillFromParamObject` ustawia timestamp przez `now - e.PS * 1000`. Walidator EmpireCore odwzorowuje tę samą semantykę; wartość `0` traktuje jako brak timestampu, ponieważ klient używa warunku truthy.
 
-Kod \`ggejs\` potwierdza kolejność pobierania raportu:
-1. \`BasicBattleLogMessage.getBattleLog()\` pobiera BLS dla \`messageId\`;
-2. następnie pobiera BLM dla \`battleLogId\` (LID);
+Kod `ggejs` potwierdza kolejność pobierania raportu:
+1. `BasicBattleLogMessage.getBattleLog()` pobiera BLS dla `messageId`;
+2. następnie pobiera BLM dla `battleLogId` (LID);
 3. następnie pobiera BLD dla tego samego LID.
 
-\`blm.js\` wysyła \`{LID: battleLogId}\` i dopasowuje odpowiedź po LID. W odpowiedzi BLM nie trzeba zakładać obecności MID. Probe wiąże więc BLM z MID wiadomości, której \`getBattleLog()\` jest aktualnie wykonywane, a następnie wymaga zgodności LID z pełnym raportem.
+`blm.js` wysyła `{LID: battleLogId}` i dopasowuje odpowiedź po LID. W odpowiedzi BLM nie trzeba zakładać obecności MID. Probe wiąże więc BLM z MID wiadomości, której `getBattleLog()` jest aktualnie wykonywane, a następnie wymaga zgodności LID z pełnym raportem.
 
 ### Zmiana w Empirenew
 
-Dodano \`parseGgejsBattleLogMiddleTimeResponse()\`:
-- akceptuje wyłącznie udaną odpowiedź XT \`blm\` (kod 0 lub 10005);
-- odczytuje wyłącznie \`LID\` i dodatnie \`PS\`;
+Dodano `parseGgejsBattleLogMiddleTimeResponse()`:
+- akceptuje wyłącznie udaną odpowiedź XT `blm` (kod 0 lub 10005);
+- odczytuje wyłącznie `LID` i dodatnie `PS`;
 - wiąże MID z aktywnym odczytem wiadomości skrzynki, jeśli wire response nie zawiera MID;
 - jeżeli BLM zawiera MID, wymaga jego zgodności z aktywną wiadomością;
 - nie zapisuje surowego payloadu.
 
-\`probe.mjs\` przechwytuje BLM.PS podczas sekwencji \`message.getBattleLog()\` i wiąże go z bieżącym MID. \`extractNpcBattleReportEvidence()\` może teraz użyć BLM.PS, jeśli BLS.PS jest nieobecny, ale nadal wymaga zgodności MID, LID, krainy, typu 11, właściciela NPC, atakującego i pełnych współrzędnych z raportu.
+`probe.mjs` przechwytuje BLM.PS podczas sekwencji `message.getBattleLog()` i wiąże go z bieżącym MID. `extractNpcBattleReportEvidence()` może teraz użyć BLM.PS, jeśli BLS.PS jest nieobecny, ale nadal wymaga zgodności MID, LID, krainy, typu 11, właściciela NPC, atakującego i pełnych współrzędnych z raportu.
 
 Jeśli dostępne są oba źródła:
 - porównuje estymacje BLS.PS i BLM.PS;
-- przy różnicy do 15 sekund oznacza czas jako \`BLS.PS+BLM.PS_cross_checked\`;
+- przy różnicy do 15 sekund oznacza czas jako `BLS.PS+BLM.PS_cross_checked`;
 - przy różnicy powyżej 15 sekund wstrzymuje timestamp i zapisuje powód odrzucenia;
 - jeśli BLS.AI podaje współrzędne sprzeczne z pełnym raportem, wstrzymuje timestamp również wtedy, gdy BLM.PS jest dostępny.
 
-Wprowadzono też korektę semantyczną: wynik używa pola \`battle_time_seconds_since_battle\`, nie mylącego \`battle_time_seconds_since_report\`. \`PS=0\` jest odrzucane zgodnie z zachowaniem klienta, który nie tworzy timestampu dla wartości falsy.
+Wprowadzono też korektę semantyczną: wynik używa pola `battle_time_seconds_since_battle`, nie mylącego `battle_time_seconds_since_report`. `PS=0` jest odrzucane zgodnie z zachowaniem klienta, który nie tworzy timestampu dla wartości falsy.
 
 ### Testy
 
@@ -819,10 +819,10 @@ Testy są offline i nie stanowią potwierdzenia zachowania produkcyjnego PL1. Ni
 
 ### Źródła
 
-- EmpireCore — \`BattleLogShortResponse.PS\` i semantyka czasu klienta: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/src/empire_core/messages/models/battle_logs.py
-- EmpireCore — \`BattleLogMiddleResponse.PS\`: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/src/empire_core/messages/models/battle_logs.py
+- EmpireCore — `BattleLogShortResponse.PS` i semantyka czasu klienta: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/src/empire_core/messages/models/battle_logs.py
+- EmpireCore — `BattleLogMiddleResponse.PS`: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/src/empire_core/messages/models/battle_logs.py
 - EmpireCore — fixture BLS i BLM z PS: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/tests/messages/battle_log_payloads.py
-- EmpireCore — test \`seconds_since_battle\`: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/tests/messages/test_battle_logs.py
+- EmpireCore — test `seconds_since_battle`: https://github.com/eschnitzler/EmpireCore/blob/b3f892059501784c28b90e7413810d17ad1e22a6/tests/messages/test_battle_logs.py
 - ggejs — kolejność BLS → BLM → BLD i powiązanie po LID: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/messages/BasicBattleLogMessage.js
 - ggejs — żądanie i handler BLM: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/blm.js
 
@@ -830,4 +830,4 @@ Testy są offline i nie stanowią potwierdzenia zachowania produkcyjnego PL1. Ni
 
 To poprawia pokrycie raportów, gdy BLS nie zawiera PS, i daje niezależny test spójności, jeśli obie odpowiedzi zawierają PS. Estymacja nadal opisuje czas bitwy, nie czas wysłania armii; nie jest dokładnym timestampem ataku. Raporty pozostają ograniczone do skrzynki autoryzowanego konta, nie do globalnej historii PL1.
 
-Następny test na autoryzowanej sesji PL1 powinien zebrać BLS i BLM dla jednego raportu z fortecy typu 11 i porównać ich PS, MID/LID, AI oraz pełny \`BattleLog.mapobject.position\`. Bez takiego wyniku nie podnosimy tej estymacji do potwierdzonego czasu ataku.
+Następny test na autoryzowanej sesji PL1 powinien zebrać BLS i BLM dla jednego raportu z fortecy typu 11 i porównać ich PS, MID/LID, AI oraz pełny `BattleLog.mapobject.position`. Bez takiego wyniku nie podnosimy tej estymacji do potwierdzonego czasu ataku.

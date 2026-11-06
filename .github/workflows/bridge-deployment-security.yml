@@ -42,3 +42,4 @@ jobs:
           node --check "$RUNNER_TEMP/empire-api/api-auth-middleware.js"
           node --check "$RUNNER_TEMP/empire-api/map-command-queue.js"
           node --check "$RUNNER_TEMP/empire-api/read-only-commands.js"
+          node --check "$RUNNER_TEMP/empire-api/utils/ws/sockets.js"

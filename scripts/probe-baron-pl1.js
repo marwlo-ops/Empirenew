@@ -165,19 +165,32 @@ async function probeTrackerAttackTimestampSemantics(server) {
       const lastAttackMs = Date.parse(row.last_attack);
       const globalAvailableMs = Date.parse(row.global_available_at);
       const hasTimes = Number.isFinite(lastAttackMs) && Number.isFinite(globalAvailableMs);
+      const globalMinusLastAttackSeconds = hasTimes
+        ? Math.round((globalAvailableMs - lastAttackMs) / 1000) : null;
       return {
         kid: Number(row.kid),
         x: Number(row.position_x),
         y: Number(row.position_y),
         last_attack_utc: Number.isFinite(lastAttackMs) ? new Date(lastAttackMs).toISOString() : null,
         global_available_at_utc: Number.isFinite(globalAvailableMs) ? new Date(globalAvailableMs).toISOString() : null,
-        global_minus_last_attack_seconds: hasTimes ? Math.round((globalAvailableMs - lastAttackMs) / 1000) : null,
+        global_minus_last_attack_seconds: globalMinusLastAttackSeconds,
+        difference_from_24h_seconds: globalMinusLastAttackSeconds === null
+          ? null : globalMinusLastAttackSeconds - 86400,
         available_duration_seconds: Number.isFinite(Number(row.available_duration_seconds))
           ? Number(row.available_duration_seconds) : null,
         total_attack_count: Number.isFinite(Number(row.total_attack_count))
           ? Number(row.total_attack_count) : null
       };
     });
+    const deltas = samples.map(sample => sample.global_minus_last_attack_seconds)
+      .filter(Number.isFinite);
+    const deltaSummary = deltas.length ? {
+      count: deltas.length,
+      min_seconds: Math.min(...deltas),
+      max_seconds: Math.max(...deltas),
+      median_seconds: [...deltas].sort((a, b) => a - b)[Math.floor(deltas.length / 2)],
+      mean_seconds: Math.round(deltas.reduce((sum, value) => sum + value, 0) / deltas.length * 10) / 10
+    } : null;
     console.log(JSON.stringify({
       probe: "tracker-attacked-at-provenance",
       server,
@@ -185,6 +198,8 @@ async function probeTrackerAttackTimestampSemantics(server) {
       error: body.error ?? null,
       filter: "filterByAttackCooldown=3 (cooldown ends within one hour)",
       pagination: body.pagination ?? null,
+      expected_global_cooldown_seconds: 86400,
+      delta_summary: deltaSummary,
       sample_count: samples.length,
       samples,
       note: "Read-only timestamp-provenance diagnostic for this named tracker server only. Beta/IT1 rows are not production PL1 attack evidence and are never copied into PL1."

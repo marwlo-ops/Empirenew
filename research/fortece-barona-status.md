@@ -1131,3 +1131,29 @@ Na katalogu współrzędnych IT1 zapisanym `2026-11-06T04:05:23.468Z` policzono 
 ### Ograniczenia i decyzja
 
 Do czasu uzyskania próbki API z porównaniem obu timestampów i potwierdzenia schematu DB, `attacked_at` nie jest traktowane jako dokładny czas ataku PL1. `E4K_PL1` nadal jest odrzucane przez publiczne API jako Invalid server; Beta i IT1 pozostają osobnymi źródłami diagnostycznymi. Żadne ich cooldowny, historie ani timestampy nie są kopiowane do PL1.
+
+## 37. Wynik porównania last_attack z global_available_at — 2026-11-06 04:47 UTC
+
+Uruchomiono nowy read-only probe `tracker-attacked-at-provenance` w workflow `42164509564`. Dla obu serwerów użyto `filterByAttackCooldown=3` (pozycje, których globalny cooldown kończył się w ciągu godziny), po 8 rekordów na serwer. Żaden z tych rekordów nie został zapisany jako PL1.
+
+### Wyniki
+
+| Serwer diagnostyczny | Liczba próbek | `global_available_at - last_attack` | Odchylenie od 24 h |
+|---|---:|---:|---:|
+| E4K_PL1_BETA | 8 | 86 282–86 383 s | 17–118 s poniżej 86 400 s |
+| IT1 | 8 | 86 296–86 373 s | 27–104 s poniżej 86 400 s |
+| Łącznie | 16 | 86 282–86 383 s | średnio 57,9 s poniżej 86 400 s; mediana 86 353 s |
+
+Wszystkie 16 próbek miały `global_available_at - last_attack` bliskie 24 godzinom, mimo że endpoint był filtrowany do cooldownów kończących się w ciągu jednej godziny. Gdyby `last_attack` było zwykłym czasem zapisu/obserwacji, różnica byłaby zbliżona do pozostałego cooldownu, a nie do pełnych 24 godzin.
+
+### Wniosek z testu
+
+Empiryczny wynik silnie wspiera hipotezę, że `last_attack` jest wyprowadzany z 24-godzinnego globalnego cooldownu (np. `global_available_at - 24h`) i jest przybliżeniem chwili ataku, a nie zwykłym czasem inserta. Różnica 17–118 s może wynikać z cyklu odczytu, opóźnienia i zaokrągleń. Nie jest to dowód na dokładny timestamp serwerowy: publiczny schemat bazy/trigger nadal nie jest dostępny, a scraper nie przekazuje `attacked_at` w SQL.
+
+### Konsekwencja dla Barony
+
+- `last_attack` z GGE Tracker nie powinien być opisywany jako dokładny czas serwerowy; jeśli kiedyś zostanie udostępniony dla PL1, należy go oznaczać jako `cooldown_derived_estimate` i zachować obserwację/czas skanu jako osobne pola.
+- Nie wolno przenosić timestampów ani cooldownów z Beta/IT1 do PL1. Zgodność współrzędnych nie oznacza zgodności stanu ani historii.
+- Produkcyjny `E4K_PL1` nadal zwraca `Invalid server`; most PL1 nadal `target_connected=false`. W tej iteracji nie uzyskano nowego ataku PL1.
+
+Workflow i surowe próbki: `42164509564` (log zawiera 8 rekordów Beta i 8 IT1).

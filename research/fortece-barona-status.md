@@ -1171,3 +1171,78 @@ Poprawka w `probe-core.mjs`:
 - `attack_time_utc` pozostaje `null`; jedyny czas to przedział między dwiema obserwacjami.
 
 To nie zapisuje ani nie potwierdza ataku produkcyjnego. Wymaga dwóch poprawnych odczytów GAA tego samego celu z autoryzowanej sesji PL1; raport walki nadal jest potrzebny do niezależnego potwierdzenia atakującego i bitwy.
+
+
+## 39. Bieżący audyt repozytorium, Actions i produkcyjnego PL1 — 2026-11-06 05:37 UTC
+
+### Stan gałęzi i katalogu IT1
+
+- Najnowszy odczyt historii commitów wskazał HEAD `b1fbf5cd1f2ae2ed66fe6860a1b885f815f07e6e` (`chore: publish latest tracker snapshots`, 05:29:27Z).
+- Plik `data/baron-fortresses.json` nie zmienił się w tym commicie; jego blob SHA to `dfc9b1152a3c1a21a5ca53ed37a9132ec2bfa177`.
+- Aktualny snapshot mapy nadal ma `captured_at=2026-11-06T04:05:23.468562Z`; nie oznaczamy go jako nowego pobrania z 05:37Z.
+- Dane: Piaski 671, Lód 779, Ogień 571, razem 2021.
+- `pages_read=1`, `complete=true`, 2021 unikalnych ID, 2021 unikalnych współrzędnych.
+- Każdy rekord ma dokładnie: `id,kid,kingdom,x,y,type,source_server`; 0 niezatwierdzonych pól, w tym cooldownu, gotowości, gracza i historii ataków.
+- Walidacja aktualnego pliku wykonana bezpośrednio po pobraniu z repozytorium: 2021 rekordów, 2021 unikalnych ID, 2021 unikalnych kluczy KID/X/Y, 0 rekordów z innym zestawem kluczy.
+
+### Import i harmonogram
+
+- Kanoniczny workflow: `.github/workflows/import-it1-fortresses.yml`.
+- Harmonogram: `17 */6 * * *`; dostępne są również `workflow_dispatch` oraz push do importera, testów i definicji workflow.
+- Ostatni potwierdzony import: run `42160358338`, job `127704345779`, SUCCESS, 2026-11-06 04:05Z.
+- Log importu: 27 testów Python, `OK`; rzeczywisty odczyt 2021 rekordów z jednej strony API; walidacja katalogu PASS; plan 2021 celów, 199 sektorów, 1 990 000 potencjalnych pól.
+- W tym audycie nie uruchomiono kolejnego importu; następny zaplanowany termin z cron to 10:17 UTC. Nie przypisujemy więc snapshotowi 04:05 nowszego czasu pobrania.
+
+### Najnowszy probe PL1
+
+Run `42168458129`, job `127730383666`, zakończony SUCCESS o 05:26Z.
+
+Testy i walidacje:
+- 13/13 testów Python probe PASS;
+- 47/47 testów Node `probe-core.test.mjs` PASS, 0 FAIL;
+- `node --check` modułów probe PASS;
+- plan Barony: 2021 celów / 199 sektorów / 1 990 000 pól;
+- kontrola mobilna: viewport, cele dotykowe 44 px, focus states, etykiety lokalnej historii i rozdzielenie evidence PASS;
+- walidacja katalogu IT1 PASS: 2021 unikalnych współrzędnych, bez pól ataku/cooldownu/gracza/gotowości.
+
+### Odczyt publicznego katalogu i ograniczenia PL1
+
+- Przypięte zależności `ggejs 2.2.0` i `e4k-data 4.144.21-788.RC.3` wskazują produkcyjną instancję `EmpirefourkingdomsExGG_3`, host `e4k-live-pl1-game.goodgamestudios.com`, instance 3, zoneId 259, locale `generic_country_PL`, transport TCP. To potwierdza routing klienta, nie dostępność danych przez publiczny tracker.
+- Katalog serwerów GGE Tracker: `E4K_PL1 enabled=true, fortress=false`; `E4K_PL1_BETA enabled=true, fortress=true`.
+- `/dungeons`: `E4K_PL1` HTTP 400 `Invalid server`; aliasy produkcyjnego zone `EmpirefourkingdomsExGG_3` i `EmpirefourkingdomsExGG2_3` również HTTP 400.
+- `E4K_PL1_BETA`: HTTP 200, 976 rekordów. To odrębny serwer; jego 976 współrzędnych pokrywa się z IT1, ale nie potwierdza historii produkcyjnego PL1.
+- `IT1`: HTTP 200, 2021 rekordów.
+- Pięć historii graczy Beta zwróciło łącznie 7750 rekordów; pozostają wyłącznie diagnostyką Beta i nie są kopiowane do PL1.
+- Trzy próbki historii produkcyjnego PL1: 3/3 `Player not found` / `Invalid player ID`; próba sufiksu zoneId 259 również 3/3 HTTP 400.
+- Publiczny most: HTTP 200, ale `target_connected=false`; komendy mapy przez most zostały pominięte.
+- Nie wykonano autoryzowanej sesji konta demo. CI nie pobrało ruchów GAM ani raportów z prywatnej skrzynki PL1.
+
+### Przejściowy błąd testów i naprawa
+
+Run `42167916190` (05:21:11Z) zakończył się błędem: 4 testy Node nie odpowiadały już nowej semantyce łączenia obserwacji tego samego celu. Kolejne przebiegi po aktualizacji logiki i asercji zakończyły się SUCCESS; najnowszy `42168458129` potwierdza 47/47 PASS. Nie pozostawiono tego błędu jako aktualnego stanu.
+
+### Build, deployment i test mobilny
+
+- Run walidacji mobilnej/katalogu `42160358384`: SUCCESS; log potwierdza cele 44 px i walidację 2021 współrzędnych.
+- Najnowszy Pages run `42168718703`, commit `b1fbf5c`: build SUCCESS, deploy SUCCESS, report-build-status SUCCESS.
+- Build artifact zawierał `data/baron-fortresses.json`, `scripts/import_it1_fortresses.py` oraz moduły probe.
+- Deploy log potwierdził `Reported success!` i URL środowiska `https://marwlo-ops.github.io/Empirenew/`.
+- Nie wykonano testu na fizycznym telefonie; wynik mobilny dotyczy statycznych kontroli CI.
+
+### Zakres i inne harmonogramy
+
+W ramach prac fortecowych nie edytowano zakładek Mapa, Szpiegowanie ani Dodatkowe, plików `barony.html` i `mapa-rb.html`, ani plików historii innych modułów. Niezależny, istniejący workflow `Empirenew location tracker` (`42168616146`) uruchomił się według własnego harmonogramu i aktualizował osobne pliki historii lokalizacji/outpostów/server-intel. Nie zmieniano jego konfiguracji ani tych danych w ramach prac fortecowych.
+
+### Decyzja o historii ataków
+
+- `last_attack` z Beta/IT1 nadal jest wyłącznie estymacją pochodzącą z cooldownu 24 h; nie wolno kopiować tych rekordów do produkcyjnego PL1.
+- BLS/BLM `PS` może oszacować wiek bitwy, gdy raport, MID/LID, cel i odpowiedzi są skorelowane; nie jest to czas wysłania armii.
+- `attack_time_utc` pozostaje `null`; nie dodano żadnych zdarzeń PL1.
+- Sygnały GAA po dwóch obserwacjach tego samego celu pozostają kandydatami ograniczonymi przedziałem obserwacji, dopóki nie zostaną zweryfikowane na autoryzowanej sesji produkcyjnego PL1 i niezależnym raporcie NPC.
+
+### Następny krok
+
+1. Poczekać na kolejny zaplanowany import IT1 lub uruchomić go przez `workflow_dispatch` w GitHub; po nim zweryfikować nowy timestamp, liczbę stron, rekordów i deployment.
+2. Uzyskać lokalny, autoryzowany odczyt konta demo na produkcyjnym PL1; poświadczenia wyłącznie w lokalnych zmiennych środowiskowych.
+3. Sprawdzić pasywnie próbkę mapy, GAM i raporty NPC, a następnie porównać dwie obserwacje tych samych współrzędnych.
+4. Nie publikować automatycznej historii, dopóki tożsamość atakującego i semantyka czasu nie zostaną potwierdzone.

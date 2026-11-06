@@ -29,7 +29,7 @@ Patch jest weryfikowany w CI względem upstream danadum/empire-api przypiętego 
 1. Wykonaj fork danadum/empire-api.
 2. Skopiuj api-auth-middleware.js i map-command-queue.js do katalogu głównego forka.
 3. Zastosuj app.js.patch i sprawdź git apply --check oraz node --check app.js.
-4. Uruchom testy obu modułów z pakietu (node --test *.test.js).
+4. Uruchom testy obu modułów z pakietu (node --test bridge-deployment/*.test.js).
 5. W Render ustaw USERNAME, PASSWORD i EMPIRE_API_TOKEN zgodnie z ENVIRONMENT.md.
 6. Przed podłączeniem Empirenew sprawdź:
    - GET / bez tokenu — HTTP 200;

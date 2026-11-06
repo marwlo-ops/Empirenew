@@ -31,7 +31,7 @@ Repetytorium Goodgame Empire — mapa świata, lokalizacje graczy, sojusze i dan
 - Dostępne krainy: Wielkie Cesarstwo, Piaski, Lód i Ogień; nieustalony kod 4 jest ukryty.
 - Kierunki osi mapy: X rośnie w prawo, Y rośnie w dół.
 - Tracker baronów sortuje dostępne fortyfikacje przed oczekującymi; ponowny atak po 24 godzinach od zapisanego pokonania. Czasy zapisują się lokalnie w przeglądarce.
-- Katalog współrzędnych fortec jest obecnie pusty. Publiczny przekaźnik API nie potwierdził zgodnego skanowania mapy E4K; nie wpisujemy fikcyjnych lokalizacji.
+- Katalog `data/baron-fortresses.json` zawiera 2021 współrzędne fortec pobrane z GGE Tracker IT1 (Piaski 671, Lód 779, Ogień 571). To katalog map-only: bez cooldownu, gotowości, graczy i historii ataków. Zgodność siatki IT1 z PL1 jest potwierdzona przez operatora, ale importer nie weryfikuje na żywo każdego obiektu PL1. Publiczny GGE Tracker odrzuca produkcyjny `E4K_PL1`; błąd źródła nie oznacza braku fortec i nie tworzymy fikcyjnych lokalizacji ani ataków.
 
 
 ## Wspólna historia lokalizacji (RB + MD)

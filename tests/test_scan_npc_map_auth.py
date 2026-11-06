@@ -72,7 +72,8 @@ class ScanNpcMapAuthTests(unittest.TestCase):
                     {"KID": 1},
                     5,
                 )
-        self.assertNotIn(TOKEN, str(raised.exception))\n        self.assertNotIn("PrivatePlayer", str(raised.exception))
+        self.assertNotIn(TOKEN, str(raised.exception))
+        self.assertNotIn("PrivatePlayer", str(raised.exception))
 
     def test_diagnostic_summary_redacts_player_values(self):
         content = [{

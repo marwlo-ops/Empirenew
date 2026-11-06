@@ -114,10 +114,10 @@ async function main() {
     map_response_match: 'command_only',
     map_timeout_ms: 15000,
     error_log: 'type_only'
-  }) + '\\n');
+  }) + '\n');
 }
 
 main().catch((error) => {
-  process.stderr.write(`Bridge patch stopped safely: ${error?.name || 'Error'}: ${error?.message || error}\\n`);
+  process.stderr.write(`Bridge patch stopped safely: ${error?.name || 'Error'}: ${error?.message || error}\n`);
   process.exitCode = 1;
 });

@@ -733,7 +733,7 @@ Na autoryzowanej sesji produkcyjnego PL1 wykonać przed i po jednym kontrolowany
 
 ### Nowe ustalenie protokołu
 
-Niezależna implementacja EmpireCore opisuje odpowiedź `bls` (Battle Log Short) z polem `PS` jako `seconds_since_battle`. Jej test oparty na zanonimizowanym kształcie odpowiedzi gry sprawdza `PS=678547`. To jest mocniejsza informacja o czasie niż wiek wiadomości w skrzynce, ale nadal wartość względna, nie absolutny timestamp.
+Niezależna implementacja EmpireCore opisuje odpowiedź `bls` (Battle Log Short) z polem `PS` jako `seconds_since_battle`. Jej test oparty na zanonimizowanym kształcie odpowiedzi gry sprawdza `PS=678547`. To jest mocniejsza informacja o czasie niż wiek wiadomości w skrzynce, ale nadal wartość względna, nie absolutny timestamp. Ważne ograniczenie próbki upstream: zanonimizowany fixture ma `AI.AT=1` (atak NPC na zamek gracza), a nie typ 11 boss dungeon. Potwierdza więc obecność `PS` w odpowiedzi BLS dla tego rodzaju raportu, ale sam nie potwierdza, że produkcyjny PL1 zwraca `PS` także dla raportu z fortecy typu 11. W Barony pole czasu pozostaje opcjonalne i zostanie dołączone tylko wtedy, gdy odpowiedź BLS rzeczywiście je zawiera i przejdzie korelację.
 
 Kod `ggejs`:
 - `BasicMessage` wylicza `deliveryTime` jako lokalne `Date.now() - data[5] * 1000`; to wiek/dostarczenie wiadomości, nie czas rozpoczęcia ataku.

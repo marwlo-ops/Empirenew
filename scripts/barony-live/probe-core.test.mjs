@@ -606,6 +606,11 @@ test('attaches BLS.PS time only when mailbox message, battle log and BLS target 
   assert.equal(rejectedTime.battle_time_estimate_utc, null);
   assert.equal(rejectedTime.attack_time_utc, null);
 
+  const wrongAreaType = parseGgejsBattleLogShortResponse('%xt%bls%opaque%0%' + JSON.stringify({
+    MID: 501, LID: 9001, PS: 90, AI: { AT: 1, K: 1, X: 321, Y: 654 },
+  }) + '%', '2026-11-05T18:00:00Z');
+  assert.equal(extractNpcBattleReportEvidence(message, battleLog, wrongAreaType).battle_time_estimate_utc, null);
+
   const wrongLog = { ...shortLog, battle_log_id: 9002 };
   assert.equal(extractNpcBattleReportEvidence(message, battleLog, wrongLog).battle_time_estimate_utc, null);
   const wrongMessage = { ...shortLog, message_id: 502 };

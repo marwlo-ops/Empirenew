@@ -256,7 +256,7 @@ async function main() {
         mailbox_total_messages:mailbox.length,
         npc_reports_selected:reportMessages.length,
         battle_logs_loaded:battleLogsLoaded,
-        battle_log_short_responses_captured:battleLogShortResponses.length,
+        battle_log_short_responses_with_ps:battleLogShortResponses.length,
         battle_time_estimates:reportEvidence.filter(item=>item.battle_time_estimate_utc).length,
         evidence_count:reportEvidence.length,
         fetch_errors:fetchErrors,

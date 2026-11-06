@@ -25,7 +25,9 @@ jobs:
         with:
           node-version: 22
       - name: Run bridge unit and patch-safety tests
-        run: node --test bridge-deployment/*.test.js bridge-deployment/*.test.mjs
+        run: |
+          node --check bridge-deployment/apply-bridge-patch.mjs
+          node --test bridge-deployment/*.test.js bridge-deployment/*.test.mjs
       - name: Verify patch against pinned upstream
         env:
           UPSTREAM_COMMIT: dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d
@@ -34,8 +36,7 @@ jobs:
           git -C "$RUNNER_TEMP/empire-api" checkout --detach "$UPSTREAM_COMMIT"
           cp bridge-deployment/api-auth-middleware.js "$RUNNER_TEMP/empire-api/api-auth-middleware.js"
           cp bridge-deployment/map-command-queue.js "$RUNNER_TEMP/empire-api/map-command-queue.js"
-          git -C "$RUNNER_TEMP/empire-api" apply --check "$GITHUB_WORKSPACE/bridge-deployment/app.js.patch"
-          git -C "$RUNNER_TEMP/empire-api" apply "$GITHUB_WORKSPACE/bridge-deployment/app.js.patch"
+          node "$GITHUB_WORKSPACE/bridge-deployment/apply-bridge-patch.mjs" "$RUNNER_TEMP/empire-api/app.js"
           node --check "$RUNNER_TEMP/empire-api/app.js"
           node --check "$RUNNER_TEMP/empire-api/api-auth-middleware.js"
           node --check "$RUNNER_TEMP/empire-api/map-command-queue.js"

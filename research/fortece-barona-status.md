@@ -2092,3 +2092,59 @@ Wymagany jest lokalny, autoryzowany odczyt produkcyjnego PL1:
 Poświadczenia muszą pozostać w lokalnych zmiennych środowiskowych. Najpierw potrzebna jest świeża próbka GAA z typu 11 i porównanie jej z ruchem GAM lub raportem SNE/BLS/BLM dla tego samego KID/X/Y i gracza. Czas ataku pozostaje przedziałem między próbkami, dopóki nie zostanie niezależnie zweryfikowana semantyka czasu albo pełna długość cooldownu na produkcyjnym PL1. Nie zakładamy 24 godzin na podstawie Beta/IT1.
 
 Zakres: wyłącznie dokumentacja i pakiet mostu powiązany z Barony. Bez zmian w Mapie, Szpiegowaniu, Dodatkowych, UI i katalogu współrzędnych.
+
+
+## 56. Świeży probe PL1 po zabezpieczeniu mostu — 2026-11-06
+
+Run 42276592655 zakończył się SUCCESS na commicie d500746387d8f98f4605ec717a82c1fe7a8ba5a4. Był to odczyt publicznych źródeł i testów offline; nie używał poświadczeń operatora.
+
+### Testy
+
+- Node probe-core: 60/60 PASS.
+- Python importer katalogu: 19/19 PASS.
+- GGE Tracker fallback/redaction: 8/8 PASS.
+- Kontrakty przypiętego ggejs/e4k-data: PASS.
+- Walidacja planu: 2021 celów, 199 sektorów 100×100.
+- Błędy testów: 0.
+
+### Produkcyjny PL1 i publiczne API
+
+- TCP do e4k-live-pl1-game.goodgamestudios.com:443: połączenie udane, 112 ms; payload_sent=false.
+- Katalog GGE Tracker: E4K_PL1 enabled=true, fortress=false, code=null.
+- /dungeons: HTTP 400 dla EmpirefourkingdomsExGG_3, EmpirefourkingdomsExGG2_3, E4K_PL1 i aliasu PL1.
+- E4K_PL1_BETA: HTTP 200, 976 rekordów.
+- IT1: HTTP 200, 2021 rekordów.
+- Zgodność współrzędnych Beta–IT1: 976/976; nie oznacza to równoważności historii produkcyjnego PL1.
+- Historia Beta: 5 sprawdzonych graczy, 3170 rekordów i 3170 dopasowań do źródłowych fortec; wynik wyłącznie Beta.
+- Historia PL1 została pominięta, bo katalog nie dostarcza zweryfikowanego trzycyfrowego kodu GGE Tracker. zoneId=259 nie jest zamiennikiem tego kodu.
+
+### Timestampy Beta/IT1 — wyłącznie test pochodzenia
+
+Nowe próbki z tego runu:
+- Beta: 8 rekordów, global_available_at - last_attack = 86 297–86 376 s (24 h minus 24–103 s), mediana 86 339 s.
+- IT1: 8 rekordów, 86 288–86 386 s (24 h minus 14–112 s), mediana 86 373 s.
+
+Wynik ponownie pasuje do hipotezy opóźnienia wykrycia przez scraper pracujący w cyklu około 120 s. Nie ujawnia jednak schematu ani triggera bazy i nie jest niezależnym pomiarem czasu ataku. Nie używamy tych danych do PL1 ani do wypełniania attack_time_utc.
+
+### Publiczny most
+
+- /status: HTTP 200, target_connected=true, 82 znane serwery.
+- GAA: pominięte; adapter publiczny nie ma bezpiecznego dopasowania odpowiedzi GAA, więc nie wysłano żądania.
+- GAM: HTTP 200, return_code=0, sekcje M/O, 0 ruchów, 0 ruchów NPC typu 11, 0 dopasowanych ataków.
+- Wynik GAM dotyczy tylko sesji publicznego mostu, nie całego PL1.
+
+### Stan PR #13
+
+Ponowne porównanie head b52c4a06 z aktualnym main d500746 wykazało 28 commitów ahead i 52 behind; PR pozostaje otwartym draftem i ma rozbieżną historię. Nie scalać go w obecnej postaci. Zabezpieczenie allowlisty zostało już wprowadzone osobno przez PR #32 i commit 1895ade5.
+
+### Wniosek i następny krok
+
+Nowych potwierdzonych ataków produkcyjnego PL1: 0. To brak dowodu w dostępnych publicznych źródłach, nie dowód braku ataków. Nie było lokalnego logowania do konta operatora. Nie zapisano żadnego zdarzenia; attack_time_utc pozostaje null.
+
+Następny rozstrzygający test pozostaje lokalny i account-scoped:
+
+    node scripts/barony-live/probe.mjs --movements --reports --no-state
+
+Potrzebna jest zgodność świeżego wiersza BossDungeonMapobject typu 11, ruchu GAM lub raportu SNE/BLS/BLM dla tego samego KID/X/Y i gracza. Czas zdarzenia nadal będzie przedziałem próbek/estymatą, dopóki nie zostanie zweryfikowany niezależny timestamp lub pełny cooldown na samym produkcyjnym PL1. Poświadczenia pozostają lokalne.
+
+Bez zmian w Mapie, Szpiegowaniu, Dodatkowych, UI i katalogu współrzędnych.

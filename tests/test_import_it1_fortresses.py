@@ -37,6 +37,7 @@ class ImportIt1FortressesTests(unittest.TestCase):
             IMPORTER.read_response_body(invalid_length, 3)
         with self.assertRaises(ValueError):
             IMPORTER.read_response_body(io.BytesIO(b""), 0)
+
     def test_accepts_supported_top_level_shapes(self):
         rows = [{"kid": 1, "position_x": 10, "position_y": 20}]
         self.assertEqual(IMPORTER.records_from(rows), rows)
@@ -154,6 +155,24 @@ class ImportIt1FortressesTests(unittest.TestCase):
         }))
         self.assertIsNotNone(IMPORTER.normalize({
             "kid": 1, "x": 10, "y": 20, "areaType": 11
+        }))
+        self.assertIsNotNone(IMPORTER.normalize({
+            "kid": 1, "x": 10, "y": 20
+        }))
+
+    def test_rejects_malformed_or_conflicting_explicit_area_type(self):
+        invalid_rows = [
+            {"kid": 1, "x": 10, "y": 20, "areaType": True},
+            {"kid": 1, "x": 10, "y": 20, "area_type": None},
+            {"kid": 1, "x": 10, "y": 20, "areaType": "not-a-type"},
+            {"kid": 1, "x": 10, "y": 20, "area_type": 11, "areaType": 2},
+        ]
+        for row in invalid_rows:
+            with self.subTest(row=row):
+                self.assertIsNone(IMPORTER.normalize(row))
+
+        self.assertIsNotNone(IMPORTER.normalize({
+            "kid": 1, "x": 10, "y": 20, "areaType": "11"
         }))
 
     def test_generates_stable_id_when_source_id_is_missing(self):

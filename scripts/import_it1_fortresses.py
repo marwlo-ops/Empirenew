@@ -113,9 +113,16 @@ def normalize(record):
     kid = integer(record, ("kid", "kingdom_id", "kingdomId", "kingdom"))
     x = integer(record, ("position_x", "x", "posX", "X"))
     y = integer(record, ("position_y", "y", "posY", "Y"))
-    area_type = integer(record, ("area_type", "areaType"))
-    if area_type is not None and area_type != 11:
+
+    # The /dungeons endpoint may omit area_type because the endpoint itself is
+    # already filtered. If a type field is present, however, every supplied
+    # representation must be a valid type-11 boss dungeon value. A malformed
+    # boolean/null/string must not be treated as if the field were absent.
+    area_type_keys = ("area_type", "areaType")
+    present_area_type_values = [integer(record, (key,)) for key in area_type_keys if key in record]
+    if present_area_type_values and any(value != 11 for value in present_area_type_values):
         return None
+
     if (
         kid not in KINGDOMS
         or x is None

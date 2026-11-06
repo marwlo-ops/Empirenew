@@ -1,0 +1,57 @@
+name: Barony catalog and diagnostic safety
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/scan_npc_map.py'
+      - 'scripts/barony-live/probe-core.mjs'
+      - 'scripts/barony-live/probe-core.test.mjs'
+      - 'tests/test_scan_npc_map_auth.py'
+      - '.github/workflows/barony-catalog-security.yml'
+      - 'data/baron-fortresses.json'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/scan_npc_map.py'
+      - 'scripts/barony-live/probe-core.mjs'
+      - 'scripts/barony-live/probe-core.test.mjs'
+      - 'tests/test_scan_npc_map_auth.py'
+      - '.github/workflows/barony-catalog-security.yml'
+      - 'data/baron-fortresses.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: barony-catalog-security
+  cancel-in-progress: false
+
+jobs:
+  python-diagnostic-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile diagnostic
+        run: python3 -m py_compile scripts/scan_npc_map.py
+      - name: Test token and PII redaction
+        run: python3 -m unittest discover -s tests -p 'test_scan_npc_map_auth.py' -v
+
+  node-catalog-safety:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test catalog validator and Barony evidence parsers
+        run: npm test --prefix scripts/barony-live

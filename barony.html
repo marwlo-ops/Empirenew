@@ -15,6 +15,14 @@ main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyeb
 <section class="hero"><div class="eyebrow">Empire tools · NPC map tracker</div><h1>🏰 Barony</h1><p>Lokalizacje fortec z mapy IT1. Historia ataków PL1 jest oddzielona od mapy IT1.</p></section>
 <div class="stats"><div class="stat"><b id="total">—</b><span>Fortecy z IT1</span></div><div class="stat"><b id="ready">—</b><span>Zapisane lokalnie</span></div><div class="stat"><b id="wait">—</b><span>W obserwacji</span></div><div class="stat"><b id="updated">—</b><span>Ostatni odczyt</span></div></div>
 <div class="controls" id="kingdoms"><button class="active" data-k="sands">🏜️ Piaski</button><button data-k="ice">❄️ Lód</button><button data-k="fire">🔥 Ogień</button><button data-k="islands">🏝️ Archipelag · wyspy</button><button data-k="unassigned">📍 Nieprzypisane</button><input id="search" placeholder="Szukaj po współrzędnych lub ID…"><select id="filter"><option value="all">Wszystkie fortecy</option><option value="checked">Z wpisem lokalnym</option><option value="watched">Obserwowane lokalnie</option></select><select id="sort"><option value="xy">Współrzędne</option><option value="checked">Najpierw z wpisem</option></select></div>
+<section class="panel" style="margin:0 0 13px">
+<h2>📡 Radar fortec · E4K_PL1_BETA</h2>
+<p class="subtle">Odczyt według mechanizmu GGE Assistant / GGE Tracker. Status pochodzi z pola cooldown API; migawka odświeżana automatycznie co około 15 minut.</p>
+<div class="controls" style="margin:8px 0"><select id="liveKingdom"><option value="all">Wszystkie krainy</option><option value="sands">Płonące Piaski</option><option value="ice">Wieczny Lód</option><option value="fire">Ogniste Szczyty</option></select><select id="liveStatus"><option value="all">Wszystkie statusy</option><option value="available">Dostępne</option><option value="locked">Zablokowane do godziny</option></select><button id="liveRefresh" type="button">Odśwież widok</button></div>
+<div class="subtle" id="liveRadarMeta">Oczekiwanie na pierwszy poprawny odczyt API…</div>
+<div id="liveRadarList" class="list" style="max-height:420px;margin-top:10px"><div class="empty">Dane radaru zostaną pokazane po pierwszym poprawnym skanie.</div></div>
+<div class="notice">To są dane źródłowe radaru. Pole „ostatni król” opisuje ostatniego gracza zapisanego przez API, a nie dowodzi, że to on wykonał ostatni atak. Nie wyciągamy historii ataków z samego cooldownu.</div>
+</section>
 <div class="layout"><section class="panel"><h2>Mapa lokalizacji</h2><div class="map" id="map"><div class="empty">Oczekiwanie na potwierdzone współrzędne skanu.</div></div><div class="legend">Mapa i współrzędne pochodzą wyłącznie z GGE Tracker IT1. Czas ataku nie jest pobierany z IT1.</div></section><section class="panel"><h2>Lista fortec</h2><div class="list" id="list"><div class="empty">Ładowanie katalogu…</div></div></section></div>
 <section class="panel" style="margin-top:13px"><h2>📡 Sygnały aktywności PL1 · Szpiegowanie</h2><div class="subtle" id="intelSummary">Odczyt historii całego serwera PL1…</div><div id="intelSignals" class="list" style="max-height:360px;margin-top:10px"><div class="empty">Ładowanie sygnałów…</div></div><div class="notice">Wzrost łupu lub honoru wskazuje aktywność gracza pomiędzy snapshotami. Nie zawiera współrzędnych celu, więc nie jest dowodem ataku na konkretną fortecę IT1. Nie ustawiamy na tej podstawie blokady 24 h.</div></section>
 <div class="notice" id="status">Ładowanie katalogu mapy IT1…</div><p class="subtle">IT1 dostarcza tylko krainę i współrzędne. Nie mamy jeszcze działającego, potwierdzonego źródła automatycznej historii ataków E4K PL1. Zapis ataku jest na razie ręczny i lokalny; czas odnowienia liczymy jako 24 h od zapisanego zdarzenia.</p>
@@ -192,6 +200,26 @@ async function loadServerIntel(){
   list.innerHTML='<div class="empty">Historia aktywności jest chwilowo niedostępna.</div>';
  }
 }
+async function loadLiveRadar(){
+ const meta=$('liveRadarMeta'),list=$('liveRadarList');
+ try{
+  const response=await fetch('./data/fortress-radar-e4k-pl1-beta.json?t='+Date.now(),{cache:'no-store'});
+  if(!response.ok)throw Error('Migawka HTTP '+response.status);
+  const data=await response.json();
+  if(data.server!=='E4K_PL1_BETA'||!Array.isArray(data.targets))throw Error('Nieprawidłowy format radaru');
+  const age=Date.now()-Date.parse(data.sampled_at);
+  const ageText=Number.isFinite(age)?Math.max(0,Math.floor(age/60000))+' min temu':'wiek nieznany';
+  meta.textContent='Serwer: '+data.server+' · status: '+data.result_status+' · skan: '+fmt(data.sampled_at)+' ('+ageText+') · ostatni skan API: '+(data.last_api_scan_at?fmt(data.last_api_scan_at):'brak danych');
+  const k=$('liveKingdom').value,s=$('liveStatus').value;
+  const targets=data.targets.filter(x=>(k==='all'||x.kingdom===k)&&(s==='all'||x.status===s)).sort((a,b)=>a.kid-b.kid||a.seconds_remaining-b.seconds_remaining||a.x-b.x);
+  const kingdomNames={sands:'Płonące Piaski',ice:'Wieczny Lód',fire:'Ogniste Szczyty'};
+  const esc=v=>String(v??'—').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const remaining=n=>{n=Math.max(0,Number(n)||0);if(n<60)return n+' s';const m=Math.ceil(n/60);return m<60?m+' min':Math.floor(m/60)+' h '+(m%60)+' min';};
+  list.innerHTML=targets.length?targets.map(x=>'<article class="item"><strong>'+(x.status==='available'?'🟢 Dostępna':'🔴 Zablokowana')+' · '+esc(kingdomNames[x.kingdom])+'</strong><small>Współrzędne: <b>'+esc(x.x)+':'+esc(x.y)+'</b> · kraina ID '+esc(x.kid)+'</small><small>Status: '+(x.status==='available'?'możliwa do ataku według API':'blokada jeszcze '+remaining(x.seconds_remaining))+'</small><small>Ostatni król w API: '+esc(x.player_name||'brak danych')+'</small><small>Cooldown do: '+esc(x.cooldown_until?fmt(x.cooldown_until):'brak aktywnej blokady')+'</small></article>').join(''):'<div class="empty">Brak fortec pasujących do filtrów w tym odczycie.</div>';
+  if(data.result_status!=='complete')meta.textContent+=' · UWAGA: odczyt niekompletny — nie traktuj braku fortec jako potwierdzenia, że nie istnieją.';
+  if(age>30*60000)meta.textContent+=' · OSTRZEŻENIE: migawka jest starsza niż 30 minut.';
+ }catch(error){meta.textContent='Radar niedostępny: '+error.message;list.innerHTML='<div class="empty">Nie ma poprawnej migawki API. Nie pokazujemy statusów domyślnych ani zgadywanych.</div>';}
+}
 async function load(){
  $('status').textContent='Ładowanie kompletnego katalogu mapy IT1…';
  try{await loadTracker();render();}
@@ -202,6 +230,10 @@ $('list').addEventListener('click',e=>{const b=e.target.closest('[data-attack]')
 ['search','filter','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',render));
 loadServerIntel();
 load();
+loadLiveRadar();
+$('liveKingdom').addEventListener('change',loadLiveRadar);
+$('liveStatus').addEventListener('change',loadLiveRadar);
+$('liveRefresh').addEventListener('click',loadLiveRadar);
 
 })();
 </script></body></html>

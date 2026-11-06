@@ -1420,3 +1420,55 @@ To niezależnie wspiera obecne filtry w ekstraktorze GAM: typ ruchu 11, kierunek
 - Następny wartościowy test to lokalny, read-only odczyt GAM na autoryzowanej sesji PL1, z korelacją MID, KID, TA i ID gracza, a następnie niezależny raport NPC BLS/BLM. Publiczny /server/movements nie będzie ponawiany.
 
 Zakres zmian dokumentacyjnych: wyłącznie README modułu Barony i ten dziennik badawczy. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, barony.html, mapa-rb.html i danych współrzędnych.
+
+
+## 43. Ponowna kontrola IT1, PL1 i wdrożenia — 2026-11-06 07:03–07:53 UTC
+
+### Świeży import mapy IT1
+
+Workflow importu 42181140876 zakończył się sukcesem:
+- rzeczywisty odczyt GGE Tracker IT1: 1/1 strona;
+- captured_at=2026-11-06T07:29:05.608532Z;
+- 2021 rekordów: Piaski 671, Lód 779, Ogień 571;
+- 2021 unikalnych identyfikatorów i 2021 unikalnych współrzędnych;
+- dokładnie siedem pól: id, kid, kingdom, source_server, type, x, y;
+- 0 pól gracza, ataku, cooldownu i gotowości;
+- plan skanowania: 2021 cele, 199 sektorów 100×100, 1 990 000 potencjalnych pól.
+
+Commit snapshotu: 35e23ca6ac20b6fd8f7a05600c12e9d3ad984249. Importer nie potwierdza samodzielnie obecności każdej lokacji na żywej mapie PL1; coordinate_alignment nadal oznacza zgodność siatki potwierdzoną przez operatora.
+
+### Najnowszy dostępny probe produkcyjnego PL1
+
+Workflow 42178291921 zakończył się sukcesem jako przebieg diagnostyczny. Potwierdzone wyniki:
+- TCP handshake do e4k-live-pl1-game.goodgamestudios.com:443: tcp_connected po 5200 ms; payload_sent=false. To nie jest logowanie ani potwierdzenie odpowiedzi komendy gry.
+- Katalog GGE Tracker: E4K_PL1 enabled=true, fortress=false; E4K_PL1_BETA fortress=true.
+- /dungeons dla produkcyjnego E4K_PL1 zwraca HTTP 400 Invalid server; Beta zwraca HTTP 200 i 976 rekordów; IT1 zwraca HTTP 200 i 2021 rekordów.
+- 976/976 współrzędnych Beta pokrywa się z IT1, ale nie przenosi to historii Beta na produkcyjny PL1.
+- Pięć historii graczy Beta zwróciło 6075 rekordów dopasowanych do dungeonów — wyłącznie dane Beta.
+- Trzy próbki historii graczy produkcyjnego PL1: Player not found / Invalid player ID; 0 rekordów.
+- Publiczny most w chwili probe zwrócił target_connected=false; GAM/GAA zostały pominięte. Nie uzyskano ruchów ani raportów z PL1.
+
+### Publikacja i mobilność
+
+Pages run 42183722274 dla commitu 5511a5e472e8cb2320f5f0e3032103365e7aaab8 zakończył build, report-build-status i deploy sukcesem; log deploy potwierdza Reported success! oraz URL https://marwlo-ops.github.io/Empirenew/. Snapshot IT1 z 35e23ca jest przodkiem wdrożonego commitu.
+
+W probe run 42178291921 test mobilny zaliczył viewport, cele dotykowe 44 px, focus states i etykiety źródła/historii lokalnej. To test statyczny CI, nie test na fizycznym telefonie.
+
+### Korekta routingu i zabezpieczenie własnego mostu
+
+Audyt e4k-data wskazuje produkcyjną strefę EmpirefourkingdomsExGG_3 (host e4k-live-pl1-game.goodgamestudios.com, instancja 3, zoneId 259). Skrypt diagnostyczny miał jeszcze stary domyślny alias EmpirefourkingdomsExGG2_3; w gałęzi poprawiamy domyślną strefę i dodajemy wysyłanie E4K_API_TOKEN jako Bearer bez umieszczania go w URL/logach.
+
+Otwarty wcześniej PR #5 był rozbieżny z main (225 commitów za main, mergeable=false). Przygotowano nową gałąź opartą bezpośrednio na aktualnym main i przeniesiono do niej pakiet mostu z następującymi zabezpieczeniami:
+- middleware Bearer z minimum 32 bajtów, timingSafeEqual, fail-closed i ochroną /status oraz tras danych;
+- sześć testów middleware;
+- testy tokenu skanera i poprawnej strefy PL1;
+- automatyczny test zastosowania patcha do przypiętego upstream dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d oraz kontrolę składni;
+- oddzielenie testów bezpieczeństwa PR od live probe, aby pull request nie odpytywał publicznego mostu ani nie wymagał sekretów.
+
+To nadal propozycja do review — nie utworzono forka upstream ani usługi Render i nie wykonano testu GAA/FNM przez nowy most. Nie ustawiono sekretów i niczego nie wdrożono.
+
+### Historia ataków
+
+Pochodzenie last_attack z GGE Tracker pozostaje nierozstrzygnięte; nie jest używane jako dokładny czas ataku. BLS/BLM PS może wspierać oszacowanie wieku bitwy po korelacji MID/LID i celu, ale nie potwierdza czasu wysłania armii. W tej iteracji nie dodano żadnych zdarzeń ataku PL1; attack_time_utc pozostaje null.
+
+Następny krok: po przeglądzie i testach PR wdrożyć zabezpieczony most w kontrolowanym środowisku, potwierdzić /status, gaa i fnm z tokenem oraz TCP/reconnect; dopiero potem wykonać autoryzowany, read-only test konta demo i korelację GAM z raportem NPC BLS/BLM.

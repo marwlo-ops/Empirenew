@@ -2,7 +2,8 @@ import os
 import unittest
 from unittest.mock import patch
 
-from scripts.scan_npc_map import (DEFAULT_SERVER, ProbeError, extract_explicit_npcs,\n                                  request_command, summarize_content)
+from scripts.scan_npc_map import (DEFAULT_SERVER, ProbeError, extract_explicit_npcs,
+                                  request_command, summarize_content)
 
 
 TOKEN = "0123456789abcdef0123456789abcdef"

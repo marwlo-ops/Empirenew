@@ -90,6 +90,7 @@ async function main() {
 
   const compatibility=await prepareE4kData();
   const {E4KClient}=require('ggejs');
+  const ggejsRoot = path.dirname(require.resolve('ggejs'));
   const {network}=require('e4k-data');
   const instance=network?.instances?.find(x=>x.zone===a.zone);
   if (!instance) throw new Error(`Zone ${a.zone} is absent from pinned e4k-data network list.`);

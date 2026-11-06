@@ -1420,3 +1420,49 @@ To niezależnie wspiera obecne filtry w ekstraktorze GAM: typ ruchu 11, kierunek
 - Następny wartościowy test to lokalny, read-only odczyt GAM na autoryzowanej sesji PL1, z korelacją MID, KID, TA i ID gracza, a następnie niezależny raport NPC BLS/BLM. Publiczny /server/movements nie będzie ponawiany.
 
 Zakres zmian dokumentacyjnych: wyłącznie README modułu Barony i ten dziennik badawczy. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, barony.html, mapa-rb.html i danych współrzędnych.
+
+
+## 43. Audyt semantyki BLS.PS/BLM.PS — 2026-11-06 08:48 UTC
+
+### Wynik inspekcji przypiętego ggejs
+
+Sprawdzono bezpośrednio kod źródłowy ggejs z rewizji `a4980b01404ab01c9b826a267f331ae8c953d237`:
+
+- `src/commands/bls.js`: `parseBLS()` odczytuje `LID`, `MID`, mapobject, uczestników i wynik, ale nie odczytuje ani nie interpretuje `params.PS`.
+- `src/commands/blm.js`: `parseBLM()` odczytuje `LID`, `MID` i dane dowódców; `params.PS` nie jest interpretowane.
+- `src/commands/bld.js`: parser szczegółów zwraca fale, jednostki i narzędzia; nie dostarcza pola czasu bitwy.
+- `src/structures/messages/BasicBattleLogMessage.js`: pobranie raportu wykonuje kolejno BLS, BLM i BLD, ale nie przelicza PS na czas.
+- `src/structures/messages/BasicMessage.js`: `deliveryTime = new Date(Date.now() - data[5] * 1000)`; jest to lokalna estymacja wieku wiadomości, nie absolutny serwerowy timestamp.
+
+Źródła:
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/bls.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/blm.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/bld.js
+- https://github.com/476f6f6467616d6553747564696d655374756469/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/messages/BasicMessage.js
+
+### Korekta klasyfikacji czasu
+
+Wcześniejszy własny parser Barony zakładał, że `BLS.PS` i `BLM.PS` oznaczają sekundy od bitwy. Nie znaleziono takiej definicji w przypiętym kodzie klienta ani w innym zweryfikowanym źródle. Sama nazwa pola i testy syntetyczne nie są dowodem semantyki.
+
+Wprowadzana korekta:
+- wartości numeryczne PS mogą być zachowane wyłącznie jako `ps_value_unverified`;
+- nie obliczamy `battle_time_estimate_utc` z PS;
+- nie wykonujemy cross-checku BLS/BLM jako walidacji czasu, dopóki znaczenie pola nie zostanie niezależnie potwierdzone;
+- pełny raport NPC nadal może potwierdzić KID/X/Y, ID atakującego, obrońcę NPC i wynik bitwy w zakresie skrzynki zalogowanego konta;
+- `report_delivery_time_estimate_utc` pozostaje tylko estymacją wieku wiadomości;
+- `battle_time_estimate_utc` oraz `attack_time_utc` pozostają `null`.
+
+### Potencjalna droga ręcznej walidacji protokołu
+
+Karta rozszerzenia GGE WebSocket Studio opisuje lokalne przechwytywanie ramek gry, dekodowanie komend `%xt%` i Explain mode dla wybranych pól. To może pomóc porównać rzeczywisty BLS/BLM z raportem na koncie testowym, ale opis sklepu nie dokumentuje PS i nie stanowi dowodu jego semantyki. Ewentualny test powinien być pasywnym odczytem ramek z normalnej sesji, bez wysyłania ręcznie konstruowanych komend:
+https://chromewebstore.google.com/detail/gge-websocket-studio/deaaangkjfdcpegbebpdhkiknaniomeg
+
+### Stan danych produkcyjnych
+
+- W tym audycie nie logowano się do PL1 i nie pobierano danych gry.
+- Nie uzyskano nowego ruchu GAM ani raportu z produkcyjnego PL1.
+- Nie zapisano żadnego ataku PL1.
+- Nie wykorzystano cooldownu IT1/Beta.
+- Następny krok: uzyskać autoryzowany raport NPC z PL1 na koncie testowym, porównać BLS/BLM PS z niezależnym czasem referencyjnym z widocznego raportu/zdarzenia i dopiero wtedy ewentualnie przywrócić estymację z udokumentowaną niepewnością.
+
+Zakres planowanej zmiany: wyłącznie `scripts/barony-live/probe-core.mjs`, testy rdzenia Barony, README Barony, workflow Barony i ten dziennik. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, `barony.html`, `mapa-rb.html` ani katalogu współrzędnych.

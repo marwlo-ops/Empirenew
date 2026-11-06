@@ -290,9 +290,8 @@ export function stateKey(target) {
 
 
 /**
- * Extract direct, account-mailbox evidence for an NPC boss-dungeon battle.
- * The report confirms target + attacker, but its delivery timestamp is not
- * the attack start time and mailbox coverage is limited to the logged-in account.
+ * Identify an NPC boss-dungeon battle report from mailbox metadata.
+ * ggejs may leave subType at 0 while encoding the real subtype in metadata.
  */
 export function isNpcBattleReportMessage(message) {
   if (Number(message?.messageType) !== 6 || Number(message?.areaType) !== 11) return false;
@@ -306,7 +305,6 @@ export function isNpcBattleReportMessage(message) {
 
 /**
  * Select the newest account-mailbox NPC boss-dungeon reports.
- * ggejs may leave subType at 0 while encoding the real subtype in metadata.
  * Invalid/missing delivery timestamps sort last and remain explicitly estimates.
  */
 export function selectLatestNpcBattleReportMessages(messages, limit = 25) {
@@ -330,6 +328,13 @@ export function selectLatestNpcBattleReportMessages(messages, limit = 25) {
     .map(({ message }) => message);
 }
 
+
+/**
+ * Extract direct, account-mailbox evidence for an NPC boss-dungeon battle.
+ * The report confirms target + attacker. Delivery age is approximate; BLS/BLM PS
+ * is retained only as an unverified numeric field because pinned ggejs does not
+ * document its meaning. No battle or attack timestamp is inferred from PS.
+ */
 export function extractNpcBattleReportEvidence(
   message,
   battleLog,
@@ -356,103 +361,65 @@ export function extractNpcBattleReportEvidence(
   const defenderId = Number(battleLog?.defender?.playerId);
   if (!Number.isSafeInteger(attackerId) || attackerId <= 0 || defenderId !== expectedOwner) return null;
 
-  const messageId = Number(message.messageId);
-  const battleLogId = Number(battleLog.battleLogId);
+  const rawMessageId = Number(message.messageId);
+  const rawBattleLogId = Number(battleLog.battleLogId);
+  const messageId = Number.isSafeInteger(rawMessageId) && rawMessageId > 0 ? rawMessageId : null;
+  const battleLogId = Number.isSafeInteger(rawBattleLogId) && rawBattleLogId > 0 ? rawBattleLogId : null;
+
   const expectedTarget = { area_type: 11, kid, x, y };
   const targetFields = ['area_type', 'kid', 'x', 'y'];
-  const targetMatches = (candidate) => {
+  const hasCompleteMatchingTarget = (candidate) => {
     const target = candidate?.target;
-    if (!target) return true;
-    return targetFields.every((key) =>
-      target[key] === null || target[key] === undefined || Number(target[key]) === expectedTarget[key]
+    return Boolean(target) && targetFields.every((key) =>
+      target[key] !== null && target[key] !== undefined && Number(target[key]) === expectedTarget[key]
     );
   };
-  const validateTimeCandidate = (candidate, command, source) => {
-    const candidateMessageId = Number(candidate?.message_id);
-    const candidateBattleLogId = Number(candidate?.battle_log_id);
-    const rawSecondsSinceBattle = candidate?.seconds_since_battle;
-    // Candidates come from the validated wire parsers; do not coerce booleans or arrays here.
-    const secondsSinceBattle = typeof rawSecondsSinceBattle === 'number' ? rawSecondsSinceBattle : NaN;
-    const receivedAt = toIsoDate(candidate?.received_at_utc);
-    const battleTime = toIsoDate(candidate?.battle_time_estimate_utc);
-    if (
-      candidate?.command !== command ||
-      candidate?.ok !== true ||
-      candidate?.source !== source ||
-      !Number.isSafeInteger(messageId) || messageId <= 0 ||
-      candidateMessageId !== messageId ||
-      !Number.isSafeInteger(battleLogId) || battleLogId <= 0 ||
-      candidateBattleLogId !== battleLogId ||
-      !Number.isFinite(secondsSinceBattle) || secondsSinceBattle <= 0 ||
-      !receivedAt || !battleTime ||
-      toIsoDate(Date.parse(receivedAt) - secondsSinceBattle * 1000) !== battleTime ||
-      !targetMatches(candidate)
-    ) return null;
-    if (
-      command === 'blm' &&
-      !['active_mailbox_report_fetch', 'BLM.MID'].includes(candidate?.message_id_source)
-    ) return null;
-    return {
-      ...candidate,
-      seconds_since_battle: secondsSinceBattle,
-      received_at_utc: receivedAt,
-      battle_time_estimate_utc: battleTime,
-    };
+  const hasTargetConflict = (candidate) => {
+    const target = candidate?.target;
+    if (!target) return false;
+    return targetFields.some((key) =>
+      target[key] !== null && target[key] !== undefined && Number(target[key]) !== expectedTarget[key]
+    );
   };
+  const matchesReport = (candidate, command) =>
+    messageId !== null &&
+    battleLogId !== null &&
+    candidate?.command === command &&
+    candidate?.ok === true &&
+    Number(candidate?.message_id) === messageId &&
+    Number(candidate?.battle_log_id) === battleLogId &&
+    candidate?.ps_semantics_status === 'unverified_pinned_ggejs_does_not_define_field';
 
-  const shortIdsMatch = Number(shortLogTimeEvidence?.message_id) === messageId &&
-    Number(shortLogTimeEvidence?.battle_log_id) === battleLogId;
-  const shortTarget = shortLogTimeEvidence?.target;
-  const shortHasTarget = shortTarget && targetFields.some((key) =>
-    shortTarget[key] !== null && shortTarget[key] !== undefined
-  );
-  const shortTargetConflict = shortIdsMatch && shortHasTarget && !targetMatches(shortLogTimeEvidence);
-  const blsCandidate = validateTimeCandidate(shortLogTimeEvidence, 'bls', 'BLS.PS');
-  const blmCandidate = validateTimeCandidate(middleLogTimeEvidence, 'blm', 'BLM.PS');
-
-  let selectedTime = null;
-  let secondaryTime = null;
-  let battleTimeSource = null;
-  let crosscheckDeltaSeconds = null;
-  let battleTimeRejectionReason = null;
-  if (shortTargetConflict) {
-    battleTimeRejectionReason = 'BLS.AI target disagreed with the full battle-log target; timestamp withheld.';
-  } else if (blsCandidate && blmCandidate) {
-    crosscheckDeltaSeconds = Math.abs(
-      Date.parse(blsCandidate.battle_time_estimate_utc) -
-      Date.parse(blmCandidate.battle_time_estimate_utc)
-    ) / 1000;
-    if (crosscheckDeltaSeconds <= 15) {
-      selectedTime = blsCandidate;
-      secondaryTime = blmCandidate;
-      battleTimeSource = 'BLS.PS+BLM.PS_cross_checked';
-    } else {
-      battleTimeRejectionReason = 'BLS.PS and BLM.PS estimates differed by more than 15 seconds; timestamp withheld.';
-    }
-  } else if (blsCandidate) {
-    selectedTime = blsCandidate;
-    battleTimeSource = 'BLS.PS_seconds_since_battle';
-  } else if (blmCandidate && !shortTargetConflict) {
-    selectedTime = blmCandidate;
-    battleTimeSource = 'BLM.PS_seconds_since_battle';
-  }
-
-  const hasBattleTimeEstimate = Boolean(selectedTime);
+  const shortIdsMatch = matchesReport(shortLogTimeEvidence, 'bls');
+  const shortTargetConflict = shortIdsMatch && hasTargetConflict(shortLogTimeEvidence);
+  const acceptedBls = shortIdsMatch && !shortTargetConflict && hasCompleteMatchingTarget(shortLogTimeEvidence)
+    ? shortLogTimeEvidence
+    : null;
+  const acceptedBlm = matchesReport(middleLogTimeEvidence, 'blm')
+    ? middleLogTimeEvidence
+    : null;
+  const safePs = (candidate) => Number.isFinite(candidate?.ps_value_unverified)
+    ? candidate.ps_value_unverified
+    : null;
+  const blsPs = safePs(acceptedBls);
+  const blmPs = safePs(acceptedBlm);
+  const hasUnverifiedPs = blsPs !== null || blmPs !== null;
   const reportDeliveryTime = toIsoDate(message.deliveryTime);
-  let timeSemantics = 'BasicMessage.deliveryTime is estimated from mailbox message age against the local clock; it is not an exact server receipt time or attack start time. No BLS.PS or BLM.PS value passed correlation and consistency checks.';
-  if (hasBattleTimeEstimate && secondaryTime) {
-    timeSemantics = 'BLS.PS and BLM.PS both report seconds since battle and were correlated to this mailbox MID, battle-log LID and full type-11 target. Their local-receipt-based estimates agree within 15 seconds. This estimates battle occurrence, not attack launch; network transit and local/server clock skew remain.';
-  } else if (hasBattleTimeEstimate && selectedTime.command === 'bls') {
-    timeSemantics = 'BLS.PS is the server-reported seconds since battle. Subtracting it from the local BLS response-receipt time estimates when the battle occurred; this is not the attack launch time, and uncertainty includes network transit and local/server clock skew.';
-  } else if (hasBattleTimeEstimate && selectedTime.command === 'blm') {
-    timeSemantics = 'BLM.PS is the server-reported seconds since battle. Its LID matches the full battle log and its MID is bound to the active getBattleLog() mailbox request (or present in the BLM payload); the full type-11 target and participants were independently validated. This is a battle-occurrence estimate, not attack launch time.';
+
+  let battleTimeRejectionReason;
+  if (shortTargetConflict) {
+    battleTimeRejectionReason = 'BLS.AI target disagreed with the full battle-log target; BLS.PS withheld and no time inferred.';
+  } else if (hasUnverifiedPs) {
+    battleTimeRejectionReason = 'BLS.PS/BLM.PS are numeric fields, but the pinned ggejs source does not define their semantics; no battle time inferred.';
+  } else {
+    battleTimeRejectionReason = 'No source-validated battle timestamp is available in the pinned ggejs report parsers.';
   }
 
   return {
     evidence_kind: 'mailbox_npc_battle_report',
     classification: 'confirmed_battle_report_target_and_attacker',
-    message_id: Number.isSafeInteger(messageId) ? messageId : null,
-    battle_log_id: Number.isSafeInteger(battleLogId) ? battleLogId : null,
+    message_id: messageId,
+    battle_log_id: battleLogId,
     target: {
       kid,
       kingdom: KINGDOM_NAME_BY_KID[kid],
@@ -469,17 +436,22 @@ export function extractNpcBattleReportEvidence(
       ? (message.hasAttackerWon ? 'attacker_won' : 'attacker_lost')
       : null,
     report_delivery_time_estimate_utc: reportDeliveryTime,
-    battle_time_estimate_utc: hasBattleTimeEstimate ? selectedTime.battle_time_estimate_utc : null,
-    battle_time_seconds_since_battle: hasBattleTimeEstimate ? selectedTime.seconds_since_battle : null,
-    battle_time_secondary_seconds_since_battle: secondaryTime ? secondaryTime.seconds_since_battle : null,
-    battle_time_observed_at_utc: hasBattleTimeEstimate ? selectedTime.received_at_utc : null,
-    battle_time_source: hasBattleTimeEstimate ? battleTimeSource : null,
-    battle_time_crosscheck_delta_seconds: crosscheckDeltaSeconds === null ? null : Number(crosscheckDeltaSeconds.toFixed(3)),
+    battle_log_ps_values_unverified: {
+      bls: acceptedBls ? { value: blsPs, observed_at_utc: toIsoDate(acceptedBls.received_at_utc) } : null,
+      blm: acceptedBlm ? { value: blmPs, observed_at_utc: toIsoDate(acceptedBlm.received_at_utc) } : null,
+      semantics_status: 'unverified_pinned_ggejs_does_not_define_field',
+    },
+    battle_time_estimate_utc: null,
+    battle_time_seconds_since_battle: null,
+    battle_time_secondary_seconds_since_battle: null,
+    battle_time_observed_at_utc: null,
+    battle_time_source: null,
+    battle_time_crosscheck_delta_seconds: null,
     battle_time_rejection_reason: battleTimeRejectionReason,
     message_is_forwarded: Boolean(message.isForwarded),
     report_delivery_kind: message.isForwarded ? 'forwarded_to_this_account' : 'original_mailbox_entry',
     attack_time_utc: null,
-    time_semantics: timeSemantics,
+    time_semantics: 'BasicMessage.deliveryTime is estimated from mailbox message age against the local clock; it is not an exact server receipt time or attack start time. The pinned ggejs BLS/BLM parsers do not document PS semantics, so numeric PS values are diagnostic metadata only and no battle time is inferred.',
     source_fields: [
       'message.messageType=6',
       'message.areaType=11',
@@ -490,18 +462,12 @@ export function extractNpcBattleReportEvidence(
       'battleLog.attacker.playerId',
       'battleLog.attacker.ownerInfo.playerName',
       'battleLog.defender.playerId',
-      ...(hasBattleTimeEstimate
-        ? [
-            selectedTime.command.toUpperCase() + '.PS (seconds_since_battle)',
-            selectedTime.command === 'bls' ? 'BLS.MID' :
-              (selectedTime.message_id_source === 'BLM.MID' ? 'BLM.MID/LID' : 'BLM.LID + active mailbox report MID'),
-            ...(selectedTime.command === 'bls' ? ['BLS.LID', 'BLS.AI target coordinates'] : []),
-            ...(secondaryTime ? ['BLM.PS cross-check', 'BLS.PS/BLM.PS estimate agreement <= 15 seconds'] : []),
-          ]
-        : []),
+      ...(acceptedBls ? ['BLS.MID/LID and complete BLS.AI target match; BLS.PS numeric value (semantics unverified)'] : []),
+      ...(acceptedBlm ? ['BLM.LID + active mailbox report MID; BLM.PS numeric value (semantics unverified)'] : []),
     ],
   };
 }
+
 
 /**
  * Extract a live outbound NPC attack movement whose exact target is a
@@ -702,10 +668,9 @@ export function parseGgejsCommandResponseEnvelope(message) {
 }
 
 /**
- * Read only timestamp-related fields from a successful BLS response.
- * BLS.PS is a server-reported age in seconds since the battle. The resulting
- * UTC value is an estimate based on the local response-receipt clock, not the
- * exact attack launch time. The raw payload is never returned or persisted.
+ * Read BLS report correlation metadata without assigning undocumented meaning to PS.
+ * In the pinned ggejs source, parseBLS() does not interpret params.PS.
+ * Keep a numeric PS value only as unverified diagnostic metadata; never derive time from it.
  */
 export function parseGgejsBattleLogShortResponse(message, receivedAt = new Date().toISOString()) {
   const envelope = parseGgejsCommandResponseEnvelope(message);
@@ -727,24 +692,20 @@ export function parseGgejsBattleLogShortResponse(message, receivedAt = new Date(
 
   const messageId = Number(payload.MID);
   const battleLogId = Number(payload.LID);
-  const rawSeconds = payload.PS;
-  const secondsWireValueIsNumeric = typeof rawSeconds === 'number' ||
-    (typeof rawSeconds === 'string' && rawSeconds.trim() !== '');
   if (
     !Number.isSafeInteger(messageId) || messageId <= 0 ||
-    !Number.isSafeInteger(battleLogId) || battleLogId <= 0 ||
-    !secondsWireValueIsNumeric
+    !Number.isSafeInteger(battleLogId) || battleLogId <= 0
   ) return null;
 
-  const secondsSinceBattle = typeof rawSeconds === 'number' ? rawSeconds : Number(rawSeconds);
+  const rawPs = payload.PS;
+  const psWireValueIsNumeric = typeof rawPs === 'number' ||
+    (typeof rawPs === 'string' && rawPs.trim() !== '');
+  const psValue = psWireValueIsNumeric ? Number(rawPs) : null;
+  const safePsValue = Number.isFinite(psValue) && Math.abs(psValue) <= Number.MAX_SAFE_INTEGER
+    ? psValue
+    : null;
   const receivedAtIso = toIsoDate(receivedAt);
-  if (
-    !Number.isFinite(secondsSinceBattle) || secondsSinceBattle <= 0 ||
-    secondsSinceBattle > Number.MAX_SAFE_INTEGER || !receivedAtIso
-  ) return null;
-
-  const battleTimeEstimate = toIsoDate(Date.parse(receivedAtIso) - secondsSinceBattle * 1000);
-  if (!battleTimeEstimate) return null;
+  if (!receivedAtIso) return null;
 
   const area = payload.AI && typeof payload.AI === 'object' && !Array.isArray(payload.AI)
     ? payload.AI
@@ -771,19 +732,19 @@ export function parseGgejsBattleLogShortResponse(message, receivedAt = new Date(
     source: 'BLS.PS',
     message_id: messageId,
     battle_log_id: battleLogId,
-    seconds_since_battle: secondsSinceBattle,
+    ps_value_unverified: safePsValue,
+    ps_wire_type: rawPs === null || rawPs === undefined ? null : typeof rawPs,
+    ps_semantics_status: 'unverified_pinned_ggejs_does_not_define_field',
     received_at_utc: receivedAtIso,
-    battle_time_estimate_utc: battleTimeEstimate,
     target,
-    time_basis: 'local_BLS_response_receipt_minus_server_reported_seconds_since_battle',
   };
 }
 
 
 /**
- * Read the BLM.PS battle-age field. The BLM response is keyed by LID; when
- * the wire payload omits MID, the caller binds it to the mailbox message whose
- * getBattleLog() call is currently awaiting this BLM response.
+ * Read BLM report correlation metadata without interpreting the undocumented PS field.
+ * The BLM response is keyed by LID; if MID is absent, bind it to the mailbox message
+ * whose getBattleLog() call is currently awaiting this BLM response.
  */
 export function parseGgejsBattleLogMiddleTimeResponse(message, receivedAt = new Date().toISOString(), reportMessageId = null) {
   const envelope = parseGgejsCommandResponseEnvelope(message);
@@ -807,26 +768,22 @@ export function parseGgejsBattleLogMiddleTimeResponse(message, receivedAt = new 
   const contextMessageId = Number(reportMessageId);
   const wireMessageId = payload.MID === null || payload.MID === undefined ? null : Number(payload.MID);
   const messageId = wireMessageId ?? contextMessageId;
-  const rawSeconds = payload.PS;
-  const secondsWireValueIsNumeric = typeof rawSeconds === 'number' ||
-    (typeof rawSeconds === 'string' && rawSeconds.trim() !== '');
   if (
     !Number.isSafeInteger(battleLogId) || battleLogId <= 0 ||
     !Number.isSafeInteger(messageId) || messageId <= 0 ||
     (wireMessageId !== null && (!Number.isSafeInteger(wireMessageId) || wireMessageId <= 0)) ||
-    (wireMessageId !== null && Number.isSafeInteger(contextMessageId) && contextMessageId > 0 && wireMessageId !== contextMessageId) ||
-    !secondsWireValueIsNumeric
+    (wireMessageId !== null && Number.isSafeInteger(contextMessageId) && contextMessageId > 0 && wireMessageId !== contextMessageId)
   ) return null;
 
-  const secondsSinceBattle = typeof rawSeconds === 'number' ? rawSeconds : Number(rawSeconds);
+  const rawPs = payload.PS;
+  const psWireValueIsNumeric = typeof rawPs === 'number' ||
+    (typeof rawPs === 'string' && rawPs.trim() !== '');
+  const psValue = psWireValueIsNumeric ? Number(rawPs) : null;
+  const safePsValue = Number.isFinite(psValue) && Math.abs(psValue) <= Number.MAX_SAFE_INTEGER
+    ? psValue
+    : null;
   const receivedAtIso = toIsoDate(receivedAt);
-  if (
-    !Number.isFinite(secondsSinceBattle) || secondsSinceBattle <= 0 ||
-    secondsSinceBattle > Number.MAX_SAFE_INTEGER || !receivedAtIso
-  ) return null;
-
-  const battleTimeEstimate = toIsoDate(Date.parse(receivedAtIso) - secondsSinceBattle * 1000);
-  if (!battleTimeEstimate) return null;
+  if (!receivedAtIso) return null;
 
   return {
     command: 'blm',
@@ -836,11 +793,11 @@ export function parseGgejsBattleLogMiddleTimeResponse(message, receivedAt = new 
     message_id: messageId,
     message_id_source: wireMessageId === null ? 'active_mailbox_report_fetch' : 'BLM.MID',
     battle_log_id: battleLogId,
-    seconds_since_battle: secondsSinceBattle,
+    ps_value_unverified: safePsValue,
+    ps_wire_type: rawPs === null || rawPs === undefined ? null : typeof rawPs,
+    ps_semantics_status: 'unverified_pinned_ggejs_does_not_define_field',
     received_at_utc: receivedAtIso,
-    battle_time_estimate_utc: battleTimeEstimate,
     target: null,
-    time_basis: 'local_BLM_response_receipt_minus_server_reported_seconds_since_battle',
   };
 }
 

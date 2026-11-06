@@ -53,8 +53,11 @@ class ImportIt1FortressesTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             IMPORTER.pagination_info(boolean_page)
 
-    def test_accepts_legacy_payload_without_pagination_metadata(self):
-        self.assertIsNone(IMPORTER.pagination_info({"dungeons": []}))
+    def test_rejects_payload_without_pagination_metadata(self):
+        with self.assertRaisesRegex(RuntimeError, "Missing GGE Tracker pagination metadata"):
+            IMPORTER.pagination_info({"dungeons": []})
+        with self.assertRaisesRegex(RuntimeError, "Missing GGE Tracker pagination metadata"):
+            IMPORTER.pagination_info([{"kid": 1, "position_x": 10, "position_y": 20}])
 
     def test_normalizes_known_kingdom_to_public_map_only_schema(self):
         point = IMPORTER.normalize({

@@ -59,6 +59,25 @@ jobs:
           if (plan.sector_count < 1 || plan.estimated_map_tiles !== plan.sector_count * 10000) throw new Error('Invalid 100x100 sector plan.');
           console.log(JSON.stringify({targets: plan.target_count, sectors: plan.sector_count, estimated_map_tiles: plan.estimated_map_tiles}));
           NODE
+      - name: Probe public GGE Tracker production PL1 fallback (read-only)
+        run: |
+          node scripts/barony-live/gge-tracker-fallback.mjs > "$RUNNER_TEMP/gge-tracker-fallback.json"
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const report = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/gge-tracker-fallback.json', 'utf8'));
+          if (report.server !== 'E4K_PL1' || report.persisted !== false) throw new Error('Fallback must remain production-only and non-persistent.');
+          if (!Array.isArray(report.observations) || report.observations.length !== report.summary.catalog_targets) throw new Error('Fallback observation count does not match the coordinate catalog.');
+          if (report.observations.some(item => item.attack_time_utc !== null)) throw new Error('Fallback must never infer a confirmed attack time.');
+          console.log(JSON.stringify({
+            server: report.server,
+            result_status: report.result_status,
+            meta_status: report.meta.status,
+            kingdom_statuses: Object.fromEntries(Object.entries(report.kingdom_results).map(([key, value]) => [key, value.status])),
+            summary: report.summary,
+            persisted: report.persisted,
+            attack_time_inferred: false
+          }));
+          NODE
       - name: Verify pinned E4K client and PL1 server metadata
         run: |
           npm install --prefix scripts/barony-live --ignore-scripts --no-audit --no-fund

@@ -919,3 +919,63 @@ Publiczny katalog GGE Tracker nadal oznacza `E4K_PL1` jako `fortress=false` i be
 ### Zakres
 
 Zmiany kodu dotyczyły tylko workflow importu katalogu Barony i jego testu. Automatyczny commit `02dc5fa` zmienił tylko `data/baron-fortresses.json`. Nie zmieniono `barony.html), Mapa, Szpiegowania ani Dodatkowe. Katalog IT1 nadal dostarcza wyłącznie współrzędne; cooldown i historia IT1/Beta nie są przenoszone do PL1.
+
+
+## 32. Weryfikacja pełnych logów importu, probe i deploymentu — 2026-11-06
+
+### Aktualny stan gałęzi
+
+Najnowszy sprawdzony commit przed tą notatką: `cf6b45357a6a319a30eaa1cba16f15aebf1ba844` (2026-11-06 03:50:25 UTC), tytuł: `fix(barony): correct pre-request evidence output formatting`.
+
+Zmienił wyłącznie:
+- `scripts/barony-live/probe-core.mjs`: usunięto nieużywaną zmienną `allBatches`;
+- `scripts/barony-live/probe.mjs`: rozdzielono deklaracje i przypisania, które wcześniej zawierały przypadkowy dosłowny zapis `\\n` w kodzie.
+
+To poprawka formatu/składni probe, nie zmiana semantyki historii ataków. Nie mam jeszcze potwierdzonego wyniku nowego Actions uruchomionego po commicie `cf6b453`. Workflow `.github/workflows/baron-pl1-probe.yml` ma kontrolę `node --check scripts/barony-live/probe.mjs` oraz testy Node; jego filtr push obejmuje `scripts/barony-live/**` i ten dziennik. Nie przypisuję poprawce statusu PASS przed odczytem nowego runu.
+
+### Import IT1 — pełny log runu 42153152595
+
+Job `127680952186`, `import-map`: SUCCESS.
+
+Log potwierdza:
+- testy Python: 27/27 PASS;
+- rzeczywiste pobranie z GGE Tracker: `Imported 2021 map-only IT1 records across 1 page(s)`;
+- walidacja katalogu: `PASS (2021 unique coordinates; no attack, cooldown, player or readiness fields)`;
+- plan: 2021 celów, 199 sektorów, 1 990 000 szacowanych pól;
+- commit danych: `02dc5fa21a8e33e3fb0bbd9bd50e8a33efcb8d0e`, push na `main` bez konfliktu.
+
+Snapshot w aktualnym pliku: `2026-11-06T02:53:37.896885+00:00`; Piaski 671, Lód 779, Ogień 571. Niezależna kontrola pliku z repo: 2021 rekordów, 2021 unikalnych ID, 2021 unikalnych współrzędnych; dokładnie siedem pól rekordu: `id,kid,kingdom,x,y,type,source_server`.
+
+### Diagnostyka produkcyjnego PL1 — pełny log runu 42153152559
+
+Job `127680952276`, `probe`: SUCCESS (testy i diagnostyka publicznych endpointów; bez logowania do konta gry).
+
+Potwierdzone wyniki:
+- katalog serwerów: `E4K_PL1 enabled=true, fortress=false`; `E4K_PL1_BETA enabled=true, fortress=true`;
+- `/dungeons` dla `IT1`: HTTP 200; dla `E4K_PL1`: HTTP 400 Invalid server; dla `E4K_PL1_BETA`: HTTP 200;
+- Beta: 976 rekordów, 976/976 współrzędnych pokrywa się z IT1; to nadal odrębny serwer;
+- pięć przykładowych historii Beta: 5/5 niepustych, 7717 rekordów łącznie; wyłącznie diagnostyka Beta, bez importu do PL1;
+- trzy próbki graczy z migawki produkcyjnego PL1: 3/3 nierozpoznane (`Player not found`), historie HTTP 400 `Invalid player ID`;
+- próba sufiksu zoneId 259: 3/3 HTTP 400 `Invalid player ID`;
+- katalog produkcyjnego PL1 nie podał trzycyfrowego kodu routingu;
+- most: `target_connected=false`; komendy mapy przez most pominięto.
+
+Wynik ten nie potwierdza globalnego feedu ruchów ani historii ataków produkcyjnego PL1. Nie wykonano logowania demo; nie otrzymano nowych raportów BLS/BLM ani ruchów GAM z produkcyjnego PL1. Liczba nowych potwierdzonych zdarzeń: 0; `attack_time_utc` pozostaje null.
+
+### Test mobilny i publikacja
+
+- Run `42153152660`: job `validate` SUCCESS; krok `Test Barony mobile layout and local-history labels` SUCCESS; walidacja katalogu PASS.
+- Run `42153182617`: build SUCCESS, deploy SUCCESS, report-build-status SUCCESS.
+- Deployment dotyczy commitu katalogu `02dc5fa`; potwierdza publikację snapshotu z 02:53:37Z.
+- Nie wykonano testu na fizycznym telefonie; test mobilny jest kontrolą statycznego interfejsu.
+
+### Zakres ochrony
+
+Zmiany kodu w commicie `cf6b453` dotyczą wyłącznie `scripts/barony-live/probe-core.mjs` i `scripts/barony-live/probe.mjs`. Import zmienił wyłącznie katalog danych. Nie zmieniono `barony.html`, `mapa-rb.html`, zakładek Mapa, Szpiegowanie ani Dodatkowe.
+
+### Następny krok
+
+1. Potwierdzić wynik workflow probe po commicie `cf6b453` (w szczególności `node --check` i pełne `node --test`).
+2. Uzyskać autoryzowaną sesję konta demo na produkcyjnym E4K PL1; poświadczenia wyłącznie lokalnie przez `E4K_USERNAME` i `E4K_PASSWORD`, nigdy w czacie, repozytorium ani Actions.
+3. Wykonać pasywny odczyt kilku fortec i skrzynki raportów, a następnie porównać dane z ręcznie przeprowadzonym testem operatora.
+4. Nie tworzyć historii automatycznej, dopóki tożsamość atakującego i semantyka czasu nie zostaną potwierdzone na rzeczywistym PL1.

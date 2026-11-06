@@ -1466,3 +1466,46 @@ https://chromewebstore.google.com/detail/gge-websocket-studio/deaaangkjfdcpegbeb
 - Następny krok: uzyskać autoryzowany raport NPC z PL1 na koncie testowym, porównać BLS/BLM PS z niezależnym czasem referencyjnym z widocznego raportu/zdarzenia i dopiero wtedy ewentualnie przywrócić estymację z udokumentowaną niepewnością.
 
 Zakres planowanej zmiany: wyłącznie `scripts/barony-live/probe-core.mjs`, testy rdzenia Barony, README Barony, workflow Barony i ten dziennik. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, `barony.html`, `mapa-rb.html` ani katalogu współrzędnych.
+
+
+## 44. Wdrożenie korekty BLS/BLM PS i weryfikacja main — 2026-11-06 08:57 UTC
+
+### Zmiana i commit
+
+- PR #14 został scalony metodą squash: https://github.com/marwlo-ops/Empirenew/pull/14
+- Commit main: `02beca2274eb69958d2961558badd56a29dab0ce`.
+- Zmienione pliki: `.github/workflows/baron-pl1-probe.yml`, `research/fortece-barona-status.md`, `scripts/barony-live/README.md`, `scripts/barony-live/probe-core.mjs`, `scripts/barony-live/probe-core.test.mjs`, `scripts/barony-live/probe.mjs`.
+- Żadna zakładka Mapa, Szpiegowanie ani Dodatkowe, plik UI `barony.html` ani katalog współrzędnych nie został zmieniony.
+
+### Testy po scaleniu
+
+Workflow `Probe PL1 fortress API`, run 42191241835:
+- Python: 13/13 PASS.
+- Node: 47/47 PASS.
+- node --check dla probe/probe-core/reports/prepare-e4k-data: PASS.
+- weryfikacja przypiętego klienta i metadanych produkcyjnego PL1: PASS.
+- test mobilnego UI Barony: PASS.
+- katalog IT1 map-only: 2021 unikalne współrzędne, bez cooldown/player/attack fields: PASS.
+
+W trakcie iteracji dwa wcześniejsze przebiegi CI ujawniły regresje w zastępowanym fragmencie: brak eksportów selektora raportów oraz zbyt rygorystyczne wymaganie MID/LID do samego potwierdzenia raportu. Oba problemy poprawiono; finalny run na gałęzi i run po scaleniu zakończyły się sukcesem. Raport może potwierdzić cel i atakującego także wtedy, gdy identyfikatory MID/LID nie są dostępne, ale wtedy nie koreluje PS.
+
+### Najnowszy odczyt diagnostyczny PL1
+
+- TCP handshake do `e4k-live-pl1-game.goodgamestudios.com:443`: PASS, 204 ms, bez loginu i payloadu.
+- GGE Tracker `E4K_PL1 /dungeons`: HTTP 400; publiczny katalog nadal nie obsługuje produkcyjnego PL1.
+- `/status` publicznego mostu: HTTP 200, ale `target_connected=false`; komendy GAA/GAM pominięte.
+- Odczyty Beta/IT1 pozostały odseparowane diagnostycznie; żaden cooldown ani timestamp z tych serwerów nie został użyty dla PL1.
+- Nowych raportów NPC ani ruchów GAM z produkcyjnego PL1 nie pobrano; potwierdzone ataki PL1 w tym przebiegu: 0.
+
+### Publikacja
+
+GitHub Pages run 42191241751:
+- build: SUCCESS;
+- deploy: SUCCESS;
+- report-build-status: SUCCESS;
+- `pages_build_version=02beca2274eb69958d2961558badd56a29dab0ce`;
+- URL: https://marwlo-ops.github.io/Empirenew/.
+
+### Stan blokady
+
+PR #13 (bezpieczny pakiet własnego mostu) nadal pozostaje draft i nie jest wdrożoną usługą. Nie utworzono forka/hostingu, nie ustawiono sekretów i nie ma autoryzowanej sesji PL1. Następny test wymagający konta to lokalny read-only odczyt GAA/GAM oraz skrzynki raportów na koncie testowym PL1; dane logowania muszą pozostać lokalne.

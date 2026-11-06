@@ -26,7 +26,7 @@ Wynik wklej bezpośrednio do pola sekretu w Render i — dopiero po uruchomieniu
 - Brak albo nieprawidłowy Bearer token powoduje HTTP 401.
 - Porównanie tokenów używa crypto.timingSafeEqual; odpowiedzi błędów nie ujawniają sekretu.
 
-Upstream danadum/empire-api nie ma tej autoryzacji domyślnie. Sama zmienna środowiskowa nie zabezpiecza serwera — wymagane jest zastosowanie app.js.patch oraz skopiowanie api-auth-middleware.js i map-command-queue.js do katalogu głównego forka.
+Upstream danadum/empire-api nie ma tej autoryzacji domyślnie. Sama zmienna środowiskowa nie zabezpiecza serwera — wymagane jest uruchomienie apply-bridge-patch.mjs na przypiętym wariancie app.js oraz skopiowanie api-auth-middleware.js i map-command-queue.js do katalogu głównego forka.
 
 Używaj osobnego konta gry przeznaczonego do integracji, jeśli regulamin gry i dostępne zabezpieczenia na to pozwalają. Nie używaj hasła do głównego konta.
 

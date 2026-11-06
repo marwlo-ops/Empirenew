@@ -1377,3 +1377,46 @@ Nie edytowano zakładek Mapa, Szpiegowanie ani Dodatkowe, plików `barony.html` 
 - Pages run `42174809096`: build SUCCESS, report-build-status SUCCESS, deploy SUCCESS. Log deploy potwierdza `pages_build_version=1ec04b9d8be333587107837a30ba8608956870bd` i URL `https://marwlo-ops.github.io/Empirenew/`.
 - Zmiany scalonego PR obejmują wyłącznie `research/fortece-barona-status.md`, `scripts/barony-live/README.md`, `scripts/barony-live/probe-core.mjs` i `scripts/barony-live/probe-core.test.mjs`. Nie zmieniono Mapa, Szpiegowania, Dodatkowe, `barony.html` ani katalogu współrzędnych.
 - Ataki potwierdzone na produkcyjnym PL1 w tym przebiegu: 0. `attack_time_utc` pozostaje `null`; sygnały GAA pozostają kandydatami do czasu walidacji na autoryzowanej sesji PL1 i niezależnym raporcie NPC.
+
+
+## 42. Audyt endpointu ruchów zamków i pochodzenia timestampów — 2026-11-06 07:54 UTC
+
+### Nowe rozróżnienie endpointów GGE Tracker
+
+Sprawdzono publiczny kod gge-tracker/gge-tracker (snapshot źródłowy 7d620820a76cde4176c752f6972ce6f0c9ad7ab1):
+
+- GET /server/movements jest opisany w api-server.ts jako paginowana historia ruchów zamków graczy. Komentarz endpointu definiuje movementType: 1=add, 2=remove, 3=move. Frontend opisuje tę stronę jako relokacje, nowe posterunki i podboje.
+- To nie jest lista marszów armii z GAM i nie zawiera semantyki ataków na NPC. Endpoint został wykluczony jako źródło Barony; nie wykonano niepotrzebnego odpytywania.
+- GET /dungeons/player/{playerId} odczytuje dungeons_history.attacked_at, kid, position_x, position_y.
+- Lista GET /dungeons mapuje last_attack z dungeons.last_attack_at, a nie bezpośrednio z kolumny dungeons_history.attacked_at.
+
+### Korekta interpretacji last_attack
+
+Wcześniejszy eksperyment global_available_at - last_attack dał wartości bliskie 86 400 sekund na próbkach Beta/IT1. Po prześledzeniu kodu źródłowego nie można z tego wyprowadzić dokładnej semantyki timestampu:
+
+- collectDungeonCooldowns() przetwarza obiekt typu 11, czyta dungeon[5] jako pozostały cooldown i dungeon[6] jako ID pokonującego; global_available_at wylicza jako currentTime + remainingCooldown24h.
+- persistDungeonUpdates() wstawia do dungeons_history tylko kid, position_x, position_y, player_id; nie przekazuje jawnie attacked_at.
+- W widocznym kodzie scraper nie zapisuje również jawnie dungeons.last_attack_at. Nie znaleziono w publicznym źródle schematu bazy, defaultu kolumny ani triggera, który wyjaśniałby, jak te timestampy są uzupełniane.
+- filterByAttackCooldown=3 oznacza dungeons, których efektywny cooldown kończy się w ciągu 60 minut. Mimo tego sam wynik różnicy 24 h nie identyfikuje źródła last_attack.
+- Wniosek z wcześniejszego testu zostaje obniżony z „silnie wspiera estymację cooldownową” do „nierozstrzygnięte pochodzenie pola; nie używać jako czasu ataku”. Żaden timestamp z Beta/IT1 nie jest przenoszony do PL1.
+
+### Niezależna walidacja semantyki GAM w ggejs
+
+Kod ggejs z rewizji a4980b01404ab01c9b826a267f331ae8c953d237 potwierdza:
+
+- MovementType.NPCAttack = 11;
+- WorldMapArea.BossDungeon = 11;
+- BasicMovement mapuje D=0 jako ruch wychodzący, z graczem w sourceArea, a D=1 jako ruch powrotny, z graczem w targetArea;
+- departureTime = now - PT, arrivalTime = now + (TT - PT), więc czasy zależą od lokalnego zegara parsowania i są estymatami;
+- BossDungeonMapobject: data[5] = pozostały cooldown, data[6] = defeaterPlayerId, data[7] = KID.
+
+To niezależnie wspiera obecne filtry w ekstraktorze GAM: typ ruchu 11, kierunek 0, cel typu 11, KID i oczekiwany właściciel NPC oraz dodatni ID gracza. Testy jednostkowe już sprawdzają odrzucenie kierunku 1 i niezgodnego typu/krainy/właściciela; nie zmieniano parsera.
+
+### Stan PL1 i następny test
+
+- Ten audyt dotyczył publicznego kodu i semantyki endpointów; nie jest nowym odczytem live PL1.
+- Nadal nie ma odpowiedzi GAM z autoryzowanej sesji produkcyjnego PL1 ani raportu NPC z MID/LID.
+- Nie dodano rekordów ataków. attack_time_utc pozostaje null.
+- Następny wartościowy test to lokalny, read-only odczyt GAM na autoryzowanej sesji PL1, z korelacją MID, KID, TA i ID gracza, a następnie niezależny raport NPC BLS/BLM. Publiczny /server/movements nie będzie ponawiany.
+
+Zakres zmian dokumentacyjnych: wyłącznie README modułu Barony i ten dziennik badawczy. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, barony.html, mapa-rb.html i danych współrzędnych.

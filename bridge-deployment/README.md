@@ -15,7 +15,9 @@ Middleware wymaga tokenu o długości co najmniej 32 bajtów, porównuje go prze
 ## Zawartość
 
 - api-auth-middleware.js — moduł autoryzacji, który należy skopiować do katalogu głównego forka.
-- api-auth-middleware.test.js — sześć testów middleware.
+- api-auth-middleware.test.js — testy middleware.
+- map-command-queue.js — kolejka serializująca żądania GAA/FNM dla tego samego serwera i komendy.
+- map-command-queue.test.js — testy kolejności, równoległości różnych komend i odzyskiwania po błędzie.
 - app.js.patch — patch do pliku app.js upstream.
 - render.yaml — blueprint Render z wymaganymi sekretami.
 - ENVIRONMENT.md — konfiguracja i zasady przechowywania sekretów.
@@ -25,9 +27,9 @@ Patch jest weryfikowany w CI względem upstream danadum/empire-api przypiętego 
 ## Kolejność wdrożenia
 
 1. Wykonaj fork danadum/empire-api.
-2. Skopiuj api-auth-middleware.js do katalogu głównego forka.
+2. Skopiuj api-auth-middleware.js i map-command-queue.js do katalogu głównego forka.
 3. Zastosuj app.js.patch i sprawdź git apply --check oraz node --check app.js.
-4. Uruchom node --test api-auth-middleware.test.js.
+4. Uruchom testy obu modułów z pakietu (node --test *.test.js).
 5. W Render ustaw USERNAME, PASSWORD i EMPIRE_API_TOKEN zgodnie z ENVIRONMENT.md.
 6. Przed podłączeniem Empirenew sprawdź:
    - GET / bez tokenu — HTTP 200;

@@ -41,13 +41,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Test E4K PL1 read-only probe core
+      - name: Test E4K PL1 read-only probe core and GGE Tracker fallback
         run: |
           node --check scripts/barony-live/probe.mjs
           node --check scripts/barony-live/reports.mjs
           node --check scripts/barony-live/probe-core.mjs
           node --check scripts/barony-live/prepare-e4k-data.mjs
+          node --check scripts/barony-live/gge-tracker-fallback.mjs
           node --test scripts/barony-live/probe-core.test.mjs
+          node --test scripts/barony-live/gge-tracker-fallback.test.mjs
           node scripts/barony-live/probe.mjs --plan --all > "$RUNNER_TEMP/barony-plan.json"
           node - <<'NODE'
           const fs = require('node:fs');

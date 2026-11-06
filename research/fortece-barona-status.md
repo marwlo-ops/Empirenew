@@ -1703,3 +1703,36 @@ GitHub Pages run `42214675962` dla commitu `8fc9e3e2df40e23fd33bb370664b9a26e73c
 - Następny test: na koncie demo produkcyjnego PL1 wykonać kontrolowany atak, zebrać GAA przed/po, GAM oraz raport NPC z MID/LID i porównać z niezależnym czasem referencyjnym. Dane logowania pozostają lokalne; nie umieszczać ich w repozytorium ani CI.
 
 Zakres tej korekty: wyłącznie dokumentacja audytu. Nie zmieniono Mapa, Szpiegowania, Dodatkowe, `barony.html`, `mapa-rb.html` ani katalogu współrzędnych.
+
+
+## 49. Pełny ponowny import IT1 i publikacja snapshotu — 2026-11-06 12:11 UTC
+
+### Rzeczywisty import
+
+Ponowiono zakończony wcześniej workflow importera (run `42199429344`, attempt 2). Job pobrał ponownie pełną odpowiedź GGE Tracker IT1:
+
+- Czas snapshotu: `2026-11-06T12:09:26.402083+00:00`.
+- Wynik: 2021 rekordów map-only, 1/1 strona API.
+- Piaski: 671; Lód: 779; Ogień: 571.
+- 2021 unikalnych ID i współrzędnych; 0 duplikatów.
+- Każdy rekord ma dokładnie: `id`, `kid`, `kingdom`, `x`, `y`, `type`, `source_server`.
+- Brak pól cooldownu, gotowości, gracza, atakującego i historii.
+- Plan skanowania: 199 sektorów 100×100, 1 990 000 potencjalnych pól.
+
+Porównanie pełnych współrzędnych z snapshotem 10:01:36 UTC: 0 dodanych i 0 usuniętych lokalizacji; katalog pozostaje stabilny. Zmienił się czas pobrania, nie zestaw współrzędnych.
+
+### Testy i publikacja
+
+- Importer: `python -m py_compile` PASS.
+- Testy importera: 28/28 PASS.
+- Kontrola jednego właściciela harmonogramu importu: PASS.
+- Walidator katalogu: PASS.
+- Walidacja planu Barony: PASS.
+- Commit snapshotu: `2d63d3a433c0991b2f536a3cddad313d222b5d7f`.
+- Pages run `42215520379`: build SUCCESS, report-build-status SUCCESS, deploy SUCCESS; log potwierdza `Reported success!` i URL `https://marwlo-ops.github.io/Empirenew/`.
+
+Sekcja 48 została skorygowana: najnowszy pełny katalog nie jest już snapshotem 10:01, lecz snapshotem 12:09 UTC. Import nadal pochodzi z IT1; pole `target_server=E4K_PL1` opisuje docelową siatkę współrzędnych potwierdzoną przez operatora, a nie niezależny live odczyt wszystkich 2021 obiektów z PL1.
+
+### Wpływ na historię PL1
+
+Import nie pobiera ani nie zapisuje historii ataków. Nie zmienia statusu produkcyjnego PL1: GGE Tracker `E4K_PL1 /dungeons` nadal zwraca HTTP 400, a ostatni probe nie miał połączonej sesji mostu. Liczba nowych potwierdzonych ataków PL1 pozostaje 0; `attack_time_utc` pozostaje null.

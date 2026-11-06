@@ -1452,10 +1452,11 @@ Wprowadzana korekta:
 - `report_delivery_time_estimate_utc` pozostaje tylko estymacją wieku wiadomości;
 - `battle_time_estimate_utc` oraz `attack_time_utc` pozostają `null`.
 
-### Potencjalna droga ręcznej walidacji protokołu
+### GGE WebSocket Studio — wykluczone jako źródło E4K PL1
 
-Karta rozszerzenia GGE WebSocket Studio opisuje lokalne przechwytywanie ramek gry, dekodowanie komend `%xt%` i Explain mode dla wybranych pól. To może pomóc porównać rzeczywisty BLS/BLM z raportem na koncie testowym, ale opis sklepu nie dokumentuje PS i nie stanowi dowodu jego semantyki. Ewentualny test powinien być pasywnym odczytem ramek z normalnej sesji, bez wysyłania ręcznie konstruowanych komend:
-https://chromewebstore.google.com/detail/gge-websocket-studio/deaaangkjfdcpegbebpdhkiknaniomeg
+Karta rozszerzenia GGE WebSocket Studio opisuje lokalne przechwytywanie ramek WebSocket, ale deklaruje aktywność wyłącznie na domenach `empire.goodgamestudios.com` i `empire-html5.goodgamestudios.com`. Przypięty ggejs wybiera natomiast transport TCP dla stref `EmpirefourkingdomsExGG*`. W konsekwencji rozszerzenie nie jest potwierdzoną ani właściwą drogą pasywnego przechwytywania ruchu E4K PL1; może dotyczyć przeglądarkowego Empire, nie mobilnego E4K. Nie używamy go jako źródła danych ani dowodu semantyki PS.
+
+Źródło zakresu rozszerzenia: https://chromewebstore.google.com/detail/gge-websocket-studio/deaaangkjfdcpegbebpdhkiknaniomeg
 
 ### Stan danych produkcyjnych
 
@@ -1509,3 +1510,8 @@ GitHub Pages run 42191241751:
 ### Stan blokady
 
 PR #13 (bezpieczny pakiet własnego mostu) nadal pozostaje draft i nie jest wdrożoną usługą. Nie utworzono forka/hostingu, nie ustawiono sekretów i nie ma autoryzowanej sesji PL1. Następny test wymagający konta to lokalny read-only odczyt GAA/GAM oraz skrzynki raportów na koncie testowym PL1; dane logowania muszą pozostać lokalne.
+
+
+## 45. Korekta zakresu GGE WebSocket Studio — 2026-11-06 08:59 UTC
+
+Wcześniejsza wzmianka o GGE WebSocket Studio jako możliwej drodze walidacji BLS/BLM dla konta E4K została zawężona. Listing rozszerzenia ogranicza aktywność do dwóch domen przeglądarkowego Empire i opisuje przechwytywanie WebSocket. Przypięty klient ggejs dla stref `EmpirefourkingdomsExGG*` używa TCP. Nie ma dowodu, że rozszerzenie widzi transport E4K PL1, więc tę ścieżkę wykluczamy z planu testów PL1. Nie wpływa to na kod ani klasyfikację zdarzeń.

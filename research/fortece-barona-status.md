@@ -1194,3 +1194,44 @@ To nie zapisuje ani nie potwierdza ataku produkcyjnego. Wymaga dwóch poprawnych
 ### Następny krok
 
 Uzyskać rzeczywiste wyniki testów Actions dla PR i — osobno — przeprowadzić małą, autoryzowaną próbkę mapy produkcyjnego PL1. Do czasu otrzymania dwóch spójnych obserwacji tego samego punktu sygnały cooldown/defeater pozostają kandydackie.
+
+
+## 21. Świeży odczyt workflow PL1 — 2026-11-06 04:52 UTC
+
+Źródło: log joba `probe` z GitHub Actions run `42165034021` (commit bazowy main `70d4b748326d3b577dae759a90179e20a4e82e30`). Workflow zakończył się sukcesem jako test i diagnostyka; status procesu nie oznacza, że wszystkie zewnętrzne endpointy zaakceptowały PL1.
+
+### Testy automatyczne na bazowym main
+
+- Python probe: 13/13 PASS.
+- Node Barony core: 44/44 PASS.
+- E4K static contract, test mobilnego UI i walidator katalogu: PASS.
+- Plan mapy: pełny plan został wygenerowany i sprawdzony.
+- To jest wynik dla bazowego main przed PR #10; nie jest to jeszcze wynik pełnego CI dla zmian z PR #10.
+
+### Publiczny GGE Tracker
+
+- `/servers`: HTTP 200, 63 wpisy.
+- `/servers/catalog`: `E4K_PL1` ma `enabled=true`, ale `fortress=false`; `E4K_PL1_BETA` ma `fortress=true`; katalog nie zawiera docelowej strefy produkcyjnej PL1.
+- `/dungeons`: produkcyjny `E4K_PL1` HTTP 400 `Invalid server`; `E4K_PL1_BETA` HTTP 200, 976 rekordów; IT1 HTTP 200, 2021 rekordów.
+- Beta ↔ IT1: 976/976 współrzędnych zgodnych (Piaski 312, Lód 409, Ogień 255). To potwierdza wyłącznie zgodność mapy, nie historię ataków produkcyjnego PL1.
+- Historia pięciu graczy Beta: 5/5 niepustych, 7766 rekordów, 7766 dopasowań do punktów katalogu IT1. Wyłącznie diagnostyka Beta.
+- Historia graczy produkcyjnego PL1 z próbek Szpiegowania: 3/3 `Player not found`, 0 rekordów. Próba dopisania suffixu zoneId=259: 3/3 `Invalid player ID`. Kod serwera w katalogu: brak.
+- Nie skopiowano żadnej historii Beta ani cooldownów IT1 do PL1.
+
+### Pochodzenie `last_attack` — próba porównawcza, nie źródło PL1
+
+Dla 8 próbek Beta i 8 próbek IT1 porównano `global_available_at - last_attack` przy filtrze końca cooldownu w ciągu godziny:
+
+- Beta: 86282–86383 s, średnia 86347.6 s.
+- IT1: 86287–86373 s, średnia 86335.4 s.
+- Wartości są bliskie 86400 s, co wspiera hipotezę, że `last_attack` w trackerze może być wyprowadzane z globalnego cooldownu. Nie dowodzi to źródła ani dokładności timestampu; nie używać tych wartości dla PL1.
+
+### Most gry
+
+- `GET /status`: HTTP 200, 82 znane serwery.
+- `target_server=EmpirefourkingdomsExGG_3`, `target_connected=false`.
+- Test GAA/FNM pominięty, ponieważ socket PL1 nie był potwierdzony jako połączony.
+
+### Wniosek
+
+W tym workflow nie uzyskano żadnej odpowiedzi mapy, ruchu ani raportu z produkcyjnego PL1. Nie zapisano ataków. Najbliższy techniczny krok pozostaje wdrożenie poprawki matcherów GAA/FNM w kontrolowanym, zabezpieczonym forku mostu oraz ponowny test read-only po potwierdzeniu połączenia z produkcyjnym PL1. Patch dla mostu jest opisany w `patches/empire-api-gaa-fnm-response-matcher.patch.md`, ale nie został wdrożony na publicznym `empire-api.fly.dev`.

@@ -174,6 +174,19 @@ class ScanNpcMapAuthTests(unittest.TestCase):
         self.assertNotIn("secret", str(result))
         self.assertEqual(request.full_url, "https://bridge.example.invalid/status")
 
+    def test_bridge_status_missing_or_non_boolean_target_is_unknown(self):
+        class StatusResponse(FakeResponse):
+            def read(self):
+                return b'{"EmpirefourkingdomsExGG_3":"false","IT1":true}'
+
+        with patch.dict(os.environ, {}, clear=True), patch(
+            "scripts.scan_npc_map.urlopen", return_value=StatusResponse()
+        ):
+            result = request_bridge_status("https://bridge.example.invalid", DEFAULT_SERVER, 5)
+
+        self.assertIsNone(result["target_connected"])
+        self.assertEqual(result["known_server_count"], 2)
+
     def test_bridge_status_sends_bearer_token_only_in_authorization_header(self):
         class StatusResponse(FakeResponse):
             def read(self):

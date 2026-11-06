@@ -8,7 +8,8 @@ Ten katalog zawiera patch i testy dla forka danadum/empire-api. Nie jest wdrożo
 2. Pozostawia publiczny wyłącznie GET / jako health-check hostingu.
 3. Obsługuje CORS Authorization i bezpieczne preflight OPTIONS.
 4. Dla gaa i fnm dopasowuje odpowiedź wyłącznie po nazwie komendy, zamiast wymagać echa parametrów żądania.
-5. Wydłuża timeout odpowiedzi gaa/fnm do 15 sekund; pozostałe komendy zachowują 1 sekundę.
+5. Wydłuża timeout odpowiedzi gaa/fnm do 15 sekund; pozostałe dozwolone komendy zachowują 1 sekundę.
+6. Ogranicza proxy do serwera `EmpirefourkingdomsExGG_3` i jawnej listy komend read-only: `hgh`, `gaa`, `fnm`, `gam`, `sne`, `bls`, `blm`, `bld`. Komendy spoza listy są odrzucane HTTP 403 przed wysłaniem do socketu.
 
 Middleware wymaga tokenu o długości co najmniej 32 bajtów, porównuje go przez crypto.timingSafeEqual i działa fail-closed. Patch loguje wyłącznie typ błędu, a nie surowy komunikat upstream. Brak lub zbyt krótki token zwraca HTTP 503 na trasach chronionych; brak/błędny token zwraca HTTP 401.
 

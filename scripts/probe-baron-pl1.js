@@ -559,11 +559,18 @@ async function probeBridge() {
       return;
     }
 
+    // The public bridge matches response data against request headers.
+    // GAM returns variable M/O batches, so an empty request object avoids
+    // falsely requiring a non-empty M or O array to match.
     const commands = [
-      ["gam", { M: {} }],
-      ["gam", { O: {} }],
-      ["gaa", { KID: 1 }]
+      ["gam", {}]
     ];
+    console.log(JSON.stringify({
+      probe: "bridge-read-command",
+      command: "gaa",
+      skipped: true,
+      reason: "The public empire-api bridge has no GAA response-key mapping; its generic matcher would require the area request fields to be echoed. No GAA request was sent."
+    }));
     for (const [command, params] of commands) {
       try {
         const headers = encodeURIComponent(JSON.stringify(params).slice(1, -1));

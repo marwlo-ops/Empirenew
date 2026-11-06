@@ -1567,3 +1567,83 @@ Nie wykorzystano IT1/Beta cooldownu ani historii jako danych PL1. Nie zmieniono 
 ### Publikacja
 
 GitHub Pages run `42203695548` dla commitu `76ecfef5c1b17ae4c9ebd7f19cec3197049f26d3`: build, report-build-status i deploy zakończone SUCCESS.
+
+## 47. Korekta identyfikatorów GGE Tracker, niezależna walidacja GAM i status Pages — 2026-11-06
+
+### GGE Tracker: wymagany sufiks ID gracza
+
+Ponowny audyt publicznego kodu GGE Tracker ujawnił, dlaczego wcześniejsze próby historii gracza nie dawały wiarygodnego wyniku:
+
+- `ApiHelper.verifyIdWithCountryCode()` przyjmuje wyłącznie dodatni numeryczny identyfikator dłuższy niż 3 znaki.
+- `getCountryCode()` pobiera ostatnie trzy znaki ID, a `removeCountryCode()` usuwa ten trzycyfrowy sufiks przed zapytaniem do bazy.
+- Trasa `GET /dungeons/player/{playerId}` wybiera pulę PostgreSQL na podstawie tego sufiksu, a następnie szuka historii po bazowym ID gracza.
+- Inne trasy serwerowe GGE Tracker dopisują `request['code']` do zwracanych `player_id` i `alliance_id`.
+
+Źródła:
+- https://github.com/gge-tracker/gge-tracker/blob/main/gge-tracker-backend-api/src/api/helper/api-helper.ts
+- https://github.com/gge-tracker/gge-tracker/blob/main/gge-tracker-backend-api/src/api/routes/api-dungeons.ts
+- https://github.com/gge-tracker/gge-tracker/blob/main/gge-tracker-backend-api/src/api/routes/api-server.ts
+
+Wniosek: `e4k-data zoneId=259` nie jest potwierdzonym trzycyfrowym kodem serwera GGE Tracker. Poprzednie dopisanie `259` było tylko hipotezą i zwróciło HTTP 400. Surowe `member_id` z migawki Szpiegowania również nie jest wystarczającym ID do tej trasy. Katalog `/servers/catalog` nadal zwraca dla `E4K_PL1` `code=null`, więc nie ma zweryfikowanego sufiksu, którego można użyć.
+
+### Zmiana diagnostyki
+
+- Commit gałęzi: `8e3eb16b9cd64af086562eb3489dbed6b6cf9ffe`.
+- W `scripts/probe-baron-pl1.js` usunięto dwa nieproduktywne warianty: wysyłanie surowych ID z migawki oraz dopisywanie `zoneId=259`.
+- Pozostawiono wyłącznie wariant oparty o dokładny trzycyfrowy `<code>` z katalogu GGE Tracker.
+- Jeżeli katalog nie podaje kodu, test kończy się jawnym `skipped`; nie zgaduje sufiksu i nie odpytuje historii pod błędnym ID.
+- Nie zmieniono logiki ekstrakcji zdarzeń ani danych mapy.
+
+### Niezależna walidacja sposobu pobierania GAM
+
+Kod niezależnego klienta `pygge` potwierdza, że `GAM` może zwrócić wiele odpowiedzi:
+- `Movements.get_movements()` wysyła `gam` z pustym obiektem;
+- oczekuje wielu odpowiedzi (`count=-1`);
+- scala tablice `M` i `O`;
+- deduplikuje ruchy po `MID`;
+- implementacja bazowa kończy zbieranie po 100 ms ciszy.
+
+Źródła:
+- https://github.com/danadum/pygge/blob/main/pygge/map/movements.py
+- https://github.com/danadum/pygge/blob/main/pygge/base_gge_socket.py
+
+Barony stosuje analogiczny model, ale dłuższe okno 250 ms ciszy, deduplikację po MID oraz kontrolę statusu odpowiedzi XT. To niezależne potwierdzenie sposobu zbierania batchy, nie dowód globalnej widoczności ruchów. GAM nadal obejmuje wyłącznie ruchy udostępnione autoryzowanej sesji danego konta.
+
+### Ponowna weryfikacja CI i produkcyjnego PL1
+
+Workflow `Probe PL1 fortress API`, run `42208565123`, zakończył się SUCCESS:
+- Python: 13/13 PASS;
+- Node: 54/54 PASS;
+- plan mapy: 2021 celów, 199 sektorów, 1 990 000 szacowanych pól;
+- weryfikacja przypiętego klienta E4K i metadanych PL1: PASS;
+- test mobilnego UI Barony: PASS;
+- katalog mapowy IT1: 2021 unikalnych współrzędnych, bez pól ataku/cooldownu/gracza/gotowości: PASS.
+
+Odczyt publiczny z tego runu:
+- TCP do produkcyjnego PL1: handshake PASS, 176 ms, `payload_sent=false`; bez logowania i komend gry;
+- `E4K_PL1 /dungeons`: HTTP 400 — serwer nie jest obsługiwany przez ten endpoint;
+- katalog `E4K_PL1`: `enabled=true`, `fortress=false`, `code=null`;
+- publiczny most: `target_connected=false`, dlatego GAA/GAM pominięte;
+- brak potwierdzonego ruchu GAM i raportu NPC z produkcyjnego PL1;
+- potwierdzone ataki PL1 w tym runie: 0.
+
+Nie użyto cooldownów ani historii IT1/Beta jako danych PL1.
+
+### Korekta statusu GitHub Pages
+
+Sprawdziłem logi jobów, a nie tylko status całego workflow. Dla runu Pages `42208564666`:
+- `build`: SUCCESS;
+- `report-build-status`: SUCCESS;
+- `deploy`: FAILURE — po utworzeniu deploymentu dla `efd6426a157fc954d0a9f1c117c9543713285d38` usługa pozostawała w stanie `syncing_files` przez 10 minut; akcja osiągnęła timeout i anulowała deployment.
+
+To nie był zakończony sukcesem deploy. Najnowszy późniejszy commit main `9cd0b1940f3720134d44de2fe4f31af6aabd8763` dotyczył wyłącznie snapshotów/historycznych plików trackerów; w dostępnych metadanych nie znalazłem potwierdzenia udanego Pages deploymentu dla tego SHA. Nie deklaruję więc, że najnowsza wersja strony została opublikowana.
+
+Źródła:
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42208565123
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42208564666
+
+### Wniosek i następny krok
+
+Nowy audyt zawęził problem historii GGE Tracker: brakuje prawidłowego trzycyfrowego kodu serwera PL1, a nie kolejnej hipotezy opartej na `zoneId`. Następny krok to uzyskać kod z wiarygodnego źródła GGE Tracker albo rzeczywisty tracker-issued player ID dla E4K_PL1. Równolegle potrzebny jest lokalny, autoryzowany odczyt PL1 przez `--movements --reports`; CI nie loguje się na konto i nie otrzymuje globalnego feedu.
+
+Nie zapisano żadnego nowego ataku PL1. Nie zmieniono zakładek Mapa, Szpiegowanie ani Dodatkowe, plików UI ani katalogu współrzędnych.

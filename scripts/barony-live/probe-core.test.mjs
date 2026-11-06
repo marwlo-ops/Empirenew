@@ -9,6 +9,7 @@ import {
   parseGgejsCommandResponseEnvelope, parseGgejsBattleLogShortResponse,
   parseGgejsBattleLogMiddleTimeResponse, pickSamples,
   requestMailboxMessages, selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
+  encodeBridgeHeadersPathSegment,
 } from './probe-core.mjs';
 
 function catalog() {

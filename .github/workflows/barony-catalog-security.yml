@@ -5,18 +5,22 @@ on:
     branches: [main]
     paths:
       - 'scripts/scan_npc_map.py'
+      - 'scripts/probe_gge_tracker.py'
       - 'scripts/barony-live/probe-core.mjs'
       - 'scripts/barony-live/probe-core.test.mjs'
       - 'tests/test_scan_npc_map_auth.py'
+      - 'tests/test_probe_gge_tracker.py'
       - '.github/workflows/barony-catalog-security.yml'
       - 'data/baron-fortresses.json'
   push:
     branches: [main]
     paths:
       - 'scripts/scan_npc_map.py'
+      - 'scripts/probe_gge_tracker.py'
       - 'scripts/barony-live/probe-core.mjs'
       - 'scripts/barony-live/probe-core.test.mjs'
       - 'tests/test_scan_npc_map_auth.py'
+      - 'tests/test_probe_gge_tracker.py'
       - '.github/workflows/barony-catalog-security.yml'
       - 'data/baron-fortresses.json'
 
@@ -38,10 +42,13 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile diagnostic
-        run: python3 -m py_compile scripts/scan_npc_map.py
+      - name: Compile diagnostics
+        run: |
+          python3 -m py_compile scripts/scan_npc_map.py scripts/probe_gge_tracker.py
       - name: Test token and PII redaction
-        run: python3 -m unittest discover -s tests -p 'test_scan_npc_map_auth.py' -v
+        run: |
+          python3 -m unittest discover -s tests -p 'test_scan_npc_map_auth.py' -v
+          python3 -m unittest discover -s tests -p 'test_probe_gge_tracker.py' -v
 
   node-catalog-safety:
     runs-on: ubuntu-latest

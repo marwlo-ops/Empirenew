@@ -83,3 +83,21 @@ Zmiana `defeater_player_id` albo przejście cooldownu z nieaktywnego na aktywny 
 GGE Tracker używa typu 11 oraz pola gracza z tego samego rekordu, ale jego publiczne `attacked_at` nie jest potwierdzonym timestampem serwera gry: scraper nie przekazuje pola `attacked_at` przy zapisie historii. Dla produkcyjnego PL1 nie mamy jeszcze działającego live odczytu, dlatego nie wyliczamy czasu ataku z 24-godzinnego założenia ani z cooldownu IT1/Beta.
 
 Brak wiersza, błąd zapytania lub niezgodny typ/właściciel nie tworzy zdarzenia. Katalog IT1 służy wyłącznie do wyboru współrzędnych; cooldown i historia IT1/Beta nie są używane.
+
+
+## Dodatkowy audyt źródeł ruchów i timestampów — 2026-11-06
+
+- Publiczny endpoint GGE Tracker GET /server/movements opisuje historię ruchów zamków (relokacje, nowe posterunki i podboje), a nie marsze armii. Implementacja API opisuje movementType jako: 1 = add, 2 = remove, 3 = move. Nie używamy tego endpointu jako źródła ataków na fortece NPC.
+- GET /dungeons/player/{playerId} odczytuje dungeons_history.attacked_at. Natomiast lista GET /dungeons zwraca last_attack z kolumny dungeons.last_attack_at. To różne pola i ścieżki danych.
+- Publiczny scraper GGE Tracker przetwarza obiekty typu 11, odczytuje pozostały cooldown z dungeon[5] i ID pokonującego z dungeon[6], a global_available_at wylicza jako czas odczytu plus pozostały cooldown. W widocznym kodzie persistDungeonUpdates() wstawia do dungeons_history tylko kid, position_x, position_y, player_id — bez jawnego attacked_at. Schemat bazy, domyślna wartość kolumny lub trigger nie są dostępne w tym źródle.
+- Dlatego eksperyment global_available_at - last_attack ≈ 24 h nie dowodzi pochodzenia ani dokładności czasu ataku. Wcześniejsza hipoteza o timestampie wyprowadzanym z 24-godzinnego cooldownu zostaje oznaczona jako nierozstrzygnięta; bez schematu/triggera lub niezależnego zdarzenia referencyjnego nie używamy tego czasu jako attack_time_utc.
+- Niezależny kod ggejs potwierdza: MovementType.NPCAttack = 11, WorldMapArea.BossDungeon = 11; BasicMovement mapuje D=0 jako ruch wychodzący (właściciel w sourceArea) i D=1 jako ruch powrotny (właściciel w targetArea). PT/TT są przeliczane względem lokalnego czasu parsowania, więc wyjście/przybycie pozostają estymatami, nie serwerowym timestampem.
+- BossDungeonMapobject mapuje data[5] na pozostały cooldown, data[6] na defeaterPlayerId, a data[7] na KID. To wspiera walidację pól mapy, ale samo defeaterPlayerId nie daje dokładnego czasu wysłania armii.
+- Źródła do audytu:
+  - https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-server.ts
+  - https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts
+  - https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+  - https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/movements/BasicMovement.js
+  - https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/mapobjects/BossDungeonMapobject.js
+
+Wniosek operacyjny: dla Barony właściwym źródłem ruchu pozostaje odpowiedź GAM z autoryzowanej sesji PL1; /server/movements jest wykluczony. Ruch GAM może potwierdzić cel i ID gracza, ale czas wyjścia/przybycia jest estymowany. Raport NPC skorelowany po MID/LID i BLS/BLM może oszacować czas bitwy; nie ustala automatycznie czasu wysłania armii. Do czasu uzyskania takiego materiału attack_time_utc pozostaje null.

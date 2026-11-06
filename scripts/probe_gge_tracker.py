@@ -28,6 +28,18 @@ def _safe_integer(value):
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
 
+def _safe_return_code(payload):
+    """Return only a small numeric protocol code; never echo arbitrary upstream text."""
+    if not isinstance(payload, dict):
+        return None
+    value = payload.get("return_code")
+    if isinstance(value, int) and not isinstance(value, bool) and -9 <= value <= 9999:
+        return value
+    if isinstance(value, str) and value.isascii() and value.isdigit() and len(value) <= 4:
+        return value
+    return None
+
+
 def summarize_payload(payload):
     """Keep only structural metadata and map coordinates; never serialize row values."""
     if not isinstance(payload, dict):
@@ -54,7 +66,7 @@ def summarize_payload(payload):
         if (
             isinstance(x, int) and not isinstance(x, bool)
             and isinstance(y, int) and not isinstance(y, bool)
-            and x >= 0 and y >= 0
+            and 0 <= x <= 1286 and 0 <= y <= 1286
         ):
             coordinates.append({"x": x, "y": y})
         keys = set(row.keys())
@@ -86,7 +98,7 @@ def probe(server):
     request = Request(url, headers={
         "gge-server": server,
         "Accept": "application/json",
-        "User-Agent": "Empirenew-readonly-provider-probe/1.1",
+        "User-Agent": "Empirenew-readonly-provider-probe/1.2",
     })
     try:
         with urlopen(request, timeout=20) as response:
@@ -105,7 +117,7 @@ def probe(server):
             return {
                 "server": server,
                 "http_status": response.status,
-                "return_code": payload.get("return_code") if isinstance(payload, dict) else None,
+                "return_code": _safe_return_code(payload),
                 **summarize_payload(payload),
                 "ok": response.status == 200 and isinstance(rows, list),
             }

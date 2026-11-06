@@ -2417,3 +2417,64 @@ W tej iteracji nie było autoryzowanej sesji produkcyjnego PL1. Nie wykonano GAM
 - Następny rozstrzygający test: autoryzowana lokalna sesja E4K PL1, polecenie `node scripts/barony-live/probe.mjs --movements --reports --no-state`; skorelować ten sam KID/X/Y i ID gracza z GAM oraz raportem SNE/BLS/BLM. Poświadczenia pozostają lokalnie.
 
 Zakres: wyłącznie dokumentacja badań #barony. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, ich UI, katalogu współrzędnych i istniejących danych Szpiegowania.
+
+
+## 61. Niezależny cross-check pola PS w kliencie przeglądarkowym GGE — 2026-11-06 23:32 UTC
+
+### Nowe źródło i dokładne ustalenie
+
+Wykonano wyszukiwanie kodu klienta i znaleziono repozytorium `gge-services/client-source`, którego README wyraźnie opisuje zawartość jako zrekonstruowane moduły JavaScript z publicznie serwowanego **przeglądarkowego** klienta Goodgame Empire. To artefakt audytowy, nie oryginalne źródła TypeScript i nie klient mobilnego E4K.
+
+W przypiętej rewizji `0efcbfc7867f51b6feb2c14d458bb45241cd78ab` plik `bundles/Game.bundle/modules/exports/BattleLogVO.js` zawiera dwa niezależne miejsca, w których parser raportu sprawdza `PS` i wykonuje:
+
+```js
+const battleTimestamp = new Date();
+battleTimestamp.setTime(
+  battleTimestamp.getTime() - PS * ClientConstTime.SEC_2_MILLISEC
+);
+```
+
+Plik `ClientConstTime.js` z tej samej rewizji definiuje `SEC_2_MILLISEC = 1000`. W przeglądarkowym GGE jest to więc jednoznaczna implementacja interpretująca `PS` jako liczbę sekund odejmowaną od lokalnego czasu parsowania raportu, aby wyliczyć `_battleTimestamp`.
+
+To jest mocniejsze źródło niż sama adnotacja w EmpireCore: pokazuje bezpośrednio użycie pola przez kod klienta gry. Nadal nie jest to serwerowy timestamp — klient wylicza datę z własnego zegara i wartości `PS`.
+
+### Granica przenoszenia wniosków na E4K PL1
+
+Nie przenosimy jeszcze tej semantyki do produkcyjnego mobilnego E4K PL1:
+
+- README repozytorium źródłowego identyfikuje je jako klienta przeglądarkowego Goodgame Empire.
+- Przypięty `ggejs 2.2.0` jest klientem E4K, ale jego parser BLS nie mapuje `PS` do pola daty w obiekcie BattleLog.
+- Nasz lokalny probe przechwytuje `PS` z surowej odpowiedzi BLS/BLM wyłącznie jako `ps_value_unverified` i jawnie odrzuca wyliczanie czasu.
+- W tej iteracji nie było autoryzowanej sesji mobilnego PL1 ani próbki BLS/BLM z produkcyjnego konta. Nie ma zatem empirycznego potwierdzenia, że mobilny serwer PL1 nadaje `PS` identyczną semantykę.
+
+**Decyzja dla Barony pozostaje bez zmian:** `ps_value_unverified` jest metadanymi diagnostycznymi; `battle_time_estimate_utc` i `attack_time_utc` pozostają `null` dla E4K PL1.
+
+### Bezpieczny test rozstrzygający
+
+Na autoryzowanej sesji E4K PL1, bez wysyłania jakichkolwiek ataków, należy pobrać istniejący raport NPC ze skrzynki konta i dla tego samego `message_id` / `battle_log_id` porównać:
+
+1. `BLS.PS` i `BLM.PS` z surowych odpowiedzi;
+2. czas dostarczenia wiadomości wyliczony przez klienta z pola wieku skrzynki — traktowany tylko jako czas dostarczenia/odczytu;
+3. czas bitwy wyświetlany przez oficjalny klient mobilny dla dokładnie tego samego raportu, jeżeli UI go udostępnia;
+4. lokalny zegar urządzenia/hosta względem wiarygodnego UTC.
+
+Dopiero zgodność na kilku raportach PL1 pozwoli oznaczyć PS jako **zweryfikowaną estymację czasu bitwy dla mobilnego E4K**. Nawet wtedy pole powinno nazywać się `battle_time_estimate_utc`, z zachowaniem informacji o źródle i możliwym błędzie zegara. Nie należy nazywać go dokładnym serwerowym czasem wysłania armii.
+
+### Kontrola aktualnego stanu repozytorium i testów
+
+Stan przed tą zmianą:
+- `main`: `bbdd7b07e13e3826509401494e9bd4f8a310546b` (ostatni commit automatycznej publikacji snapshotów, 2026-11-06 23:25:01 UTC).
+- Ostatni workflow `Probe PL1 fortress API`: `42306925872`, commit `9a1c14d04a73e2a05799c8fc0cb4c07807de5a98`, SUCCESS. Log potwierdza: produkcyjny `E4K_PL1` zwraca HTTP 400 `Invalid server`; Beta 976 rekordów i IT1 2021 rekordów (wyłącznie oddzielne źródła); publiczny most miał `target_connected=true`, GAM HTTP 200 / `return_code=0`, ale 0 ruchów w sesji mostu; GAA pominięto, bo publiczny adapter nie ma potwierdzonego mapowania odpowiedzi. To nie jest test autoryzowanej sesji operatora.
+- Ostatni Pages deployment dla aktualnego `main`: run `42311764316`, commit `bbdd7b07e13e3826509401494e9bd4f8a310546b`, build/deploy/report-build-status SUCCESS.
+- Odczyt statusów commitów `bbdd7b0` przez endpoint combined-status zwrócił pustą listę; nie utożsamiać tego z wynikiem workflow. Powyższy Pages run jest osobnym, potwierdzonym wynikiem.
+
+Ta aktualizacja zmienia wyłącznie dziennik badań #barony. Nie zmienia parsera, danych, katalogu współrzędnych, Mapy, Szpiegowania, Dodatkowych ani żadnego interfejsu. Nie zapisano zdarzeń ataków PL1 i nie użyto cooldownów IT1/Beta jako danych produkcyjnego PL1.
+
+### Źródła
+
+- Klient przeglądarkowy GGE — README i zakres repozytorium: https://github.com/gge-services/client-source/blob/0efcbfc7867f51b6feb2c14d458bb45241cd78ab/README.md
+- Implementacja `PS` w BattleLogVO: https://github.com/gge-services/client-source/blob/0efcbfc7867f51b6feb2c14d458bb45241cd78ab/bundles/Game.bundle/modules/exports/BattleLogVO.js
+- Stała konwersji sekund na milisekundy: https://github.com/gge-services/client-source/blob/0efcbfc7867f51b6feb2c14d458bb45241cd78ab/bundles/Game.bundle/modules/exports/ClientConstTime.js
+- E4K parser BLS przypięty w ggejs: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/bls.js
+- Ostatni probe PL1: https://github.com/marwlo-ops/Empirenew/actions/runs/42306925872
+- Ostatni deployment Pages main: https://github.com/marwlo-ops/Empirenew/actions/runs/42311764316

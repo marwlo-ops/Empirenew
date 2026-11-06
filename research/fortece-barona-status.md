@@ -1803,3 +1803,28 @@ Run: https://github.com/marwlo-ops/Empirenew/actions/runs/42219044713. To potwie
 - Nie użyto cooldownów/historii IT1 ani Beta jako danych PL1.
 - Nie zmieniono Mapa, Szpiegowania, Dodatkowe ani katalogu współrzędnych.
 - Kolejny test rozstrzygający nadal wymaga lokalnego, autoryzowanego połączenia konta testowego z produkcyjnym PL1. Potrzebne są równoczesne odczyty GAA/GAM i raport NPC z MID/LID; poświadczenia muszą pozostać lokalne.
+
+
+### Uzupełnienie walidacji dla commitu 6b2730d — 2026-11-06 13:02 UTC
+
+Po dopisaniu sekcji 50 uruchomiono ponownie pełny workflow dla commitu `6b2730d9d3a83952135a806118a08c975552f20a`:
+
+- Probe PL1 run `42221848566`: SUCCESS.
+- Python: 13/13 PASS.
+- Node: 54/54 PASS, 0 failed.
+- walidacja metadanych przypiętego klienta E4K: PASS.
+- mobilny test Barony: PASS.
+- katalog mapowy: 2021 unikalne współrzędne, bez pól ataku/cooldownu/gracza/gotowości.
+- plan: 2021 celów, 199 sektorów, 1 990 000 pól.
+- TCP PL1: 175 ms, `payload_sent=false`.
+- GGE Tracker: `E4K_PL1` nadal `fortress=false, code=null`, `/dungeons` HTTP 400; Beta 976 rekordów, IT1 2021.
+- Beta: 5 próbek historii zwróciło 3571 rekordów — wyłącznie diagnostyka Beta.
+- timestamp delta w próbkach Beta: 86291–86372 s; IT1: 86294–86398 s. Nie stanowią dowodu czasu ataku PL1.
+- most: `target_connected=false`; GAM/GAA pominięte.
+- potwierdzone ataki PL1: 0.
+
+Pages run `42221847629` dla tego samego SHA zakończył się SUCCESS: build, report-build-status i deploy. Log potwierdza `Reported success!` oraz URL `https://marwlo-ops.github.io/Empirenew/`.
+
+Źródła:
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42221848566
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42221847629

@@ -1918,3 +1918,47 @@ W tests/test_scan_npc_map_auth.py dodano testy:
 Ta zmiana nie tworzy źródła mapy. Publiczny bridge nadal nie udostępnia potwierdzonego GAA/FNM, a produkcyjny GGE Tracker PL1 nadal wymaga obsługi serwera i prawidłowego kodu. Dane Beta/IT1 nie są używane jako ataki PL1. Nie wykonano lokalnego logowania do konta demo; nie uzyskano nowych ruchów GAM ani raportów BLS/BLM/SNE. attack_time_utc pozostaje null.
 
 Zmiana obejmuje wyłącznie skrypt diagnostyczny, jego testy i ten dziennik. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, barony.html, mapa-rb.html i katalogu współrzędnych.
+
+
+## 53. Dodatkowa kontrola kontraktów SNE, raportów i GAM — 2026-11-06
+
+### Potwierdzone w przypiętym ggejs 2.2.0 (rewizja a4980b01404ab01c9b826a267f331ae8c953d237)
+
+- E4KClient.connect() wykonuje logowanie i ping, ale nie pobiera skrzynki. commands/sne.js udostępnia showMessages(client), które jawnie wysyła SNE i zwraca listę wiadomości z pola MSG. Odpowiedź bez MSG zwraca null, a nie potwierdzoną pustą skrzynkę.
+- BasicMessage.deliveryTime jest liczone jako Date.now() - data[5] * 1000. To lokalne odtworzenie wieku wiadomości, nie serwerowy czas ataku.
+- BasicBattleLogMessage.getBattleLog() pobiera kolejno BLS po MID, BLM po LID i BLD. BLS/BLM w przypiętym parserze nie definiują semantyki PS; Barony zachowuje PS jako ps_value_unverified i nie wylicza z niego czasu.
+- MovementParser mapuje typ ruchu 11 na ArmyAttackMovement. BasicMovement wylicza departureTime = now - PT i arrivalTime = now + (TT - PT); są to lokalne estymaty oparte na zegarze w chwili parsowania, nie serwerowe timestampy.
+
+### Znaleziona luka bezpieczeństwa w helperze skrzynki
+
+requestMailboxMessages() wcześniej zwracał zawartość client.mailMessages z cache, gdy SNE kończył się błędem, timeoutem albo odpowiedzią bez tablicy. To mogło sprawić, że stare wiadomości z tej samej sesji zostałyby pokazane w raporcie tak, jakby pochodziły z bieżącego, udanego odczytu SNE.
+
+Korekta w tej iteracji: w przypadku response_missing, request_error lub timeout helper zwraca teraz pustą listę dowodów, zachowując osobny status błędu. Tylko tablica zwrócona przez bieżące żądanie SNE może zasilić ekstrakcję raportów. Sukces z MSG: [] nadal oznacza prawidłową, pustą skrzynkę.
+
+### Regresje i walidacja upstream
+
+- Testy helpera używają teraz niepustego, starego cache i sprawdzają, że błąd, brak odpowiedzi oraz timeout nie zwracają tych rekordów.
+- Workflow Probe PL1 fortress API sprawdza dodatkowo kontrakt SNE, sposób wyliczania deliveryTime, kolejność BLS → BLM → BLD, typ ruchu 11 oraz lokalne wzory PT/TT. Zmiana kontraktu przypiętego ggejs zatrzyma test i wymusi ponowny audyt semantyki.
+- To są testy offline kontraktów biblioteki; nie wykonują logowania do gry i nie potwierdzają globalnej widoczności ataków.
+
+### Stan live i publikacji przed tą zmianą
+
+- main przed poprawką: a8f6a32696e8edee63169f0fd2000a5de20a0410.
+- Probe 42238732569 zakończył się SUCCESS, ale workflow uruchamia testy offline i publiczne API; nie wywołuje lokalnego probe.mjs --movements --reports i nie ma poświadczeń konta.
+- Publiczny GGE Tracker dla E4K_PL1 zwrócił HTTP 400; E4K_PL1_BETA zwrócił dane wyłącznie środowiska Beta. Most zgłosił target_connected=false, więc GAA/GAM przez most pominięto.
+- Diagnostyka NPC 42238732493 zakończyła się kontrolowanym FAIL: brak wsparcia produkcyjnego PL1; snapshot_written=false. Dane Beta nie zostały przeniesione do PL1.
+- Pages dla SHA a8f6a32696e8edee63169f0fd2000a5de20a0410: build, report-build-status i deploy SUCCESS (run 42238732263).
+- PR #13 pozostaje draftem, opartym na starszym SHA 5511a5e472e8cb2320f5f0e3032103365e7aaab8; nie wdrożono mostu ani sekretów.
+
+### Ograniczenia i następny krok
+
+Nie wykonano autoryzowanego logowania do konta demo w tej iteracji. Brak nowego odczytu GAM/SNE z produkcyjnego PL1 i brak potwierdzonych zdarzeń. attack_time_utc pozostaje null; BLS.PS/BLM.PS pozostają niezweryfikowane; nie użyto cooldownów ani historii IT1/Beta jako danych PL1. Następny rozstrzygający test to lokalny odczyt na autoryzowanej sesji PL1, z porównaniem raportu NPC i ruchu GAM dla tej samej fortecy.
+
+Źródła upstream:
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/sne.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/messages/BasicMessage.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/messages/BasicBattleLogMessage.js
+- https://github.com/476f6f6467616d6553747564696d655374756469/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/MovementParser.js
+- https://github.com/476f6f6467616d6553747564696d655374756469/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/movements/BasicMovement.js
+
+Zakres: scripts/barony-live/probe-core.mjs, jego testy, workflow Barony i dziennik badań. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, barony.html, mapa-rb.html ani katalogu współrzędnych.

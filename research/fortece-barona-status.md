@@ -888,3 +888,34 @@ Import i walidacja przed commitem zostały potwierdzone przez automatyczny commi
 ### PL1
 
 Nie wykonano live logowania do produkcyjnego PL1. Dane GAA/GAM, BLS/BLM i raporty NPC pozostają ścieżkami przygotowanymi do testu na autoryzowanej sesji konta demo; nie ma nowego potwierdzonego odczytu ruchów ani raportu z produkcyjnego PL1. Nie zapisano zdarzeń ataków; `attack_time_utc` pozostaje null.
+
+
+## 31. Usunięcie konfliktu równoległego importu IT1 i ponowna weryfikacja — 2026-11-06 02:53 UTC
+
+### Przyczyna błędu importu
+
+Log runu `42148912228` wykazał, że pobranie IT1, testy importera i walidacja katalogu przeszły poprawnie (2021 rekordów; plan 199 sektorów), ale krok commitowania zakończył się konfliktem w `data/baron-fortresses.json` podczas `git pull --rebase origin main`. Kolejny import oparty na starszym SHA zdarzenia push próbował ponownie opublikować katalog, który zdążył już zmienić inny przebieg. To nie był błąd danych ani testów — konflikt powstał przy publikacji z nieaktualnej bazy commita.
+
+### Poprawka
+
+Commit `5eb98af6ff7292731763c2e69fd5b4f647282220` zmienia wyłącznie:
+- `.github/workflows/import-it1-fortresses.yml`: checkout jawnie używa `ref: main`, aby przebieg oczekujący w kolejce zaczynał od aktualnego HEAD, a nie od starego SHA zdarzenia push;
+- `scripts/test-baron-import-workflows.mjs`: dodano regresję wymagającą checkoutu `main` i zachowania serializacji importu bez anulowania aktywnego wydawcy.
+
+Istniejąca grupa `concurrency: empire-new-it1-map` i końcowe `git pull --rebase origin main` pozostały. Rebase nadal chroni przed zmianami, które pojawią się po checkout; poprawka usuwa typowy konflikt wynikający z kolejki i starego SHA.
+
+### Weryfikacja po poprawce
+
+- Probe Barony, run `42153152559`: SUCCESS. Testy Node.js: 40/40 PASS, 0 FAIL; plan: 2021 celów, 199 sektorów 100×100, 1 990 000 szacowanych pól. Kontrole klienta E4K, mobilnego UI, katalogu i publicznych endpointów zakończyły się sukcesem.
+- Walidacja mapy i UI, run `42153152660`: SUCCESS.
+- Import IT1, run `42153152595`: SUCCESS. Import: 2021 rekordów mapowych z jednej strony API; walidator katalogu potwierdził 2021 unikalnych współrzędnych i brak pól ataku/cooldownu/gracza/gotowości. Plan: 199 sektorów. Krok commitowania utworzył `02dc5fa21a8e33e3fb0bbd9bd50e8a33efcb8d0e` bez konfliktu rebase.
+- Końcowy katalog w HEAD: `captured_at=2026-11-06T02:53:37.896885Z`; Piaski 671, Lód 779, Ogień 571; razem 2021. Schemat rekordu pozostaje dokładnie: `id,kid,kingdom,x,y,type,source_server`.
+- GitHub Pages: wcześniejszy build dla commitu `5eb98af` został anulowany, gdy automatyczny import utworzył nowy commit danych; końcowy run `42153182617` dla `02dc5fa` zakończył build, deploy i report-build-status sukcesem.
+
+### Aktualny wynik PL1
+
+Publiczny katalog GGE Tracker nadal oznacza `E4K_PL1` jako `fortress=false` i bez zone ID/kodu; `E4K_PL1/dungeons` zwraca HTTP 400 Invalid server. `E4K_PL1_BETA` zwraca 976 rekordów, ale pozostaje osobnym serwerem i nie jest źródłem danych ataków PL1. Most zgłosił `target_connected=false`, więc żądania mapy przez most pominięto. Nie wykonano autoryzowanej sesji gry; nie uzyskano nowych ruchów GAM ani raportów BLS/BLM dla produkcyjnego PL1. Liczba nowych potwierdzonych ataków: 0; `attack_time_utc` pozostaje null.
+
+### Zakres
+
+Zmiany kodu dotyczyły tylko workflow importu katalogu Barony i jego testu. Automatyczny commit `02dc5fa` zmienił tylko `data/baron-fortresses.json`. Nie zmieniono `barony.html), Mapa, Szpiegowania ani Dodatkowe. Katalog IT1 nadal dostarcza wyłącznie współrzędne; cooldown i historia IT1/Beta nie są przenoszone do PL1.

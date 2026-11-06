@@ -116,6 +116,22 @@ class ImportIt1FortressesTests(unittest.TestCase):
         point = IMPORTER.normalize({"kid": 3, "x": 8, "y": 9})
         self.assertEqual(point["id"], "it1-3-8-9")
 
+    def test_generates_coordinate_id_when_source_id_is_blank_and_uses_next_nonblank_id(self):
+        blank = IMPORTER.normalize({"id": "  ", "kid": 3, "x": 8, "y": 9})
+        self.assertEqual(blank["id"], "it1-3-8-9")
+        fallback = IMPORTER.normalize({"id": "", "dungeon_id": 77, "kid": 3, "x": 8, "y": 9})
+        self.assertEqual(fallback["id"], "77")
+
+    def test_rejects_duplicate_stable_ids_before_catalog_write(self):
+        points = [
+            {"id": "same", "kid": 1, "x": 10, "y": 20},
+            {"id": "same", "kid": 2, "x": 30, "y": 40},
+        ]
+        with self.assertRaisesRegex(RuntimeError, "Duplicate IT1 fortress ID same"):
+            IMPORTER.validate_unique_ids(points)
+        with self.assertRaisesRegex(RuntimeError, "Invalid IT1 fortress ID"):
+            IMPORTER.validate_unique_ids([{"id": "  "}])
+
     def test_rejects_unknown_kingdom_and_invalid_coordinates(self):
         self.assertIsNone(IMPORTER.normalize({"kid": 4, "x": 1, "y": 2}))
         self.assertIsNone(IMPORTER.normalize({"kid": 1, "x": -1, "y": 2}))

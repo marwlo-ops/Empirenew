@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   DEFAULT_PL1_ZONE,
   extractNpcBattleReportEvidence,
+  requestMailboxMessages,
   selectLatestNpcBattleReportMessages,
   validateMapOnlyCatalog,
 } from './probe-core.mjs';
@@ -16,16 +17,20 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const CATALOG = path.join(ROOT, 'data', 'baron-fortresses.json');
 
 function parseArgs(argv) {
-  const args = { limit: 25, zone: process.env.E4K_ZONE || DEFAULT_PL1_ZONE };
+  const args = { limit: 25, reportWaitMs: 3000, zone: process.env.E4K_ZONE || DEFAULT_PL1_ZONE };
   for (let i = 0; i < argv.length; i++) {
     const value = argv[i];
     if (value === '--limit') args.limit = Number(argv[++i]);
+    else if (value === '--report-wait-ms') args.reportWaitMs = Number(argv[++i]);
     else if (value === '--zone') args.zone = String(argv[++i] || '');
     else if (value === '--help') args.help = true;
     else throw new Error(`Unknown argument: ${value}`);
   }
   if (!Number.isInteger(args.limit) || args.limit < 1 || args.limit > 100) {
     throw new Error('--limit must be an integer from 1 to 100.');
+  }
+  if (!Number.isInteger(args.reportWaitMs) || args.reportWaitMs < 1000 || args.reportWaitMs > 10000) {
+    throw new Error('--report-wait-ms must be an integer from 1000 to 10000.');
   }
   return args;
 }
@@ -37,7 +42,7 @@ async function main() {
   if (args.help) {
     process.stdout.write(
       'Read-only PL1 mailbox report probe. Credentials: E4K_USERNAME/E4K_PASSWORD. ' +
-      'Use --limit 25 to limit NPC boss-dungeon reports. No report data is persisted. ' +
+      'Use --limit 25 and --report-wait-ms 3000 to bound report count and SNE wait. No report data is persisted. ' +
       'Report delivery time is not the exact attack start time.\n'
     );
     return 0;
@@ -77,10 +82,8 @@ async function main() {
   client.socketManager.reconnectTimeout = -1;
   try {
     await client.connect(username, password);
-    const returnedMessages = await showMessages(client);
-    const messages = Array.isArray(returnedMessages)
-      ? returnedMessages
-      : (Array.isArray(client.mailMessages) ? client.mailMessages : []);
+    const mailboxFetch = await requestMailboxMessages(client, showMessages, args.reportWaitMs);
+    const messages = mailboxFetch.messages;
     const npcReports = selectLatestNpcBattleReportMessages(messages, args.limit);
 
     const evidence = [];
@@ -118,6 +121,8 @@ async function main() {
       server_zone: args.zone,
       server_host: instance.server,
       dependency_compatibility: compatibility,
+      mailbox_fetch_status: mailboxFetch.status,
+      mailbox_fetch_error_type: mailboxFetch.error_type,
       mailbox_messages_returned: messages.length,
       npc_boss_dungeon_reports_selected: npcReports.length,
       reports_with_cross_validated_target_and_attacker: evidence.length,

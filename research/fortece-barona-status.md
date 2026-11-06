@@ -867,3 +867,24 @@ Nowy ścisły walidator katalogu wymaga niepustych, unikalnych identyfikatorów.
 ### Testy i ograniczenia
 
 Commit importera uruchamia workflow importu z rzeczywistym odczytem IT1. Wynik pobrania i publikacji należy potwierdzić po zakończeniu Actions. Nie wykonano autoryzowanego logowania do gry ani testu ataku na PL1; nie zapisano zdarzeń ataków.
+
+
+## 30. Weryfikacja po wdrożeniu walidatorów ID i schematu — 2026-11-06 02:13 UTC
+
+### Import IT1
+
+Po commitach zmian importera i testów pojawił się commit automatyczny `d36e5ae5a5f6a872c604da837101a8cd76af047b` z czasem 2026-11-06T02:13:29Z. Commit odświeżył `captured_at` w katalogu, co potwierdza, że workflow importu pobrał nowy snapshot i dotarł do kroku commitowania. Workflow wykonuje testy Python, import, walidację katalogu i plan Barony przed commitem; nie mam jednak bezpośredniego dostępu do pełnych logów runu przez dostępny interfejs GitHub Actions.
+
+Snapshot: `2026-11-06T02:13:28.173308Z`; Piaski 671, Lód 779, Ogień 571; razem 2021. Jedna strona API. Po odczycie repozytorium uruchomiono w izolowanym harnessie JavaScript aktualny `validateMapOnlyCatalog()` i `buildScanPlan()`: 6/6 kontroli PASS (katalog bieżący, 2021/199 plan, odrzucenie dodatkowego pola, brakującego ID, duplikatu ID i pola cooldownu). 2021 współrzędnych i 2021 unikalnych ID.
+
+### Zakres zmian
+
+Porównanie od snapshotu 01:23:54Z do commitu po imporcie wykazuje tylko: `data/baron-fortresses.json`, `scripts/import_it1_fortresses.py`, `tests/test_import_it1_fortresses.py`, `scripts/barony-live/probe-core.mjs`, `scripts/barony-live/probe-core.test.mjs`, `scripts/test-baron-map-catalog.mjs` oraz ten dziennik. Nie zmieniono `barony.html`, `mapa-rb.html`, zakładek Mapa, Szpiegowanie ani Dodatkowe.
+
+### Build, deployment i mobilność
+
+Import i walidacja przed commitem zostały potwierdzone przez automatyczny commit danych. Nie udało się odczytać szczegółowego wyniku nowego workflow probe/mobilności ani nowego deploymentu Pages: dostępne wywołanie statusów commitów zwróciło pustą listę, a dostępny interfejs GitHub nie udostępnił listy runów push-triggered. Ostatni wcześniej potwierdzony test mobilny i deployment nie są dowodem wdrożenia snapshotu 02:13Z. Żaden plik UI nie został zmieniony w tej iteracji.
+
+### PL1
+
+Nie wykonano live logowania do produkcyjnego PL1. Dane GAA/GAM, BLS/BLM i raporty NPC pozostają ścieżkami przygotowanymi do testu na autoryzowanej sesji konta demo; nie ma nowego potwierdzonego odczytu ruchów ani raportu z produkcyjnego PL1. Nie zapisano zdarzeń ataków; `attack_time_utc` pozostaje null.

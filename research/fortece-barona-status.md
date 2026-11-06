@@ -1655,3 +1655,51 @@ Nie zapisano żadnego nowego ataku PL1. Nie zmieniono zakładek Mapa, Szpiegowan
 - Dostępny endpoint statusu commita nie zwrócił checków, a wrapper listowania workflow zwraca tylko runy uruchomione przez pull request; ten workflow jest uruchamiany przez push. Nie mam zatem potwierdzonego wyniku pełnego CI dla bieżącej gałęzi i nie scalono PR #16.
 - Run `42208565123` opisany wyżej jest ostatnim potwierdzonym pełnym testem poprzedniego commita `efd6426a157fc954d0a9f1c117c9543713285d38`, a nie nowej gałęzi.
 - Nie wykonano nowego deployu Pages dla PR #16; publikacja pozostaje zablokowana do czasu potwierdzenia poprawnego deployu z main.
+
+
+## 48. Audyt pochodzenia `attacked_at` / `last_attack` — 2026-11-06 12:05 UTC
+
+### Weryfikacja publicznego kodu GGE Tracker
+
+Przeanalizowano przypięty snapshot źródłowy GGE Tracker `7d620820a76cde4176c752f6972ce6f0c9ad7ab1`, a nie tylko nazwy pól w odpowiedzi API.
+
+- `appendDungeons()` przyjmuje obiekty typu 11, zapisuje `dungeon[5]` jako pozostały cooldown, `dungeon[6]` jako ID gracza i ustawia `updatedAt: new Date()` lokalnie.
+- `collectDungeonCooldowns()` ponownie czyta GAA; wylicza `global_available_at = currentTime + remainingCooldown24h` i zapisuje `player_id = dungeon[6]`. Nie przekazuje do bazy serwerowego czasu rozpoczęcia ataku.
+- `persistDungeonUpdates()` wykonuje INSERT do `dungeons_history` wyłącznie z polami `kid`, `position_x`, `position_y`, `player_id`. Kolumna `attacked_at` nie występuje w INSERT.
+- Endpoint `getDungeonsByPlayer()` odczytuje `DH.attacked_at` z bazy i zwraca to pole klientowi. Publiczny kod nie pokazuje jednak schematu produkcyjnej tabeli, defaultu ani triggera, który wyjaśniałby źródło tej wartości.
+- Wniosek: API wystawia `attacked_at`, ale z publicznego kodu nie można potwierdzić, że jest to dokładny czas ataku. Nie wolno publikować go jako takiego bez potwierdzenia schematu bazy lub kontrolowanego testu z niezależnym czasem referencyjnym.
+- Wcześniejsza obserwacja, że `global_available_at - last_attack` w IT1/Beta jest bliskie 24 godzinom, nie rozstrzyga pochodzenia timestampu. Oba źródła pozostają poza produkcyjnym PL1, a `last_attack` również nie jest uznawany za dokładny czas PL1.
+
+### Identyfikator gracza
+
+- Endpoint historii gracza wymaga numerycznego ID z trzycyfrowym sufiksem kodu serwera.
+- `getCountryCode()` pobiera ostatnie trzy cyfry, a `removeCountryCode()` usuwa je przed zapytaniem do bazy.
+- Katalog GGE Tracker dla `E4K_PL1` nadal zwraca `code=null`. `e4k-data zoneId=259` nie jest równoważnym, potwierdzonym kodem.
+- PR #16 został scalony do main jako commit `8fc9e3e2df40e23fd33bb370664b9a26e73cdef4`. Usunięto niepotwierdzone próby z surowym `member_id` i sufiksem 259; odczyt historii jest pomijany, gdy nie ma prawdziwego kodu serwera.
+
+### Najnowsza walidacja po scaleniu PR #16
+
+Workflow `Probe PL1 fortress API`, run `42214676661`, zakończony SUCCESS:
+- Python: 13/13 PASS.
+- Node: 54/54 PASS.
+- przypięty klient E4K i metadane PL1: PASS;
+- katalog IT1: 2021 unikalne współrzędne, bez pól ataku, cooldownu, gracza i gotowości: PASS;
+- test mobilnego UI Barony: PASS (statyczny CI; nie jest to test fizycznego telefonu);
+- TCP PL1: handshake 199 ms, `payload_sent=false` — bez logowania i komend gry;
+- GGE Tracker `E4K_PL1 /dungeons`: HTTP 400;
+- katalog `E4K_PL1`: `enabled=true`, `fortress=false`, `code=null`;
+- Beta: 976 rekordów i 8477 rekordów historii w pięciu próbkach — wyłącznie diagnostyka Beta;
+- IT1: live próbka API HTTP 200; pełny publiczny katalog pozostaje snapshotem 2021 rekordów z importu 10:01:36 UTC;
+- most: `target_connected=false`; GAA/GAM pominięte.
+
+GitHub Pages run `42214675962` dla commitu `8fc9e3e2df40e23fd33bb370664b9a26e73cdef4`: build SUCCESS, report-build-status SUCCESS, deploy SUCCESS. Log deploy zawiera `Reported success!` i URL strony.
+
+### Wniosek i następny krok
+
+- Nie uzyskano nowej autoryzowanej sesji produkcyjnego PL1.
+- Nie uzyskano ruchów GAM ani raportów NPC z produkcyjnego PL1.
+- Liczba nowych potwierdzonych ataków PL1: 0.
+- `attack_time_utc` pozostaje null; `attacked_at` i `last_attack` z GGE Tracker nie są traktowane jako potwierdzony czas ataku.
+- Następny test: na koncie demo produkcyjnego PL1 wykonać kontrolowany atak, zebrać GAA przed/po, GAM oraz raport NPC z MID/LID i porównać z niezależnym czasem referencyjnym. Dane logowania pozostają lokalne; nie umieszczać ich w repozytorium ani CI.
+
+Zakres tej korekty: wyłącznie dokumentacja audytu. Nie zmieniono Mapa, Szpiegowania, Dodatkowe, `barony.html`, `mapa-rb.html` ani katalogu współrzędnych.

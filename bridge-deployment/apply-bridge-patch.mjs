@@ -22,7 +22,7 @@ async function main() {
   let updated = original;
   updated = replaceExactlyOnce(updated,
     "const express = require('express');\n",
-    "const express = require('express');\nconst { createApiAuthMiddleware } = require('./api-auth-middleware');\nconst { createCommandQueue } = require('./map-command-queue');\n",
+    "const express = require('express');\nconst { createApiAuthMiddleware } = require('./api-auth-middleware');\nconst { createCommandQueue } = require('./map-command-queue');\nconst { isAllowedReadOnlyCommand } = require('./read-only-commands');\n",
     'express import');
   updated = replaceExactlyOnce(updated,
     '    const app = express();\n',
@@ -34,7 +34,7 @@ async function main() {
     'CORS authorization header');
   updated = replaceExactlyOnce(updated,
     '    });\n\n    app.get("/:server/:command/:headers", async (req, res) => {',
-    '    });\n\n    // Protect /status and all data routes; only GET / remains public for health checks.\n    app.use(createApiAuthMiddleware());\n\n    app.get("/:server/:command/:headers", async (req, res) => {',
+    '    });\n\n    // Protect /status and all data routes; only GET / remains public for health checks.\n    app.use(createApiAuthMiddleware());\n\n    app.get("/:server/:command/:headers", async (req, res) => {\n        if (!isAllowedReadOnlyCommand(req.params.command)) {\n            return res.status(403).json({ error: "Command not allowed" });\n        }',
     'route authentication middleware');
 
   const oldBlock = [
@@ -97,6 +97,8 @@ async function main() {
     'error log redaction');
 
   if (!updated.includes('app.use(createApiAuthMiddleware())') ||
+      !updated.includes('isAllowedReadOnlyCommand(req.params.command)') ||
+      !updated.includes('Command not allowed') ||
       !updated.includes('responseHeaders = false;') ||
       !updated.includes('responseTimeout') ||
       updated.includes('console.log(error.message)')) {
@@ -111,6 +113,8 @@ async function main() {
     target: path.basename(absolutePath),
     authentication: 'Bearer middleware enabled',
     map_commands: ['gaa', 'fnm'],
+    read_only_commands: ['gaa', 'fnm', 'gam'],
+    rejected_commands_status: 403,
     map_response_match: 'command_only',
     map_timeout_ms: 15000,
     error_log: 'type_only'

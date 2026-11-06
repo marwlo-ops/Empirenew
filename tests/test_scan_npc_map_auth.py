@@ -78,6 +78,7 @@ class ScanNpcMapAuthTests(unittest.TestCase):
     def test_diagnostic_summary_redacts_player_values(self):
         content = [{
             "x": 17, "y": 29, "type": "BOSS_DUNGEON",
+            "type_name": "PrivatePlayer Dungeon",
             "player_id": 123456, "player_name": "PrivatePlayer",
             "owner": "PrivateAlliance", "name": "PrivatePlayer",
         }]

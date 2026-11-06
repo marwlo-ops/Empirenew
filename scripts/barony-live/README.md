@@ -78,7 +78,7 @@ Każda próbka sprawdza dokładnie `kid/x/y`, `areaType=11` i oczekiwanego wła�
 - pozostały cooldown i wyliczony czas końca cooldownu;
 - czas pobrania próbki.
 
-Zmiana `defeater_player_id` albo przejście cooldownu z nieaktywnego na aktywny generuje **kandydacki sygnał dla konkretnej fortecy** z przedziałem między próbkami. Nie jest to dokładny czas ataku i nie jest zapisywane jako potwierdzona historia. Pierwsza próbka nie generuje zdarzenia historycznego. Brak cooldownu pozostaje stanem „nieznany”, a nie „brak cooldownu”.
+Zmiana `defeater_player_id` albo przejście cooldownu z nieaktywnego na aktywny generuje **kandydacki sygnał dla konkretnej fortecy** z przedziałem między próbkami. Porównanie jest wykonywane tylko wtedy, gdy obie obserwacje zawierają dokładnie jeden wiersz na tych samych KID/X/Y, ten sam identyfikator katalogowy, typ 11 i oczekiwanego właściciela NPC; wiele wierszy na jednej współrzędnej jest oznaczane jako niejednoznaczne. Przedział próbek musi wynosić maksymalnie 2 godziny — starsza próbka nie tworzy kandydata. Nie jest to dokładny czas ataku i nie jest zapisywane jako potwierdzona historia. Pierwsza próbka nie generuje zdarzenia historycznego. Brak cooldownu pozostaje stanem „nieznany”, a nie „brak cooldownu”.
 
 GGE Tracker używa typu 11 oraz pola gracza z tego samego rekordu, ale jego publiczne `attacked_at` nie jest potwierdzonym timestampem serwera gry: scraper nie przekazuje pola `attacked_at` przy zapisie historii. Dla produkcyjnego PL1 nie mamy jeszcze działającego live odczytu, dlatego nie wyliczamy czasu ataku z 24-godzinnego założenia ani z cooldownu IT1/Beta.
 

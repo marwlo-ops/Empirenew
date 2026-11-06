@@ -1472,3 +1472,38 @@ To nadal propozycja do review — nie utworzono forka upstream ani usługi Rende
 Pochodzenie last_attack z GGE Tracker pozostaje nierozstrzygnięte; nie jest używane jako dokładny czas ataku. BLS/BLM PS może wspierać oszacowanie wieku bitwy po korelacji MID/LID i celu, ale nie potwierdza czasu wysłania armii. W tej iteracji nie dodano żadnych zdarzeń ataku PL1; attack_time_utc pozostaje null.
 
 Następny krok: po przeglądzie i testach PR wdrożyć zabezpieczony most w kontrolowanym środowisku, potwierdzić /status, gaa i fnm z tokenem oraz TCP/reconnect; dopiero potem wykonać autoryzowany, read-only test konta demo i korelację GAM z raportem NPC BLS/BLM.
+
+
+## 44. Probe PL1 08:13 UTC, timestamp provenance i test mostu
+
+### Produkcyjny PL1 — odczyt bez uwierzytelniania gry
+
+Workflow Probe PL1 fortress API 42186073405 zakończył się sukcesem jako test diagnostyczny:
+- TCP do e4k-live-pl1-game.goodgamestudios.com:443: tcp_connected w 159 ms; payload_sent=false;
+- e4k-data nadal wskazuje strefę produkcyjną EmpirefourkingdomsExGG_3, instancję 3, zoneId 259 i generic_country_PL;
+- katalog GGE Tracker zwraca E4K_PL1 enabled=true, fortress=false; E4K_PL1_BETA fortress=true;
+- /dungeons: EmpirefourkingdomsExGG_3 — HTTP 400; E4K_PL1 — HTTP 400 i lista obsługiwanych serwerów nie zawiera produkcyjnego E4K_PL1; E4K_PL1_BETA — HTTP 200, 976; IT1 — HTTP 200, 2021;
+- publiczny most zwrócił target_connected=false; GAA/FNM pominięte. TCP handshake nie oznacza sesji gry ani wysłania komendy.
+
+### Badanie znaczenia pola last_attack — tylko serwery wspierane przez tracker
+
+Read-only probe tracker-attacked-at-provenance zebrał po 8 próbek IT1 i E4K_PL1_BETA, filtrując lokacje, których cooldown kończy się w ciągu godziny. Oczekiwany globalny cooldown wynosił 86400 s:
+- IT1: global_available_at - last_attack = 86283–86392 s; mediana 86334 s; różnica od 24 h: -117 do -8 s.
+- E4K_PL1_BETA: 86291–86390 s; mediana 86355 s; różnica od 24 h: -109 do -10 s.
+
+To wspiera hipotezę, że last_attack jest blisko początku 24-godzinnego cooldownu na wspieranych przez tracker serwerach IT1/Beta. Nie jest to niezależna korelacja z raportem bitwy ani dowód dokładności znacznika czasu. Nie wolno przenosić tej obserwacji na produkcyjny PL1, którego tracker nie obsługuje.
+
+### Wyniki testów nowej gałęzi mostu
+
+- PR workflow 42186191657: SUCCESS; bridge-security zakończony sukcesem, live probe w PR celowo pominięty.
+- 6/6 testów middleware Node: PASS.
+- 4/4 testy skanera Python (Bearer header, brak tokenu, brak wycieku tokenu, domyślna strefa PL1): PASS.
+- Patch zastosował się do przypiętego upstream dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d; node --check app.js i middleware: PASS.
+- Pierwszy przebieg 42186097204 nie przeszedł z powodu błędnej liczby linii w ostatnim hunku patcha; poprawiono nagłówek z -30,7 +38,12 na -30,5 +38,10. Następny przebieg 42186191657 przeszedł.
+- Probe PL1 42186073405: 47/47 testów rdzenia Barony PASS; walidacja katalogu IT1 PASS; test mobilny PASS (44 px, focus, etykiety lokalnej historii).
+
+### Wdrożenie i historia
+
+Zmiany mostu są wyłącznie w draft PR #13. Nie ma forka upstream, usługi Render ani sekretów; nie ma wdrożenia mostu. Nie uruchomiono nowego Pages deploy dla tej gałęzi; publiczna strona nadal korzysta z potwierdzonego wdrożenia main z run 42183722274.
+
+W tej iteracji nie zapisano żadnego zdarzenia ataku PL1. Nie ma potwierdzonego atakującego ani dokładnego czasu ataku dla żadnej lokacji produkcyjnego PL1. attack_time_utc pozostaje null.

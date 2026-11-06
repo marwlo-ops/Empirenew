@@ -1,0 +1,49 @@
+diff --git a/app.js b/app.js
+--- a/app.js
++++ b/app.js
+@@ -1,4 +1,5 @@
+ const express = require('express');
++const { createApiAuthMiddleware } = require('./api-auth-middleware');
+ const commands = require('./data/commands.json');
+ const { setNestedValue } = require('./utils/nestedHeaders');
+ 
+@@ -8,10 +9,13 @@
+     app.use((req, res, next) => {
+         res.header("Access-Control-Allow-Origin", "*");
+         res.header("Access-Control-Allow-Methods", "GET");
+-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
++        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+         next();
+     });
+ 
++    // Protect /status and all data routes; only GET / remains public for health checks.
++    app.use(createApiAuthMiddleware());
++
+     app.get("/:server/:command/:headers", async (req, res) => {
+         if (req.params.server in sockets) {
+             if (sockets[req.params.server] !== null && sockets[req.params.server].connected.isSet) {
+@@ -20,7 +24,11 @@
+                     sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);
+ 
+                     let responseHeaders = {};
+-                    if (req.params.command in commands) {
++                    if (["gaa", "fnm"].includes(req.params.command)) {
++                        // Map replies do not have to echo request parameters.
++                        // BaseSocket treats false as command-only matching.
++                        responseHeaders = false;
++                    } else if (req.params.command in commands) {
+                         for (const [messageKey, responsePath] of Object.entries(commands[req.params.command])) {
+                             if (messageKey in messageHeaders) {
+                                 setNestedValue(responseHeaders, responsePath, messageHeaders[messageKey]);
+@@ -30,7 +38,12 @@
+                         responseHeaders = messageHeaders;
+                     }
+ 
+-                    const response = await sockets[req.params.server].socket.waitForJsonResponse(req.params.command, responseHeaders, timeout = 1000);
++                    const responseTimeout = ["gaa", "fnm"].includes(req.params.command) ? 15000 : 1000;
++                    const response = await sockets[req.params.server].socket.waitForJsonResponse(
++                        req.params.command,
++                        responseHeaders,
++                        responseTimeout
++                    );
+                     res.status(200).json({server: req.params.server, command: req.params.command, return_code: response.payload.status, content: response.payload.data});

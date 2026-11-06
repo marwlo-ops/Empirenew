@@ -59,6 +59,19 @@ class ImportIt1FortressesTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "Missing GGE Tracker pagination metadata"):
             IMPORTER.pagination_info([{"kid": 1, "position_x": 10, "position_y": 20}])
 
+    def test_rejects_out_of_range_pagination_metadata(self):
+        invalid_payloads = [
+            {"pagination": {"current_page": 0, "total_pages": 1, "current_items_count": 0, "total_items_count": 0}},
+            {"pagination": {"current_page": 2, "total_pages": 1, "current_items_count": 0, "total_items_count": 0}},
+            {"pagination": {"current_page": 1, "total_pages": 0, "current_items_count": 0, "total_items_count": 0}},
+            {"pagination": {"current_page": 1, "total_pages": 1, "current_items_count": -1, "total_items_count": 0}},
+            {"pagination": {"current_page": 1, "total_pages": 1, "current_items_count": 0, "total_items_count": -1}},
+        ]
+        for payload in invalid_payloads:
+            with self.subTest(payload=payload):
+                with self.assertRaisesRegex(RuntimeError, "Out-of-range"):
+                    IMPORTER.pagination_info(payload)
+
     def test_normalizes_known_kingdom_to_public_map_only_schema(self):
         point = IMPORTER.normalize({
             "id": 77, "kid": 2, "position_x": 123, "position_y": 456,

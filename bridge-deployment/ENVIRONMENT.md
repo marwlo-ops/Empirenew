@@ -17,6 +17,10 @@ Wygeneruj token lokalnie, np. poleceniem Node.js:
 
 Wynik wklej bezpośrednio do pola sekretu w Render i — dopiero po uruchomieniu oraz sprawdzeniu middleware — do sekretu E4K_API_TOKEN w Empirenew Actions. Nie wpisuj go do terminala jako argumentu, pliku, commitu ani logu.
 
+## Ograniczenie komend
+
+Po zastosowaniu patcha most przekazuje wyłącznie `gaa`, `fnm` i `gam` (read-only odczyt mapy/ruchów). Każda inna wartość `command` na trasie `/:server/:command/:headers` jest odrzucana HTTP 403 przed wysłaniem polecenia do gry. Nie rozszerzaj listy bez osobnego audytu semantyki komendy i testu.
+
 ## Zachowanie autoryzacji
 
 - GET / pozostaje publiczny wyłącznie jako health-check hostingu.

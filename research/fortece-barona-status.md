@@ -1246,3 +1246,104 @@ W ramach prac fortecowych nie edytowano zakładek Mapa, Szpiegowanie ani Dodatko
 2. Uzyskać lokalny, autoryzowany odczyt konta demo na produkcyjnym PL1; poświadczenia wyłącznie w lokalnych zmiennych środowiskowych.
 3. Sprawdzić pasywnie próbkę mapy, GAM i raporty NPC, a następnie porównać dwie obserwacje tych samych współrzędnych.
 4. Nie publikować automatycznej historii, dopóki tożsamość atakującego i semantyka czasu nie zostaną potwierdzone.
+
+
+## 40. Świeży import 06:11Z i diagnostyka mostu po połączeniu — 2026-11-06 06:13 UTC
+
+### Świeży import IT1 — potwierdzony
+
+Po dodaniu testu zakresów paginacji uruchomił się kanoniczny workflow `Refresh IT1 fortress map catalog`:
+
+- run `42172899967`, job `127744619369`: SUCCESS;
+- testy importera: 28, wynik `OK`;
+- rzeczywisty import: 2021 rekordów mapowych z jednej strony GGE Tracker IT1;
+- walidacja katalogu: PASS;
+- plan: 2021 celów, 199 sektorów 100×100, 1 990 000 potencjalnych pól;
+- commit importu: `dd661ae57ffa0452f048df78bea2b723b2127a47`.
+
+Nowy snapshot:
+- `captured_at=2026-11-06T06:11:51.997482Z`;
+- Piaski 671, Lód 779, Ogień 571;
+- razem 2021 rekordów;
+- 2021 unikalnych ID i 2021 unikalnych współrzędnych;
+- dokładnie siedem pól: `id,kid,kingdom,x,y,type,source_server`;
+- brak cooldownu, gotowości, gracza i historii ataków.
+
+Zbiór współrzędnych pozostał taki sam jak w poprzednim snapshotcie; zmienił się czas pobrania. Nowy blob katalogu: `76abf015f4432374b0dc33a9d8e3e31329e89601`.
+
+### Test mobilny, probe i Pages
+
+Run `42172900111` (job `127744619530`):
+- 13/13 testów Python PASS;
+- 44/44 testów Node PASS, 0 FAIL;
+- test mobilnego viewportu, 44 px celów dotykowych, focus states i etykiet historii lokalnej PASS;
+- walidacja katalogu IT1 PASS: 2021 unikalnych współrzędnych, bez dynamicznych pól.
+
+Import commit uruchomił Pages run `42172918789`:
+- build SUCCESS;
+- artifact `github-pages.zip` zawierał `data/baron-fortresses.json`;
+- deploy SUCCESS;
+- log: `Reported success!`;
+- environment: `https://marwlo-ops.github.io/Empirenew/`.
+
+To potwierdza wdrożenie snapshotu z 06:11:51Z. Test mobilny pozostaje testem statycznym CI, nie testem na fizycznym telefonie.
+
+### Nowe ustalenie: most PL1 chwilowo połączył się, ale komendy nie zwróciły danych
+
+W probe run `42172373205` status mostu o 06:07:05Z zwrócił `target_connected=true`. Wykonane wtedy, tylko do odczytu, próby:
+- GAM z nagłówkiem `M:{}`: HTTP 400 `Invalid command or headers`;
+- GAM z nagłówkiem `O:{}`: HTTP 400 `Invalid command or headers`;
+- GAA z `KID:1`: HTTP 400 `Invalid command or headers`.
+
+Następny probe `42172692175` i kolejny `42172900111` odczytały już `target_connected=false`; po poprawce nie wysłano więc kolejnego GAM. Połączenie mostu jest niestabilne i nie wolno traktować samego statusu `true` jako potwierdzenia poprawnego odczytu danych.
+
+### Audyt źródła mostu i poprawka naszego probe
+
+Przejrzałem publiczny kod mostu `danadum/empire-api` (commit źródłowy `dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d`):
+- trasa `/:server/:command/:headers` parsuje segment headers jako JSON i wysyła komendę;
+- odpowiedź jest dopasowywana przez `waitForJsonResponse` z timeoutem 1000 ms;
+- każdy wyjątek, również timeout lub brak dopasowania odpowiedzi, jest zwracany jako ten sam HTTP 400 `Invalid command or headers`;
+- `data/commands.json` nie zawiera mapowania odpowiedzi dla GAM ani GAA; dla nieznanych komend most dopasowuje odpowiedź do wszystkich przekazanych pól żądania.
+
+Wniosek: wcześniejszy HTTP 400 nie rozstrzyga, czy serwer odrzucił komendę, czy most nie dopasował odpowiedzi w sekundowym oknie. Dla GAM tablice M/O są zmienne i mogą być puste, więc oczekiwanie na niepusty fragment M albo O mogło samo powodować timeout. Dla GAA żądanie obszaru ma więcej parametrów niż sam KID, a most nie ma dedykowanego mapowania odpowiedzi, dlatego nie wysyłamy go dalej przez ten niedopasowany adapter.
+
+Poprawka w naszym `scripts/probe-baron-pl1.js`, commit `462aeece2d030d8c6611776f9b60eb9e0f82aadf`:
+- GAM jest teraz wysyłany z pustym obiektem `{}`, aby nie wymagać niepustej tablicy M/O do dopasowania;
+- GAA jest jawnie oznaczane jako `skipped` z powodem braku mapowania odpowiedzi w adapterze;
+- nie dodano żadnych zapisów zdarzeń ani dodatkowych komend modyfikujących stan gry.
+
+Ta zmiana przeszła testy i build, ale nie została jeszcze potwierdzona odpowiedzią GAM z live mostu: najnowszy run miał `target_connected=false`, więc request został bezpiecznie pominięty.
+
+Źródła audytu adaptera:
+- `https://github.com/danadum/empire-api/blob/main/app.js`;
+- `https://github.com/danadum/empire-api/blob/main/data/commands.json`;
+- `https://github.com/danadum/empire-api/blob/main/utils/ws/baseSocket.js`.
+
+### PL1 — nadal brak potwierdzonej historii
+
+- GGE Tracker `E4K_PL1`: HTTP 400 `Invalid server`;
+- alias produkcyjny `EmpirefourkingdomsExGG_3`: HTTP 400;
+- `E4K_PL1_BETA`: HTTP 200, 976 rekordów, ale to osobny serwer;
+- IT1: HTTP 200, 2021 rekordów;
+- próbki historii produkcyjnego PL1: 3/3 `Player not found` / `Invalid player ID`;
+- most: status zmieniał się między `true` i `false`; brak udanej odpowiedzi GAM/GAA;
+- nie wykonano autoryzowanego logowania kontem demo ani odczytu jego skrzynki raportów.
+
+Nie zapisano żadnych zdarzeń ataków PL1. `attack_time_utc` pozostaje `null`. Estymaty z cooldownu Beta/IT1 nie są kopiowane do PL1.
+
+### Zakres
+
+Zmiany tej iteracji ograniczono do:
+- testu zakresów metadanych paginacji;
+- bezpiecznego sposobu odczytu GAM przez most i jawnego pominięcia GAA;
+- świeżego map-only snapshotu IT1;
+- dziennika badań.
+
+Nie edytowano zakładek Mapa, Szpiegowanie ani Dodatkowe, plików `barony.html` i `mapa-rb.html`, ani danych ich historii.
+
+### Następny krok
+
+1. Przy kolejnym potwierdzonym `target_connected=true` sprawdzić, czy GAM `{}` zwróci HTTP 200 i prawidłową odpowiedź; nie uznawać pustej odpowiedzi ani timeoutu za brak ruchów.
+2. Dla GAA potrzebny jest adapter z mapowaniem odpowiedzi (np. KID i identyfikator obszaru) albo autoryzowana lokalna sesja ggejs; nie wysyłać kolejnych niedopasowanych żądań przez obecny most.
+3. Wykonać lokalny, autoryzowany odczyt konta demo na produkcyjnym PL1, z poświadczeniami wyłącznie w zmiennych środowiskowych.
+4. Następnie skorelować dokładny cel, ID atakującego, raport NPC oraz BLS/BLM PS; czas bitwy nadal odróżniać od czasu wysłania armii.

@@ -15,6 +15,11 @@ async function main() {
   if (!targetPath) throw new Error('Usage: apply-bridge-patch.mjs <path-to-upstream-app.js>');
   const absolutePath = path.resolve(targetPath);
   const original = await readFile(absolutePath, 'utf8');
+  const socketsPath = path.join(path.dirname(absolutePath), 'utils', 'ws', 'sockets.js');
+  const socketsOriginal = await readFile(socketsPath, 'utf8');
+  if (socketsOriginal.includes('EMPIRENEW_PL1_ONLY_SOCKET_SCOPE')) {
+    throw new Error('Refusing to patch sockets.js that is already PL1-scoped.');
+  }
   if (original.includes('createApiAuthMiddleware') || original.includes('createCommandQueue')) {
     throw new Error('Refusing to patch an app.js that already contains bridge middleware.');
   }
@@ -34,7 +39,7 @@ async function main() {
     'CORS authorization header');
   updated = replaceExactlyOnce(updated,
     '    });\n\n    app.get("/:server/:command/:headers", async (req, res) => {',
-    '    });\n\n    // Protect /status and all data routes; only GET / remains public for health checks.\n    app.use(createApiAuthMiddleware());\n\n    app.get("/:server/:command/:headers", async (req, res) => {\n        if (!isAllowedReadOnlyCommand(req.params.command)) {\n            return res.status(403).json({ error: "Command not allowed" });\n        }',
+    '    });\n\n    // Protect /status and all data routes; only GET / remains public for health checks.\n    app.use(createApiAuthMiddleware());\n\n    app.get("/:server/:command/:headers", async (req, res) => {\n        if (!isAllowedReadOnlyCommand(req.params.command)) {\n            return res.status(403).json({ error: "Command not allowed" });\n        }\n        if (req.params.server !== "EmpirefourkingdomsExGG_3") {\n            return res.status(403).json({ error: "Server not allowed" });\n        }',
     'route authentication middleware');
 
   const oldBlock = [
@@ -99,19 +104,66 @@ async function main() {
   if (!updated.includes('app.use(createApiAuthMiddleware())') ||
       !updated.includes('isAllowedReadOnlyCommand(req.params.command)') ||
       !updated.includes('Command not allowed') ||
+      !updated.includes('req.params.server !== "EmpirefourkingdomsExGG_3"') ||
+      !updated.includes('Server not allowed') ||
       !updated.includes('responseHeaders = false;') ||
       !updated.includes('responseTimeout') ||
       updated.includes('console.log(error.message)')) {
     throw new Error('Patched app.js failed postcondition checks.');
   }
 
+  let socketsUpdated = socketsOriginal;
+  socketsUpdated = replaceExactlyOnce(socketsUpdated,
+    [
+      '        for (const server of data.network.instances.instance) {',
+      '            const socket = new E4kSocket(`tcp://${server.server}:443`, server.zone, process.env.USERNAME, process.env.PASSWORD);',
+      '            sockets[server.zone] = socket;',
+      '        }'
+    ].join('\n'),
+    [
+      '        for (const server of data.network.instances.instance) {',
+      '            if (server.zone !== "EmpirefourkingdomsExGG_3") continue;',
+      '            const socket = new E4kSocket(`tcp://${server.server}:443`, server.zone, process.env.USERNAME, process.env.PASSWORD);',
+      '            sockets[server.zone] = socket;',
+      '        }'
+    ].join('\n'),
+    'E4K PL1 socket filter');
+  socketsUpdated = replaceExactlyOnce(socketsUpdated,
+    [
+      'async function getSockets() {',
+      '    return { ...await getGgeSockets(), ...await getE4kSockets() };',
+      '}'
+    ].join('\n'),
+    [
+      'async function getSockets() {',
+      '    // EMPIRENEW_PL1_ONLY_SOCKET_SCOPE: never create/connect other game sockets.',
+      '    const sockets = await getE4kSockets();',
+      '    if (Object.keys(sockets).length !== 1 || !sockets["EmpirefourkingdomsExGG_3"]) {',
+      '        throw new Error("Expected exactly one production PL1 socket.");',
+      '    }',
+      '    return sockets;',
+      '}'
+    ].join('\n'),
+    'PL1-only socket selection');
+  if (!socketsUpdated.includes('EMPIRENEW_PL1_ONLY_SOCKET_SCOPE') ||
+      !socketsUpdated.includes('server.zone !== "EmpirefourkingdomsExGG_3"') ||
+      !socketsUpdated.includes('Expected exactly one production PL1 socket.') ||
+      socketsUpdated.includes('return { ...await getGgeSockets(), ...await getE4kSockets() };')) {
+    throw new Error('Patched sockets.js failed PL1-only postcondition checks.');
+  }
+
+  const socketsTemporaryPath = `${socketsPath}.tmp`;
+  await writeFile(socketsTemporaryPath, socketsUpdated, 'utf8');
   const temporaryPath = `${absolutePath}.tmp`;
   await writeFile(temporaryPath, updated, 'utf8');
+  await rename(socketsTemporaryPath, socketsPath);
   await rename(temporaryPath, absolutePath);
   process.stdout.write(JSON.stringify({
     patched: true,
     target: path.basename(absolutePath),
     authentication: 'Bearer middleware enabled',
+    target_server: 'EmpirefourkingdomsExGG_3',
+    socket_scope: 'PL1 only; no other GGE/E4K sockets are connected',
     map_commands: ['gaa', 'fnm'],
     read_only_commands: ['gaa', 'fnm', 'gam'],
     rejected_commands_status: 403,

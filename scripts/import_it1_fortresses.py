@@ -16,6 +16,26 @@ API = "https://api.gge-tracker.com/api/v1/dungeons"
 SERVER = "IT1"
 TARGET_SERVER = "E4K_PL1"
 PAGE_SIZE = 4000
+MAX_RESPONSE_BYTES = 8 * 1024 * 1024
+
+
+def read_response_body(response, max_bytes=MAX_RESPONSE_BYTES):
+    """Read a bounded API response so an unexpected payload cannot exhaust the runner."""
+    if not isinstance(max_bytes, int) or isinstance(max_bytes, bool) or max_bytes < 1:
+        raise ValueError("max_bytes must be a positive integer")
+    headers = getattr(response, "headers", {})
+    content_length = headers.get("Content-Length") if hasattr(headers, "get") else None
+    if content_length is not None:
+        try:
+            declared_size = int(content_length)
+        except (TypeError, ValueError):
+            raise RuntimeError("Invalid GGE Tracker Content-Length; existing catalog preserved")
+        if declared_size < 0 or declared_size > max_bytes:
+            raise RuntimeError("GGE Tracker response exceeds the configured size limit; existing catalog preserved")
+    body = response.read(max_bytes + 1)
+    if len(body) > max_bytes:
+        raise RuntimeError("GGE Tracker response exceeds the configured size limit; existing catalog preserved")
+    return body
 MAX_PAGES = 20
 MAX_COORDINATE = 1286
 KINGDOMS = {1: "sands", 2: "ice", 3: "fire"}
@@ -151,7 +171,11 @@ def fetch_page(page):
     with urllib.request.urlopen(req, timeout=30) as response:
         if response.status != 200:
             raise RuntimeError(f"GGE Tracker HTTP {response.status}")
-        return json.loads(response.read().decode("utf-8"))
+        body = read_response_body(response)
+        try:
+            return json.loads(body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as error:
+            raise RuntimeError("Invalid GGE Tracker JSON; existing catalog preserved") from error
 
 
 def main():

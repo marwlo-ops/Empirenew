@@ -1,4 +1,5 @@
 import importlib.util
+import io
 import unittest
 from pathlib import Path
 
@@ -9,6 +10,33 @@ SPEC.loader.exec_module(IMPORTER)
 
 
 class ImportIt1FortressesTests(unittest.TestCase):
+    def test_reads_bounded_response_body_with_or_without_content_length(self):
+        with_length = io.BytesIO(b"abc")
+        with_length.headers = {"Content-Length": "3"}
+        self.assertEqual(IMPORTER.read_response_body(with_length, 3), b"abc")
+
+        without_length = io.BytesIO(b"abc")
+        without_length.headers = {}
+        self.assertEqual(IMPORTER.read_response_body(without_length, 3), b"abc")
+
+    def test_rejects_response_over_limit_from_header_or_actual_body(self):
+        declared_large = io.BytesIO(b"x")
+        declared_large.headers = {"Content-Length": "4"}
+        with self.assertRaisesRegex(RuntimeError, "exceeds the configured size limit"):
+            IMPORTER.read_response_body(declared_large, 3)
+
+        actual_large = io.BytesIO(b"abcd")
+        actual_large.headers = {}
+        with self.assertRaisesRegex(RuntimeError, "exceeds the configured size limit"):
+            IMPORTER.read_response_body(actual_large, 3)
+
+    def test_rejects_invalid_content_length_and_invalid_limit(self):
+        invalid_length = io.BytesIO(b"abc")
+        invalid_length.headers = {"Content-Length": "unknown"}
+        with self.assertRaisesRegex(RuntimeError, "Invalid GGE Tracker Content-Length"):
+            IMPORTER.read_response_body(invalid_length, 3)
+        with self.assertRaises(ValueError):
+            IMPORTER.read_response_body(io.BytesIO(b""), 0)
     def test_accepts_supported_top_level_shapes(self):
         rows = [{"kid": 1, "position_x": 10, "position_y": 20}]
         self.assertEqual(IMPORTER.records_from(rows), rows)

@@ -988,6 +988,13 @@ test('times out a pending SNE request without treating it as an empty response',
   assert.deepEqual(result.messages, []);
 });
 
+test('standalone reports probe uses only the current SNE response and never falls back to mailbox cache', async () => {
+  const source = await readFile(new URL('./reports.mjs', import.meta.url), 'utf8');
+  assert.ok(source.includes('requestMailboxMessages(client, showMessages, args.reportWaitMs)'));
+  assert.ok(source.includes('mailbox_fetch_status: mailboxFetch.status'));
+  assert.equal(source.includes('client.mailMessages'), false);
+});
+
 test('live probe explicitly invokes the pinned ggejs SNE mailbox reader for reports', async () => {
   const source = await readFile(new URL('./probe.mjs', import.meta.url), 'utf8');
   assert.ok(source.includes('requestMailboxMessages(client, showMessages, a.reportWaitMs)'));

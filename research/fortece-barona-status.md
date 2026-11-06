@@ -1736,3 +1736,70 @@ Sekcja 48 została skorygowana: najnowszy pełny katalog nie jest już snapshote
 ### Wpływ na historię PL1
 
 Import nie pobiera ani nie zapisuje historii ataków. Nie zmienia statusu produkcyjnego PL1: GGE Tracker `E4K_PL1 /dungeons` nadal zwraca HTTP 400, a ostatni probe nie miał połączonej sesji mostu. Liczba nowych potwierdzonych ataków PL1 pozostaje 0; `attack_time_utc` pozostaje null.
+
+
+## 50. Potwierdzenie pochodzenia czasu GGE Tracker i świeży probe PL1 — 2026-11-06 12:45 UTC
+
+### Nowy, istotny wynik audytu kodu GGE Tracker
+
+Przejrzałem pełną ścieżkę aktualizacji cooldownów w przypiętym publicznym snapshotcie GGE Tracker `7d620820a76cde4176c752f6972ce6f0c9ad7ab1` — od odczytu GAA, przez `collectDungeonCooldowns()`, po zapis do PostgreSQL i endpointy API.
+
+1. `refreshDungeonSquare()` ustawia `currentTime = new Date()` po otrzymaniu odpowiedzi HTTP z mostu.
+2. `collectDungeonCooldowns()` czyta `dungeon[5]` jako pozostały cooldown 24h i `dungeon[6]` jako ID gracza.
+3. `global_available_at` jest wyliczane lokalnie jako `currentTime + remainingCooldown24h`.
+4. `persistDungeonUpdates()` zapisuje do `dungeons_history` wyłącznie kolumny `kid, position_x, position_y, player_id`. Nie przekazuje pola `attacked_at` ani serwerowego czasu zdarzenia.
+5. Endpoint `GET /dungeons/player/{playerId}` odczytuje `DH.attacked_at` z bazy. Endpoint listy `GET /dungeons` zwraca natomiast `D.last_attack_at` jako `last_attack` oraz `D.last_attacker_id` jako `player_id`.
+
+Wniosek: pola `attacked_at` i `last_attack` są wartościami pochodzącymi z warstwy bazy/scrapera, a nie polami czasu odczytanymi bezpośrednio z pakietu ataku. Publiczny kod nie ujawnia DDL, defaultu ani triggerów, które ustalałyby dokładną semantykę tych kolumn. Nie można więc potwierdzić, że którykolwiek z tych timestampów jest czasem rozpoczęcia ataku. `global_available_at - 24h` może służyć co najwyżej do estymacji z ograniczoną dokładnością, nigdy do potwierdzonego `attack_time_utc`.
+
+Dodatkowe rozróżnienie testów: backendowe `dungeon-scenario.ts` wstawia syntetyczne wartości `attacked_at` jawnie, a `dungeon-truth.ts` czyta je jako fixture truth. Testy endpointu dowodzą zgodności API z przygotowanymi fixture'ami; nie dowodzą pochodzenia czasu w produkcyjnym scraperze.
+
+Niezależny projekt `gge-assistant-bot` również pobiera `/dungeons/player/{playerId}` i sortuje rekordy po `attacked_at`. To tylko drugi klient tego samego GGE Tracker API, a nie niezależne źródło potwierdzające czas ataku.
+
+Źródła — przypięte rewizje:
+- `gge-tracker` `7d620820a76cde4176c752f6972ce6f0c9ad7ab1`: [scraper main.ts — refreshDungeonSquare, collectDungeonCooldowns, persistDungeonUpdates](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts#L2118-L2278)
+- [API dungeons — historia gracza i attacked_at](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts#L160-L235)
+- [API dungeons — last_attack_at i last_attacker_id](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts#L420-L500)
+- [Fixture scenario — jawne, syntetyczne attacked_at](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-scenario.ts)
+- [GGE Assistant — konsument tej samej historii API](https://github.com/nathael-aa/gge-assistant-bot/blob/91cb8a16d2175ddfbdd435c9b5eb87d178e0cc13/cogs/forteresses.py#L814-L900)
+
+### Świeży probe publicznych źródeł PL1 — run 42215784484
+
+Workflow `Probe PL1 fortress API` zakończył się SUCCESS dla commitu `e097dfa70aea3fb4bd6fe3763435ef89acbbeb80` (2026-11-06 12:11:38 UTC).
+
+Testy:
+- Python: 13/13 PASS.
+- Node: 54/54 PASS, 0 failed.
+- składnia skryptów i kontrakt przypiętego `ggejs`: PASS.
+- test mobilnego UI Barony: PASS.
+- katalog mapowy: 2021 unikalnych współrzędnych, bez pól ataku/cooldownu/gracza/gotowości.
+- plan skanowania: 2021 celów, 199 sektorów 100×100, 1 990 000 potencjalnych pól.
+
+Odczyty publiczne:
+- produkcyjny PL1 TCP handshake: PASS, 175 ms; `payload_sent=false` — nie było logowania ani komend gry.
+- `/servers/catalog`: `E4K_PL1 enabled=true, fortress=false, code=null`; `E4K_PL1_BETA enabled=true, fortress=true, code=null`.
+- `/dungeons`: produkcyjny `E4K_PL1` HTTP 400 — serwer nie jest obsługiwany przez ten endpoint; `E4K_PL1_BETA` HTTP 200, 976 rekordów; IT1 HTTP 200, 2021 rekordów.
+- Beta: 5 próbek historii graczy zwróciło łącznie 8477 rekordów. To wyłącznie diagnostyka Beta; żadnego z nich nie przypisano do PL1.
+- W ośmiu próbkach timestampów Beta różnica `global_available_at - last_attack` wyniosła 86290–86393 s; w ośmiu próbkach IT1 86297–86395 s. Zgodność z okolicą 24h nie dowodzi czasu zdarzenia i nie jest przenoszona do PL1.
+- most `/status`: HTTP 200, ale `target_connected=false`; GAM/GAA zostały pominięte.
+- brak autoryzowanej sesji PL1, brak odczytu SNE/GAM z konta, brak potwierdzonego nowego ataku.
+
+Workflow: https://github.com/marwlo-ops/Empirenew/actions/runs/42215784484
+
+### Aktualna publikacja strony
+
+Po poprzednim błędzie synchronizacji sprawdziłem najnowszy workflow Pages dla aktualnego wówczas main SHA `4d39b83322424ee08be5055aec2911d09ec8a11b`:
+
+- build: SUCCESS;
+- deploy: SUCCESS;
+- report-build-status: SUCCESS.
+
+Run: https://github.com/marwlo-ops/Empirenew/actions/runs/42219044713. To potwierdza publikację commitu `4d39b833...`, nie przyszłej zmiany dokumentacji z tej sekcji.
+
+### Decyzja i następny krok
+
+- Nie zmieniono kodu produkcyjnego w tej iteracji; dopisano wyłącznie audyt źródeł i wyniki testu do dziennika #barony.
+- Nie dodano rekordów ataków PL1. `attack_time_utc` pozostaje null.
+- Nie użyto cooldownów/historii IT1 ani Beta jako danych PL1.
+- Nie zmieniono Mapa, Szpiegowania, Dodatkowe ani katalogu współrzędnych.
+- Kolejny test rozstrzygający nadal wymaga lokalnego, autoryzowanego połączenia konta testowego z produkcyjnym PL1. Potrzebne są równoczesne odczyty GAA/GAM i raport NPC z MID/LID; poświadczenia muszą pozostać lokalne.

@@ -6,8 +6,18 @@ on:
     paths:
       - 'scripts/scan_npc_map.py'
       - 'scripts/probe_gge_tracker.py'
+      - 'tests/test_scan_npc_map_auth.py'
       - '.github/workflows/npc-map-diagnostics.yml'
       - 'research/npc-map-bridge-fix.md'
+      - 'research/fortece-barona-status.md'
+      - 'bridge-deployment/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/scan_npc_map.py'
+      - 'tests/test_scan_npc_map_auth.py'
+      - '.github/workflows/npc-map-diagnostics.yml'
+      - 'bridge-deployment/**'
   workflow_dispatch:
     inputs:
       kingdom:
@@ -31,7 +41,40 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  bridge-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Empirenew
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test Bearer authentication middleware
+        run: node --test bridge-deployment/api-auth-middleware.test.js
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test scanner token handling and PL1 routing
+        run: |
+          python3 -m py_compile scripts/scan_npc_map.py
+          python3 -m unittest discover -s tests -p "test_scan_npc_map_auth.py" -v
+      - name: Verify patch against pinned upstream
+        env:
+          UPSTREAM_COMMIT: dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d
+        run: |
+          git clone --quiet https://github.com/danadum/empire-api.git "$RUNNER_TEMP/empire-api"
+          git -C "$RUNNER_TEMP/empire-api" checkout --detach "$UPSTREAM_COMMIT"
+          cp bridge-deployment/api-auth-middleware.js "$RUNNER_TEMP/empire-api/api-auth-middleware.js"
+          git -C "$RUNNER_TEMP/empire-api" apply --check "$GITHUB_WORKSPACE/bridge-deployment/app.js.patch"
+          git -C "$RUNNER_TEMP/empire-api" apply "$GITHUB_WORKSPACE/bridge-deployment/app.js.patch"
+          node --check "$RUNNER_TEMP/empire-api/app.js"
+          node --check "$RUNNER_TEMP/empire-api/api-auth-middleware.js"
+
   probe:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -40,6 +83,9 @@ jobs:
       - name: Run read-only gaa/fnm diagnostic
         id: probe
         continue-on-error: true
+        env:
+          E4K_API_BASE: ${{ secrets.E4K_API_BASE || 'https://empire-api.fly.dev' }}
+          E4K_API_TOKEN: ${{ secrets.E4K_API_TOKEN }}
         run: |
           python3 scripts/scan_npc_map.py \
             --kingdom "${{ inputs.kingdom || '1' }}" \

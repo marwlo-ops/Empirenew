@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { createConnection } from "node:net";
-import { DEFAULT_PL1_ZONE, extractOutboundBossDungeonMovementEvidence } from "./barony-live/probe-core.mjs";
+import { DEFAULT_PL1_ZONE, encodeBridgeHeadersPathSegment, extractOutboundBossDungeonMovementEvidence } from "./barony-live/probe-core.mjs";
 // Read-only probes only; do not persist player names or inferred attack events.
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
@@ -505,7 +505,7 @@ async function probeBridge() {
     }));
     for (const [command, params] of commands) {
       try {
-        const headers = encodeURIComponent(JSON.stringify(params).slice(1, -1));
+        const headers = encodeBridgeHeadersPathSegment(params);
         const url = bridgeBase + "/" + encodeURIComponent(targetServer) + "/" + command + "/" + headers;
         const result = await fetch(url, {
           headers: { Accept: "application/json" },

@@ -12,6 +12,12 @@ export function validateMapOnlyCatalog(payload) {
     throw new Error('Expected a complete IT1 map-only catalog.');
   }
   if (!payload.results || typeof payload.results !== 'object') throw new Error('Catalog has no results object.');
+  const expectedKingdoms = Object.keys(KINGDOMS).sort();
+  const actualKingdoms = Object.keys(payload.results).sort();
+  if (actualKingdoms.length !== expectedKingdoms.length ||
+      actualKingdoms.some((kingdom, index) => kingdom !== expectedKingdoms[index])) {
+    throw new Error('Catalog must contain exactly the sands, ice and fire kingdom groups.');
+  }
   const seen = new Set();
   const seenIds = new Set();
   const groups = {};

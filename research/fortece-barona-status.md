@@ -2256,3 +2256,53 @@ Zakres tej iteracji: katalog IT1, dokumentacja fortec i pakiet mostu Barony. Bez
 **Następny krok:** test na autoryzowanej sesji produkcyjnego PL1, uruchomiony lokalnie przez operatora poleceniem `node scripts/barony-live/probe.mjs --movements --reports --no-state`. Dane logowania muszą pozostać w lokalnych zmiennych środowiskowych — nie w czacie, repozytorium ani GitHub Actions. Do czasu takiego testu automatyczna historia ataków PL1 pozostaje niepotwierdzona.
 
 Dokumentacja: https://docs.gge-tracker.com/ oraz https://api.gge-tracker.com/api/v1/docs.
+
+
+## 58. Audyt kontraktów API GGE Tracker — brak globalnego feedu ataków E4K PL1 — 2026-11-06 20:35 UTC
+
+### Zakres i źródła
+
+Przeprowadzono świeży odczyt dokumentacji OpenAPI GGE Tracker (wersja widoczna w dokumentacji: `26.04.07-beta`) oraz odczyt logów workflow `42285478811` z 2026-11-06 20:06 UTC. Testy publicznego API były wyłącznie GET/read-only; nie użyto poświadczeń konta operatora.
+
+- `GET /dungeons` wymaga nagłówka `gge-server` i zwraca **bieżący stan** fortec/dungeonów. Schemat zawiera m.in. KID, X/Y, `player_id`, `player_name`, `total_attack_count`, `last_attack`, `global_available_at` i `effective_cooldown_until`. Endpoint ma paginację i filtry cooldownu/gracza/pozycji, ale dokumentacja nie definiuje go jako globalnego dziennika zdarzeń per współrzędna. `last_attack` pozostaje polem stanu o niepotwierdzonej semantyce czasu rozpoczęcia bitwy.
+- `GET /dungeons/player/{playerId}` zwraca historię ataków **jednego wskazanego gracza**. Parametr `lastDays` ma zakres 1–365 (domyślnie 30), a rekord historii zawiera `kid`, `position_x`, `position_y`, `attacked_at`. To potencjalny cross-check dla znanego ID gracza na obsługiwanym serwerze, nie globalne wyszukiwanie wszystkich ataków na daną fortecę.
+- `GET /server/movements` zwraca historię **przeniesień zamków graczy**: pozycję zamku przed/po, typ zamku i `created_at`. Nie jest to feed marszów armii ani ataków NPC.
+- `GET /changes` obejmuje tylko typy: `membership`, `player_rename`, `castle_movement`, `alliance_rename`, `alliance_description`. Schemat nie zawiera zdarzeń ataków na fortece NPC.
+
+Dokumentacja kontraktów:
+- https://docs.gge-tracker.com/#/Dungeons/get_dungeons
+- https://docs.gge-tracker.com/#/Dungeons/get_dungeons_player__playerId_
+- https://docs.gge-tracker.com/#/Movements/get_server_movements
+- https://docs.gge-tracker.com/#/Changes/get_changes
+
+### Świeży test filtrów serwera
+
+Logi workflow `42285478811` (2026-11-06 20:06:51–20:06:54 UTC) potwierdzają:
+- `gge-server: E4K_PL1` na `/dungeons`: HTTP 400, `Invalid server`. Lista serwerów w odpowiedzi zawiera `E4K_PL1_BETA`, ale nie produkcyjne `E4K_PL1`.
+- `gge-server: PL1`: HTTP 400, `Invalid server`.
+- `gge-server: E4K_PL1_BETA`: HTTP 200; próbka stanu zwróciła pola `player_id`, `last_attack` i cooldown. `/dungeons/meta`: HTTP 200, `last_scan_at=2026-11-06T20:05:56.983Z`.
+- `gge-server: IT1`: HTTP 200; `/dungeons/meta`: HTTP 200. Dane IT1/Beta nie są przenoszone do produkcyjnego PL1.
+- Beta: 976/976 współrzędnych pokrywa się z katalogiem IT1; to potwierdza wyłącznie zgodność tych dwóch źródeł mapowych, nie tożsamość bieżącego stanu produkcyjnego PL1.
+- Historia pięciu graczy Beta: 3182 rekordy w tej próbce; pozostaje to wyłącznie historia Beta.
+
+Publiczny most w tym samym runie:
+- `/status`: HTTP 200, `target_connected=true`.
+- GAM: HTTP 200, `return_code=0`, sekcje M/O, 0 zwróconych ruchów i 0 ruchów NPC typu 11.
+- GAA pominięto, ponieważ publiczny adapter nie ma potwierdzonego mapowania odpowiedzi GAA; żądania nie wysłano.
+- GAM obejmuje tylko ruchy widoczne dla sesji mostu, nie cały serwer. Nie był to odczyt autoryzowanej sesji konta operatora.
+
+Źródło logów: https://github.com/marwlo-ops/Empirenew/actions/runs/42285478811
+
+### Wniosek i decyzja implementacyjna
+
+W aktualnie udokumentowanym publicznym API GGE Tracker nie ma globalnego feedu zdarzeń „atak na KID/X/Y”. `/dungeons/player/{playerId}` może dostarczyć `attacked_at` wyłącznie dla znanego gracza, ale produkcyjne `E4K_PL1` jest odrzucane przez filtr serwera. `/server/movements` i `/changes` nie opisują marszów armii na NPC. Nie dodawać tych endpointów jako źródła potwierdzeń ataków.
+
+**Potwierdzone nowe ataki produkcyjnego PL1: 0.** Nie zapisano zdarzeń; `attack_time_utc` pozostaje `null`. Brakuje świeżej autoryzowanej próbki produkcyjnego PL1 zawierającej dokładny KID/X/Y oraz ruch GAM lub raport SNE/BLS/BLM skorelowany z tym samym celem i graczem. Nawet wtedy czas rozpoczęcia będzie przedziałem obserwacji, dopóki nie zostanie potwierdzony niezależny timestamp.
+
+Następny test pozostaje lokalny, na autoryzowanej sesji produkcyjnego PL1:
+```bash
+node scripts/barony-live/probe.mjs --movements --reports --no-state
+```
+Poświadczenia muszą pozostać w lokalnych zmiennych środowiskowych. Nie używać cooldownów IT1/Beta jako danych PL1.
+
+Zakres: wyłącznie dokumentacja i diagnostyka #barony. Bez zmian w Mapie, Szpiegowaniu, Dodatkowych, ich UI ani w katalogu współrzędnych.

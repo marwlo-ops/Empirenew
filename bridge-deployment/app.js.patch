@@ -71,5 +71,5 @@ diff --git a/app.js b/app.js
 +                        : await executeCommand();
                      res.status(200).json({server: req.params.server, command: req.params.command, return_code: response.payload.status, content: response.payload.data});
                  } catch (error) {
- -                    console.log(error.message);
+-                    console.log(error.message);
 +                    console.log('Bridge command failed:', error?.name || 'Error');

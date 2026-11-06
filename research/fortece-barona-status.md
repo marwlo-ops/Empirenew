@@ -918,7 +918,7 @@ Publiczny katalog GGE Tracker nadal oznacza `E4K_PL1` jako `fortress=false` i be
 
 ### Zakres
 
-Zmiany kodu dotyczyły tylko workflow importu katalogu Barony i jego testu. Automatyczny commit `02dc5fa` zmienił tylko `data/baron-fortresses.json`. Nie zmieniono `barony.html), Mapa, Szpiegowania ani Dodatkowe. Katalog IT1 nadal dostarcza wyłącznie współrzędne; cooldown i historia IT1/Beta nie są przenoszone do PL1.
+Zmiany kodu dotyczyły tylko workflow importu katalogu Barony i jego testu. Automatyczny commit `02dc5fa` zmienił tylko `data/baron-fortresses.json`. Nie zmieniono `barony.html`, Mapa, Szpiegowania ani Dodatkowe. Katalog IT1 nadal dostarcza wyłącznie współrzędne; cooldown i historia IT1/Beta nie są przenoszone do PL1.
 
 
 ## 32. Weryfikacja pełnych logów importu, probe i deploymentu — 2026-11-06
@@ -1373,7 +1373,7 @@ Nie edytowano zakładek Mapa, Szpiegowanie ani Dodatkowe, plików `barony.html` 
 - Beta: `E4K_PL1_BETA` HTTP 200, 976 punktów (Piaski 312, Lód 409, Ogień 255); 5 sprawdzonych historii dało 4659 rekordów. Są to wyłącznie dane Beta. IT1 zwrócił 2021 rekordów mapy. Zgodność współrzędnych Beta↔IT1 wyniosła 976/976; nie stanowi to dowodu historii produkcyjnego PL1.
 - Historia graczy produkcyjnego PL1 z migawki Szpiegowania: 3/3 `Player not found`, 0 rekordów; próba suffixu zoneId=259: 3/3 `Invalid player ID`; katalog nie udostępnia trzycyfrowego kodu serwera.
 - Publiczny most `/status`: HTTP 200, ale `EmpirefourkingdomsExGG_3` ma `target_connected=false`; GAM/GAA pominięto. Nie uzyskano odpowiedzi mapy, ruchów ani raportów z produkcyjnego PL1.
-- Porównanie `last_attack) z globalnym cooldownem wykonano wyłącznie diagnostycznie na Beta i IT1. Nie przeniesiono żadnych cooldownów ani historii do PL1.
+- Porównanie `last_attack` z globalnym cooldownem wykonano wyłącznie diagnostycznie na Beta i IT1. Nie przeniesiono żadnych cooldownów ani historii do PL1.
 - Pages run `42174809096`: build SUCCESS, report-build-status SUCCESS, deploy SUCCESS. Log deploy potwierdza `pages_build_version=1ec04b9d8be333587107837a30ba8608956870bd` i URL `https://marwlo-ops.github.io/Empirenew/`.
-- Zmiany scalonego PR obejmują wyłącznie `research/fortece-barona-status.md`, `scripts/barony-live/README.md`, `scripts/barony-live/probe-core.mjs) i `scripts/barony-live/probe-core.test.mjs`. Nie zmieniono Mapa, Szpiegowania, Dodatkowe, `barony.html) ani katalogu współrzędnych.
-- Ataki potwierdzone na produkcyjnym PL1 w tym przebiegu: 0. `attack_time_utc) pozostaje `null`; sygnały GAA pozostają kandydatami do czasu walidacji na autoryzowanej sesji PL1 i niezależnym raporcie NPC.
+- Zmiany scalonego PR obejmują wyłącznie `research/fortece-barona-status.md`, `scripts/barony-live/README.md`, `scripts/barony-live/probe-core.mjs` i `scripts/barony-live/probe-core.test.mjs`. Nie zmieniono Mapa, Szpiegowania, Dodatkowe, `barony.html) ani katalogu współrzędnych.
+- Ataki potwierdzone na produkcyjnym PL1 w tym przebiegu: 0. `attack_time_utc` pozostaje `null`; sygnały GAA pozostają kandydatami do czasu walidacji na autoryzowanej sesji PL1 i niezależnym raporcie NPC.

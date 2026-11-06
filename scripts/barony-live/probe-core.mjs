@@ -2,6 +2,19 @@ export const DEFAULT_PL1_ZONE = 'EmpirefourkingdomsExGG_3';
 export const EXPECTED_BOSS_DUNGEON_OWNER_BY_KID = Object.freeze({ 1: -230, 2: -231, 3: -232 });
 export const MAP_SECTOR_SIZE = 100;
 
+/**
+ * The public empire-api route is /:server/:command/:headers, so an empty
+ * object still needs a non-empty third path segment. A single encoded space
+ * decodes to whitespace and makes JSON.parse(`{ }`) return the intended {}.
+ */
+export function encodeBridgeHeadersPathSegment(params) {
+  if (!params || typeof params !== 'object' || Array.isArray(params)) {
+    throw new Error('Bridge command headers must be an object.');
+  }
+  const fragment = JSON.stringify(params).slice(1, -1);
+  return encodeURIComponent(fragment || ' ');
+}
+
 const KINGDOMS = Object.freeze({ sands: 1, ice: 2, fire: 3 });
 const KINGDOM_NAME_BY_KID = Object.freeze({ 1: 'sands', 2: 'ice', 3: 'fire' });
 const FORBIDDEN_CATALOG_KEY = /(attack|cooldown|player|defeater|ready|readiness|available|attacked)/i;

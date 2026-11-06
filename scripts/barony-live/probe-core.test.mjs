@@ -9,6 +9,7 @@ import {
   parseGgejsCommandResponseEnvelope, parseGgejsBattleLogShortResponse,
   parseGgejsBattleLogMiddleTimeResponse, pickSamples,
   requestMailboxMessages, selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
+  encodeBridgeHeadersPathSegment,
 } from './probe-core.mjs';
 
 function catalog() {
@@ -47,6 +48,24 @@ function makeObservation({
   }
   return buildObservation({ id, kid, kingdom, x, y }, [row], sampledAt);
 }
+
+test('encodes empty bridge headers into a non-empty Express route segment', () => {
+  const segment = encodeBridgeHeadersPathSegment({});
+  assert.equal(segment, '%20');
+  assert.deepEqual(JSON.parse(`{${decodeURIComponent(segment)}}`), {});
+});
+
+test('preserves non-empty bridge header JSON after path decoding', () => {
+  const segment = encodeBridgeHeadersPathSegment({ KID: 2, AX1: 100, AY1: 200 });
+  assert.deepEqual(JSON.parse(`{${decodeURIComponent(segment)}}`), {
+    KID: 2, AX1: 100, AY1: 200,
+  });
+});
+
+test('rejects non-object bridge headers', () => {
+  assert.throws(() => encodeBridgeHeadersPathSegment(null), /must be an object/);
+  assert.throws(() => encodeBridgeHeadersPathSegment([]), /must be an object/);
+});
 
 test('accepts only complete IT1 map-only data', () => {
   assert.equal(Object.values(validateMapOnlyCatalog(catalog())).flat().length, 9);

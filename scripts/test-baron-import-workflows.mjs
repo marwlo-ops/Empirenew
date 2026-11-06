@@ -6,6 +6,8 @@ const canonical = await readFile(new URL("import-it1-fortresses.yml", root), "ut
 const legacy = await readFile(new URL("baron-map-import.yml", root), "utf8");
 
 assert.match(canonical, /schedule:\s*\n\s*- cron:/, "The canonical Python importer must own the refresh schedule");
+assert.match(canonical, /push:\s*\n[\s\S]*paths:\s*\n[\s\S]*scripts\/import_it1_fortresses\.py/, "Importer changes must trigger the canonical workflow");
+assert.match(canonical, /push:\s*\n[\s\S]*paths:\s*\n[\s\S]*tests\/test_import_it1_fortresses\.py/, "Importer test changes must trigger the canonical workflow");
 assert.match(canonical, /python scripts\/import_it1_fortresses\.py/, "The canonical workflow must run the validated Python importer");
 assert.match(canonical, /contents:\s*write/, "Only the canonical importer may publish the map catalog");
 assert.match(canonical, /uses: actions\/checkout@v4\s*\n\s*with:\s*\n\s*# Queued runs must start from the latest main, not the stale push-event SHA\.\s*\n\s*ref: main/, "Queued imports must check out the current main branch");

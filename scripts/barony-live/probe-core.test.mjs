@@ -23,6 +23,30 @@ function catalog() {
   return { complete: true, server_source: 'IT1', total_count: 9, results };
 }
 
+function makeObservation({
+  kid = 1,
+  x = 10,
+  y = 20,
+  defeater = 111,
+  cooldownUntil = '2026-11-05T14:59:00Z',
+  sampledAt = '2026-11-05T15:00:00Z',
+  id = `it1-${kid}-${x}-${y}`,
+} = {}) {
+  const kingdom = ({ 1: 'sands', 2: 'ice', 3: 'fire' })[kid];
+  const owner = ({ 1: -230, 2: -231, 3: -232 })[kid];
+  const row = {
+    areaType: 11,
+    kingdomId: kid,
+    position: { X: x, Y: y },
+    ownerInfo: { playerId: owner },
+    defeaterPlayerId: defeater,
+  };
+  if (cooldownUntil !== undefined) {
+    row.attackCooldownEnd = cooldownUntil === null ? null : new Date(cooldownUntil);
+  }
+  return buildObservation({ id, kid, kingdom, x, y }, [row], sampledAt);
+}
+
 test('accepts only complete IT1 map-only data', () => {
   assert.equal(Object.values(validateMapOnlyCatalog(catalog())).flat().length, 9);
 });
@@ -109,7 +133,7 @@ test('does not accept a regular type 2 dungeon, player castle or wrong type 11 N
     { areaType: 2, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -220 } },
     { areaType: 11, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -231 } },
   ];
-  assert.equal(buildObservation(target, rows).status, 'coordinate_row_unverified');
+  assert.equal(buildObservation(target, rows).status, 'ambiguous_duplicate_rows');
 });
 
 test('reports no row as not confirmed, not as an attack', () => {
@@ -119,17 +143,19 @@ test('reports no row as not confirmed, not as an attack', () => {
   assert.equal(observation.attack_time_utc, null);
 });
 
-test('reports defeater and cooldown transitions only as unvalidated target-specific candidates', () => {
-  const previous = {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:00:00Z',
-    target: { kid: 1, x: 10, y: 20 }, defeater_player_id: 111, cooldown_active: false,
-  };
-  const current = {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:10:00Z',
-    target: previous.target, defeater_player_id: 222, cooldown_active: true,
-  };
+test('reports a combined cooldown and defeater transition only for one exact verified fortress row', () => {
+  const previous = makeObservation({
+    defeater: 111,
+    cooldownUntil: '2026-11-05T14:59:00Z',
+    sampledAt: '2026-11-05T15:00:00Z',
+  });
+  const current = makeObservation({
+    defeater: 222,
+    cooldownUntil: '2026-11-05T16:10:00Z',
+    sampledAt: '2026-11-05T15:10:00Z',
+  });
   const signals = compareObservations(previous, current);
-  assert.deepEqual(signals.map((s) => s.kind), ['target_attack_transition_candidate']);
+  assert.deepEqual(signals.map((signal) => signal.kind), ['target_attack_transition_candidate']);
   assert.equal(signals[0].classification, 'candidate_same_target_cooldown_transition_with_positive_defeater');
   assert.deepEqual(signals[0].metrics, [
     'BossDungeonMapobject.attackCooldownEnd',
@@ -140,20 +166,30 @@ test('reports defeater and cooldown transitions only as unvalidated target-speci
   assert.equal(signals[0].attack_time_utc, null);
   assert.equal(signals[0].interval_start_utc, '2026-11-05T15:00:00.000Z');
   assert.equal(signals[0].interval_end_utc, '2026-11-05T15:10:00.000Z');
+  assert.equal(signals[0].interval_seconds, 600);
 });
 
-test('requires the same exact target and increasing sample times before comparing observations', () => {
-  const previous = {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:00:00Z',
-    target: { kid: 1, x: 10, y: 20, area_type: 11, expected_boss_dungeon_owner_id: -230 },
-    defeater_player_id: 111, cooldown_active: false,
-  };
-  const current = {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:10:00Z',
-    target: previous.target, defeater_player_id: 222, cooldown_active: true,
-  };
+test('requires identical catalog ID, kingdom, KID, X/Y, NPC owner contract and increasing sample times', () => {
+  const previous = makeObservation({
+    sampledAt: '2026-11-05T15:00:00Z',
+    cooldownUntil: '2026-11-05T14:59:00Z',
+  });
+  const current = makeObservation({
+    defeater: 222,
+    sampledAt: '2026-11-05T15:10:00Z',
+    cooldownUntil: '2026-11-05T16:10:00Z',
+  });
   assert.deepEqual(compareObservations(previous, {
     ...current, target: { ...current.target, x: 11 },
+  }), []);
+  assert.deepEqual(compareObservations(previous, {
+    ...current, target: { ...current.target, catalog_id_it1: 'different-id' },
+  }), []);
+  assert.deepEqual(compareObservations(previous, {
+    ...current, target: { ...current.target, kingdom: 'ice' },
+  }), []);
+  assert.deepEqual(compareObservations(previous, {
+    ...current, target: { ...current.target, expected_area_type: 2 },
   }), []);
   assert.deepEqual(compareObservations(previous, {
     ...current, target: { ...current.target, expected_boss_dungeon_owner_id: -231 },
@@ -166,15 +202,17 @@ test('requires the same exact target and increasing sample times before comparin
   }), []);
 });
 
-test('recognizes a repeat win by the same player when the same target cooldown restarts', () => {
-  const previous = {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:00:00Z',
-    target: { kid: 2, x: 300, y: 400 }, defeater_player_id: 98765, cooldown_active: false,
-  };
-  const current = {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:04:00Z',
-    target: previous.target, defeater_player_id: 98765, cooldown_active: true,
-  };
+test('recognizes a repeat win by the same player when the exact target cooldown restarts', () => {
+  const previous = makeObservation({
+    kid: 2, x: 300, y: 400, defeater: 98765,
+    cooldownUntil: '2026-11-05T14:59:00Z',
+    sampledAt: '2026-11-05T15:00:00Z',
+  });
+  const current = makeObservation({
+    kid: 2, x: 300, y: 400, defeater: 98765,
+    cooldownUntil: '2026-11-05T15:04:30Z',
+    sampledAt: '2026-11-05T15:04:00Z',
+  });
   const [signal] = compareObservations(previous, current);
   assert.equal(signal.kind, 'target_attack_transition_candidate');
   assert.equal(signal.player_id, 98765);
@@ -183,26 +221,86 @@ test('recognizes a repeat win by the same player when the same target cooldown r
 });
 
 test('keeps single-field changes as partial candidates, not combined attack transitions', () => {
-  const previous = {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:00:00Z',
-    target: { kid: 3, x: 500, y: 600 }, defeater_player_id: 111, cooldown_active: false,
-  };
-  const idOnly = compareObservations(previous, {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:05:00Z',
-    target: previous.target, defeater_player_id: 222, cooldown_active: false,
+  const previous = makeObservation({
+    kid: 3, x: 500, y: 600, defeater: 111,
+    cooldownUntil: '2026-11-05T14:59:00Z',
+    sampledAt: '2026-11-05T15:00:00Z',
   });
+  const idOnly = compareObservations(previous, makeObservation({
+    kid: 3, x: 500, y: 600, defeater: 222,
+    cooldownUntil: '2026-11-05T14:59:00Z',
+    sampledAt: '2026-11-05T15:05:00Z',
+  }));
   assert.deepEqual(idOnly.map((signal) => signal.kind), ['target_defeater_id_changed']);
-  const cooldownOnly = compareObservations(previous, {
-    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:05:00Z',
-    target: previous.target, defeater_player_id: null, cooldown_active: true,
-  });
+
+  const cooldownOnly = compareObservations(previous, makeObservation({
+    kid: 3, x: 500, y: 600, defeater: null,
+    cooldownUntil: '2026-11-05T15:06:00Z',
+    sampledAt: '2026-11-05T15:05:00Z',
+  }));
   assert.deepEqual(cooldownOnly.map((signal) => signal.kind), ['target_cooldown_started']);
 });
 
-test('does not create signals from missing or unverified previous samples', () => {
-  const current = { status: 'fortress_row_found', defeater_player_id: 123456, cooldown_active: true };
+test('does not compare forged, incomplete or unverified observation records', () => {
+  const current = makeObservation({
+    defeater: 123456,
+    cooldownUntil: '2026-11-05T16:00:00Z',
+    sampledAt: '2026-11-05T15:10:00Z',
+  });
   assert.deepEqual(compareObservations(null, current), []);
   assert.deepEqual(compareObservations({ status: 'not_confirmed' }, current), []);
+  assert.deepEqual(compareObservations({
+    status: 'fortress_row_found',
+    sampled_at_utc: '2026-11-05T15:00:00Z',
+    target: current.target,
+    defeater_player_id: 111,
+    cooldown_active: false,
+  }, current), []);
+  assert.deepEqual(compareObservations({
+    ...current,
+    rows: [{ ...current.rows[0], owner_id: 999 }],
+  }, current), []);
+});
+
+test('does not create a transition candidate when the observation interval exceeds two hours', () => {
+  const previous = makeObservation({
+    sampledAt: '2026-11-05T12:00:00Z',
+    cooldownUntil: '2026-11-05T11:59:00Z',
+  });
+  const current = makeObservation({
+    defeater: 222,
+    sampledAt: '2026-11-05T14:00:01Z',
+    cooldownUntil: '2026-11-05T15:00:00Z',
+  });
+  assert.deepEqual(compareObservations(previous, current), []);
+});
+
+test('marks multiple rows at one coordinate ambiguous even when only one row has the expected NPC owner', () => {
+  const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
+  const valid = {
+    areaType: 11, kingdomId: 1, position: { X: 10, Y: 20 },
+    ownerInfo: { playerId: -230 }, defeaterPlayerId: 123456,
+    attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
+  };
+  const unrelated = {
+    areaType: 2, kingdomId: 1, position: { X: 10, Y: 20 },
+    ownerInfo: { playerId: -220 },
+  };
+  const observation = buildObservation(target, [valid, unrelated], '2026-11-05T15:00:00Z');
+  assert.equal(observation.status, 'ambiguous_duplicate_rows');
+  assert.deepEqual(compareObservations(
+    makeObservation({ sampledAt: '2026-11-05T14:59:00Z' }),
+    observation,
+  ), []);
+});
+
+test('rejects invalid fortress targets before matching map rows', () => {
+  assert.throws(() => buildObservation({
+    id: 'bad', kid: 4, kingdom: 'sands', x: 10, y: 20,
+  }, [], '2026-11-05T15:00:00Z'), /Invalid fortress target/);
+  assert.throws(() => buildObservation({
+    id: '', kid: 1, kingdom: 'sands', x: 10, y: 20,
+  }, [], '2026-11-05T15:00:00Z'), /Invalid fortress target/);
 });
 
 test('keeps a missing cooldown as unknown and does not create a false cooldown-start signal', () => {

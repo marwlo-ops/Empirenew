@@ -25,6 +25,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Queued runs must start from the latest main, not the stale push-event SHA.
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"

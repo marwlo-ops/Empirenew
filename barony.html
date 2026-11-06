@@ -23,7 +23,7 @@ main{max-width:1400px;margin:auto;padding:18px}.hero{padding:12px 4px 18px}.eyeb
 <label><input type="checkbox" class="realm-choice" value="1" checked> 🏜️ Piaski</label>
 <label><input type="checkbox" class="realm-choice" value="2" checked> ❄️ Lód</label>
 <label><input type="checkbox" class="realm-choice" value="3" checked> 🔥 Ogień</label>
-<label><input type="checkbox" class="realm-choice" value="archipelago"> 🏝️ Archipelag</label>
+<label><input type="checkbox" class="realm-choice" value="4"> 🏝️ Archipelag / Wyspy</label>
 <label><input type="checkbox" class="realm-choice" value="islands"> 🌊 Wyspy</label>
 <select id="liveStatus"><option value="all">Wszystkie statusy</option><option value="available">Dostępne</option><option value="locked">Zablokowane</option></select></div>
 <div class="subtle">Archipelag i Wyspy są widoczne jako osobne obszary, ale nie włączam ich do zapytania fortec, dopóki nie ma potwierdzonego endpointu i identyfikatorów API.</div>
@@ -213,7 +213,7 @@ async function loadLiveRadar(){
  const player=$('livePlayer').value.trim();
  const selected=[...document.querySelectorAll('.realm-choice:checked')].map(x=>x.value);
  if(!player){meta.textContent='Wpisz nick gracza, aby uruchomić skan.';list.innerHTML='<div class="empty">Czekam na nick gracza.</div>';return;}
- const kids=selected.filter(x=>['1','2','3'].includes(x));
+ const kids=selected.filter(x=>['1','2','3','4'].includes(x));
  if(!kids.length){meta.textContent='Wybierz przynajmniej jedną obsługiwaną krainę.';list.innerHTML='<div class="empty">Brak wybranych krain fortecznych.</div>';return;}
  meta.textContent='Skanuję gracza „'+player+'” w API GGE Tracker…';
  list.innerHTML='<div class="empty">Pobieranie danych…</div>';
@@ -230,7 +230,7 @@ async function loadLiveRadar(){
   const data=await response.json();
   if(!Array.isArray(data.dungeons))throw Error('API zwróciło nieoczekiwany format danych.');
   const now=Date.now();
-  const kingdomNames={1:'Płonące Piaski',2:'Wieczny Lód',3:'Ogniste Szczyty'};
+  const kingdomNames={1:'Płonące Piaski',2:'Wieczny Lód',3:'Ogniste Szczyty',4:'Archipelag / Wyspy'};
   const status=$('liveStatus').value;
   const rows=data.dungeons.map(d=>{
    const until=d.effective_cooldown_until?Date.parse(d.effective_cooldown_until):NaN;
@@ -242,7 +242,7 @@ async function loadLiveRadar(){
   const remaining=n=>{n=Math.max(0,Number(n)||0);if(n<60)return n+' s';const m=Math.ceil(n/60);return m<60?m+' min':Math.floor(m/60)+' h '+(m%60)+' min';};
   meta.textContent='Serwer E4K_PL1_BETA · gracz: '+player+' · wyników: '+rows.length+' · odczyt: '+fmt(new Date().toISOString());
   list.innerHTML=rows.length?rows.map(x=>'<article class="item"><strong>'+(x.status==='available'?'🟢 Dostępna':'🔴 Zablokowana')+' · '+esc(kingdomNames[x.kid]||('Kraina '+x.kid))+'</strong><small>Współrzędne: <b>'+esc(x.x)+':'+esc(x.y)+'</b> · dystans: '+esc(x.distance)+'</small><small>Status: '+(x.status==='available'?'gotowa według cooldownu API':'odblokowanie za '+remaining(x.seconds_remaining))+'</small><small>Ostatni gracz zapisany przez API: '+esc(x.player_name||'brak danych')+'</small><small>Cooldown do: '+esc(x.cooldown_until?fmt(x.cooldown_until):'brak aktywnej blokady')+'</small></article>').join(''):'<div class="empty">API nie zwróciło fortec dla wybranego nicku i krain.</div>';
-  if(selected.includes('archipelago')||selected.includes('islands'))meta.textContent+=' · Archipelag/Wyspy pominięte: brak potwierdzonej obsługi w API fortec.';
+  
  }catch(error){
   meta.textContent='Nie udało się wykonać skanu: '+error.message;
   list.innerHTML='<div class="empty">Nie pokazujemy danych zastępczych. Możliwa blokada CORS albo niedostępność API.</div>';

@@ -25,7 +25,6 @@ DEFAULT_BASE = "https://empire-api.fly.dev"
 DEFAULT_SERVER = "EmpirefourkingdomsExGG_3"  # Pinned production PL1 zone from e4k-data
 # Audited upstream empire-api data/commands.json: GAA and FNM have no response-key mapping.
 BRIDGE_RESPONSE_MAPPED_COMMANDS = frozenset({"wsp", "gdi", "hgh", "ain", "llsp", "llsw", "slse"})
-MAP_COMMANDS = ("gaa", "fnm")
 NPC_WORDS = re.compile(r"(npc|baron|robber|dungeon|fortress|stronghold|camp|rozb[oó]j|baron|loch|twierd|ob[oó]z)", re.I)
 
 
@@ -79,7 +78,7 @@ def request_command(base: str, server: str, command: str,
     url = build_url(base, server, command, params)
     headers = {
         "Accept": "application/json",
-        "User-Agent": "Empirenew-NPC-map-diagnostic/1.1",
+        "User-Agent": "Empirenew-NPC-map-diagnostic/1.2",
     }
     api_token = os.getenv("E4K_API_TOKEN")
     if api_token:

@@ -23,7 +23,7 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
 DEFAULT_BASE = "https://empire-api.fly.dev"
-DEFAULT_SERVER = "EmpirefourkingdomsExGG2_3"
+DEFAULT_SERVER = "EmpirefourkingdomsExGG_3"  # Pinned production PL1 zone from e4k-data
 NPC_WORDS = re.compile(r"(npc|baron|robber|dungeon|fortress|stronghold|camp|rozb[oó]j|baron|loch|twierd|ob[oó]z)", re.I)
 
 
@@ -41,10 +41,14 @@ def build_url(base: str, server: str, command: str, params: dict[str, Any]) -> s
 def request_command(base: str, server: str, command: str,
                     params: dict[str, Any], timeout: int) -> dict[str, Any]:
     url = build_url(base, server, command, params)
-    req = Request(url, headers={
+    headers = {
         "Accept": "application/json",
-        "User-Agent": "Empirenew-NPC-map-diagnostic/1.0",
-    })
+        "User-Agent": "Empirenew-NPC-map-diagnostic/1.1",
+    }
+    api_token = os.getenv("E4K_API_TOKEN")
+    if api_token:
+        headers["Authorization"] = f"Bearer {api_token}"
+    req = Request(url, headers=headers)
     try:
         with urlopen(req, timeout=timeout) as response:
             status = response.status

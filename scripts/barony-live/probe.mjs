@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
   isGgejsGamDispatchStack, parseGgejsCommandResponseEnvelope, parseGgejsBattleLogShortResponse,
+  parseGgejsBattleLogMiddleTimeResponse,
   selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
 
@@ -105,6 +106,8 @@ async function main() {
   const movementGamBatches=[];
   const movementGamResponseStatuses=[];
   const battleLogShortResponses=[];
+  const battleLogMiddleResponses=[];
+  let activeReportMessageId=null;
   let latestGamResponseMeta=null;
   let ignoredNonGamMovementUpdates=0;
   let movementObservationPhase = 'pre_request';
@@ -120,6 +123,8 @@ async function main() {
       if (latestGamResponseMeta) movementGamResponseStatuses.push(latestGamResponseMeta);
       const shortLog=parseGgejsBattleLogShortResponse(message,receivedAt);
       if (shortLog) battleLogShortResponses.push(shortLog);
+      const middleLog=parseGgejsBattleLogMiddleTimeResponse(message,receivedAt,activeReportMessageId);
+      if (middleLog) battleLogMiddleResponses.push(middleLog);
       return originalOnSocketMessage.call(this,clientArg,message);
     };
   }
@@ -239,11 +244,17 @@ async function main() {
       for (const message of reportMessages) {
         try {
           if (typeof message.getBattleLog!=='function') { rejectedReports++; continue; }
-          const battleLog=await message.getBattleLog();
+          const reportMessageId=Number(message.messageId);
+          activeReportMessageId=Number.isSafeInteger(reportMessageId) && reportMessageId>0 ? reportMessageId : null;
+          let battleLog;
+          try { battleLog=await message.getBattleLog(); }
+          finally { activeReportMessageId=null; }
           if (battleLog) battleLogsLoaded++;
           const shortLogTimeEvidence=battleLogShortResponses.slice().reverse().find(item =>
-            item.message_id===Number(message.messageId) && item.battle_log_id===Number(battleLog?.battleLogId));
-          const evidence=extractNpcBattleReportEvidence(message,battleLog,shortLogTimeEvidence);
+            item.message_id===reportMessageId && item.battle_log_id===Number(battleLog?.battleLogId));
+          const middleLogTimeEvidence=battleLogMiddleResponses.slice().reverse().find(item =>
+            item.message_id===reportMessageId && item.battle_log_id===Number(battleLog?.battleLogId));
+          const evidence=extractNpcBattleReportEvidence(message,battleLog,shortLogTimeEvidence,middleLogTimeEvidence);
           if (evidence) reportEvidence.push(evidence);
           else rejectedReports++;
         } catch {
@@ -257,7 +268,9 @@ async function main() {
         npc_reports_selected:reportMessages.length,
         battle_logs_loaded:battleLogsLoaded,
         battle_log_short_responses_with_ps:battleLogShortResponses.length,
+        battle_log_middle_responses_with_ps:battleLogMiddleResponses.length,
         battle_time_estimates:reportEvidence.filter(item=>item.battle_time_estimate_utc).length,
+        battle_time_cross_checked:reportEvidence.filter(item=>item.battle_time_source==='BLS.PS+BLM.PS_cross_checked').length,
         evidence_count:reportEvidence.length,
         fetch_errors:fetchErrors,
         rejected_reports:rejectedReports,

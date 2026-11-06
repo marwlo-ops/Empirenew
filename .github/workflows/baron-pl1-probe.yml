@@ -68,6 +68,7 @@ jobs:
           const socket = fs.readFileSync(root + '/managers/SocketManager.js', 'utf8');
           const gam = fs.readFileSync(root + '/commands/gam.js', 'utf8');
           const bls = fs.readFileSync(root + '/commands/bls.js', 'utf8');
+          const blm = fs.readFileSync(root + '/commands/blm.js', 'utf8');
           const commandIndex = fs.readFileSync(root + '/commands/index.js', 'utf8');
           const probe = fs.readFileSync('scripts/barony-live/probe.mjs', 'utf8');
           const core = fs.readFileSync('scripts/barony-live/probe-core.mjs', 'utf8');
@@ -85,7 +86,8 @@ jobs:
           if (commandShift < 0 || contextShift < 0 || errorCodeShift < contextShift) throw new Error('Pinned ggejs response command/context/error-code parsing order changed.');
           if (!gam.includes('client.movements._add_or_update(movements);') || !gam.includes('baseExecuteCommand(client, movements, errorCode, params, callbacks);')) throw new Error('Pinned ggejs GAM handler dispatch order changed.');
           if (!bls.includes('parseBLS(client, params)') || !bls.includes('baseExecuteCommand(client, battleLog, errorCode, params, callbacks)')) throw new Error('Pinned ggejs BLS short battle-log response contract changed.');
-          if (!core.includes('payload.PS') || !core.includes('BLS.PS_seconds_since_battle') || !probe.includes('parseGgejsBattleLogShortResponse')) throw new Error('Barony no longer captures the BLS.PS battle-age field as an estimate.');
+          if (!blm.includes('const C2SBattleLogMiddleVO = {LID: battleLogId};') || !blm.includes('baseExecuteCommand(client, battleLog, errorCode, params, callbacks)')) throw new Error('Pinned ggejs BLM middle battle-log response contract changed.');
+          if (!core.includes('payload.PS') || !core.includes('BLS.PS_seconds_since_battle') || !core.includes('BLM.PS_seconds_since_battle') || !probe.includes('parseGgejsBattleLogShortResponse') || !probe.includes('parseGgejsBattleLogMiddleTimeResponse')) throw new Error('Barony no longer captures and cross-checks BLS.PS/BLM.PS battle-age estimates.');
           if (!probe.includes("client.socketManager.sendCommand('gam',{})") || !probe.includes('buildGamProbeSummary') || !probe.includes('parseGgejsCommandResponseEnvelope')) throw new Error('Barony probe no longer sends and status-validates the read-only GAM snapshot request.');
           if (!core.includes('response_ok === true') || !core.includes('gam_response_rejected')) throw new Error('Barony core no longer rejects unverified/failed GAM response batches.');
           if (!bossDungeon.includes('this.attackCooldownEnd = new Date(Date.now() + data[5] * 1000)') || !bossDungeon.includes('this.defeaterPlayerId = data[6]') || !bossDungeon.includes('this.kingdomId = data[7]')) throw new Error('BossDungeonMapobject type 11 field mapping changed.');

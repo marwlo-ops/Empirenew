@@ -1647,3 +1647,11 @@ To nie był zakończony sukcesem deploy. Najnowszy późniejszy commit main `9cd
 Nowy audyt zawęził problem historii GGE Tracker: brakuje prawidłowego trzycyfrowego kodu serwera PL1, a nie kolejnej hipotezy opartej na `zoneId`. Następny krok to uzyskać kod z wiarygodnego źródła GGE Tracker albo rzeczywisty tracker-issued player ID dla E4K_PL1. Równolegle potrzebny jest lokalny, autoryzowany odczyt PL1 przez `--movements --reports`; CI nie loguje się na konto i nie otrzymuje globalnego feedu.
 
 Nie zapisano żadnego nowego ataku PL1. Nie zmieniono zakładek Mapa, Szpiegowanie ani Dodatkowe, plików UI ani katalogu współrzędnych.
+
+### Walidacja bieżącej gałęzi PR #16
+
+- PR #16: https://github.com/marwlo-ops/Empirenew/pull/16, baza `9cd0b1940f3720134d44de2fe4f31af6aabd8763`, dwa zmienione pliki.
+- Parserowy test składni zmodyfikowanego `scripts/probe-baron-pl1.js` w środowisku narzędziowym: PASS; dodatkowo potwierdzono usunięcie obu niezweryfikowanych wariantów ID i zachowanie wyłącznie ścieżki katalogowego kodu 3-cyfrowego. Nie jest to pełny test runtime Node.
+- Dostępny endpoint statusu commita nie zwrócił checków, a wrapper listowania workflow zwraca tylko runy uruchomione przez pull request; ten workflow jest uruchamiany przez push. Nie mam zatem potwierdzonego wyniku pełnego CI dla bieżącej gałęzi i nie scalono PR #16.
+- Run `42208565123` opisany wyżej jest ostatnim potwierdzonym pełnym testem poprzedniego commita `efd6426a157fc954d0a9f1c117c9543713285d38`, a nie nowej gałęzi.
+- Nie wykonano nowego deployu Pages dla PR #16; publikacja pozostaje zablokowana do czasu potwierdzenia poprawnego deployu z main.

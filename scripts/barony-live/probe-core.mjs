@@ -4,7 +4,7 @@ export const MAP_SECTOR_SIZE = 100;
 
 const KINGDOMS = Object.freeze({ sands: 1, ice: 2, fire: 3 });
 const KINGDOM_NAME_BY_KID = Object.freeze({ 1: 'sands', 2: 'ice', 3: 'fire' });
-const FORBIDDEN_CATALOG_KEY = /(attack|cooldown|player|defeater|ready|attacked)/i;
+const FORBIDDEN_CATALOG_KEY = /(attack|cooldown|player|defeater|ready|readiness|available|attacked)/i;
 const ALLOWED_FORTRESS_KEYS = new Set(['id', 'kid', 'kingdom', 'x', 'y', 'type', 'source_server']);
 
 /**
@@ -46,7 +46,18 @@ export async function requestMailboxMessages(client, showMessages, timeoutMs = 3
   return result;
 }
 
+function containsForbiddenCatalogKey(value) {
+  if (Array.isArray(value)) return value.some(containsForbiddenCatalogKey);
+  if (!value || typeof value !== 'object') return false;
+  return Object.entries(value).some(([key, child]) =>
+    FORBIDDEN_CATALOG_KEY.test(key) || containsForbiddenCatalogKey(child)
+  );
+}
+
 export function validateMapOnlyCatalog(payload) {
+  if (containsForbiddenCatalogKey(payload)) {
+    throw new Error('IT1 catalog contains attack/player state or forbidden cooldown/readiness/availability fields; refusing to use it.');
+  }
   if (!payload || payload.complete !== true || payload.server_source !== 'IT1') {
     throw new Error('Expected a complete IT1 map-only catalog.');
   }
@@ -67,7 +78,6 @@ export function validateMapOnlyCatalog(payload) {
     if (group.fortress_count !== group.fortresses.length) throw new Error(`Invalid fortress count for ${kingdom}.`);
     groups[kingdom] = group.fortresses.map((point) => {
       if (!point || typeof point !== 'object' || Array.isArray(point)) throw new Error(`Invalid record in ${kingdom}.`);
-      if (Object.keys(point).some((key) => FORBIDDEN_CATALOG_KEY.test(key))) throw new Error('IT1 catalog contains attack/player state; refusing to use it.');
       if (typeof point.id !== 'string' || point.id.trim().length === 0) throw new Error(`Invalid fortress ID in ${kingdom}.`);
       const pointKeys = Object.keys(point);
       if (pointKeys.length !== ALLOWED_FORTRESS_KEYS.size || pointKeys.some((key) => !ALLOWED_FORTRESS_KEYS.has(key))) {

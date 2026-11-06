@@ -1828,3 +1828,44 @@ Pages run `42221847629` dla tego samego SHA zakończył się SUCCESS: build, rep
 Źródła:
 - https://github.com/marwlo-ops/Empirenew/actions/runs/42221848566
 - https://github.com/marwlo-ops/Empirenew/actions/runs/42221847629
+
+
+## 51. Bieżący przegląd snapshotu IT1 i bezpieczeństwa diagnostyki — 2026-11-06
+
+### Aktualny snapshot na gałęzi main
+
+- Najnowszy commit katalogu: `9d11d05910b05b5fbdac05df8da118eaa84a5499` (`chore: refresh IT1 fortress map catalog`).
+- `captured_at`: `2026-11-06T13:19:51.085842+00:00`.
+- Źródło: publiczne API GGE Tracker, serwer źródłowy IT1; snapshot ma `complete=true`, `pages_read=1`, `total_count=2021`.
+- Piaski: 671; Lód: 779; Ogień: 571.
+- Niezależna walidacja bieżącego JSON: 2021 rekordów, 2021 unikalnych ID, 2021 unikalnych współrzędnych.
+- Każdy rekord ma dokładnie siedem pól: `id`, `kid`, `kingdom`, `x`, `y`, `type`, `source_server`.
+- W rekordach nie ma pól cooldownu, gotowości/dostępności, gracza, atakującego ani czasu ataku.
+- Metadane `target_server=E4K_PL1` oraz `coordinate_alignment=operator_confirmed; not independently live-verified by this importer` oznaczają deklarowane przez operatora dopasowanie siatki. Sam snapshot IT1 nie jest live potwierdzeniem wszystkich obiektów PL1.
+- Najnowszy commit repozytorium `04d3ff6ae2f23379de15c581c11a6f613d97fc5b` dotyczy wyłącznie pozostałych snapshotów trackerów; nie zmienia katalogu fortec.
+
+### Znaleziona luka w diagnostyce mostu
+
+Na `main` skrypt `scripts/scan_npc_map.py` nadal zawierał:
+- `content_preview` z fragmentem surowej odpowiedzi API;
+- `raw` obiekt mapy w wynikach ekstrakcji;
+- `source_path` budowany z kluczy odpowiedzi, które mogą być dynamiczne;
+- pełne wartości klasyfikacji obiektu;
+- origin logowany z `netloc`, który może zawierać userinfo.
+
+Draft PR #13 zawierał część redakcji, ale przegląd wykazał dalsze ryzyka: dynamiczne klucze w `top_level_keys`, dynamiczny `source_path` i pełną wartość pola klasyfikacji. Przygotowano osobną, węższą poprawkę bezpieczeństwa: origin bez userinfo/path/query, odrzucenie URL z osadzonymi poświadczeniami, brak surowych obiektów/ścieżek i tylko ogólny token klasyfikacji NPC. Testy mają obejmować również dynamiczne klucze i wartości.
+
+### Wzmocnienie walidatora katalogu
+
+Dotychczas walidator odrzucał niedozwolone pola w rekordzie fortecy, ale nie sprawdzał rekurencyjnie metadanych najwyższego poziomu ani grup krain. Przygotowano kontrolę rekurencyjną nazw kluczy obejmującą m.in. `attack`, `player`, `cooldown`, `ready/readiness` i `available`. Dodatkowy test ładuje rzeczywisty `data/baron-fortresses.json` i waliduje cały snapshot.
+
+### PL1 — stan bez zmian, brak nowych zdarzeń
+
+- Ostatni potwierdzony probe produkcyjnego PL1: run `42221848566` dla commitu `6b2730d9d3a83952135a806118a08c975552f20a`.
+- Wyniki z tego probe: TCP handshake bez wysyłania payloadu; GGE Tracker `E4K_PL1` nadal `fortress=false, code=null`, endpoint `/dungeons` HTTP 400; most zgłaszał `target_connected=false`; GAA/GAM pominięte.
+- W tej iteracji nie wykonano autoryzowanego logowania do gry — nie udostępniono sesji konta demo. Nie uruchamiano żadnego testu logowania z CI.
+- Brak nowych potwierdzonych ataków PL1. `attack_time_utc` pozostaje `null`; nie wykorzystano IT1/Beta jako historii PL1.
+
+### Zakres
+
+Przygotowane zmiany dotyczą wyłącznie walidatora katalogu fortec, diagnostyki mostu i ich testów. Nie zmieniają zakładek Mapa, Szpiegowanie ani Dodatkowe, ani plików `barony.html` i `mapa-rb.html`. Testowy workflow bezpieczeństwa nie korzysta z sekretów i nie wysyła żądań do serwera gry.

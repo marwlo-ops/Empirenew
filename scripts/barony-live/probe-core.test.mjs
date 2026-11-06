@@ -51,6 +51,12 @@ test('accepts only complete IT1 map-only data', () => {
   assert.equal(Object.values(validateMapOnlyCatalog(catalog())).flat().length, 9);
 });
 
+test('rejects unexpected kingdom groups instead of silently ignoring them', () => {
+  const data = catalog();
+  data.results.unknown = { complete: true, fortress_count: 1, fortresses: [] };
+  assert.throws(() => validateMapOnlyCatalog(data), /exactly the sands, ice and fire/);
+});
+
 test('rejects Beta or attack-state fields in the coordinate catalog', () => {
   const beta = catalog(); beta.server_source = 'E4K_PL1_BETA';
   assert.throws(() => validateMapOnlyCatalog(beta), /IT1/);

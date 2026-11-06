@@ -57,10 +57,10 @@ def integer(record, keys):
 
 
 def pagination_info(payload):
-    """Validate optional GGE Tracker pagination metadata.
+    """Require and validate GGE Tracker pagination metadata for every page.
 
-    Returns normalized metadata when present. Unknown/invalid pagination is a
-    hard failure so an incomplete API response cannot replace the last catalog.
+    Missing, unknown or invalid metadata is a hard failure so an incomplete
+    API response cannot replace the last known-good catalog.
     """
     if not isinstance(payload, dict) or "pagination" not in payload:
         raise RuntimeError("Missing GGE Tracker pagination metadata; existing catalog preserved")

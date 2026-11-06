@@ -1364,6 +1364,16 @@ Nie edytowano zakładek Mapa, Szpiegowanie ani Dodatkowe, plików `barony.html` 
 - Zachowano sekcje 39–40 z main, opisujące ostatnią diagnostykę mostu i PL1. Dołączono wyłącznie zmianę logiki, testy regresyjne, README i ten wpis; nie nadpisano nowszego dziennika main.
 - PR nie dodaje historii ataków ani nie wykorzystuje cooldownów Beta/IT1 jako danych PL1. Nie było autoryzowanej sesji produkcyjnego PL1 ani potwierdzonego rekordu ataku.
 
-### Walidacja po integracji
+### Walidacja po integracji — wyniki potwierdzone 2026-11-06 06:31 UTC
 
-Pełny workflow dla nowego commitu scalającego został uruchomiony po aktualizacji gałęzi. Wyniki Actions i status publikacji Pages należy odczytywać z najnowszych runów; nie przenosić wyników bazowego main na zmieniony kod.
+- PR #10 został scalony 2026-11-06 06:30:00Z. Commit main: `1ec04b9d8be333587107837a30ba8608956870bd`.
+- Workflow na gałęzi przed scaleniem: run `42174716344`, SUCCESS; 13/13 testów Python, 47/47 testów Node, walidacja kontraktu E4K, mobilnego UI i katalogu PASS.
+- Ponowny workflow po scaleniu na main: run `42174810272`, SUCCESS; ponownie 13/13 Python, 47/47 Node, walidacja kontraktu E4K, mobilnego UI i katalogu PASS. Plan: 2021 cele, 199 sektorów, 1 990 000 potencjalnych pól.
+- Publiczny GGE Tracker w tym przebiegu: `E4K_PL1` w katalogu ma `enabled=true`, `fortress=false`; `/dungeons` dla `E4K_PL1` zwraca HTTP 400 `Invalid server`. Alias `EmpirefourkingdomsExGG_3` również HTTP 400.
+- Beta: `E4K_PL1_BETA` HTTP 200, 976 punktów (Piaski 312, Lód 409, Ogień 255); 5 sprawdzonych historii dało 4659 rekordów. Są to wyłącznie dane Beta. IT1 zwrócił 2021 rekordów mapy. Zgodność współrzędnych Beta↔IT1 wyniosła 976/976; nie stanowi to dowodu historii produkcyjnego PL1.
+- Historia graczy produkcyjnego PL1 z migawki Szpiegowania: 3/3 `Player not found`, 0 rekordów; próba suffixu zoneId=259: 3/3 `Invalid player ID`; katalog nie udostępnia trzycyfrowego kodu serwera.
+- Publiczny most `/status`: HTTP 200, ale `EmpirefourkingdomsExGG_3` ma `target_connected=false`; GAM/GAA pominięto. Nie uzyskano odpowiedzi mapy, ruchów ani raportów z produkcyjnego PL1.
+- Porównanie `last_attack) z globalnym cooldownem wykonano wyłącznie diagnostycznie na Beta i IT1. Nie przeniesiono żadnych cooldownów ani historii do PL1.
+- Pages run `42174809096`: build SUCCESS, report-build-status SUCCESS, deploy SUCCESS. Log deploy potwierdza `pages_build_version=1ec04b9d8be333587107837a30ba8608956870bd` i URL `https://marwlo-ops.github.io/Empirenew/`.
+- Zmiany scalonego PR obejmują wyłącznie `research/fortece-barona-status.md`, `scripts/barony-live/README.md`, `scripts/barony-live/probe-core.mjs) i `scripts/barony-live/probe-core.test.mjs`. Nie zmieniono Mapa, Szpiegowania, Dodatkowe, `barony.html) ani katalogu współrzędnych.
+- Ataki potwierdzone na produkcyjnym PL1 w tym przebiegu: 0. `attack_time_utc) pozostaje `null`; sygnały GAA pozostają kandydatami do czasu walidacji na autoryzowanej sesji PL1 i niezależnym raporcie NPC.

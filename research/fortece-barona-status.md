@@ -1157,3 +1157,17 @@ Empiryczny wynik silnie wspiera hipotezę, że `last_attack` jest wyprowadzany z
 - Produkcyjny `E4K_PL1` nadal zwraca `Invalid server`; most PL1 nadal `target_connected=false`. W tej iteracji nie uzyskano nowego ataku PL1.
 
 Workflow i surowe próbki: `42164509564` (log zawiera 8 rekordów Beta i 8 IT1).
+
+## 38. Łączenie sygnałów GAA tylko dla tego samego celu
+
+Przegląd `compareObservations()` ujawnił, że poprzednia implementacja porównywała dwa poprawne wiersze, ale nie sprawdzała jawnie, czy obie obserwacje dotyczą tych samych współrzędnych. Dodatkowo zwracała osobne sygnały dla zmiany `defeaterPlayerId` i rozpoczęcia cooldownu.
+
+Poprawka w `probe-core.mjs`:
+- porównuje KID/X/Y oraz, jeśli dostępne, `area_type` i oczekiwany owner NPC;
+- odrzuca próbki z nieprawidłowym czasem lub czasem nie rosnącym;
+- gdy ten sam cel przechodzi z `cooldown_active=false` na `true` i ma dodatni `defeaterPlayerId`, zwraca jeden łączny sygnał `target_attack_transition_candidate` z dwoma polami źródłowymi;
+- obsługuje ponowną wygraną tego samego gracza (ID nie musi się zmienić, jeśli cooldown rozpoczął się ponownie);
+- pojedyncza zmiana ID albo sam cooldown pozostają osobnymi, słabszymi sygnałami `candidate`;
+- `attack_time_utc` pozostaje `null`; jedyny czas to przedział między dwiema obserwacjami.
+
+To nie zapisuje ani nie potwierdza ataku produkcyjnego. Wymaga dwóch poprawnych odczytów GAA tego samego celu z autoryzowanej sesji PL1; raport walki nadal jest potrzebny do niezależnego potwierdzenia atakującego i bitwy.

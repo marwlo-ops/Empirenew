@@ -129,12 +129,74 @@ test('reports defeater and cooldown transitions only as unvalidated target-speci
     target: previous.target, defeater_player_id: 222, cooldown_active: true,
   };
   const signals = compareObservations(previous, current);
-  assert.deepEqual(signals.map((s) => s.kind), ['target_defeater_id_changed', 'target_cooldown_started']);
-  assert.ok(signals.every((s) => s.classification.includes('candidate_target_specific')));
-  assert.equal(signals[0].metric, 'BossDungeonMapobject.defeaterPlayerId');
+  assert.deepEqual(signals.map((s) => s.kind), ['target_attack_transition_candidate']);
+  assert.equal(signals[0].classification, 'candidate_same_target_cooldown_transition_with_positive_defeater');
+  assert.deepEqual(signals[0].metrics, [
+    'BossDungeonMapobject.attackCooldownEnd',
+    'BossDungeonMapobject.defeaterPlayerId',
+  ]);
   assert.equal(signals[0].player_id, 222);
+  assert.equal(signals[0].defeater_changed, true);
+  assert.equal(signals[0].attack_time_utc, null);
   assert.equal(signals[0].interval_start_utc, previous.sampled_at_utc);
   assert.equal(signals[0].interval_end_utc, current.sampled_at_utc);
+});
+
+test('requires the same exact target and increasing sample times before comparing observations', () => {
+  const previous = {
+    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:00:00Z',
+    target: { kid: 1, x: 10, y: 20, area_type: 11, expected_boss_dungeon_owner_id: -230 },
+    defeater_player_id: 111, cooldown_active: false,
+  };
+  const current = {
+    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:10:00Z',
+    target: previous.target, defeater_player_id: 222, cooldown_active: true,
+  };
+  assert.deepEqual(compareObservations(previous, {
+    ...current, target: { ...current.target, x: 11 },
+  }), []);
+  assert.deepEqual(compareObservations(previous, {
+    ...current, target: { ...current.target, expected_boss_dungeon_owner_id: -231 },
+  }), []);
+  assert.deepEqual(compareObservations(previous, {
+    ...current, sampled_at_utc: '2026-11-05T14:59:59Z',
+  }), []);
+  assert.deepEqual(compareObservations(previous, {
+    ...current, sampled_at_utc: 'not-a-date',
+  }), []);
+});
+
+test('recognizes a repeat win by the same player when the same target cooldown restarts', () => {
+  const previous = {
+    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:00:00Z',
+    target: { kid: 2, x: 300, y: 400 }, defeater_player_id: 98765, cooldown_active: false,
+  };
+  const current = {
+    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:04:00Z',
+    target: previous.target, defeater_player_id: 98765, cooldown_active: true,
+  };
+  const [signal] = compareObservations(previous, current);
+  assert.equal(signal.kind, 'target_attack_transition_candidate');
+  assert.equal(signal.player_id, 98765);
+  assert.equal(signal.defeater_changed, false);
+  assert.equal(signal.attack_time_utc, null);
+});
+
+test('keeps single-field changes as partial candidates, not combined attack transitions', () => {
+  const previous = {
+    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:00:00Z',
+    target: { kid: 3, x: 500, y: 600 }, defeater_player_id: 111, cooldown_active: false,
+  };
+  const idOnly = compareObservations(previous, {
+    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:05:00Z',
+    target: previous.target, defeater_player_id: 222, cooldown_active: false,
+  });
+  assert.deepEqual(idOnly.map((signal) => signal.kind), ['target_defeater_id_changed']);
+  const cooldownOnly = compareObservations(previous, {
+    status: 'fortress_row_found', sampled_at_utc: '2026-11-05T15:05:00Z',
+    target: previous.target, defeater_player_id: null, cooldown_active: true,
+  });
+  assert.deepEqual(cooldownOnly.map((signal) => signal.kind), ['target_cooldown_started']);
 });
 
 test('does not create signals from missing or unverified previous samples', () => {

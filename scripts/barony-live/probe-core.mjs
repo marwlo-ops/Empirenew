@@ -154,30 +154,78 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
 
 export function compareObservations(previous, current) {
   if (!previous || !current || previous.status !== 'fortress_row_found' || current.status !== 'fortress_row_found') return [];
-  const signals = [];
+
+  const previousTarget = previous.target;
+  const currentTarget = current.target;
+  const sameCoordinates = ['kid', 'x', 'y'].every((key) => {
+    const before = Number(previousTarget?.[key]);
+    const after = Number(currentTarget?.[key]);
+    return Number.isInteger(before) && Number.isInteger(after) && before === after;
+  });
+  const optionalTargetFieldsMatch = ['area_type', 'expected_boss_dungeon_owner_id'].every((key) => {
+    const before = previousTarget?.[key];
+    const after = currentTarget?.[key];
+    return before === null || before === undefined || after === null || after === undefined ||
+      Number(before) === Number(after);
+  });
+  const previousAt = toIsoDate(previous.sampled_at_utc);
+  const currentAt = toIsoDate(current.sampled_at_utc);
   if (
-    Number.isInteger(current.defeater_player_id) && current.defeater_player_id > 0 &&
-    current.defeater_player_id !== previous.defeater_player_id
-  ) {
+    !sameCoordinates ||
+    !optionalTargetFieldsMatch ||
+    !previousAt ||
+    !currentAt ||
+    Date.parse(currentAt) <= Date.parse(previousAt)
+  ) return [];
+
+  const previousDefeaterId = Number(previous.defeater_player_id);
+  const currentDefeaterId = Number(current.defeater_player_id);
+  const hasCurrentDefeater = Number.isSafeInteger(currentDefeaterId) && currentDefeaterId > 0;
+  const defeaterChanged = hasCurrentDefeater && currentDefeaterId !== previousDefeaterId;
+  const cooldownStarted = previous.cooldown_active === false && current.cooldown_active === true;
+  const signals = [];
+
+  if (cooldownStarted && hasCurrentDefeater) {
+    signals.push({
+      kind: 'target_attack_transition_candidate',
+      metrics: [
+        'BossDungeonMapobject.attackCooldownEnd',
+        'BossDungeonMapobject.defeaterPlayerId',
+      ],
+      player_id: currentDefeaterId,
+      previous_defeater_player_id: Number.isSafeInteger(previousDefeaterId) && previousDefeaterId > 0
+        ? previousDefeaterId : null,
+      defeater_changed: defeaterChanged,
+      classification: 'candidate_same_target_cooldown_transition_with_positive_defeater',
+      interval_start_utc: previousAt,
+      interval_end_utc: currentAt,
+      attack_time_utc: null,
+      time_semantics: 'The same target changed from no active cooldown to active cooldown and a positive defeaterPlayerId was observed. The event is bounded by these two sample times; no exact point timestamp is inferred.',
+      target: currentTarget,
+    });
+    return signals;
+  }
+
+  if (defeaterChanged) {
     signals.push({
       kind: 'target_defeater_id_changed',
       metric: 'BossDungeonMapobject.defeaterPlayerId',
-      player_id: current.defeater_player_id,
+      player_id: currentDefeaterId,
       classification: 'candidate_target_specific_player_change_not_yet_live_validated',
-      interval_start_utc: previous.sampled_at_utc,
-      interval_end_utc: current.sampled_at_utc,
-      target: current.target,
+      interval_start_utc: previousAt,
+      interval_end_utc: currentAt,
+      target: currentTarget,
     });
   }
-  if (previous.cooldown_active === false && current.cooldown_active === true) {
+  if (cooldownStarted) {
     signals.push({
       kind: 'target_cooldown_started',
       metric: 'BossDungeonMapobject.attackCooldownEnd',
-      player_id: current.defeater_player_id ?? null,
+      player_id: hasCurrentDefeater ? currentDefeaterId : null,
       classification: 'candidate_target_specific_cooldown_transition_not_yet_live_validated',
-      interval_start_utc: previous.sampled_at_utc,
-      interval_end_utc: current.sampled_at_utc,
-      target: current.target,
+      interval_start_utc: previousAt,
+      interval_end_utc: currentAt,
+      target: currentTarget,
     });
   }
   return signals;

@@ -58,6 +58,13 @@ async function main() {
 
   const newBlock = [
     '                    const messageHeaders = JSON.parse(`{${req.params.headers}}`);',
+    '                    const allowedReadOnlyCommands = new Set(["gaa", "fnm", "gam", "hgh", "sne", "bls", "blm", "bld"]);',
+    '                    if (!allowedReadOnlyCommands.has(req.params.command)) {',
+    '                        return res.status(403).json({ error: "Command not allowed" });',
+    '                    }',
+    '                    if (req.params.server !== "EmpirefourkingdomsExGG_3") {',
+    '                        return res.status(403).json({ error: "Server not allowed" });',
+    '                    }',
     '                    const executeCommand = async () => {',
     '                        sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);',
     '',
@@ -97,6 +104,8 @@ async function main() {
     'error log redaction');
 
   if (!updated.includes('app.use(createApiAuthMiddleware())') ||
+      !updated.includes('const allowedReadOnlyCommands = new Set(["gaa", "fnm", "gam", "hgh", "sne", "bls", "blm", "bld"]);') ||
+      !updated.includes('req.params.server !== "EmpirefourkingdomsExGG_3"') ||
       !updated.includes('responseHeaders = false;') ||
       !updated.includes('responseTimeout') ||
       updated.includes('console.log(error.message)')) {
@@ -110,6 +119,8 @@ async function main() {
     patched: true,
     target: path.basename(absolutePath),
     authentication: 'Bearer middleware enabled',
+    target_server: 'EmpirefourkingdomsExGG_3',
+    allowed_read_only_commands: ['gaa', 'fnm', 'gam', 'hgh', 'sne', 'bls', 'blm', 'bld'],
     map_commands: ['gaa', 'fnm'],
     map_response_match: 'command_only',
     map_timeout_ms: 15000,

@@ -133,6 +133,9 @@ test('does not accept a regular type 2 dungeon, player castle or wrong type 11 N
     { areaType: 2, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -220 } },
     { areaType: 11, kingdomId: 1, position: { X: 10, Y: 20 }, ownerInfo: { playerId: -231 } },
   ];
+  assert.equal(buildObservation(target, [rows[0]]).status, 'coordinate_row_unverified');
+  assert.equal(buildObservation(target, [rows[1]]).status, 'coordinate_row_unverified');
+  assert.equal(buildObservation(target, [rows[2]]).status, 'coordinate_row_unverified');
   assert.equal(buildObservation(target, rows).status, 'ambiguous_duplicate_rows');
 });
 

@@ -2148,3 +2148,89 @@ Następny rozstrzygający test pozostaje lokalny i account-scoped:
 Potrzebna jest zgodność świeżego wiersza BossDungeonMapobject typu 11, ruchu GAM lub raportu SNE/BLS/BLM dla tego samego KID/X/Y i gracza. Czas zdarzenia nadal będzie przedziałem próbek/estymatą, dopóki nie zostanie zweryfikowany niezależny timestamp lub pełny cooldown na samym produkcyjnym PL1. Poświadczenia pozostają lokalne.
 
 Bez zmian w Mapie, Szpiegowaniu, Dodatkowych, UI i katalogu współrzędnych.
+
+
+## 57. Iteracja po 19:08 UTC — świeży katalog, PL1 probe i ograniczenie socketów mostu — 2026-11-06
+
+### 1. Katalog IT1 — stan w repozytorium
+
+Najnowszy automatyczny commit katalogu to `59b0a4be1c2fbfae03ba387d3bf1846c51769bbd` (GitHub Actions bot). `captured_at=2026-11-06T19:04:51.840217+00:00`.
+
+Niezależna walidacja odczytanego JSON:
+- 2021 rekordów;
+- Piaski 671, Lód 779, Ogień 571;
+- 2021 unikalnych ID i 2021 unikalnych par KID/X/Y;
+- dokładnie siedem pól: id, kid, kingdom, source_server, type, x, y;
+- brak cooldown, gotowości, gracza, właściciela i pól ataku;
+- complete=true, pages_read=1, total_count=2021.
+
+`coordinate_alignment=operator_confirmed; not independently live-verified by this importer`. Dane pochodzą z IT1 i są katalogiem współrzędnych, nie potwierdzeniem aktualnego stanu każdej fortecy na produkcyjnym PL1.
+
+### 2. Najnowszy probe publicznych źródeł PL1
+
+Workflow `42276592655` zakończył się SUCCESS (2026-11-06 19:05 UTC). Wykonał testy offline i read-only odczyty publicznych źródeł; nie używał poświadczeń operatora.
+
+Wyniki:
+- Node probe-core: 60/60 PASS.
+- Python importer: 19/19 PASS.
+- GGE Tracker fallback/redaction: 8/8 PASS.
+- Testy kontraktów przypiętego ggejs/e4k-data: PASS.
+- Test mobilnego widoku Barony: PASS (viewport, 44 px touch targets, focus, etykiety historii lokalnej i separacja dowodów).
+- Walidacja katalogu: PASS; plan 2021 celów, 199 sektorów 100×100, 1 990 000 potencjalnych pól.
+
+Fallback GGE Tracker dla produkcyjnego E4K_PL1 zwrócił:
+- result_status=unavailable, meta_status=unavailable;
+- Piaski/Lód/Ogień: unsupported_or_rejected_server_filter;
+- catalog_targets=2021, tracker_rows_matched=0, source_unavailable=2021;
+- persisted=false, attack_time_inferred=false.
+
+To oznacza brak obsługi/odrzucenie filtra serwera przez publiczne źródło; nie oznacza, że na PL1 nie ma fortec ani ataków.
+
+Dodatkowo:
+- TCP do `e4k-live-pl1-game.goodgamestudios.com:443`: handshake 112 ms, payload_sent=false.
+- Publiczny most: /status HTTP 200, target_connected=true, 82 znane serwery.
+- GAA: pominięte; adapter nie ma bezpiecznego mapowania odpowiedzi, więc żądania nie wysłano.
+- GAM: HTTP 200, return_code=0, sekcje M/O, 0 ruchów i 0 dopasowanych ataków NPC typu 11. Zakres widoczności to tylko ruchy dostępne dla sesji tego mostu, nie globalny serwer.
+- Dane historii Beta/IT1 z tego runu pozostały wyłącznie diagnostyką tych serwerów.
+
+### 3. Zabezpieczenie custom bridge — PR #34 scalony
+
+Audyt przypiętego `danadum/empire-api` ujawnił, że upstream `getSockets()` tworzył sockety dla wielu sieci GGE i E4K, używając tych samych USERNAME/PASSWORD. Samo ograniczenie komend HTTP nie ograniczało połączeń tworzonych przy starcie.
+
+PR #34 został scalony do main:
+- merge commit: `5589ea733c87ae1ec96f4bed0e4cfefe6afb1463`;
+- `utils/ws/sockets.js` tworzy wyłącznie socket `EmpirefourkingdomsExGG_3`;
+- start jest fail-closed, jeśli nie istnieje dokładnie jeden socket produkcyjnego PL1;
+- trasa HTTP odrzuca inne nazwy serwerów;
+- allowlista pozostaje minimalna: tylko `gaa`, `fnm`, `gam`; pozostałe komendy HTTP 403;
+- workflow sprawdza składnię upstream app.js, middleware, kolejki, allowlisty i sockets.js.
+
+Workflow security `42276987737`: SUCCESS, Node 17/17 PASS; patch zastosowano do przypiętego upstream `dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d`, a `node --check` dla app.js i utils/ws/sockets.js przeszedł.
+
+To nadal jest bezpieczny pakiet wdrożeniowy, nie działająca wdrożona usługa. Nie utworzono forka upstream/Render, nie ustawiono sekretów, nie zalogowano konta i nie wysłano komendy do gry.
+
+README skorygowano: nie podaje już, że katalog fortec jest pusty; opisuje 2021 rekordów IT1 i ograniczenie weryfikacji PL1.
+
+### 4. Build/deployment i urządzenia mobilne
+
+Test mobilny i walidacja katalogu przeszły w runie `42276592655`. To automatyczny test CI, nie test na fizycznym telefonie.
+
+Ostatni Pages deployment potwierdzony w zapisanym dzienniku dotyczył wcześniejszego commitu `1895ade5` (run `42276063475`). Nie mam niezależnego potwierdzenia deploymentu Pages dla późniejszego snapshotu `59b0a4b` ani merge commitu `5589ea7`; nie deklaruję więc, że najnowszy snapshot jest już widoczny na stronie.
+
+### 5. Historia ataków — bez zmian
+
+- Nowe potwierdzone zdarzenia produkcyjnego PL1: 0.
+- Nie zapisano żadnego zdarzenia.
+- `attack_time_utc` pozostaje null.
+- `last_attack` / `attacked_at` z GGE Tracker nie mają potwierdzonego pochodzenia jako czas rozpoczęcia bitwy.
+- Nie użyto danych Beta/IT1 jako historii produkcyjnego PL1.
+
+### 6. Następny krok
+
+Rozstrzygający test nadal wymaga lokalnej, autoryzowanej sesji konta demo na produkcyjnym PL1. Uruchomić lokalnie:
+
+    node scripts/barony-live/probe.mjs --movements --reports --no-state
+
+Poświadczenia pozostają w lokalnych zmiennych środowiskowych. W raporcie trzeba skorelować świeży rekord typu 11 z GAM lub SNE/BLS/BLM dla tego samego KID/X/Y i gracza. Bez niezależnego timestampu wynik może być tylko przedziałem obserwacji, nie dokładnym czasem ataku.
+
+Zakres tej iteracji: katalog IT1, dokumentacja fortec i pakiet mostu Barony. Bez zmian w zakładkach Mapa, Szpiegowanie, Dodatkowe oraz ich plikach UI.

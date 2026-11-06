@@ -69,6 +69,11 @@ jobs:
           const gam = fs.readFileSync(root + '/commands/gam.js', 'utf8');
           const bls = fs.readFileSync(root + '/commands/bls.js', 'utf8');
           const blm = fs.readFileSync(root + '/commands/blm.js', 'utf8');
+          const sne = fs.readFileSync(root + '/commands/sne.js', 'utf8');
+          const basicMessage = fs.readFileSync(root + '/structures/messages/BasicMessage.js', 'utf8');
+          const battleLogMessage = fs.readFileSync(root + '/structures/messages/BasicBattleLogMessage.js', 'utf8');
+          const movementParser = fs.readFileSync(root + '/utils/MovementParser.js', 'utf8');
+          const basicMovement = fs.readFileSync(root + '/structures/movements/BasicMovement.js', 'utf8');
           const commandIndex = fs.readFileSync(root + '/commands/index.js', 'utf8');
           const probe = fs.readFileSync('scripts/barony-live/probe.mjs', 'utf8');
           const core = fs.readFileSync('scripts/barony-live/probe-core.mjs', 'utf8');
@@ -87,6 +92,14 @@ jobs:
           if (!gam.includes('client.movements._add_or_update(movements);') || !gam.includes('baseExecuteCommand(client, movements, errorCode, params, callbacks);')) throw new Error('Pinned ggejs GAM handler dispatch order changed.');
           if (!bls.includes('parseBLS(client, params)') || !bls.includes('baseExecuteCommand(client, battleLog, errorCode, params, callbacks)')) throw new Error('Pinned ggejs BLS short battle-log response contract changed.');
           if (!blm.includes('const C2SBattleLogMiddleVO = {LID: battleLogId};') || !blm.includes('baseExecuteCommand(client, battleLog, errorCode, params, callbacks)')) throw new Error('Pinned ggejs BLM middle battle-log response contract changed.');
+          if (!sne.includes('module.exports.showMessages = function (client)') || !sne.includes('baseSendCommand(client, NAME, C2SShowMessagesVO, callbacks, () => true)') || !sne.includes('if (!params?.MSG) return null;') || !sne.includes('return mailMessages;')) throw new Error('Pinned ggejs SNE mailbox request/response contract changed.');
+          if (!basicMessage.includes('this.deliveryTime = new Date(Date.now() - data[5] * 1000);')) throw new Error('Pinned ggejs mailbox deliveryTime is no longer derived from local clock and message age; re-audit time semantics.');
+          const blsCall = battleLogMessage.indexOf('await getBattleLogShort(client, messageId)');
+          const blmCall = battleLogMessage.indexOf('await getBattleLogMiddle(client, body.battleLogId)');
+          const bldCall = battleLogMessage.indexOf('await getBattleLogDetail(client, body.battleLogId)');
+          if (blsCall < 0 || blmCall <= blsCall || bldCall <= blmCall) throw new Error('Pinned ggejs battle-log request order is no longer BLS -> BLM -> BLD.');
+          if (!movementParser.includes('case 11: //MOVEMENTTYPE_NPC_ATTACK') || !movementParser.includes('return new ArmyAttackMovement(client, data);')) throw new Error('Pinned ggejs no longer parses movement type 11 as an army attack.');
+          if (!basicMovement.includes('this.departureTime = new Date(now - data.M.PT * 1000);') || !basicMovement.includes('this.arrivalTime = new Date(now + (data.M.TT - data.M.PT) * 1000);') || !basicMovement.includes('this.ownerArea = this.direction === 0 ? this.sourceArea : this.targetArea;')) throw new Error('Pinned ggejs PT/TT or direction time-estimate contract changed; re-audit before using movement timestamps.');
           if (!core.includes('payload.PS') || !core.includes('ps_value_unverified') || !core.includes('ps_semantics_status') || core.includes('BLS.PS_seconds_since_battle') || core.includes('BLM.PS_seconds_since_battle') || !probe.includes('parseGgejsBattleLogShortResponse') || !probe.includes('parseGgejsBattleLogMiddleTimeResponse')) throw new Error('Barony must retain BLS/BLM PS only as unverified metadata and must not infer battle time.');
           if (!probe.includes("client.socketManager.sendCommand('gam',{})") || !probe.includes('buildGamProbeSummary') || !probe.includes('parseGgejsCommandResponseEnvelope')) throw new Error('Barony probe no longer sends and status-validates the read-only GAM snapshot request.');
           if (!core.includes('response_ok === true') || !core.includes('gam_response_rejected')) throw new Error('Barony core no longer rejects unverified/failed GAM response batches.');
@@ -94,7 +107,7 @@ jobs:
           if (!parser.includes('case 11:') || !parser.includes('return new BossDungeonMapobject(client, data)')) throw new Error('Type 11 rows are not parsed by BossDungeonMapobject.');
           if (!owners.includes('getKingdomBossDungeonOwnerByKingdomId = (kID) => this.getOwnerInfo(-229 - kID)')) throw new Error('Boss dungeon NPC owner mapping changed.');
           if (!regularDungeon.includes('this.attackCount = data[4]') || !regularDungeon.includes('this.kingdomId = data[6]')) throw new Error('Type 2 DungeonMapobject distinction changed.');
-          console.log(JSON.stringify({zone: pl1.zone, host: pl1.server, instance: pl1.value, zone_id: pl1.zoneId, loca_id: pl1.instanceLocaId, network_version: network.versionNo, network_deploy_time: new Date(network.deployTime * 1000).toISOString(), transport: 'TCP', target_map_type: 11, boss_owner_ids_by_kid: [-230,-231,-232], e4k_client_export: 'PASS'}));
+          console.log(JSON.stringify({zone: pl1.zone, host: pl1.server, instance: pl1.value, zone_id: pl1.zoneId, loca_id: pl1.instanceLocaId, network_version: network.versionNo, network_deploy_time: new Date(network.deployTime * 1000).toISOString(), transport: 'TCP', target_map_type: 11, boss_owner_ids_by_kid: [-230,-231,-232], mailbox: 'explicit SNE request; account-scoped', mailbox_delivery_time: 'local age estimate only', movement_time: 'PT/TT-derived local estimates only', e4k_client_export: 'PASS'}));
           NODE
       - name: Test Barony mobile UI
         run: node scripts/test-barony-mobile.mjs

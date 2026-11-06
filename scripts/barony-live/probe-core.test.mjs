@@ -34,6 +34,20 @@ test('rejects Beta or attack-state fields in the coordinate catalog', () => {
   assert.throws(() => validateMapOnlyCatalog(polluted), /attack\/player state/);
 });
 
+test('rejects unapproved fields, missing stable IDs and duplicate stable IDs', () => {
+  const extra = catalog();
+  extra.results.sands.fortresses[0].unreviewed_status = 'ready';
+  assert.throws(() => validateMapOnlyCatalog(extra), /Unexpected or missing map-only fortress fields/);
+
+  const missingId = catalog();
+  delete missingId.results.sands.fortresses[0].id;
+  assert.throws(() => validateMapOnlyCatalog(missingId), /Invalid fortress ID/);
+
+  const duplicateId = catalog();
+  duplicateId.results.sands.fortresses[1].id = duplicateId.results.sands.fortresses[0].id;
+  assert.throws(() => validateMapOnlyCatalog(duplicateId), /Duplicate fortress ID/);
+});
+
 test('groups several targets in the same 100x100 sector into one read', () => {
   const data = catalog();
   for (const kingdom of Object.keys(data.results)) {

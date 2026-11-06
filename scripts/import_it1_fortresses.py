@@ -104,11 +104,15 @@ def normalize(record):
         or not 0 <= y <= MAX_COORDINATE
     ):
         return None
-    stable_id = record.get("id", record.get("dungeon_id", record.get("object_id")))
+    stable_id = next((
+        record.get(key) for key in ("id", "dungeon_id", "object_id")
+        if record.get(key) is not None and str(record.get(key)).strip()
+    ), None)
+    stable_id_text = str(stable_id).strip() if stable_id is not None else ""
     # Keep the public schema identical to the catalog consumed by Barony/probe.
     # Never copy arbitrary API fields (especially player/cooldown/history fields).
     return {
-        "id": str(stable_id) if stable_id is not None else f"it1-{kid}-{x}-{y}",
+        "id": stable_id_text or f"it1-{kid}-{x}-{y}",
         "kid": kid,
         "kingdom": KINGDOMS[kid],
         "x": x,
@@ -116,6 +120,18 @@ def normalize(record):
         "type": "dungeon",
         "source_server": SERVER,
     }
+
+
+def validate_unique_ids(points):
+    """Reject missing or repeated stable IDs before replacing the public catalog."""
+    seen = set()
+    for point in points:
+        stable_id = point.get("id") if isinstance(point, dict) else None
+        if not isinstance(stable_id, str) or not stable_id.strip():
+            raise RuntimeError("Invalid IT1 fortress ID; existing catalog preserved")
+        if stable_id in seen:
+            raise RuntimeError(f"Duplicate IT1 fortress ID {stable_id}; existing catalog preserved")
+        seen.add(stable_id)
 
 
 def fetch_page(page):
@@ -196,6 +212,7 @@ def main():
         )
     if not all_points:
         raise RuntimeError("API returned no recognized coordinates; existing catalog preserved")
+    validate_unique_ids(all_points.values())
 
     groups = {name: [] for name in ("sands", "ice", "fire")}
     for point in all_points.values():

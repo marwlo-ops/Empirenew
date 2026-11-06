@@ -1,13 +1,17 @@
 diff --git a/app.js b/app.js
 --- a/app.js
 +++ b/app.js
-@@ -1,4 +1,5 @@
+@@ -1,36 +1,58 @@
  const express = require('express');
 +const { createApiAuthMiddleware } = require('./api-auth-middleware');
++const { createCommandQueue } = require('./map-command-queue');
  const commands = require('./data/commands.json');
  const { setNestedValue } = require('./utils/nestedHeaders');
  
-@@ -8,10 +9,13 @@
+ module.exports = function (sockets) {
+     const app = express();
++    const runMapCommand = createCommandQueue();
+ 
      app.use((req, res, next) => {
          res.header("Access-Control-Allow-Origin", "*");
          res.header("Access-Control-Allow-Methods", "GET");
@@ -22,28 +26,47 @@ diff --git a/app.js b/app.js
      app.get("/:server/:command/:headers", async (req, res) => {
          if (req.params.server in sockets) {
              if (sockets[req.params.server] !== null && sockets[req.params.server].connected.isSet) {
-@@ -20,7 +24,11 @@
-                     sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);
+                 try {
+                     const messageHeaders = JSON.parse(`{${req.params.headers}}`);
+-                    sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);
++                    const executeCommand = async () => {
++                        sockets[req.params.server].socket.sendJsonCommand(req.params.command, messageHeaders);
  
-                     let responseHeaders = {};
+-                    let responseHeaders = {};
 -                    if (req.params.command in commands) {
-+                    if (["gaa", "fnm"].includes(req.params.command)) {
-+                        // Map replies do not have to echo request parameters.
-+                        // BaseSocket treats false as command-only matching.
-+                        responseHeaders = false;
-+                    } else if (req.params.command in commands) {
-                         for (const [messageKey, responsePath] of Object.entries(commands[req.params.command])) {
-                             if (messageKey in messageHeaders) {
-                                 setNestedValue(responseHeaders, responsePath, messageHeaders[messageKey]);
-@@ -30,5 +38,10 @@
-                         responseHeaders = messageHeaders;
-                     }
+-                        for (const [messageKey, responsePath] of Object.entries(commands[req.params.command])) {
+-                            if (messageKey in messageHeaders) {
+-                                setNestedValue(responseHeaders, responsePath, messageHeaders[messageKey]);
++                        let responseHeaders = {};
++                        if (["gaa", "fnm"].includes(req.params.command)) {
++                            // Map replies do not have to echo request parameters.
++                            // BaseSocket treats false as command-only matching.
++                            responseHeaders = false;
++                        } else if (req.params.command in commands) {
++                            for (const [messageKey, responsePath] of Object.entries(commands[req.params.command])) {
++                                if (messageKey in messageHeaders) {
++                                    setNestedValue(responseHeaders, responsePath, messageHeaders[messageKey]);
++                                }
+                             }
+-                        }    
+-                    } else {
+-                        responseHeaders = messageHeaders;
+-                    }
++                        } else {
++                            responseHeaders = messageHeaders;
++                        }
++
++                        const responseTimeout = ["gaa", "fnm"].includes(req.params.command) ? 15000 : 1000;
++                        return await sockets[req.params.server].socket.waitForJsonResponse(
++                            req.params.command,
++                            responseHeaders,
++                            responseTimeout
++                        );
++                    };
  
 -                    const response = await sockets[req.params.server].socket.waitForJsonResponse(req.params.command, responseHeaders, timeout = 1000);
-+                    const responseTimeout = ["gaa", "fnm"].includes(req.params.command) ? 15000 : 1000;
-+                    const response = await sockets[req.params.server].socket.waitForJsonResponse(
-+                        req.params.command,
-+                        responseHeaders,
-+                        responseTimeout
-+                    );
++                    const isMapCommand = ["gaa", "fnm"].includes(req.params.command);
++                    const response = isMapCommand
++                        ? await runMapCommand(`${req.params.server}:${req.params.command}`, executeCommand)
++                        : await executeCommand();
                      res.status(200).json({server: req.params.server, command: req.params.command, return_code: response.payload.status, content: response.payload.data});

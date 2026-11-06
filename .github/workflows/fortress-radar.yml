@@ -1,0 +1,48 @@
+name: Refresh E4K PL1 beta fortress radar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: barony-fortress-radar
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Fetch read-only fortress status snapshot
+        run: node scripts/barony-live/fortress-radar.mjs > data/fortress-radar-e4k-pl1-beta.json
+      - name: Validate snapshot
+        run: |
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const x=JSON.parse(fs.readFileSync('data/fortress-radar-e4k-pl1-beta.json','utf8'));
+            if (x.server !== 'E4K_PL1_BETA') throw new Error('Wrong server');
+            if (!['complete','partial','unavailable'].includes(x.result_status)) throw new Error('Bad result status');
+            if (!Array.isArray(x.targets)) throw new Error('Missing targets');
+            console.log(JSON.stringify({server:x.server,status:x.result_status,targets:x.targets.length,kingdoms:x.kingdoms}));
+          "
+      - name: Publish changed snapshot
+        run: |
+          if git diff --quiet -- data/fortress-radar-e4k-pl1-beta.json; then
+            echo "No snapshot changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/fortress-radar-e4k-pl1-beta.json
+          git commit -m "Refresh E4K PL1 beta fortress radar data"
+          git push

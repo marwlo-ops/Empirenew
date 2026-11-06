@@ -1,10 +1,81 @@
 import { readFile } from "node:fs/promises";
+import { createConnection } from "node:net";
 import { DEFAULT_PL1_ZONE, extractOutboundBossDungeonMovementEvidence } from "./barony-live/probe-core.mjs";
 // Read-only probes only; do not persist player names or inferred attack events.
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
 const targetServer = DEFAULT_PL1_ZONE;
+
 const legacyTargetServer = "EmpirefourkingdomsExGG2_3";
+
+// Verify only TCP reachability to the pinned production PL1 endpoint.
+// This deliberately sends no login, XT command, or application payload.
+async function probeProductionTcpReachability() {
+  try {
+    const network = JSON.parse(await readFile(
+      new URL("./barony-live/node_modules/e4k-data/network/network.json", import.meta.url),
+      "utf8"
+    ));
+    const instance = (network.instances || []).find(item =>
+      item.zone === targetServer && item.instanceLocaId === "generic_country_PL"
+    );
+    if (!instance || typeof instance.server !== "string" || !Number.isInteger(instance.port)) {
+      console.log(JSON.stringify({
+        probe: "pl1-game-tcp-reachability",
+        skipped: true,
+        reason: "Pinned e4k-data does not expose the expected production PL1 host and port"
+      }));
+      return;
+    }
+
+    const startedAt = Date.now();
+    const result = await new Promise(resolve => {
+      const socket = createConnection({ host: instance.server, port: instance.port });
+      let settled = false;
+      const finish = value => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        socket.destroy();
+        resolve(value);
+      };
+      const timer = setTimeout(() => finish({
+        status: "timeout",
+        error_code: "ETIMEDOUT"
+      }), 8000);
+      socket.once("connect", () => finish({
+        status: "tcp_connected",
+        elapsed_ms: Date.now() - startedAt
+      }));
+      socket.once("error", error => finish({
+        status: "tcp_error",
+        error_code: error.code || null,
+        error: String(error)
+      }));
+    });
+
+    console.log(JSON.stringify({
+      probe: "pl1-game-tcp-reachability",
+      host: instance.server,
+      port: instance.port,
+      zone: instance.zone,
+      zone_id: instance.zoneId,
+      instance_loca_id: instance.instanceLocaId,
+      transport: "TCP",
+      payload_sent: false,
+      ...result,
+      note: "TCP handshake only; no authentication, login, game command or state change."
+    }));
+  } catch (error) {
+    console.log(JSON.stringify({
+      probe: "pl1-game-tcp-reachability",
+      error: String(error),
+      payload_sent: false
+    }));
+  }
+}
+
+await probeProductionTcpReachability();
 
 const serverListResponse = await fetch(base + "/servers", {
   headers: { Accept: "application/json" },

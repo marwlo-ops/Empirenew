@@ -1347,3 +1347,23 @@ Nie edytowano zakładek Mapa, Szpiegowanie ani Dodatkowe, plików `barony.html` 
 2. Dla GAA potrzebny jest adapter z mapowaniem odpowiedzi (np. KID i identyfikator obszaru) albo autoryzowana lokalna sesja ggejs; nie wysyłać kolejnych niedopasowanych żądań przez obecny most.
 3. Wykonać lokalny, autoryzowany odczyt konta demo na produkcyjnym PL1, z poświadczeniami wyłącznie w zmiennych środowiskowych.
 4. Następnie skorelować dokładny cel, ID atakującego, raport NPC oraz BLS/BLM PS; czas bitwy nadal odróżniać od czasu wysłania armii.
+
+## 41. Integracja ścisłej walidacji obserwacji GAA — 2026-11-06 06:27 UTC
+
+### Zakres scalanej poprawki Barony
+
+- Wiersz mapy zachowuje własne X/Y; identyfikator pokonującego jest akceptowany tylko jako dodatnia bezpieczna liczba całkowita.
+- Cel przed obserwacją musi mieć niepusty identyfikator katalogowy, poprawny KID/krainę i całkowite X/Y w granicach mapy.
+- Każdy dodatkowy wiersz na tych samych współrzędnych oznacza wynik `ambiguous_duplicate_rows`, nawet jeśli tylko jeden wiersz pasuje do typu 11 i oczekiwanego właściciela NPC.
+- Porównanie dwóch próbek wymaga dokładnie jednego, wewnętrznie spójnego wiersza typu 11 na tym samym ID katalogowym, krainie, KID, X/Y i właścicielu NPC. Kopie pól cooldownu i defeatera muszą zgadzać się z wierszem źródłowym.
+- Kandydat zmiany stanu jest odrzucany, gdy próbki są niechronologiczne albo dzieli je ponad 2 godziny. `attack_time_utc` pozostaje `null`; przedział obserwacji nie jest dokładnym czasem ataku.
+
+### Integracja z aktualnym main
+
+- Gałąź bazowa zawiera już świeży, kompletny snapshot mapy IT1 z 2026-11-06 06:11:51.997482Z (2021 rekordy, 2021 unikalnych współrzędnych; tylko pola mapowe).
+- Zachowano sekcje 39–40 z main, opisujące ostatnią diagnostykę mostu i PL1. Dołączono wyłącznie zmianę logiki, testy regresyjne, README i ten wpis; nie nadpisano nowszego dziennika main.
+- PR nie dodaje historii ataków ani nie wykorzystuje cooldownów Beta/IT1 jako danych PL1. Nie było autoryzowanej sesji produkcyjnego PL1 ani potwierdzonego rekordu ataku.
+
+### Walidacja po integracji
+
+Pełny workflow dla nowego commitu scalającego został uruchomiony po aktualizacji gałęzi. Wyniki Actions i status publikacji Pages należy odczytywać z najnowszych runów; nie przenosić wyników bazowego main na zmieniony kod.

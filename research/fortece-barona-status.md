@@ -979,3 +979,67 @@ Zmiany kodu w commicie `cf6b453` dotyczą wyłącznie `scripts/barony-live/probe
 2. Uzyskać autoryzowaną sesję konta demo na produkcyjnym E4K PL1; poświadczenia wyłącznie lokalnie przez `E4K_USERNAME` i `E4K_PASSWORD`, nigdy w czacie, repozytorium ani Actions.
 3. Wykonać pasywny odczyt kilku fortec i skrzynki raportów, a następnie porównać dane z ręcznie przeprowadzonym testem operatora.
 4. Nie tworzyć historii automatycznej, dopóki tożsamość atakującego i semantyka czasu nie zostaną potwierdzone na rzeczywistym PL1.
+
+
+## 33. Import fail-closed bez paginacji i świeży snapshot IT1 — 2026-11-06 04:05 UTC
+
+### Zmiana bezpieczeństwa importera
+
+Wcześniejszy importer dopuszczał odpowiedź bez obiektu pagination, uznając krótką stronę za kompletną. Sam rozmiar odpowiedzi nie dowodzi jednak, że API zwróciło wszystkie rekordy.
+
+Wprowadzono:
+- brak pagination lub brak wymaganych pól paginacji powoduje teraz błąd i zachowanie poprzedniego katalogu;
+- usunięto ścieżkę kończącą skan tylko dlatego, że liczba rekordów jest mniejsza od PAGE_SIZE;
+- test test_rejects_payload_without_pagination_metadata sprawdza odrzucenie zarówno obiektu bez paginacji, jak i surowej listy;
+- test scripts/test-baron-import-workflows.mjs wymaga, aby zmiany importera i jego testów znajdowały się w filtrze push kanonicznego workflow.
+
+Zmiany:
+- importer: f1c35307dce75ee9bdc20a74ca4878dd0ce1b45a;
+- test importera: 88c744c80deac12f3f84803a6e7054ba95efbd2c;
+- test triggerów workflow: eae7e75b8a04d8827c7c36e9b928815104913797.
+
+### Rzeczywisty import po zmianie
+
+Po zmianach pojawiły się automatyczne commity katalogu:
+- 7ddd7f2e5733f1ebd5dd8ff78a8026e5452bda76;
+- 9b4ae82ee4e374f804bcd5750c166412673602e0;
+- najnowszy: 5300025396ff35c1a91b6b23811dd555709612c6.
+
+Najnowszy commit zmienił wyłącznie data/baron-fortresses.json i został utworzony 2026-11-06 04:05:24 UTC. Automatyczny commit jest dowodem, że workflow dotarł do kroku zapisu po testach i walidacji; pełny log tego konkretnego runu nie był dostępny w tym odczycie, więc nie podaję niezweryfikowanej liczby testów.
+
+Snapshot w aktualnym katalogu: 2026-11-06T04:05:23.468562Z.
+- Piaski 671, Lód 779, Ogień 571;
+- razem 2021;
+- jedna strona API;
+- 2021 unikalnych ID i 2021 unikalnych współrzędnych;
+- dokładnie siedem pól rekordu: id,kid,kingdom,x,y,type,source_server;
+- 0 pól cooldownu, gotowości, gracza lub historii ataków.
+
+Porównanie zbioru współrzędnych ze snapshotem 02:53:37Z: 0 dodanych i 0 usuniętych. Zmienił się czas pobrania, nie zawartość mapy.
+
+### Kontrole wykonane po zmianie
+
+Weryfikacja aktualnych plików i katalogu w repozytorium: 9/9 kontroli PASS:
+1. workflow ma filtr push dla importera;
+2. workflow ma filtr push dla testów importera;
+3. importer odrzuca brak paginacji;
+4. usunięto fallback krótkiej strony;
+5. test braku paginacji jest obecny;
+6. rekord zachowuje zatwierdzony schemat;
+7. liczba rekordów to 2021;
+8. współrzędne są unikalne;
+9. brak dynamicznych pól w rekordach.
+
+To kontrole źródeł i danych wykonane w odczycie repozytorium, a nie substytut pełnego wyniku python -m unittest. Automatyczny commit potwierdza przejście bramek workflow przed zapisem, ale szczegółowe logi ostatniego runu trzeba jeszcze pobrać.
+
+### PL1, mobilność i deployment
+
+W tej iteracji nie wykonano autoryzowanego logowania do produkcyjnego PL1. Ostatnie szczegółowe publiczne wyniki pozostają takie jak w sekcji 32: produkcyjny PL1 jest odrzucany przez GGE Tracker jako nieobsługiwany dla /dungeons, Beta jest osobnym serwerem, a most PL1 nie ma potwierdzonego połączenia. Nie zapisano ataków; attack_time_utc pozostaje null.
+
+Ostatni potwierdzony deployment Pages to run 42153182617 dla snapshotu commitu 02dc5fa (02:53:37Z). Nowy snapshot 5300025 powstał później; nie mam jeszcze potwierdzonego wyniku nowego build/deploy dla niego. Ostatni potwierdzony test mobilny to run 42153152660; nie jest dowodem testu fizycznego telefonu.
+
+Najnowsza poprawka składni probe cf6b453 oraz nowe zmiany importera powinny uruchomić odpowiednie workflow na podstawie filtrów push. Nie przypisuję im statusu PASS bez odczytu konkretnych logów.
+
+### Zakres
+
+Zmiany obejmują tylko importer IT1, testy importera, test kontroli workflow, katalog danych i ten dziennik. Nie zmieniono barony.html, mapa-rb.html, zakładek Mapa, Szpiegowanie ani Dodatkowe.

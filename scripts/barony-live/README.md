@@ -54,11 +54,11 @@ Aby odczytać raporty NPC dostępne na zalogowanym koncie:
 node scripts/barony-live/probe.mjs --reports
 ```
 
-Po logowaniu `ggejs` pobiera skrzynkę przez `SNE`. Probe wybiera wyłącznie raporty typu battle log, area type 11 i subtype NPC attack 2, a następnie pobiera ich szczegóły przez read-only `BLS/BLM/BLD`. Ekstraktor wymaga zgodności KID/właściciela, dokładnych współrzędnych mapobject oraz dodatniego ID atakującego i zgodnego obrońcy NPC. Maksymalnie 10 raportów jest sprawdzanych domyślnie; limit można zmienić przez `--report-limit 1..25`.
+Samo `E4KClient.connect()` w przypiętym `ggejs` 2.2.0 nie pobiera skrzynki. Dlatego probe jawnie wywołuje read-only `showMessages(client)` z `commands/sne.js` (komenda `SNE`) i korzysta z odpowiedzi tej komendy. Dopiero potem wybiera raporty typu battle log, area type 11 i subtype NPC attack 2 oraz pobiera ich szczegóły przez read-only `BLS/BLM/BLD`. Ekstraktor wymaga zgodności KID/właściciela, dokładnych współrzędnych mapobject oraz dodatniego ID atakującego i zgodnego obrońcy NPC. Maksymalnie 10 raportów jest sprawdzanych domyślnie; limit można zmienić przez `--report-limit 1..25`.
 
 Wynik zawiera lokalizację, ID atakującego, nazwę gracza jeśli `ownerInfo` ją udostępnia (w przeciwnym razie pozostaje sam ID), wynik bitwy i `report_delivery_time_estimate_utc`. Probe wybiera najnowsze raporty według czasu dostarczenia wiadomości. To **czas dostarczenia/odczytu wiadomości wyliczony z wieku skrzynki**, nie dokładny czas rozpoczęcia ataku; `attack_time_utc` pozostaje `null`. Raport dotyczy wyłącznie wiadomości dostępnych temu kontu, nie wszystkich graczy PL1. Probe niczego nie usuwa, nie oznacza jako przeczytane, nie przekazuje dalej i nie zapisuje raportów do pliku stanu ani repozytorium.
 
-Jeżeli odpowiedź skrzynki nie nadejdzie w ciągu 3 sekund, status będzie `mailbox_update_not_observed`; okno można zmienić przez `--report-wait-ms 1000..10000`.
+`--report-wait-ms 1000..10000` ogranicza oczekiwanie na odpowiedź SNE (domyślnie 3000 ms). Przypięty `ggejs` ma dodatkowo własny timeout tej komendy wynoszący 2,5 s. Wynik rozróżnia `mailbox_update_observed`, `mailbox_response_missing`, `mailbox_request_error` i `mailbox_timeout`; prawidłowa odpowiedź z pustą listą nie jest mylona z brakiem odpowiedzi.
 
 ## Pełny plan
 

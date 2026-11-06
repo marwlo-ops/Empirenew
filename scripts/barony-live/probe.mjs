@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
   extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
   isGgejsGamDispatchStack, parseGgejsCommandResponseEnvelope, parseGgejsBattleLogShortResponse,
-  parseGgejsBattleLogMiddleTimeResponse,
+  parseGgejsBattleLogMiddleTimeResponse, requestMailboxMessages,
   selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
 import { prepareE4kData } from './prepare-e4k-data.mjs';
 
@@ -238,9 +238,10 @@ async function main() {
     }
 
     if (a.reports) {
-      // SNE is requested by ggejs during GBD. Fetch only full details for matching NPC reports.
-      await sleep(a.reportWaitMs);
-      const mailbox=Array.isArray(client.mailMessages)?client.mailMessages:[];
+      // E4KClient.connect() does not fetch the mailbox. Request it explicitly through SNE.
+      const { showMessages } = require(path.join(ggejsRoot, 'commands', 'sne.js'));
+      const mailboxFetch = await requestMailboxMessages(client, showMessages, a.reportWaitMs);
+      const mailbox = mailboxFetch.messages;
       const reportMessages=selectLatestNpcBattleReportMessages(mailbox,a.reportLimit);
       let battleLogsLoaded=0,fetchErrors=0,rejectedReports=0;
       for (const message of reportMessages) {
@@ -264,7 +265,12 @@ async function main() {
         }
       }
       reportProbe={
-        status:mailboxUpdateObserved?'mailbox_update_observed':(mailbox.length?'mailbox_data_present':'mailbox_update_not_observed'),
+        status:mailboxFetch.status==='response_received'
+          ? (mailboxUpdateObserved?'mailbox_update_observed':'mailbox_response_received')
+          : (mailboxFetch.status==='request_error'?'mailbox_request_error'
+            : mailboxFetch.status==='timeout'?'mailbox_timeout':'mailbox_response_missing'),
+        mailbox_fetch_status:mailboxFetch.status,
+        mailbox_fetch_error_type:mailboxFetch.error_type,
         sampled_at_utc:new Date().toISOString(),
         mailbox_total_messages:mailbox.length,
         npc_reports_selected:reportMessages.length,

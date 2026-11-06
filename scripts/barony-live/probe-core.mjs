@@ -7,6 +7,45 @@ const KINGDOM_NAME_BY_KID = Object.freeze({ 1: 'sands', 2: 'ice', 3: 'fire' });
 const FORBIDDEN_CATALOG_KEY = /(attack|cooldown|player|defeater|ready|attacked)/i;
 const ALLOWED_FORTRESS_KEYS = new Set(['id', 'kid', 'kingdom', 'x', 'y', 'type', 'source_server']);
 
+/**
+ * Explicitly request the authenticated account mailbox through ggejs SNE.
+ * E4KClient.connect() does not populate mailMessages by itself in the pinned client.
+ * A missing response or timeout must not be reported as an empty mailbox.
+ */
+export async function requestMailboxMessages(client, showMessages, timeoutMs = 3000) {
+  if (!client || typeof showMessages !== 'function') {
+    throw new Error('A client and SNE mailbox reader are required.');
+  }
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10000) {
+    throw new Error('Mailbox wait must be an integer from 1 to 10000 ms.');
+  }
+
+  const cachedMessages = () => Array.isArray(client.mailMessages) ? client.mailMessages : [];
+  let timer;
+  const request = Promise.resolve()
+    .then(() => showMessages(client))
+    .then((messages) => ({
+      status: Array.isArray(messages) ? 'response_received' : 'response_missing',
+      messages: Array.isArray(messages) ? messages : cachedMessages(),
+      error_type: null,
+    }))
+    .catch((error) => ({
+      status: 'request_error',
+      messages: cachedMessages(),
+      error_type: error?.constructor?.name || 'Error',
+    }));
+  const timeout = new Promise((resolve) => {
+    timer = setTimeout(() => resolve({
+      status: 'timeout',
+      messages: cachedMessages(),
+      error_type: null,
+    }), timeoutMs);
+  });
+  const result = await Promise.race([request, timeout]);
+  clearTimeout(timer);
+  return result;
+}
+
 export function validateMapOnlyCatalog(payload) {
   if (!payload || payload.complete !== true || payload.server_source !== 'IT1') {
     throw new Error('Expected a complete IT1 map-only catalog.');

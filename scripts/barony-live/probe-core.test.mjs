@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {
   buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
@@ -7,7 +8,7 @@ import {
   extractParsedOutboundBossDungeonMovementEvidence,
   parseGgejsCommandResponseEnvelope, parseGgejsBattleLogShortResponse,
   parseGgejsBattleLogMiddleTimeResponse, pickSamples,
-  selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
+  requestMailboxMessages, selectLatestNpcBattleReportMessages, validateMapOnlyCatalog,
 } from './probe-core.mjs';
 
 function catalog() {
@@ -942,3 +943,53 @@ test('does not infer battle time even when BLS.PS and BLM.PS values agree or dif
   }
 });
 
+
+
+test('requests account mailbox messages through the explicit SNE reader', async () => {
+  const client = { mailMessages: [] };
+  const messages = [{ messageId: 501 }, { messageId: 502 }];
+  let calls = 0;
+  const result = await requestMailboxMessages(client, async (receivedClient) => {
+    calls++;
+    assert.equal(receivedClient, client);
+    client.mailMessages = messages;
+    return messages;
+  }, 100);
+  assert.equal(calls, 1);
+  assert.equal(result.status, 'response_received');
+  assert.deepEqual(result.messages, messages);
+  assert.equal(result.error_type, null);
+});
+
+test('distinguishes a missing SNE response from a successful empty mailbox', async () => {
+  const client = { mailMessages: [] };
+  const result = await requestMailboxMessages(client, async () => null, 100);
+  assert.equal(result.status, 'response_missing');
+  assert.deepEqual(result.messages, []);
+});
+
+test('reports only the error type when the SNE mailbox request fails', async () => {
+  const client = { mailMessages: [{ messageId: 9 }] };
+  const result = await requestMailboxMessages(client, async () => {
+    throw new Error('sensitive server response must not be copied');
+  }, 100);
+  assert.equal(result.status, 'request_error');
+  assert.equal(result.error_type, 'Error');
+  assert.deepEqual(result.messages, client.mailMessages);
+  assert.equal(JSON.stringify(result).includes('sensitive server response'), false);
+});
+
+test('times out a pending SNE request without treating it as an empty response', async () => {
+  const client = { mailMessages: [] };
+  const result = await requestMailboxMessages(client, () => new Promise((resolve) => {
+    setTimeout(() => resolve([]), 40);
+  }), 5);
+  assert.equal(result.status, 'timeout');
+  assert.deepEqual(result.messages, []);
+});
+
+test('live probe explicitly invokes the pinned ggejs SNE mailbox reader for reports', async () => {
+  const source = await readFile(new URL('./probe.mjs', import.meta.url), 'utf8');
+  assert.match(source, /requestMailboxMessages\\(client,\\s*showMessages,\\s*a\\.reportWaitMs\\)/);
+  assert.match(source, /commands',\\s*'sne\\.js'/);
+});

@@ -16,6 +16,8 @@ assert.match(catalog.source || "", /GGE Tracker/i, "Catalog must name GGE Tracke
 assert.match(catalog.source || "", /map coordinates only/i, "Catalog must be map-only");
 assert.ok(Number.isFinite(Date.parse(catalog.captured_at)), "Catalog capture time must be valid ISO date text");
 assert.ok(catalog.results && typeof catalog.results === "object", "Catalog results must be an object");
+assert.deepEqual(Object.keys(catalog.results).sort(), Object.keys(expected).sort(),
+  "Catalog must contain exactly the sands, ice and fire groups");
 
 for (const [kingdom, kid] of Object.entries(expected)) {
   const group = catalog.results[kingdom];

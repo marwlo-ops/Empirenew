@@ -21,6 +21,8 @@ Wynik wklej bezpośrednio do pola sekretu w Render i — dopiero po uruchomieniu
 
 Po zastosowaniu patcha most przekazuje wyłącznie `gaa`, `fnm` i `gam` (read-only odczyt mapy/ruchów). Każda inna wartość `command` na trasie `/:server/:command/:headers` jest odrzucana HTTP 403 przed wysłaniem polecenia do gry. Nie rozszerzaj listy bez osobnego audytu semantyki komendy i testu.
 
+Most jest ograniczony do produkcyjnego serwera `EmpirefourkingdomsExGG_3`: trasa HTTP odrzuca inne nazwy serwerów, a patch `utils/ws/sockets.js` nie tworzy socketów dla pozostałych serwerów E4K ani dla sieci GGE. Start jest fail-closed, jeśli nie zostanie znaleziony dokładnie jeden socket PL1.
+
 ## Zachowanie autoryzacji
 
 - GET / pozostaje publiczny wyłącznie jako health-check hostingu.
@@ -30,7 +32,7 @@ Po zastosowaniu patcha most przekazuje wyłącznie `gaa`, `fnm` i `gam` (read-on
 - Brak albo nieprawidłowy Bearer token powoduje HTTP 401.
 - Porównanie tokenów używa crypto.timingSafeEqual; odpowiedzi błędów nie ujawniają sekretu.
 
-Upstream danadum/empire-api nie ma tej autoryzacji domyślnie. Sama zmienna środowiskowa nie zabezpiecza serwera — wymagane jest uruchomienie apply-bridge-patch.mjs na przypiętym wariancie app.js oraz skopiowanie api-auth-middleware.js i map-command-queue.js do katalogu głównego forka.
+Upstream danadum/empire-api nie ma tej autoryzacji domyślnie. Sama zmienna środowiskowa nie zabezpiecza serwera — wymagane jest uruchomienie apply-bridge-patch.mjs na przypiętym wariancie `app.js` i `utils/ws/sockets.js` oraz skopiowanie `api-auth-middleware.js`, `map-command-queue.js` i `read-only-commands.js` do katalogu głównego forka.
 
 Używaj osobnego konta gry przeznaczonego do integracji, jeśli regulamin gry i dostępne zabezpieczenia na to pozwalają. Nie używaj hasła do głównego konta.
 

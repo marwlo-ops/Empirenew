@@ -138,7 +138,7 @@ test('reports defeater and cooldown transitions only as unvalidated target-speci
   assert.equal(signals[0].player_id, 222);
   assert.equal(signals[0].defeater_changed, true);
   assert.equal(signals[0].attack_time_utc, null);
-  assert.equal(signals[0].interval_start_utc, previous.sampled_at_utc);
+  assert.equal(signals[0].interval_start_utc, '2026-11-05T15:00:00.000Z');
   assert.equal(signals[0].interval_end_utc, current.sampled_at_utc);
 });
 

@@ -1759,7 +1759,7 @@ Niezależny projekt `gge-assistant-bot` również pobiera `/dungeons/player/{pla
 Źródła — przypięte rewizje:
 - `gge-tracker` `7d620820a76cde4176c752f6972ce6f0c9ad7ab1`: [scraper main.ts — refreshDungeonSquare, collectDungeonCooldowns, persistDungeonUpdates](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts#L2118-L2278)
 - [API dungeons — historia gracza i attacked_at](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts#L160-L235)
-- [API dungeons — last_attack_at i last_attacker_id](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts#L420-L500)
+- [API dungeons — last_attack_at i last_attacker_id](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts#L600-L625)
 - [Fixture scenario — jawne, syntetyczne attacked_at](https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-scenario.ts)
 - [GGE Assistant — konsument tej samej historii API](https://github.com/nathael-aa/gge-assistant-bot/blob/91cb8a16d2175ddfbdd435c9b5eb87d178e0cc13/cogs/forteresses.py#L814-L900)
 

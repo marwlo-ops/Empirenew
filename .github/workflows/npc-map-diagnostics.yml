@@ -52,7 +52,7 @@ jobs:
         with:
           node-version: 22
       - name: Test Bearer authentication middleware
-        run: node --test bridge-deployment/api-auth-middleware.test.js
+        run: node --test bridge-deployment/*.test.js
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -68,6 +68,7 @@ jobs:
           git clone --quiet https://github.com/danadum/empire-api.git "$RUNNER_TEMP/empire-api"
           git -C "$RUNNER_TEMP/empire-api" checkout --detach "$UPSTREAM_COMMIT"
           cp bridge-deployment/api-auth-middleware.js "$RUNNER_TEMP/empire-api/api-auth-middleware.js"
+          cp bridge-deployment/map-command-queue.js "$RUNNER_TEMP/empire-api/map-command-queue.js"
           git -C "$RUNNER_TEMP/empire-api" apply --check "$GITHUB_WORKSPACE/bridge-deployment/app.js.patch"
           git -C "$RUNNER_TEMP/empire-api" apply "$GITHUB_WORKSPACE/bridge-deployment/app.js.patch"
           node --check "$RUNNER_TEMP/empire-api/app.js"

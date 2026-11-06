@@ -1962,3 +1962,57 @@ Nie wykonano autoryzowanego logowania do konta demo w tej iteracji. Brak nowego 
 - https://github.com/476f6f6467616d6553747564696d655374756469/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/movements/BasicMovement.js
 
 Zakres: scripts/barony-live/probe-core.mjs, jego testy, workflow Barony i dziennik badań. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, barony.html, mapa-rb.html ani katalogu współrzędnych.
+
+
+## 54. Niezależne potwierdzenie pól mapy type 11 w scraperze GGE Tracker — 2026-11-06
+
+### Potwierdzone w dwóch niezależnych implementacjach
+
+Przejrzałem ponownie przypięty kod klienta E4K `ggejs` oraz scraper GGE Tracker pod tym samym, konkretnym kontraktem mapy:
+
+- W `ggejs` `MapObjectParser.js` mapuje `areaType=11` na `BossDungeonMapobject`.
+- `BossDungeonMapobject.js` mapuje `data[5]` na pozostały cooldown (lokalnie przeliczony na `attackCooldownEnd`), `data[6]` na `defeaterPlayerId`, a `data[7]` na KID.
+- W niezależnym scraperze GGE Tracker `collectDungeonCooldowns()` wybiera dokładnie rekordy `dungeon[0] == '11'`, odczytuje `dungeon[5]` jako pozostały cooldown i `dungeon[6]` jako `player_id`. Kod scrapera opisuje ten fragment jako wyliczanie daty ostatniego ataku. Zapisuje też KID i dokładne X/Y z tego samego rekordu.
+
+To jest mocniejsze potwierdzenie, że w rekordzie mapy type 11 pole 6 jest identyfikatorem gracza powiązanym z ostatnim pokonaniem/atakiem na ten obiekt. Nadal nie jest to samodzielny dowód nowego zdarzenia w PL1: trzeba odebrać świeży rekord z autoryzowanej sesji produkcyjnego PL1 i skorelować go z poprzednią próbką.
+
+### Co mówi to o czasie
+
+- `data[5]` to pozostały cooldown, nie timestamp ataku.
+- `currentTime + remainingCooldown` pozwala odtworzyć przewidywany koniec blokady, ale bez potwierdzonego pełnego czasu cooldownu i zachowania serwera nie daje dokładnego czasu ataku.
+- Scraper zapisuje do `dungeons_history` tylko `kid`, `position_x`, `position_y` i `player_id`; nie przekazuje `attacked_at` w INSERT.
+- Publiczne repozytorium nie zawiera w przejrzanym drzewie migracji/schematu tabeli ani triggerów, które wyjaśniałyby, jak baza ustawia `attacked_at`. Testowe scenariusze API wstawiają `attacked_at` jawnie jako dane fixture, więc nie dowodzą produkcyjnego pochodzenia czasu.
+
+Wniosek: `attacked_at` zwracane przez endpoint historii GGE Tracker pozostaje niezweryfikowane pod względem pochodzenia. Nie traktujemy go jako serwerowego czasu bitwy bez schematu/triggera lub niezależnego testu.
+
+### Ocena obecnej korelacji w Barony
+
+Obecne `compareObservations()` jest zachowawcze i nie wymaga zmiany bez testu live:
+
+1. wymaga tego samego ID katalogowego, KID, krainy, X/Y, typu 11 i oczekiwanego właściciela NPC;
+2. wymaga dokładnie jednego zweryfikowanego wiersza w obu próbkach;
+3. wykrywa przejście cooldownu z nieaktywnego do aktywnego oraz dodatni `defeaterPlayerId`;
+4. dopuszcza również ponowne zwycięstwo tego samego gracza, jeśli cooldown rzeczywiście się zresetował;
+5. ogranicza odstęp próbek do maksymalnie dwóch godzin;
+6. zwraca przedział `interval_start_utc`–`interval_end_utc`, a `attack_time_utc` pozostawia `null`.
+
+To pozostaje kandydatem zdarzenia per forteca, a nie potwierdzoną globalną historią PL1. Sygnał nie jest zapisywany jako potwierdzony atak. Testy offline pokrywają przejście cooldownu, powtórne zwycięstwo tego samego gracza, niezgodne współrzędne/typ/właściciela oraz odstęp ponad dwie godziny.
+
+### Wyniki walidacji repozytorium przed tą aktualizacją dokumentacji
+
+- PR #25 jest scalony; merge commit: `8f554ea54ad5380fe8543649cc86610640228d7e`.
+- Checki PR head `0e04f11653ded7bd06c21392ed040236a9871ddd`: `probe`, `node-catalog-safety`, `python-diagnostic-safety` — wszystkie SUCCESS.
+- Checki merge commit `8f554ea54ad5380fe8543649cc86610640228d7e`: `probe`, `node-catalog-safety`, `python-diagnostic-safety`, Pages `build`, `report-build-status`, `deploy` — wszystkie SUCCESS. Deployment zakończył się 2026-11-06 16:43:46 UTC.
+- Bieżący HEAD `main` w chwili audytu: `4570d3789761a542451fdef75e1dcf7040ac28ef`; to późniejszy automatyczny commit snapshotów trackerów, nie zmieniający kodu Barony.
+- Dla tego HEAD Pages `build` i `report-build-status` były SUCCESS, a `deploy` pozostawał IN_PROGRESS w chwili odczytu. Status wymaga ponownego sprawdzenia po zakończeniu joba.
+- Nie wykonano autoryzowanej sesji PL1 ani lokalnego `probe.mjs --movements --reports`; nie ma nowych potwierdzonych ataków. Dane IT1/Beta nie zostały przeniesione do PL1.
+
+### Źródła
+
+- `ggejs` `BossDungeonMapobject.js`, rewizja `a4980b01404ab01c9b826a267f331ae8c953d237`: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/mapobjects/BossDungeonMapobject.js
+- `ggejs` `MapObjectParser.js`, ta sama rewizja: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/MapObjectParser.js
+- GGE Tracker `collectDungeonCooldowns()` i `persistDungeonUpdates()`, rewizja `7d620820a76cde4176c752f6972ce6f0c9ad7ab1`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+- GGE Tracker API historia gracza: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts
+- GGE Tracker scenariusz testowy z jawnie wstawionym `attacked_at`: https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-scenario.ts
+
+Zakres tej aktualizacji: wyłącznie dziennik badań modułu Barony. Bez zmian w kodzie, Mapie, Szpiegowaniu, Dodatkowych, UI ani katalogu współrzędnych.

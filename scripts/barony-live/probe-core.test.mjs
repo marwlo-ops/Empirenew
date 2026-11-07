@@ -171,6 +171,10 @@ test('derives a labeled live-PL1 attack-time estimate only from a positive defea
     observed.attack_time_estimate_source,
     'live_PL1_GAA_type11_remaining_24h_global_cooldown_minus_86400s',
   );
+  assert.equal(
+    observed.attack_time_estimate_semantics,
+    'estimated_global_cooldown_start_after_fortress_defeat_not_army_launch_or_battle_start',
+  );
   assert.match(observed.attack_time_estimate_clock_basis, /local clock offset.*unmeasured/);
   assert.equal(observed.attack_time_utc, null);
 
@@ -188,6 +192,7 @@ test('derives a labeled live-PL1 attack-time estimate only from a positive defea
   ], '2026-11-05T15:00:00Z');
   assert.equal(noDefeater.attack_evidence_status, 'not_established');
   assert.equal(noDefeater.attack_time_estimate_utc, null);
+  assert.equal(noDefeater.attack_time_estimate_semantics, null);
 
   const expiredCooldown = buildObservation(target, [
     { ...baseRow, attackCooldownEnd: new Date('2026-11-05T14:59:59Z') },

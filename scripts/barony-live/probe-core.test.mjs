@@ -191,6 +191,37 @@ test('derives a labeled live-PL1 attack-time estimate only from a positive defea
   assert.equal(over24hCooldown.attack_time_estimate_utc, null);
 });
 
+test('does not expose cooldown-derived time for an unverified or ambiguous map row', () => {
+  const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
+  const activeRow = {
+    areaType: 11,
+    kingdomId: 1,
+    position: { X: 10, Y: 20 },
+    ownerInfo: { playerId: -230 },
+    defeaterPlayerId: 123456,
+    attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
+  };
+  const wrongOwner = buildObservation(target, [
+    { ...activeRow, ownerInfo: { playerId: -231 } },
+  ], '2026-11-05T15:00:00Z');
+  assert.equal(wrongOwner.status, 'coordinate_row_unverified');
+  assert.equal(wrongOwner.attack_time_estimate_utc, null);
+  assert.equal(wrongOwner.rows[0].attack_time_estimate_utc, null);
+
+  const wrongType = buildObservation(target, [
+    { ...activeRow, areaType: 2 },
+  ], '2026-11-05T15:00:00Z');
+  assert.equal(wrongType.status, 'coordinate_row_unverified');
+  assert.equal(wrongType.rows[0].attack_time_estimate_utc, null);
+
+  const duplicate = buildObservation(target, [
+    activeRow,
+    { ...activeRow, position: { X: 10, Y: 20 } },
+  ], '2026-11-05T15:00:00Z');
+  assert.equal(duplicate.status, 'ambiguous_duplicate_rows');
+  assert.equal(duplicate.rows.every(row => row.attack_time_estimate_utc === null), true);
+});
+
 test('does not accept a regular type 2 dungeon, player castle or wrong type 11 NPC owner', () => {
   const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
   const rows = [

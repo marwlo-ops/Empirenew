@@ -2558,3 +2558,66 @@ node scripts/barony-live/probe.mjs --movements --reports --no-state
 ```
 
 Poświadczenia pozostają wyłącznie w lokalnych zmiennych środowiskowych; nie umieszczać ich w GitHub Actions, repozytorium ani czacie. Jeśli raport zostanie odczytany, zapis może potwierdzić konkretną fortecę i atakującego w zakresie skrzynki tego konta; czas dostarczenia raportu nadal nie jest dokładnym czasem ataku.
+
+## 63. Rozdzielenie pól `last_attack`, `attacked_at` i cooldownu; naprawa bezpiecznego pomijania radaru Beta — 2026-11-07 02:42 UTC
+
+### 1) Co dokładnie zwraca GGE Tracker jako `last_attack`
+
+W przypiętym API GGE Tracker `7d620820a76cde4176c752f6972ce6f0c9ad7ab1` endpoint listy fortec nie zwraca bezpośrednio wiersza `dungeons_history`. W `api-dungeons.ts` pobiera z tabeli `dungeons` pole `D.last_attack_at` i mapuje je na JSON `last_attack`. Dla endpointu historii gracza `/dungeons/player/{playerId}` API pobiera osobno `DH.attacked_at` z `dungeons_history`.
+
+Testowa implementacja `dungeon-truth.ts` wylicza oczekiwane `last_attack` jako timestamp najnowszego `attacked_at` dla danej fortecy; test suite opisuje kontrakt jako „last_attack = the latest one”. Scenariusz testowy `dungeon-scenario.ts` jawnie wstawia `attacked_at` do `dungeons_history`. To potwierdza semantykę pola w testowym modelu API, ale nie wyjaśnia produkcyjnego sposobu nadania timestampu.
+
+### 2) Dlaczego produkcyjne pochodzenie timestampu nadal nie jest udowodnione
+
+W scraperze:
+- `collectDungeonCooldowns()` odczytuje `dungeon[5]` jako pozostały cooldown 24h;
+- wylicza `global_available_at = currentTime + remainingCooldown24h`;
+- wylicza cooldown osobisty jako dodatkowe 4 dni;
+- `persistDungeonUpdates()` aktualizuje `dungeons.global_available_at`;
+- wstawia do `dungeons_history` wyłącznie `kid, position_x, position_y, player_id` — bez jawnego pola `attacked_at`.
+
+Publiczne przypięte drzewo nadal nie zawiera definicji tabeli, DEFAULT ani triggera, który wyjaśniałby nadanie `attacked_at` i aktualizację `dungeons.last_attack_at`. Nie wolno zatem zakładać, że produkcyjny timestamp pochodzi bezpośrednio z serwera gry.
+
+### 3) Odczyt istniejącej diagnostyki relacji cooldown–last_attack
+
+W workflow `42324373025` wykonano read-only próbę pochodzenia timestampu na dwóch nazwanych źródłach zewnętrznych:
+- Beta: 8 rekordów, `global_available_at - last_attack` od 86 280 do 86 394 sekund;
+- IT1: 8 rekordów, od 86 289 do 86 381 sekund.
+
+W obu zestawach różnica jest bliska 86 400 sekund (24h), z odchyleniem 6–120 sekund. Jest to zgodne z hipotezą, że `last_attack` jest wyprowadzane z 24-godzinnego cooldownu lub z timestampu powiązanego z jego początkiem. **Nie dowodzi** to dokładnego pochodzenia ani dokładności czasu bitwy. Próbki nie pochodzą z produkcyjnego PL1 i nie są używane do jego danych.
+
+Ważne doprecyzowanie API: `available_duration_seconds` nie jest pozostałym cooldownem. Kod API oblicza je jako odstęp pomiędzy dwoma ostatnimi atakami minus 24h (z dolnym ograniczeniem 0). `effective_cooldown_until` to `global_available_at`, a przy filtrze gracza maksimum z cooldownu globalnego i osobistego. Nie należy mieszać tych pól.
+
+**Decyzja dla Barony:** `last_attack` pozostaje zewnętrznym, niezweryfikowanym timestampem trackera. Nie mapować go do `attack_time_utc` ani `battle_time_estimate_utc`; nie wykorzystywać wartości Beta/IT1 do PL1.
+
+Źródła:
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/src/api/routes/api-dungeons.ts
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-truth.ts
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/lib/dungeon-scenario.ts
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-backend-api/tests/suites/dungeons.ts
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42324373025
+
+### 4) Naprawa operacyjna radaru Beta bez zmiany źródła danych
+
+Ostatni harmonogram radaru Beta (`fortress-radar.yml`) zakończył się błędem w kroku pobierania, ponieważ repozytoryjna zmienna `BARONY_PLAYER_NAME` nie była ustawiona. Skrypt wymaga dokładnego nicku, więc zakończył się bez wygenerowania snapshotu; walidacja i publikacja zostały pominięte. Nie powstał nowy plik danych ani commit.
+
+Workflow otrzymuje teraz bezpieczny warunek:
+- najpierw sprawdza wyłącznie, czy `BARONY_PLAYER_NAME` jest skonfigurowane;
+- jeśli zmiennej brak, publikuje komunikat GitHub Actions notice i pomija pobranie, walidację oraz commit;
+- jeśli zmienna jest ustawiona, dotychczasowy radar Beta działa bez zmian;
+- `GGE_SERVER` pozostaje jawnie `E4K_PL1_BETA`.
+
+To usuwa cykliczne czerwone przebiegi spowodowane brakiem opcjonalnej konfiguracji. Nie włącza produkcyjnego PL1, nie zmienia Mapy/Szpiegowania/Dodatkowych i nie przenosi cooldownów Beta/IT1 do PL1.
+
+### 5) Stan dowodów i następny test
+
+- Produkcyjny GGE Tracker `E4K_PL1`: ostatni odczyt w workflow `42324373025` zwrócił HTTP 400 `Invalid server`.
+- Beta i IT1: wyłącznie źródła pomocnicze do audytu implementacji i siatki; ich statusy/cooldowny nie są danymi PL1.
+- Autoryzowana próbka produkcyjnego PL1: nadal brak.
+- Potwierdzone nowe ataki PL1 w tej iteracji: **0**.
+- `attack_time_utc`: nadal `null`.
+
+Następny rozstrzygający test pozostaje lokalny i read-only na autoryzowanej sesji E4K PL1: `node scripts/barony-live/probe.mjs --movements --reports --no-state`. Do weryfikacji czasu potrzebne jest dodatkowo niezależne potwierdzenie pochodzenia `attacked_at`/PS albo zgodność istniejącego raportu z zegarem oficjalnego klienta. Nie wysyłać nowych ataków tylko na potrzeby testu.
+
+Zakres tej iteracji: dziennik badań #barony oraz bezpieczna obsługa brakującej konfiguracji w workflow radaru Beta. Bez zmian w kodzie detektora, katalogu współrzędnych, Mapa, Szpiegowanie, Dodatkowe, ich UI ani danych produkcyjnego PL1.

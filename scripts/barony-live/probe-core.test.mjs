@@ -809,6 +809,19 @@ test('marks a disconnected GAM request as not sent instead of as an empty snapsh
   assert.equal(result.summary.timed_out, false);
 });
 
+test('ignores non-GAM command responses that also update MovementManager', () => {
+  const newline = String.fromCharCode(10);
+  const commands = ['cra', 'crm', 'csm', 'mcm', 'cds', 'cdd', 'cat'];
+  for (const command of commands) {
+    const stack = [
+      'Error',
+      `    at Object.execute (/opt/app/node_modules/ggejs/src/commands/${command}.js:20:22)`,
+      '    at executeResponse (/opt/app/node_modules/ggejs/src/commands/index.js:55:13)',
+    ].join(newline);
+    assert.equal(isGgejsGamDispatchStack(stack), false, `unexpected GAM classification for ${command}`);
+  }
+});
+
 test('parses the ggejs XT response envelope without retaining account payload data', () => {
   const success = parseGgejsCommandResponseEnvelope(
     '%xt%gam%EmpirefourkingdomsExGG_3%0%{"M":[],"O":[]}%'

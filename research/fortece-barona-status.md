@@ -2933,3 +2933,62 @@ Wniosek: nie używać `/server/movements` jako dowodu ataku na fortecę. Nie wyk
 - `gge-tracker-backend-api/src/api/routes/api-server.ts` — SQL na `player_castle_movements_history` i pola starej/nowej pozycji zamku.
 
 Zakres: audyt źródeł #barony; bez zmian w Mapa, Szpiegowanie, Dodatkowe, katalogu współrzędnych i snapshotach.
+
+## 71. Audyt wszystkich ścieżek aktualizacji MovementManager w przypiętym ggejs — 2026-11-07 07:58 UTC
+
+### Metoda
+
+Przeszukano przypięte repozytorium `ggejs` pod kątem wszystkich wywołań `movements._add_or_update` oraz `movements._remove` dla commitu:
+
+`a4980b01404ab01c9b826a267f331ae8c953d237`
+
+Wyniki sprawdzono w plikach źródłowych, a nie wyłącznie po nazwach komend.
+
+### Wynik wyszukiwania
+
+Wywołania `movements._add_or_update` występują w następujących handlerach:
+
+| Handler | Znaczenie z kodu | Czy jest źródłem nowego globalnego feedu? |
+|---|---|---|
+| `gam.js` | Parsuje tablicę `params.M` i aktualizuje wiele ruchów | Jedyna znaleziona ścieżka zbiorcza |
+| `cra.js` | Odpowiedź na utworzenie ruchu ataku przez klienta | Nie; odpowiedź na własną komendę klienta |
+| `crm.js` | Odpowiedź na utworzenie ruchu handlowego | Nie; odpowiedź na własną komendę klienta |
+| `csm.js` | Odpowiedź na utworzenie ruchu szpiegowskiego | Nie; odpowiedź na własną komendę klienta |
+| `mcm.js`, `cds.js`, `cdd.js`, `cat.js` | Inne odpowiedzi komend parsujące pojedynczy ruch | Nie wykazano globalnego strumienia; są to handlery odpowiedzi komend |
+
+Jedyny znaleziony handler `movements._remove` to `commands/onReceived/mrm.js`; usuwa ruch po `MID`. W katalogu `commands/onReceived` nie znaleziono osobnego handlera dodającego nowe ruchy do `MovementManager`.
+
+`MovementParser.js` mapuje `M.T=11` na `ArmyAttackMovement` jako `MOVEMENTTYPE_NPC_ATTACK`.
+
+### Wniosek dla #barony
+
+1. W przypiętym `ggejs` jedyną zidentyfikowaną ścieżką zbiorczego odczytu ruchów jest `GAM`.
+2. Pozostałe znalezione wywołania `_add_or_update` są odpowiedziami handlerów komend klienta; nie wolno ich traktować jako niezależnego feedu ruchów PL1.
+3. Filtr `isGgejsGamDispatchStack()` w probe jest zasadny: zapobiega zaliczeniu odpowiedzi `CRA/CRM/CSM/MCM/CDS/CDD/CAT` jako wyniku migawki `GAM`.
+4. Ruch może być dowodem **trwającego ruchu atakującego** wyłącznie po sprawdzeniu `movementType=11`, kierunku wychodzącego, typu celu 11, zgodnego KID, właściciela NPC oraz dokładnego X/Y i dodatniego ID właściciela źródła.
+5. `PT/TT` są przeliczane przez klienta względem lokalnego zegara. Wyliczona chwila wyjścia pozostaje estymacją, nie serwerowym timestampem.
+6. `GAM` jest ograniczony do danych zwróconych bieżącej autoryzowanej sesji. Nie daje globalnej kompletności PL1.
+7. Raport SNE/BLS/BLM może być niezależnym potwierdzeniem wyniku bitwy tylko wtedy, gdy zgadzają się dokładny cel i atakujący. Skrzynka pozostaje kontowa; bez próbki PL1 nie wnioskujemy o semantyce PS ani dokładnym czasie bitwy.
+
+### Test regresyjny
+
+Dodano test, który sprawdza, że stosy handlerów `cra`, `crm`, `csm`, `mcm`, `cds`, `cdd` i `cat` są odrzucane przez `isGgejsGamDispatchStack()`. Istniejący test nadal akceptuje wyłącznie stos `gam.js`.
+
+To jest test offline na kontrolowanych stosach, a nie próbka ruchu PL1.
+
+### Źródła
+
+- [ggejs gam.js — zbiorcze parsowanie GAM](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/gam.js)
+- [ggejs MovementManager.js — dodawanie i usuwanie ruchów](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/managers/MovementManager.js)
+- [ggejs MovementParser.js — typ 11 NPC attack](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/MovementParser.js)
+- [ggejs mrm.js — usuwanie ruchu po MID](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/onReceived/mrm.js)
+- [ggejs cra.js](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/cra.js)
+- [ggejs crm.js](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/crm.js)
+- [ggejs csm.js](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/csm.js)
+- [ggejs mcm.js](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/mcm.js)
+- [ggejs cds.js](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/cds.js)
+- [ggejs cdd.js](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/cdd.js)
+- [ggejs cat.js](https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/cat.js)
+
+Zakres tej iteracji: wyłącznie test #barony i dziennik badań #barony. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, UI, katalogu współrzędnych, snapshotach ani danych ataków. Nie użyto cooldownów IT1/Beta do PL1; nie zapisano zdarzenia ataku PL1.
+

@@ -358,14 +358,16 @@ async function probeBetaPlayerHistoryFromDungeonRows() {
   }
 }
 
-async function probeTrackerServerStatus(server) {
+async function probeTrackerServerStatus(server, expectedZone) {
   try {
     const response = await fetch(base + "/", {
       headers: { "gge-server": server, Accept: "application/json" },
       signal: AbortSignal.timeout(20000)
     });
     const body = await response.json();
-    const serverCode = getVerifiedTrackerServerCode(body);
+    const serverCode = response.ok
+      ? getVerifiedTrackerServerCode(body, server, expectedZone)
+      : null;
     console.log(JSON.stringify({
       probe: "tracker-server-status",
       server,
@@ -603,8 +605,8 @@ async function probeBridge() {
 }
 
 await probeBetaPlayerHistoryFromDungeonRows();
-const trackerPl1ServerCode = await probeTrackerServerStatus("E4K_PL1");
-await probeTrackerServerStatus("E4K_PL1_BETA"); // control only; its code is never used for PL1
+const trackerPl1ServerCode = await probeTrackerServerStatus("E4K_PL1", DEFAULT_PL1_ZONE);
+await probeTrackerServerStatus("E4K_PL1_BETA", "EmpirefourkingdomsExGG2_3"); // isolated control; its code is never used for PL1
 await probeProductionPlayerHistoryFromServerPlayers(trackerPl1ServerCode);
 await probeTrackerAttackTimestampSemantics("E4K_PL1_BETA");
 await probeTrackerAttackTimestampSemantics("IT1");

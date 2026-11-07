@@ -29,12 +29,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Check optional Beta player filter
+        id: player-config
+        env:
+          BARONY_PLAYER_NAME: ${{ vars.BARONY_PLAYER_NAME }}
+        shell: bash
+        run: |
+          if [[ -z "${BARONY_PLAYER_NAME//[[:space:]]/}" ]]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping Beta-only radar refresh because BARONY_PLAYER_NAME is not configured."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Fetch read-only fortress status snapshot
+        if: steps.player-config.outputs.configured == 'true'
         env:
           BARONY_PLAYER_NAME: ${{ vars.BARONY_PLAYER_NAME }}
           GGE_SERVER: E4K_PL1_BETA
         run: node scripts/barony-live/fortress-radar.mjs > data/fortress-radar-e4k-pl1-beta.json
       - name: Validate snapshot
+        if: steps.player-config.outputs.configured == 'true'
         run: |
           node --input-type=module -e "
             import fs from 'node:fs';
@@ -45,7 +59,7 @@ jobs:
             console.log(JSON.stringify({server:x.server,status:x.result_status,targets:x.targets.length,kingdoms:x.kingdoms}));
           "
       - name: Publish changed snapshot
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.player-config.outputs.configured == 'true'
         run: |
           if git diff --quiet -- data/fortress-radar-e4k-pl1-beta.json; then
             echo "No snapshot changes."

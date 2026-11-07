@@ -2655,3 +2655,54 @@ To nadal nie jest dowód schematu DB ani dokładnego czasu ataku: nie znamy DEFA
 - https://github.com/marwlo-ops/Empirenew/actions/runs/42324373025
 
 Zakres: wyłącznie dokumentacja badań #barony. Bez zmian w kodzie detektora, danych, katalogu współrzędnych, Mapie, Szpiegowaniu, Dodatkowych ani ich UI.
+
+
+## 65. Ponowna diagnostyka mostu PL1 i audyt pól czasu raportu — 2026-11-07 02:50 UTC
+
+### Potwierdzony przebieg produkcyjnego endpointu i mostu
+
+Źródło: workflow `42331177185`, commit `6c4412bf72fc3d14ef3446e6e64ceec2b4381314`, job `probe` zakończony sukcesem. Pełny log joba został odczytany po zakończeniu Actions.
+
+- Test TCP do `e4k-live-pl1-game.goodgamestudios.com:443`: handshake PASS, 174 ms, `payload_sent=false`. To potwierdza osiągalność portu, nie logowanie ani odczyt danych gry.
+- Kanoniczna strefa z przypiętego `e4k-data`: `EmpirefourkingdomsExGG_3`, instancja 3, `zoneId=259`, `generic_country_PL`. To identyfikator strefy używany przez klienta `ggejs`; nie należy utożsamiać go z aliasem `EmpirefourkingdomsExGG2_3`.
+- GGE Tracker `/dungeons`: `EmpirefourkingdomsExGG_3` HTTP 400, `EmpirefourkingdomsExGG2_3` HTTP 400, `E4K_PL1` HTTP 400, `PL1` HTTP 400. Odpowiedź dla `E4K_PL1` wymienia obsługiwane serwery, w tym `E4K_PL1_BETA`, ale nie produkcyjny `E4K_PL1`.
+- Katalog GGE Tracker: `E4K_PL1 enabled=true, fortress=false`; `E4K_PL1_BETA enabled=true, fortress=true`; dla obu wpisów brak `zone`, `zone_id` i `code`.
+- Beta: 976 rekordów; 5/5 sprawdzonych historii niepustych (łącznie 5599 wpisów). Są to wyłącznie dane Beta i nie zostały użyte jako dowód ani cooldown PL1.
+- IT1: 2021 rekordów. Katalog IT1 jest używany wyłącznie do współrzędnych; jego pola dynamiczne nie są kopiowane do danych PL1.
+
+### Publiczny most — wynik GAM i ograniczenie GAA
+
+- `GET /status`: HTTP 200; most zgłosił `target_connected=true` dla `EmpirefourkingdomsExGG_3`.
+- `GAM`: HTTP 200, `return_code=0`, klucze odpowiedzi `M/O`, `movement_count=0`, `map_row_count=0`, brak ruchów typu NPC attack w tej migawce.
+- Zera oznaczają wyłącznie brak ruchów widocznych w tej chwili dla sesji mostu; nie dowodzą braku ataków na całym PL1.
+- `GAA` zostało jawnie pominięte, ponieważ publiczny most nie ma mapowania klucza odpowiedzi dla tej komendy. **Nie wysłano żądania GAA**, więc nie ma nowego odczytu mapy z mostu. `FNM` nie było częścią tego przebiegu.
+- Nie wykonano lokalnego logowania operatora ani odczytu SNE/BLS/BLM z prywatnej skrzynki.
+
+### Audyt implementacji PS w aktualnym kodzie Empirenew
+
+W aktualnym `scripts/barony-live/probe-core.mjs` parsery zachowują dodatnie BLS.PS/BLM.PS jako wartości diagnostyczne z etykietą `unverified_pinned_ggejs_does_not_define_field`. `extractNpcBattleReportEvidence()` jawnie zwraca `battle_time_estimate_utc=null`, `battle_time_seconds_since_battle=null` i `attack_time_utc=null`. W aktualnym przepływie `probe.mjs` nie ma późniejszego kroku, który wypełniałby te pola; liczniki `battle_time_estimates` i `battle_time_cross_checked` są więc kontrolami przyszłej możliwości, a nie potwierdzeniem działającej estymacji.
+
+To rozróżnienie jest celowe: zewnętrzny kod klienta przeglądarkowego/EmpireCore opisuje PS jako wiek bitwy, ale nie mamy kontrolnej próbki BLS+BLM z mobilnego E4K PL1. Nie przekształcamy PS w czas bitwy ani ataku do czasu walidacji tej samej semantyki na raporcie NPC typu 11 z produkcyjnego PL1. Sekcja 27 dokumentuje wcześniejszy audyt źródeł PS; aktualna implementacja pozostaje fail-closed i nie publikuje estymacji.
+
+### Testy i publikacja
+
+Workflow `42331177185` zakończył się sukcesem:
+- Python probe: 13/13 PASS;
+- importer IT1: 19/19 PASS;
+- Node core: 63/63 PASS;
+- GGE Tracker fallback: 8/8 PASS;
+- pełny plan: 2021 celów, 199 sektorów 100×100, 1 990 000 szacowanych pól;
+- kontrola przypiętego klienta E4K i metadanych PL1: PASS;
+- statyczny test mobilnego UI: PASS;
+- walidator katalogu mapowego: PASS.
+
+Deployment Pages `42331176382` dla tego samego SHA zakończył build, deploy i report-build-status sukcesem. W logu deploy widnieje `Reported success!` oraz adres `https://marwlo-ops.github.io/Empirenew/`.
+
+### Wniosek i następny test
+
+1. Publiczny most ma połączenie z kanoniczną strefą PL1 i poprawnie zwraca odpowiedź GAM, ale bieżąca migawka zawiera zero ruchów. Nie daje to globalnego monitoringu.
+2. GAA pozostaje nieprzetestowane przez most; potrzebny jest matcher odpowiedzi GAA/FNM w kontrolowanym, zabezpieczonym wdrożeniu własnego mostu. Nie wysyłać GAA przez obecny publiczny adapter, dopóki nie ma poprawnego matcher-a.
+3. Następny rozstrzygający test konta: lokalne, autoryzowane `node scripts/barony-live/probe.mjs --movements --reports --no-state`; sprawdzić konkretny KID/X/Y, ID gracza, oryginalny raport NPC i zgodność MID/LID. Nie wykonywać ataku na potrzeby testu.
+4. Dla czasu zebrać BLS.PS i BLM.PS z tego samego raportu PL1 i porównać je z czasem wyświetlanym przez oficjalny klient. Do tego czasu `battle_time_estimate_utc` i `attack_time_utc` pozostają null.
+
+Zakres tej notatki: wyłącznie dokumentacja badań #barony. Bez zmian w kodzie, katalogu współrzędnych, danych Mapa, Szpiegowanie, Dodatkowe ani ich UI. Nie zapisano żadnego nowego zdarzenia ataku PL1.

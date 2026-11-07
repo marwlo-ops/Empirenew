@@ -94,11 +94,11 @@ svg{width:100%;height:100%;display:block}.dot{cursor:pointer;stroke:#08111d;stro
 <script>
 if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embedded');
 const DATA_URLS={'115':'./data/rb-player-map.json','41343':'./data/maddevils-player-map.json'};
-const kingdomNames={'0':'Wielkie Cesarstwo','1':'Płonące Piaski','2':'Wieczny Lód','3':'Ogniste Szczyty','4':'Nieustalony (kod 4)'};
+const kingdomNames={'0':'Wielkie Cesarstwo','1':'Płonące Piaski','2':'Wieczny Lód','3':'Ogniste Szczyty','4':'Archipelag / Wyspy'};
 let datasets={},data=null,selected=null,showAP=true,showVP=true;const BARON_KEY='empirenew_baron_tracker_v2';let baronCatalog=[],baronRecords=JSON.parse(localStorage.getItem(BARON_KEY)||'{}');
 const $=id=>document.getElementById(id);
 // Wielkie Cesarstwo: zamek (typ 1) i posterunki (typ 4). Krainy 1–3: wyłącznie zamek (typ 12).
-function eligible(m){let k=$('kingdom').value;return m.ap.filter(p=>{let code=String(p.kingdom_code);if(k!=='all'&&code!==k)return false;if(code==='0')return p.type_code===1||p.type_code===4;if(['1','2','3'].includes(code))return p.type_code===12;return false}).map(p=>({...p,kind:String(p.kingdom_code)==='0'?(p.type_code===1?'Zamek':'Posterunek'):'Zamek'}))}
+function eligible(m){let k=$('kingdom').value;return m.ap.filter(p=>{let code=String(p.kingdom_code);if(k!=='all'&&code!==k)return false;if(code==='0')return p.type_code===1||p.type_code===4;if(['1','2','3','4'].includes(code))return p.type_code===12;return false}).map(p=>({...p,kind:String(p.kingdom_code)==='0'?(p.type_code===1?'Zamek':'Posterunek'):'Zamek'}))}
 function allPos(m){return eligible(m)}
 function positions(m){return eligible(m).filter(p=>p.kind==='Zamek'?showAP:showVP)}
 function visiblePlayers(){let q=$('search').value.trim().toLowerCase();let arr=data.members.filter(m=>m.name.toLowerCase().includes(q)&&eligible(m).length>0);if($('sort').value==='count')arr.sort((a,b)=>eligible(b).length-eligible(a).length);else arr.sort((a,b)=>a.name.localeCompare(b.name,'pl'));return arr}

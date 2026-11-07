@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { createConnection } from "node:net";
-import { DEFAULT_PL1_ZONE, encodeBridgeHeadersPathSegment, extractOutboundBossDungeonMovementEvidence } from "./barony-live/probe-core.mjs";
+import { DEFAULT_PL1_ZONE, encodeBridgeHeadersPathSegment, extractOutboundBossDungeonMovementEvidence, getVerifiedTrackerServerCode } from "./barony-live/probe-core.mjs";
 // Read-only probes only; do not persist player names or inferred attack events.
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
@@ -358,31 +358,46 @@ async function probeBetaPlayerHistoryFromDungeonRows() {
   }
 }
 
-async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
+async function probeTrackerServerStatus(server) {
   try {
-    const catalogResponse = await fetch(base + "/servers/catalog", {
-      headers: { Accept: "application/xml, text/xml, */*" },
+    const response = await fetch(base + "/", {
+      headers: { "gge-server": server, Accept: "application/json" },
       signal: AbortSignal.timeout(20000)
     });
-    const xml = await catalogResponse.text();
-    const blocks = xml.match(/<server>[\s\S]*?<\/server>/g) || [];
-    const block = blocks.find(item => new RegExp("<name>\\s*E4K_PL1\\s*</name>").test(item));
-    const readTag = name => {
-      const match = block?.match(new RegExp("<" + name + ">\\s*([^<]+?)\\s*</" + name + ">"));
-      return match ? match[1].trim() : null;
-    };
-    const code = readTag("code");
-    if (!catalogResponse.ok || !/^\d{3}$/.test(code || "")) {
+    const body = await response.json();
+    const serverCode = getVerifiedTrackerServerCode(body);
+    console.log(JSON.stringify({
+      probe: "tracker-server-status",
+      server,
+      http_status: response.status,
+      error: body.error ?? null,
+      response_server: body.server ?? null,
+      server_code: serverCode,
+      server_code_valid: serverCode !== null,
+      zone: body.zone ?? null,
+      platform: body.platform ?? null,
+      data_version: body.data_version ?? null,
+      dataset_snapshot_at: body.dataset?.snapshot_at ?? null
+    }));
+    return serverCode;
+  } catch (error) {
+    console.log(JSON.stringify({
+      probe: "tracker-server-status",
+      server,
+      error_type: error?.constructor?.name || "Error"
+    }));
+    return null;
+  }
+}
+
+async function probeProductionPlayerHistoryWithStatusCodeSuffix(code) {
+  try {
+    if (!/^\d{3}$/.test(code || "")) {
       console.log(JSON.stringify({
-        probe: "production-pl1-player-history-with-catalog-code-suffix",
-        catalog_status: catalogResponse.status,
+        probe: "production-pl1-player-history-with-status-code-suffix",
         skipped: true,
-        reason: "No verified three-digit GGE Tracker server-code suffix is available; e4k-data zoneId is not a substitute.",
-        id_format_contract: "numeric player ID + three-digit GGE Tracker server-code suffix; API extracts the trailing three digits",
-        catalog_entry_found: Boolean(block),
-        catalog_code: code,
-        enabled: readTag("enabled"),
-        fortress: readTag("fortress")
+        reason: "The E4K_PL1 /api/v1/ status response did not provide an explicit numeric three-digit server_code; no suffix was inferred from zoneId, server name, IT1 or Beta.",
+        id_format_contract: "numeric player ID + explicit three-digit GGE Tracker server_code; API extracts the trailing three digits"
       }));
       return;
     }
@@ -441,17 +456,15 @@ async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
           })) : []
         });
       } catch (error) {
-        results.push({ sample: index + 1, error: String(error) });
+        results.push({ sample: index + 1, error_type: error?.constructor?.name || "Error" });
       }
     }
     console.log(JSON.stringify({
-      probe: "production-pl1-player-history-with-catalog-code-suffix",
+      probe: "production-pl1-player-history-with-status-code-suffix",
       api_route: "/dungeons/player/{playerId}",
-      suffix_source: "GGE Tracker /servers/catalog E4K_PL1 <code>",
-      id_format_contract: "numeric player ID + three-digit GGE Tracker server-code suffix; API extracts the trailing three digits; e4k-data zoneId is not interchangeable",
+      suffix_source: "GGE Tracker server-scoped /api/v1/ status response for gge-server E4K_PL1",
+      id_format_contract: "numeric player ID + explicit three-digit server_code; e4k-data zoneId is not interchangeable",
       server_code: code,
-      catalog_enabled: readTag("enabled"),
-      catalog_fortress: readTag("fortress"),
       snapshot_members_sampled: members.length,
       profiles_matched: results.filter(result => result.profile_identity_matched_to_spy_snapshot).length,
       histories_checked: results.length,
@@ -461,7 +474,10 @@ async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
       timestamp_warning: "API attacked_at is not treated as exact attack time: the public scraper INSERT omits attacked_at, so its database timestamp semantics are not proven to be the game event time."
     }));
   } catch (error) {
-    console.log(JSON.stringify({ probe: "production-pl1-player-history-with-catalog-code-suffix", error: String(error) }));
+    console.log(JSON.stringify({
+      probe: "production-pl1-player-history-with-status-code-suffix",
+      error_type: error?.constructor?.name || "Error"
+    }));
   }
 }
 
@@ -572,7 +588,9 @@ async function probeBridge() {
 }
 
 await probeBetaPlayerHistoryFromDungeonRows();
-await probeProductionPlayerHistoryWithCatalogCodeSuffix();
+const trackerPl1ServerCode = await probeTrackerServerStatus("E4K_PL1");
+await probeTrackerServerStatus("E4K_PL1_BETA"); // control only; its code is never used for PL1
+await probeProductionPlayerHistoryWithStatusCodeSuffix(trackerPl1ServerCode);
 await probeTrackerAttackTimestampSemantics("E4K_PL1_BETA");
 await probeTrackerAttackTimestampSemantics("IT1");
 await probeBridge();

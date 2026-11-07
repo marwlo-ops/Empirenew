@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {
   DEFAULT_PL1_ZONE, buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
+  getVerifiedTrackerServerCode,
   correlateMovementAndBattleReports,
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
   isNpcBattleReportMessage, isGgejsGamDispatchStack,
@@ -66,6 +67,16 @@ test('preserves non-empty bridge header JSON after path decoding', () => {
 test('rejects non-object bridge headers', () => {
   assert.throws(() => encodeBridgeHeadersPathSegment(null), /must be an object/);
   assert.throws(() => encodeBridgeHeadersPathSegment([]), /must be an object/);
+});
+
+test('accepts only an explicit numeric three-digit server_code from the status response', () => {
+  assert.equal(getVerifiedTrackerServerCode({ server_code: '259', zone_id: 259 }), '259');
+  assert.equal(getVerifiedTrackerServerCode({ server_code: ' 007 ' }), '007');
+  assert.equal(getVerifiedTrackerServerCode({ zone_id: 259 }), null);
+  assert.equal(getVerifiedTrackerServerCode({ server_code: 259 }), null);
+  assert.equal(getVerifiedTrackerServerCode({ server_code: 'PL1' }), null);
+  assert.equal(getVerifiedTrackerServerCode({ server_code: '25' }), null);
+  assert.equal(getVerifiedTrackerServerCode(null), null);
 });
 
 test('accepts only complete IT1 map-only data', () => {

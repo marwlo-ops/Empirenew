@@ -175,8 +175,11 @@ test('derives a labeled live-PL1 attack-time estimate only from a positive defea
   assert.equal(observed.attack_time_utc, null);
 
   const betaZone = buildObservation(target, [baseRow], '2026-11-05T15:00:00Z', 'E4K_PL1_BETA');
+  assert.equal(betaZone.source_zone, 'E4K_PL1_BETA');
   assert.equal(betaZone.attack_evidence_status, 'not_established');
   assert.equal(betaZone.attack_time_estimate_utc, null);
+  const betaLater = buildObservation(target, [baseRow], '2026-11-05T15:10:00Z', 'E4K_PL1_BETA');
+  assert.deepEqual(compareObservations(observed, betaLater), []);
   const it1Zone = buildObservation(target, [baseRow], '2026-11-05T15:00:00Z', 'IT1');
   assert.equal(it1Zone.attack_time_estimate_utc, null);
 

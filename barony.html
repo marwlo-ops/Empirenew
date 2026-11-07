@@ -5,10 +5,10 @@
 <div class="controls"><button class="primary" id="refresh">Pobierz / odśwież</button><select id="state"><option value="0">Wszystkie stany</option><option value="1">Wolne</option><option value="2">Zajęte</option><option value="3">Oczekujące</option></select><input id="search" placeholder="Szukaj po współrzędnych lub graczu…"></div>
 <section class="panel"><div class="subtle" id="status">Oczekiwanie na pierwszy odczyt GGE Tracker…</div><div class="subtle" id="coverage"></div></section>
 <div class="layout"><section class="panel"><h2>Mapa wysp</h2><div class="map" id="map"><div class="empty">Mapa pojawi się po pobraniu danych.</div></div></section><section class="panel"><h2>Lista wysp akwamarynowych</h2><div class="list" id="list"><div class="empty">Brak danych.</div></div></section></div>
-<div class="notice">Odświeżanie automatyczne co 10 minut, gdy zakładka jest otwarta. Historia wykrytych wysp jest zapisywana lokalnie. Brak odpowiedzi API lub niekompletny skan nie jest traktowany jako brak wysp.</div></main>
+<div class="notice">Odświeżanie co 10 minut. Historia wykryć i zmian statusu (zajęcie / zwolnienie) jest zapisywana lokalnie w tej przeglądarce. Szacowanie cyklu: typ 3 = 36+6 h, typ 6 = 72+18 h, liczone od pierwszego wykrycia zajęcia. To prognoza, nie potwierdzenie terminu serwera. Brak odpowiedzi API lub niekompletny skan nie oznacza braku wysp.</div></main>
 <script>(()=>{'use strict';
 const API='https://api.gge-tracker.com/api/v1/storms/isles',SERVER='E4K_PL1_BETA',IDS=[3,6],BATCH=50,STORE='empirenew-aquamarine-isles-v1';
-const $=id=>document.getElementById(id);let islands=[],newCount=0,busy=false;
+const $=id=>document.getElementById(id);let islands=[],newCount=0,busy=false,history=[];
 const esc=v=>String(v??'—').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const coord=x=>String(x.position_x??'?')+':'+String(x.position_y??'?'),key=x=>String(x.position_x??'')+':'+String(x.position_y??'');
 const fmt=v=>{if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString('pl-PL')};
@@ -17,21 +17,21 @@ function saved(){try{let v=JSON.parse(localStorage.getItem(STORE)||'{}');return 
 function persist(){try{localStorage.setItem(STORE,JSON.stringify({saved_at:new Date().toISOString(),items:islands}))}catch(_){}}
 async function page(n){const q=new URLSearchParams({page:String(n),size:String(BATCH),filterByIsleIds:'['+IDS.join(',')+']'});const r=await fetch(API+'?'+q,{headers:{Accept:'application/json','gge-server':SERVER},cache:'no-store'});if(!r.ok)throw Error('GGE Tracker HTTP '+r.status);return unpack(await r.json())}
 async function scan(){if(busy)return;busy=true;$('refresh').disabled=true;try{
- const prior=saved(),merged=new Map(prior.map(x=>[key(x),x])),before=new Set(merged.keys());let n=1,pages=0,reported=null,sourceTotal=null;
+ const prior=saved(),merged=new Map(prior.map(x=>[key(x),x])),before=new Set(merged.keys());let n=1,pages=0,reported=null,sourceTotal=null;const now=new Date().toISOString();
  $('status').textContent='Pobieranie wysp akwamarynowych partiami po 50…';
- const pageSeen=new Set();
- while(n<=200){const res=await page(n),rows=res.rows;if(!rows.length)break;let addedRaw=0;
-  for(const x of rows){if(!x||x.position_x==null||x.position_y==null)continue;const rawKey=String(x.isle_id)+':'+key(x);if(!pageSeen.has(rawKey)){pageSeen.add(rawKey);addedRaw++}
+ const pageSeen=new Set(),pageFingerprints=new Set();
+ while(n<=200){const res=await page(n),rows=res.rows;if(!rows.length)break;const fingerprint=rows.map(x=>String(x.isle_id)+':'+key(x)).join('|');if(pageFingerprints.has(fingerprint))break;pageFingerprints.add(fingerprint);
+  for(const x of rows){if(!x||x.position_x==null||x.position_y==null)continue;const rawKey=String(x.isle_id)+':'+key(x);pageSeen.add(rawKey);
    if(![3,6].includes(Number(x.isle_id)))continue;const k=key(x);if(!k||k===':')continue;
-   merged.set(k,{...(merged.get(k)||{}),...x,resource_name:Number(x.isle_id)===3?'Akwamaryna — duża':'Akwamaryna — mała',first_seen:merged.get(k)?.first_seen||new Date().toISOString(),last_seen:new Date().toISOString()})
+   const prev=merged.get(k);const next={...(prev||{}),...x,resource_name:Number(x.isle_id)===3?'Akwamaryna — duża':'Akwamaryna — mała',first_seen:prev?.first_seen||now,last_seen:now};recordTransition(prev,next,now);if(Number(next.state)===2&&!next.occupied_since)next.occupied_since=now;if(Number(next.state)===2){const h=cycleHours(next);next.respawn_at=h?new Date(Date.parse(next.occupied_since)+h*3600000).toISOString():null;next.respawn_cycle=h===42?'36+6 h':h===90?'72+18 h':null;}merged.set(k,next)
   }
   pages++;const m=res.meta||{};const tp=Number(m.total_pages??m.totalPages??m.last_page??m.lastPage);if(Number.isFinite(tp)&&tp>0)reported=tp;const tc=Number(m.total_items_count??m.total??m.totalItemsCount??m.total_count);if(Number.isFinite(tc)&&tc>0)sourceTotal=tc;
   $('status').textContent='Strona '+n+' pobrana · rekordów: '+rows.length+' · unikalnych akwamarynowych: '+merged.size;
-  if(reported!==null&&n>=reported)break;if(addedRaw===0)break;n++;await new Promise(r=>setTimeout(r,250));
+  if(reported!==null&&n>=reported)break;n++;await new Promise(r=>setTimeout(r,250));
  }
  if(!pages)throw Error('Źródło nie zwróciło żadnej strony danych.');islands=[...merged.values()];newCount=[...merged.keys()].filter(k=>!before.has(k)).length;persist();render();
  $('status').textContent='Skan zakończony · '+pages+' stron · '+islands.length+' zapamiętanych wysp akwamarynowych.';
- $('coverage').textContent='Serwer '+SERVER+' · typy 3 i 6 · nowe w tym skanie: '+newCount+(sourceTotal!==null?' · liczba źródłowa: '+sourceTotal:'');
+ $('coverage').textContent='Serwer '+SERVER+' · wszystkie strony · typy akwamarynowe 3 i 6 · nowe w tym skanie: '+newCount+' · historia zmian: '+history.length+(sourceTotal!==null?' · liczba źródłowa: '+sourceTotal:'');
  }catch(e){$('status').textContent='Błąd pobierania: '+e.message;$('coverage').textContent='Zachowano poprzednią historię. Sprawdź dostęp API/CORS.';if(!islands.length){islands=saved();render()}}finally{busy=false;$('refresh').disabled=false}}
 function render(){const st=$('state').value,q=$('search').value.trim().toLowerCase();const list=islands.filter(x=>(st==='0'||String(x.state)===st)&&(!q||(coord(x)+' '+(x.occupier_name||'')+' '+(x.occupier_alliance_name||'')).toLowerCase().includes(q)));
  $('total').textContent=islands.length;$('fresh').textContent=newCount;$('occupied').textContent=islands.filter(x=>Number(x.state)===2).length;$('updated').textContent=fmt(islands.reduce((a,x)=>!a||Date.parse(x.last_seen)>Date.parse(a)?x.last_seen:a,null));

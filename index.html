@@ -19,11 +19,11 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
 </style>
 </head>
 <body>
-<header><div class="head"><div class="brand">EMPIRENEW</div><nav class="nav" aria-label="Główna nawigacja"><button type="button" data-view="map">🗺️ Mapa</button><button type="button" data-view="spy">🕵️ Szpiegowanie</button><button type="button" data-view="extras">🔗 Dodatkowe</button><button type="button" data-view="reference">🛰️ Tracker RB</button><button type="button" data-view="barony">🏝️ Wyspy</button></nav></div></header>
+<header><div class="head"><div class="brand">EMPIRENEW</div><nav class="nav" aria-label="Główna nawigacja"><button type="button" data-view="map">🗺️ Mapa</button><button type="button" data-view="spy">🕵️ Szpiegowanie</button><button type="button" data-view="extras">🔗 Dodatkowe</button><button type="button" data-view="reference">🛰️ Tracker RB</button><button type="button" data-view="barony">🏝️ Wyspy sztormowe</button></nav></div></header>
 <main>
 <section class="view" id="view-map" aria-label="Mapa"><div class="frame-shell"><iframe id="map-frame" title="Empirenew — Mapa RB i MD" loading="lazy"></iframe></div></section>
 <section class="view" id="view-spy" aria-label="Szpiegowanie"><div class="frame-shell"><iframe id="spy-frame" title="Empirenew — Szpiegowanie PL1" loading="lazy"></iframe></div></section>
-<section class="view" id="view-reference" aria-label="Tracker RB"><div class="frame-shell"><iframe id="reference-frame" title="Tracker RB — lista i aktywność graczy RB" loading="lazy"></iframe></div></section><section class="view" id="view-barony" aria-label="Wyspy"><div class="frame-shell"><iframe id="barony-frame" title="Empirenew — Wyspy" loading="lazy"></iframe></div></section>
+<section class="view" id="view-reference" aria-label="Tracker RB"><div class="frame-shell"><iframe id="reference-frame" title="Tracker RB — lista i aktywność graczy RB" loading="lazy"></iframe></div></section><section class="view" id="view-barony" aria-label="Wyspy"><div class="frame-shell"><iframe id="barony-frame" title="Empirenew — Wyspy sztormowe" loading="lazy"></iframe></div></section>
 <section class="view" id="view-extras" aria-label="Dodatkowe">
 <div class="extras-intro"><div class="eyebrow">Empire tools · community hub</div><h1>Dodatkowe narzędzia</h1><p>Zewnętrzne rankingi, narzędzia społeczności oraz oficjalne informacje o wydarzeniach Goodgame Empire. Jeśli dostawca blokuje osadzanie strony, skorzystaj z przycisku otwarcia w nowej karcie.</p></div>
 <div class="resource-grid">
@@ -42,7 +42,7 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
   const frame=view==='spy'?spyFrame:view==='reference'?referenceFrame:view==='barony'?baronyFrame:mapFrame;
   if(loaded[view])return;
   if(view==='reference')frame.src='./tracker-rb.html';
-  else if(view==='barony')frame.src='./barony.html';
+  else if(view==='barony')frame.src='./wyspy.html';
   else frame.src='./mapa-rb.html?embed=1#'+(view==='spy'?'intel':'map');
   loaded[view]=true;
  }

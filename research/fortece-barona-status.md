@@ -2727,10 +2727,11 @@ W aktualnym kliencie E4K dostępne są dwa pola z tego samego, bieżącego wiers
 **attack_time_estimate_utc = cooldown_until_utc - 86400 sekund**
 
 Estymacja jest emitowana tylko wtedy, gdy jednocześnie:
-1. odpowiedź pochodzi z bieżącej autoryzowanej sesji produkcyjnego PL1;
-2. dokładny KID/X/Y zawiera dokładnie jeden obiekt typu 11 z oczekiwanym właścicielem NPC;
-3. defeaterPlayerId jest dodatnim ID gracza;
-4. cooldown jest aktywny i pozostały czas mieści się w zakresie 1–86400 sekund.
+1. sourceZone jest dokładnie równe DEFAULT_PL1_ZONE = EmpirefourkingdomsExGG_3; jawny override na IT1, Beta lub inną strefę wyłącza estymację;
+2. odpowiedź pochodzi z bieżącej autoryzowanej sesji produkcyjnego PL1;
+3. dokładny KID/X/Y zawiera dokładnie jeden obiekt typu 11 z oczekiwanym właścicielem NPC;
+4. defeaterPlayerId jest dodatnim ID gracza;
+5. cooldown jest aktywny i pozostały czas mieści się w zakresie 1–86400 sekund.
 
 Wynik otrzymuje osobne pola attack_time_estimate_utc, attack_time_estimate_source i attack_time_estimate_clock_basis. attack_time_utc pozostaje zawsze null: klient konstruuje attackCooldownEnd na lokalnym Date.now(), a różnica zegara urządzenia/hosta względem serwera gry nie została zmierzona. To estymacja z bieżącego PL1 GAA, nie potwierdzony serwerowy timestamp.
 
@@ -2743,6 +2744,7 @@ Dodano test regresyjny obejmujący:
 - brak defeatera → brak estymacji;
 - wygasły cooldown → brak estymacji;
 - cooldown ponad 24h → brak estymacji;
+- strefa Beta lub IT1 → brak estymacji, nawet przy dodatnim defeaterze i aktywnym cooldownie;
 - dokładny attack_time_utc pozostaje null.
 
 To test jednostkowy na fixture, nie walidacja produkcyjnej próbki PL1. Do walidacji live nadal potrzebny jest autoryzowany odczyt GAA z produkcyjnej sesji PL1.

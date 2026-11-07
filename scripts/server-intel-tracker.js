@@ -100,7 +100,7 @@ const players = snapshot.players.map(player => {
   const honorDelta24h = first && end && hasNumber(first.honor_points) && hasNumber(end.honor_points) ? Number(end.honor_points) - Number(first.honor_points) : null;
   const lootDelta24h = first && end && hasNumber(first.loot) && hasNumber(end.loot) ? Number(end.loot) - Number(first.loot) : null;
   return {
-    ...player, metrics_available: player.power !== null || player.loot !== null || player.glory_points !== null || player.honor_points !== null,
+    ...player, peace_disabled_at: player.peace_disabled_at ?? player.raw?.peace_disabled_at ?? player.raw?.peaceDisabledAt ?? null, metrics_available: player.power !== null || player.loot !== null || player.glory_points !== null || player.honor_points !== null,
     power_delta_24h: powerDelta24h, loot_delta_24h: lootDelta24h, honor_delta_24h: honorDelta24h,
     trend_available: metricHistory.length >= 2,
     activity_status: metricHistory.length >= 2 && ((powerDelta24h !== null && powerDelta24h !== 0) || (honorDelta24h !== null && honorDelta24h !== 0)) ? "active" : "unknown",
@@ -157,7 +157,7 @@ const rbTracker = {
   activity_signal_policy: { honor: "strong", loot: "strong", power: "weak", direct_online_status: false },
   protection_evidence: { direct_api_flag_available: false, loot_metric_available: rbPlayers.some(player => hasNumber(player.loot)) },
   players: rbPlayers.map(player => ({
-    player_id: player.player_id, name: player.name, alliance_id: player.alliance_id,
+    player_id: player.player_id, name: player.name, peace_disabled_at: player.peace_disabled_at ?? null, alliance_id: player.alliance_id,
     alliance_name: player.alliance_name, rank: player.rank, power: player.power,
     glory_points: player.glory_points, honor_points: player.honor_points,
     loot: player.loot, level: player.level, legend_level: player.legend_level,

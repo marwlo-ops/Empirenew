@@ -153,6 +153,44 @@ test('accepts only a BossDungeonMapobject type 11 row with the expected NPC owne
   assert.equal(observation.attack_time_utc, null);
 });
 
+test('derives a labeled live-PL1 attack-time estimate only from a positive defeater and active 24h global cooldown', () => {
+  const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
+  const baseRow = {
+    areaType: 11,
+    kingdomId: 1,
+    position: { X: 10, Y: 20 },
+    ownerInfo: { playerId: -230 },
+    dungeonLevel: 72,
+    defeaterPlayerId: 123456,
+    attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
+  };
+  const observed = buildObservation(target, [baseRow], '2026-11-05T15:00:00Z');
+  assert.equal(observed.attack_evidence_status, 'live_PL1_map_cooldown_and_defeater_evidence');
+  assert.equal(observed.attack_time_estimate_utc, '2026-11-04T16:00:00.000Z');
+  assert.equal(
+    observed.attack_time_estimate_source,
+    'live_PL1_GAA_type11_remaining_24h_global_cooldown_minus_86400s',
+  );
+  assert.match(observed.attack_time_estimate_clock_basis, /local clock offset.*unmeasured/);
+  assert.equal(observed.attack_time_utc, null);
+
+  const noDefeater = buildObservation(target, [
+    { ...baseRow, defeaterPlayerId: 0 },
+  ], '2026-11-05T15:00:00Z');
+  assert.equal(noDefeater.attack_evidence_status, 'not_established');
+  assert.equal(noDefeater.attack_time_estimate_utc, null);
+
+  const expiredCooldown = buildObservation(target, [
+    { ...baseRow, attackCooldownEnd: new Date('2026-11-05T14:59:59Z') },
+  ], '2026-11-05T15:00:00Z');
+  assert.equal(expiredCooldown.attack_time_estimate_utc, null);
+
+  const over24hCooldown = buildObservation(target, [
+    { ...baseRow, attackCooldownEnd: new Date('2026-11-06T15:00:01Z') },
+  ], '2026-11-05T15:00:00Z');
+  assert.equal(over24hCooldown.attack_time_estimate_utc, null);
+});
+
 test('does not accept a regular type 2 dungeon, player castle or wrong type 11 NPC owner', () => {
   const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
   const rows = [

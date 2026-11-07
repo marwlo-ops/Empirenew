@@ -158,7 +158,7 @@ function toIsoDate(value) {
   return null;
 }
 
-function serializeExactRow(row, sampledAt, isVerifiedFortressTarget = false) {
+function serializeExactRow(row, sampledAt, isVerifiedFortressTarget = false, sourceZone = DEFAULT_PL1_ZONE) {
   const cooldownUntil = toIsoDate(row.attackCooldownEnd);
   const sampledAtMs = Date.parse(sampledAt);
   const cooldownUntilMs = cooldownUntil ? Date.parse(cooldownUntil) : NaN;
@@ -172,6 +172,7 @@ function serializeExactRow(row, sampledAt, isVerifiedFortressTarget = false) {
     ? row.defeaterPlayerId
     : null;
   const hasLiveAttackEvidence = isVerifiedFortressTarget &&
+    sourceZone === DEFAULT_PL1_ZONE &&
     defeaterPlayerId !== null &&
     cooldownMs !== null &&
     cooldownMs > 0 &&
@@ -262,7 +263,7 @@ function isTrustedFortressObservation(observation) {
   return true;
 }
 
-export function buildObservation(target, mapObjects, sampledAt = new Date().toISOString()) {
+export function buildObservation(target, mapObjects, sampledAt = new Date().toISOString(), sourceZone = DEFAULT_PL1_ZONE) {
   const sampledAtIso = toIsoDate(sampledAt);
   if (!sampledAtIso) throw new Error('Invalid observation timestamp.');
   if (!isValidFortressTarget(target)) throw new Error('Invalid fortress target.');
@@ -290,6 +291,7 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
       row,
       sampledAtIso,
       status === 'fortress_row_found' && row === validRows[0],
+      sourceZone,
     )),
     defeater_player_id: null,
     attack_evidence_status: 'not_established',
@@ -297,10 +299,10 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     attack_time_estimate_source: null,
     attack_time_estimate_clock_basis: null,
     attack_time_utc: null,
-    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. A time estimate is emitted only for one exact PL1 type-11 row with the expected NPC owner, a positive defeaterPlayerId and an active remaining global cooldown no greater than 24h. The estimate is cooldown_until_utc minus 86400 seconds, uses the local client clock and is not an exact server timestamp; attack_time_utc remains null.',
+    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. A time estimate is emitted only for one exact production-zone PL1 type-11 row with the expected NPC owner, a positive defeaterPlayerId and an active remaining global cooldown no greater than 24h. The estimate is cooldown_until_utc minus 86400 seconds, uses the local client clock and is not an exact server timestamp; attack_time_utc remains null.',
   };
   if (status === 'fortress_row_found') {
-    const row = serializeExactRow(validRows[0], sampledAtIso, true);
+    const row = serializeExactRow(validRows[0], sampledAtIso, true, sourceZone);
     observation.owner_id = row.owner_id;
     observation.dungeon_level = row.dungeon_level;
     observation.defeater_player_id = row.defeater_player_id;

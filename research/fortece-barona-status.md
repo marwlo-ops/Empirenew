@@ -2621,3 +2621,37 @@ To usuwa cykliczne czerwone przebiegi spowodowane brakiem opcjonalnej konfigurac
 Następny rozstrzygający test pozostaje lokalny i read-only na autoryzowanej sesji E4K PL1: `node scripts/barony-live/probe.mjs --movements --reports --no-state`. Do weryfikacji czasu potrzebne jest dodatkowo niezależne potwierdzenie pochodzenia `attacked_at`/PS albo zgodność istniejącego raportu z zegarem oficjalnego klienta. Nie wysyłać nowych ataków tylko na potrzeby testu.
 
 Zakres tej iteracji: dziennik badań #barony oraz bezpieczna obsługa brakującej konfiguracji w workflow radaru Beta. Bez zmian w kodzie detektora, katalogu współrzędnych, Mapa, Szpiegowanie, Dodatkowe, ich UI ani danych produkcyjnego PL1.
+
+
+## 64. Interwał 120 s scrapera wyjaśnia odchylenie pola `last_attack` od cooldownu 24h — 2026-11-07 02:48 UTC
+
+### Nowe źródło
+
+W przypiętym GGE Tracker `7d620820a76cde4176c752f6972ce6f0c9ad7ab1` plik `gge-tracker-internal-scraping/src/dungeon-update.worker.ts` ustawia domyślny `INTERVAL_MS = 120_000`. Pętla `main()` uruchamia `runOnce()`, a następnie śpi przez `max(0, INTERVAL_MS - elapsed)`. Każdy cykl wywołuje `backend.updateDungeonsList()`, które wykonuje sweep cooldownów fortec.
+
+Scraperowy `persistDungeonUpdates()` zapisuje do `dungeons_history` tylko `kid, position_x, position_y, player_id`, bez jawnego `attacked_at`. Publiczne repo nie ujawnia DEFAULT/triggera tej kolumny. Jeżeli timestamp nadaje domyślnie baza w chwili INSERT, będzie to czas wykrycia przez sweep, a nie dokładny czas ataku.
+
+### Powtórzony pomiar relacji `global_available_at - last_attack`
+
+Nowszy read-only przebieg `42330908449` powtórzył pomiar wyłącznie dla odrębnych źródeł pomocniczych:
+- Beta: 7 rekordów; różnica 86 289–86 338 s, czyli 62–111 s mniej niż 24h;
+- IT1: 8 rekordów; różnica 86 285–86 382 s, czyli 18–115 s mniej niż 24h.
+
+Wszystkie 15 różnic mieszczą się w granicy 120 sekund. Wcześniejszy przebieg `42324373025` dał 8 rekordów Beta i 8 IT1 z odchyleniem 6–120 sekund. Zbieżność odchylenia z domyślnym 120-sekundowym interwałem scrapera jest mocnym wsparciem hipotezy, że trackerowy `last_attack` może być czasem wykrycia/utrwalenia zdarzenia podczas sweepu, opóźnionym względem rzeczywistego ataku.
+
+To nadal nie jest dowód schematu DB ani dokładnego czasu ataku: nie znamy DEFAULT/triggera, a próbki pochodzą wyłącznie z Beta i IT1. Nie przenosimy tej interpretacji ani żadnych cooldownów do PL1.
+
+### Decyzja dla Barony
+
+- Nie mapować `last_attack` na `attack_time_utc`.
+- Nie przedstawiać go jako dokładnego czasu rozpoczęcia ataku.
+- Jeśli GGE Tracker kiedyś udostępni produkcyjny PL1, traktować `last_attack` początkowo jako potencjalny czas wykrycia przez tracker; dopiero porównanie z autoryzowanymi próbkami i schematem DB pozwoli określić margines błędu.
+- Własny detektor PL1 nadal wymaga autoryzowanej próbki GAA/GAM/SNE na mobilnym PL1.
+
+Źródła:
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/dungeon-update.worker.ts
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42330908449
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42324373025
+
+Zakres: wyłącznie dokumentacja badań #barony. Bez zmian w kodzie detektora, danych, katalogu współrzędnych, Mapie, Szpiegowaniu, Dodatkowych ani ich UI.

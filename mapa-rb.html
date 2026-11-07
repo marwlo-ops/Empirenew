@@ -114,7 +114,7 @@ function renderMap(){let pts=activePositions(),svg=$('map');if(!pts.length){svg.
  svg.innerHTML=markup;svg.querySelectorAll('.dot').forEach(c=>c.onclick=()=>{let p=pts[Number(c.dataset.i)];selectPlayer(p.member_id,p,p.alliance_id)});
  $('mapCaption').textContent=pts.length+' widocznych punktów · X '+minX+'–'+maxX+' (w prawo), Y '+minY+'–'+maxY+' (w dół)'}
 function protectionEndOf(player){
- const keys=['protection_end','protection_ends_at','protection_until','protection_end_at','protection_expiry','protection_expires_at','protectionEnd','protectionUntil','beginner_protection_end','beginner_protection_until','shield_until','shield_ends_at','protection'];
+ const keys=['peace_disabled_at','protection_end','protection_ends_at','protection_until','protection_end_at','protection_expiry','protection_expires_at','protectionEnd','protectionUntil','beginner_protection_end','beginner_protection_until','shield_until','shield_ends_at','protection'];
  for(const key of keys){const value=player?.[key];if(value==null||value==='')continue;if(typeof value==='object'){for(const nested of ['ends_at','end_at','until','expires_at','end','until_at'])if(value[nested])return value[nested];}else if(typeof value==='string'||typeof value==='number')return value;}
  return null;
 }

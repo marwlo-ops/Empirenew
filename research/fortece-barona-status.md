@@ -2728,7 +2728,8 @@ W aktualnym kliencie E4K dostępne są dwa pola z tego samego, bieżącego wiers
 
 Estymacja jest emitowana tylko wtedy, gdy jednocześnie:
 1. sourceZone jest dokładnie równe DEFAULT_PL1_ZONE = EmpirefourkingdomsExGG_3; jawny override na IT1, Beta lub inną strefę wyłącza estymację;
-2. odpowiedź pochodzi z bieżącej autoryzowanej sesji produkcyjnego PL1;
+2. każde obserwowane zdarzenie zapisuje source_zone, a porównywarka przyjmuje tylko obserwacje z dokładnie tej produkcyjnej strefy; dane Beta/IT1 nie mogą zostać porównane z historią PL1;
+3. odpowiedź pochodzi z bieżącej autoryzowanej sesji produkcyjnego PL1;
 3. dokładny KID/X/Y zawiera dokładnie jeden obiekt typu 11 z oczekiwanym właścicielem NPC;
 4. defeaterPlayerId jest dodatnim ID gracza;
 5. cooldown jest aktywny i pozostały czas mieści się w zakresie 1–86400 sekund.
@@ -2745,6 +2746,7 @@ Dodano test regresyjny obejmujący:
 - wygasły cooldown → brak estymacji;
 - cooldown ponad 24h → brak estymacji;
 - strefa Beta lub IT1 → brak estymacji, nawet przy dodatnim defeaterze i aktywnym cooldownie;
+- porównanie obserwacji PL1 z obserwacją Beta/IT1 → odrzucone;
 - dokładny attack_time_utc pozostaje null.
 
 To test jednostkowy na fixture, nie walidacja produkcyjnej próbki PL1. Do walidacji live nadal potrzebny jest autoryzowany odczyt GAA z produkcyjnej sesji PL1.

@@ -46,6 +46,15 @@
   const status=!h.length||!Number.isFinite(Date.parse(h.at(-1)?.captured_at))?"unknown":lastChange?(minutesSinceChange<=10?"active":minutesSinceChange<30?"idle":"inactive"):(monitoringAge>=30?"inactive":monitoringAge>=10?"idle":"unknown");
   return {direct,indirect,directAge,indirectAge,status,last:lastChange,minutes:minutesSinceChange,minutesSinceChange,monitoringAge};
  }
+ function protectionEndLabel(p){
+  const raw=p.peace_disabled_at ?? p.raw?.peace_disabled_at ?? null;
+  if(raw==null||raw===""||raw==="null")return '<div class="notice warn">🕊️ Brak daty końca ochrony w danych źródłowych</div>';
+  const ms=typeof raw==="number"?(raw<1e12?raw*1000:raw):Date.parse(raw);
+  if(!Number.isFinite(ms))return '<div class="notice warn">🕊️ API zwróciło nieczytelną datę ochrony</div>';
+  const left=ms-Date.now(),dateText=new Date(ms).toLocaleString('pl-PL');
+  const remaining=left<=0?'ochrona wygasła':Math.floor(left/86400000)+' dni '+Math.floor(left%86400000/3600000)+' godz.';
+  return '<div class="notice '+(left>0?'good':'warn')+'">🕊️ <b>Protection ends:</b> '+esc(dateText)+' · '+remaining+'</div>';
+ }
  function protectionHint(p){
   const raw=p.raw||{};
   const keys=Object.keys(raw).filter(k=>/shield|protection|protect|peace|safe|bubble|truce/i.test(k));
@@ -101,7 +110,7 @@
   $("detail").innerHTML='<div class="profile-top"><div><h2>'+esc(p.name)+'</h2><div class="profile-id">PID '+p.player_id+' · '+esc(p.alliance_name||"ReBorN")+' · AID '+p.alliance_id+'</div></div>'+statusMarkup(p)+'</div>'+
    '<div class="metric-grid"><div class="metric"><b>'+fmt(p.honor_points)+'</b><span>Honor</span></div><div class="metric"><b>'+fmt(p.loot)+'</b><span>Łup</span></div><div class="metric"><b>'+fmt(p.power)+'</b><span>Potęga</span></div><div class="metric"><b>'+fmt(p.glory_points)+'</b><span>Chwała</span></div><div class="metric"><b>'+fmt(p.level)+'</b><span>Poziom</span></div><div class="metric"><b>'+fmt(p.legend_level)+'</b><span>Poziom legendarny</span></div></div>'+
    '<div class="notice '+(a.status==="confirmed"?"good":"")+'"><b>Aktywność – dowody z pomiarów</b><br>Potwierdzona zmiana honoru/łupu: '+esc(direct)+'.<br>Sygnał pośredni potęgi: '+esc(indirect)+'.<br><span class="small">Zmiana potęgi nie jest traktowana jako potwierdzenie zalogowania. Ostatni pomiar: '+date(p.last_seen||data.source_snapshot_at)+'.</span></div>'+
-   '<div class="notice '+pro.kind+'"><b>Ochrona przed atakami: '+esc(pro.label)+'</b><br>'+esc(pro.desc)+'<br><span class="small">Nie wnioskujemy o tarczy na podstawie samego braku honoru ani braku udziału w wydarzeniach.</span></div>'+
+   protectionEndLabel(p)+'<div class="notice '+pro.kind+'"><b>Ochrona przed atakami: '+esc(pro.label)+'</b><br>'+esc(pro.desc)+'<br><span class="small">Nie wnioskujemy o tarczy na podstawie samego braku honoru ani braku udziału w wydarzeniach.</span></div>'+
    '<div class="section"><h3>Zmiany z ostatnich 24 godzin</h3><div class="metric-grid"><div class="metric"><b>'+(delta("power")===null?"—":(delta("power")>0?"+":"")+fmt(delta("power")))+'</b><span>Zmiana potęgi</span></div><div class="metric"><b>'+(delta("honor_points")===null?"—":(delta("honor_points")>0?"+":"")+fmt(delta("honor_points")))+'</b><span>Zmiana honoru</span></div><div class="metric"><b>'+(delta("loot")===null?"—":(delta("loot")>0?"+":"")+fmt(delta("loot")))+'</b><span>Zmiana łupu</span></div></div></div>'+
    '<div class="section"><h3>Wykresy historii · ostatnie 48 pomiarów</h3>'+chart("power","Potęga")+chart("honor_points","Honor")+'</div>'+
    '<div class="section"><h3>Ostatnie eventy gracza ('+events.length+')</h3>'+(events.length?events.map(e=>'<div class="event"><time>'+date(e.detected_at)+'</time><div><b>'+esc(eventLabel[e.kind]||e.kind)+'</b><p>'+esc(e.description||"Zarejestrowane zdarzenie")+'</p></div></div>').join(""):'<p class="small">Brak zapisanych eventów dla tego gracza. Eventy pojawią się po wykryciu różnicy w kolejnych snapshotach.</p>')+'</div>'+

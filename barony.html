@@ -19,11 +19,15 @@ async function page(n){const q=new URLSearchParams({page:String(n),size:String(B
 async function scan(){if(busy)return;busy=true;$('refresh').disabled=true;try{
  const prior=saved(),merged=new Map(prior.map(x=>[key(x),x])),before=new Set(merged.keys());let n=1,pages=0,reported=null,sourceTotal=null;
  $('status').textContent='Pobieranie wysp akwamarynowych partiami po 50…';
- while(n<=200){const res=await page(n),rows=res.rows;if(!rows.length)break;let added=0;
-  for(const x of rows){if(!x||![3,6].includes(Number(x.isle_id))||x.position_x==null||x.position_y==null)continue;const k=key(x);if(!k||k===':')continue;if(!merged.has(k))added++;merged.set(k,{...(merged.get(k)||{}),...x,resource_name:Number(x.isle_id)===3?'Akwamaryna — duża':'Akwamaryna — mała',first_seen:merged.get(k)?.first_seen||new Date().toISOString(),last_seen:new Date().toISOString()})}
+ const pageSeen=new Set();
+ while(n<=200){const res=await page(n),rows=res.rows;if(!rows.length)break;let addedRaw=0;
+  for(const x of rows){if(!x||x.position_x==null||x.position_y==null)continue;const rawKey=String(x.isle_id)+':'+key(x);if(!pageSeen.has(rawKey)){pageSeen.add(rawKey);addedRaw++}
+   if(![3,6].includes(Number(x.isle_id)))continue;const k=key(x);if(!k||k===':')continue;
+   merged.set(k,{...(merged.get(k)||{}),...x,resource_name:Number(x.isle_id)===3?'Akwamaryna — duża':'Akwamaryna — mała',first_seen:merged.get(k)?.first_seen||new Date().toISOString(),last_seen:new Date().toISOString()})
+  }
   pages++;const m=res.meta||{};const tp=Number(m.total_pages??m.totalPages??m.last_page??m.lastPage);if(Number.isFinite(tp)&&tp>0)reported=tp;const tc=Number(m.total_items_count??m.total??m.totalItemsCount??m.total_count);if(Number.isFinite(tc)&&tc>0)sourceTotal=tc;
   $('status').textContent='Strona '+n+' pobrana · rekordów: '+rows.length+' · unikalnych akwamarynowych: '+merged.size;
-  if(reported!==null&&n>=reported)break;if(added===0)break;n++;await new Promise(r=>setTimeout(r,250));
+  if(reported!==null&&n>=reported)break;if(addedRaw===0)break;n++;await new Promise(r=>setTimeout(r,250));
  }
  if(!pages)throw Error('Źródło nie zwróciło żadnej strony danych.');islands=[...merged.values()];newCount=[...merged.keys()].filter(k=>!before.has(k)).length;persist();render();
  $('status').textContent='Skan zakończony · '+pages+' stron · '+islands.length+' zapamiętanych wysp akwamarynowych.';

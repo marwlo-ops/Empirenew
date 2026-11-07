@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { createConnection } from "node:net";
-import { DEFAULT_PL1_ZONE, encodeBridgeHeadersPathSegment, extractOutboundBossDungeonMovementEvidence } from "./barony-live/probe-core.mjs";
+import { DEFAULT_PL1_ZONE, encodeBridgeHeadersPathSegment, extractOutboundBossDungeonMovementEvidence, getVerifiedTrackerServerCode } from "./barony-live/probe-core.mjs";
 // Read-only probes only; do not persist player names or inferred attack events.
 const base = "https://api.gge-tracker.com/api/v1";
 const bridgeBase = "https://empire-api.fly.dev";
@@ -358,36 +358,64 @@ async function probeBetaPlayerHistoryFromDungeonRows() {
   }
 }
 
-async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
+async function probeTrackerServerStatus(server, expectedZone) {
   try {
-    const catalogResponse = await fetch(base + "/servers/catalog", {
-      headers: { Accept: "application/xml, text/xml, */*" },
+    const response = await fetch(base + "/", {
+      headers: { "gge-server": server, Accept: "application/json" },
       signal: AbortSignal.timeout(20000)
     });
-    const xml = await catalogResponse.text();
-    const blocks = xml.match(/<server>[\s\S]*?<\/server>/g) || [];
-    const block = blocks.find(item => new RegExp("<name>\\s*E4K_PL1\\s*</name>").test(item));
-    const readTag = name => {
-      const match = block?.match(new RegExp("<" + name + ">\\s*([^<]+?)\\s*</" + name + ">"));
-      return match ? match[1].trim() : null;
-    };
-    const code = readTag("code");
-    if (!catalogResponse.ok || !/^\d{3}$/.test(code || "")) {
+    const body = await response.json();
+    const serverCode = response.ok
+      ? getVerifiedTrackerServerCode(body, server, expectedZone)
+      : null;
+    console.log(JSON.stringify({
+      probe: "tracker-server-status",
+      server,
+      http_status: response.status,
+      error: body.error ?? null,
+      response_server: body.server ?? null,
+      server_code: serverCode,
+      server_code_valid: serverCode !== null,
+      zone: body.zone ?? null,
+      platform: body.platform ?? null,
+      data_version: body.data_version ?? null,
+      dataset_players: body.dataset?.players ?? null,
+      dataset_alliances: body.dataset?.alliances ?? null,
+      dataset_snapshot_at: body.dataset?.snapshot_at ?? null
+    }));
+    return serverCode;
+  } catch (error) {
+    console.log(JSON.stringify({
+      probe: "tracker-server-status",
+      server,
+      error_type: error?.constructor?.name || "Error"
+    }));
+    return null;
+  }
+}
+
+async function probeProductionPlayerHistoryFromServerPlayers(code) {
+  try {
+    if (!/^\d{3}$/.test(code || "")) {
       console.log(JSON.stringify({
-        probe: "production-pl1-player-history-with-catalog-code-suffix",
-        catalog_status: catalogResponse.status,
+        probe: "production-pl1-player-history-from-server-player-list",
         skipped: true,
-        reason: "No verified three-digit GGE Tracker server-code suffix is available; e4k-data zoneId is not a substitute.",
-        id_format_contract: "numeric player ID + three-digit GGE Tracker server-code suffix; API extracts the trailing three digits",
-        catalog_entry_found: Boolean(block),
-        catalog_code: code,
-        enabled: readTag("enabled"),
-        fortress: readTag("fortress")
+        reason: "E4K_PL1 status did not provide an explicit numeric three-digit server_code; no suffix was inferred from zoneId, alias, IT1 or Beta."
       }));
       return;
     }
 
-    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
+    const playersResponse = await fetch(base + "/players?page=1&size=20&orderBy=might_current&orderType=DESC", {
+      headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
+      signal: AbortSignal.timeout(20000)
+    });
+    const playerBody = await playersResponse.json();
+    const players = Array.isArray(playerBody.players) ? playerBody.players : [];
+    const validPlayers = players.filter(player => {
+      const id = String(player?.player_id ?? "");
+      return /^\d{6,}$/.test(id) && id.slice(-3) === code;
+    });
+
     const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
     const known = new Set();
     for (const data of Object.values(map.results || {})) {
@@ -395,73 +423,78 @@ async function probeProductionPlayerHistoryWithCatalogCodeSuffix() {
         known.add(Number(fortress.kid) + "/" + Number(fortress.x) + "/" + Number(fortress.y));
       }
     }
-    const members = (snapshot.alliances || []).flatMap(alliance => alliance.members || [])
-      .filter(member => member.name && Number.isInteger(member.member_id) && member.member_id > 999)
-      .slice(0, 3);
-    const results = [];
-    for (let index = 0; index < members.length; index++) {
-      const member = members[index];
-      const candidateId = String(member.member_id) + code;
-      try {
-        const profileResponse = await fetch(
-          base + "/players/" + encodeURIComponent(candidateId) + "/profile?include=none",
-          { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
-        );
-        const profile = await profileResponse.json();
-        const identity = profile?.player || {};
-        const profileMatched = profileResponse.ok &&
-          String(profile.server_code || "") === code &&
-          String(identity.player_id || "") === candidateId &&
-          String(identity.player_name || "").trim().toLocaleLowerCase() === String(member.name).trim().toLocaleLowerCase();
 
+    const sampled = validPlayers.slice(0, 5);
+    const results = [];
+    let rateLimited = false;
+    for (let index = 0; index < sampled.length; index++) {
+      const playerId = String(sampled[index].player_id);
+      try {
         const historyResponse = await fetch(
-          base + "/dungeons/player/" + encodeURIComponent(candidateId) + "?lastDays=365",
+          base + "/dungeons/player/" + encodeURIComponent(playerId) + "?lastDays=365",
           { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
         );
         const history = await historyResponse.json();
+        if (historyResponse.status === 429) {
+          results.push({
+            sample: index + 1,
+            player_id_suffix_matches_status_code: playerId.slice(-3) === code,
+            history_status: 429,
+            history_error: history.error ?? "rate limited",
+            history_records: 0,
+            map_target_matches: 0,
+            rate_limited: true,
+            sample_target_rows: []
+          });
+          rateLimited = true;
+          break;
+        }
         const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
         const targetRows = rows.filter(row =>
           known.has(Number(row.kid) + "/" + Number(row.position_x) + "/" + Number(row.position_y))
         );
         results.push({
           sample: index + 1,
-          profile_status: profileResponse.status,
-          profile_server_code: profile.server_code ?? null,
-          profile_identity_matched_to_spy_snapshot: profileMatched,
+          player_id_suffix_matches_status_code: playerId.slice(-3) === code,
           history_status: historyResponse.status,
           history_error: history.error ?? null,
           history_records: rows.length,
-          map_target_matches: profileMatched ? targetRows.length : 0,
-          unverified_target_coordinate_matches: profileMatched ? 0 : targetRows.length,
-          sample_target_rows: profileMatched ? targetRows.slice(0, 3).map(row => ({
+          map_target_matches: targetRows.length,
+          sample_target_rows: targetRows.slice(0, 3).map(row => ({
             kid: Number(row.kid),
             x: Number(row.position_x),
             y: Number(row.position_y),
             attacked_at: row.attacked_at ?? null
-          })) : []
+          }))
         });
       } catch (error) {
-        results.push({ sample: index + 1, error: String(error) });
+        results.push({ sample: index + 1, error_type: error?.constructor?.name || "Error" });
       }
     }
+
     console.log(JSON.stringify({
-      probe: "production-pl1-player-history-with-catalog-code-suffix",
-      api_route: "/dungeons/player/{playerId}",
-      suffix_source: "GGE Tracker /servers/catalog E4K_PL1 <code>",
-      id_format_contract: "numeric player ID + three-digit GGE Tracker server-code suffix; API extracts the trailing three digits; e4k-data zoneId is not interchangeable",
+      probe: "production-pl1-player-history-from-server-player-list",
+      server: "E4K_PL1",
       server_code: code,
-      catalog_enabled: readTag("enabled"),
-      catalog_fortress: readTag("fortress"),
-      snapshot_members_sampled: members.length,
-      profiles_matched: results.filter(result => result.profile_identity_matched_to_spy_snapshot).length,
+      players_status: playersResponse.status,
+      players_error: playerBody.error ?? null,
+      players_total: playerBody.pagination?.total_items_count ?? null,
+      players_in_page: players.length,
+      player_sort: "might_current DESC",
+      valid_player_ids_for_status_code: validPlayers.length,
       histories_checked: results.length,
-      nonempty_matched_histories: results.filter(result => result.profile_identity_matched_to_spy_snapshot && result.history_records > 0).length,
-      total_profile_matched_target_history_rows: results.reduce((total, result) => total + Number(result.map_target_matches || 0), 0),
+      nonempty_histories: results.filter(result => result.history_records > 0).length,
+      rate_limited: rateLimited,
+      total_map_target_matches: results.reduce((total, result) => total + Number(result.map_target_matches || 0), 0),
       results,
-      timestamp_warning: "API attacked_at is not treated as exact attack time: the public scraper INSERT omits attacked_at, so its database timestamp semantics are not proven to be the game event time."
+      timestamp_warning: "attacked_at is a GGE Tracker database history field. The scraper INSERT omits attacked_at, so its exact game-event-time semantics remain unproven.",
+      sampling_note: "At most five production PL1 player histories are queried per run to respect the public API rate limit; stop immediately on HTTP 429."
     }));
   } catch (error) {
-    console.log(JSON.stringify({ probe: "production-pl1-player-history-with-catalog-code-suffix", error: String(error) }));
+    console.log(JSON.stringify({
+      probe: "production-pl1-player-history-from-server-player-list",
+      error_type: error?.constructor?.name || "Error"
+    }));
   }
 }
 
@@ -572,7 +605,9 @@ async function probeBridge() {
 }
 
 await probeBetaPlayerHistoryFromDungeonRows();
-await probeProductionPlayerHistoryWithCatalogCodeSuffix();
+const trackerPl1ServerCode = await probeTrackerServerStatus("E4K_PL1", DEFAULT_PL1_ZONE);
+await probeTrackerServerStatus("E4K_PL1_BETA", "EmpirefourkingdomsExGG2_3"); // isolated control; its code is never used for PL1
+await probeProductionPlayerHistoryFromServerPlayers(trackerPl1ServerCode);
 await probeTrackerAttackTimestampSemantics("E4K_PL1_BETA");
 await probeTrackerAttackTimestampSemantics("IT1");
 await probeBridge();

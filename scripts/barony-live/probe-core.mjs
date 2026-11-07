@@ -7,6 +7,26 @@ export const MAP_SECTOR_SIZE = 100;
  * object still needs a non-empty third path segment. A single encoded space
  * decodes to whitespace and makes JSON.parse(`{ }`) return the intended {}.
  */
+/**
+ * Accept a numeric three-digit GGE Tracker server_code only when the status
+ * response identifies the exact requested server and expected zone. This
+ * prevents a Beta/IT1 status payload from being mistaken for production PL1.
+ */
+export function getVerifiedTrackerServerCode(statusPayload, expectedServer, expectedZone) {
+  if (
+    typeof expectedServer !== 'string' || expectedServer.length === 0 ||
+    statusPayload?.server !== expectedServer ||
+    statusPayload?.platform !== 'E4K' ||
+    typeof expectedZone !== 'string' || expectedZone.length === 0 ||
+    statusPayload?.zone !== expectedZone
+  ) return null;
+
+  const code = typeof statusPayload?.server_code === 'string'
+    ? statusPayload.server_code.trim()
+    : '';
+  return /^\d{3}$/.test(code) ? code : null;
+}
+
 export function encodeBridgeHeadersPathSegment(params) {
   if (!params || typeof params !== 'object' || Array.isArray(params)) {
     throw new Error('Bridge command headers must be an object.');

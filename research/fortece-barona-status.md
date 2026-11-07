@@ -2847,3 +2847,89 @@ GAM obejmuje tylko ruchy widoczne dla sesji mostu, nie cały serwer. Zero ruchó
 ### Ochrona zakresu
 
 Ta iteracja aktualizuje wyłącznie dziennik badań #barony. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, katalogu współrzędnych, snapshotach ani danych ataków. Nie zapisano żadnego ataku i nie użyto cooldownów IT1/Beta do PL1.
+
+## 69. Produkcyjny GGE Tracker: jawny kod PL1, ale brak historii fortec w próbce — 2026-11-07 06:42 UTC
+
+### Potwierdzony status serwera
+
+Read-only `GET /api/v1/` z nagłówkiem `gge-server: E4K_PL1` zwrócił HTTP 200:
+
+- `server=E4K_PL1`;
+- `server_code=607`;
+- `zone=EmpirefourkingdomsExGG_3`;
+- `platform=E4K`;
+- snapshot danych graczy/sojuszy: 770 / 88, `dataset.snapshot_at=2026-11-07T06:03:42.055Z`.
+
+Oddzielny request kontrolny `E4K_PL1_BETA` zwrócił `server_code=226` i strefę `EmpirefourkingdomsExGG2_3`. Kod 226 jest kontrolą Beta i nie jest używany do PL1. Kod 607 pochodzi bezpośrednio z pola `server_code` statusu, a nie z `zoneId=259`, nazwy strefy ani serwera Beta.
+
+### Próba historii graczy PL1
+
+Zapytanie `/players?page=1&size=20&orderBy=might_current DESC` z nagłówkiem `gge-server: E4K_PL1` zwróciło HTTP 200, 129 graczy łącznie i 20 w pierwszej stronie. Wszystkie 20 identyfikatorów miało końcówkę 607 zgodną z kodem statusu.
+
+Dla pięciu pierwszych ID wykonano `/dungeons/player/{playerId}?lastDays=365`:
+
+- 5/5 odpowiedzi HTTP 200;
+- 0 rekordów historii;
+- 0 dopasowań do współrzędnych katalogu fortec;
+- brak HTTP 429;
+- niczego nie zapisano.
+
+To jest ograniczona próbka pięciu graczy, nie dowód, że każdy gracz PL1 ma pustą historię. Wcześniejszy odczyt publicznego katalogu serwerów oznaczał jednak `E4K_PL1 fortress=false`, więc najbardziej prawdopodobnym wyjaśnieniem jest to, że publiczny scraper nie zbiera historii fortec dla produkcyjnego PL1.
+
+### Audyt kontraktu endpointu i znaczenia czasu
+
+Kod upstream GGE Tracker potwierdza:
+
+- `/dungeons/player/:playerId` jest publiczną trasą;
+- ID musi zawierać trzycyfrowy kod serwera;
+- `getDungeonsByPlayer()` waliduje kod, wybiera bazę serwera na podstawie sufiksu ID i odczytuje `kid`, `position_x`, `position_y`, `attacked_at` z `dungeons_history`;
+- endpoint nie wymaga nagłówka `gge-server` dla historii gracza, ponieważ serwer jest rozpoznawany z sufiksu ID.
+
+W `persistDungeonUpdates()` scraper wykonuje INSERT do `dungeons_history` wyłącznie dla kolumn `kid`, `position_x`, `position_y`, `player_id`; nie przekazuje jawnie `attacked_at`. Nie znaleziono w sprawdzonym kodzie definicji DEFAULT/triggera tej kolumny. Dlatego `attacked_at` pozostaje timestampem pochodzącym z bazy Trackera o nieustalonej semantyce względem rzeczywistego czasu zdarzenia gry. Nie traktować go jako dokładnego czasu wysłania armii ani bitwy.
+
+### Zmiana fail-closed w Empirenew
+
+W PR #53 helper `getVerifiedTrackerServerCode()` został zaostrzony. Teraz wymaga jednocześnie:
+
+1. dokładnego `server` zgodnego z żądaniem;
+2. `platform=E4K`;
+3. dokładnej oczekiwanej strefy;
+4. tekstowego trzycyfrowego `server_code`.
+
+Testy odrzucają m.in. status Beta przedstawiony jako PL1, złą strefę, inną platformę, brak kodu i nieprawidłowy format. Kod Beta nie może przejść walidacji PL1.
+
+### Walidacja po ostatnim commicie
+
+Commit gałęzi PR: `c521c4c2385b5b5c716046c880327c06799ca7de`.
+
+- Workflow `Probe PL1 fortress API` run `42348174113` — SUCCESS; zakończone kroki obejmowały testy offline, GGE Tracker fallback, weryfikację klienta E4K, katalog mapy i live read-only probe.
+- Workflow `Barony catalog and diagnostic safety` run `42348177334` — SUCCESS; Node catalog/evidence tests oraz Python diagnostic/PII redaction tests.
+- Live probe ponownie zwrócił PL1 `server_code=607` i 5 pustych historii graczy. GAA przez publiczny most nadal pominięte z powodu nieprawidłowego upstream matchera.
+- Wcześniejszy pośredni commit `c07d295` miał nieudany test po zmianie sygnatury helpera przed aktualizacją testów i wywołania; kolejny commit z kompletną aktualizacją przeszedł pełny workflow.
+
+### Wniosek i następny krok
+
+Publiczny GGE Tracker rozpoznaje produkcyjny PL1 i jego własny kod `607`, ale nie udostępnia w tym przebiegu historii fortec: katalog ma `fortress=false`, a pięć sprawdzonych historii graczy było pustych. Nie jest to źródło globalnego feedu ataków.
+
+Następny test powinien iść przez autoryzowaną sesję mobilnego E4K PL1 i bezpośredni odczyt GAA dla kilku znanych KID/X/Y. Do historii „kto i kiedy” nadal potrzebny będzie osobny dowód z ruchu GAM lub raportu SNE/BLS/BLM; GAA/cooldown sam w sobie nie daje czasu wysłania armii. Nie zapisano żadnego zdarzenia i nie wykorzystano IT1/Beta cooldownów do PL1.
+
+Zakres: wyłącznie #barony (skrypty, testy i dziennik badań). Bez zmian w Mapa, Szpiegowanie, Dodatkowe, katalogu współrzędnych i snapshotach.
+
+## 70. Odrzucona alternatywa: `/server/movements` nie jest feedem ataków — 2026-11-07 06:44 UTC
+
+Sprawdzono kod endpointu GGE Tracker `GET /server/movements` oraz jego trasę w `api/main.ts` i implementację `ApiServer.getMovements()`.
+
+To endpoint historii **przemieszczeń zamków graczy**, a nie marszów armii:
+
+- zapytanie SQL czyta `player_castle_movements_history`;
+- zwracane pola to `movement_type`, `castle_type`, stare i nowe X/Y zamku oraz `created_at`;
+- filtruje graczy/sojusze i typy ruchu zamku;
+- nie odczytuje `GAM`, `army movements`, obiektów mapy typu 11 ani celu ataku NPC.
+
+Wniosek: nie używać `/server/movements` jako dowodu ataku na fortecę. Nie wykonano live requestu, ponieważ audyt kodu rozstrzyga semantykę endpointu i nie ma powodu obciążać API zapytaniem, które nie dostarcza wymaganych danych.
+
+Źródła upstream:
+- `gge-tracker-backend-api/src/api/main.ts` — opis i rejestracja `/server/movements`;
+- `gge-tracker-backend-api/src/api/routes/api-server.ts` — SQL na `player_castle_movements_history` i pola starej/nowej pozycji zamku.
+
+Zakres: audyt źródeł #barony; bez zmian w Mapa, Szpiegowanie, Dodatkowe, katalogu współrzędnych i snapshotach.

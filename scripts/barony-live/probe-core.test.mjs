@@ -69,14 +69,26 @@ test('rejects non-object bridge headers', () => {
   assert.throws(() => encodeBridgeHeadersPathSegment([]), /must be an object/);
 });
 
-test('accepts only an explicit numeric three-digit server_code from the status response', () => {
-  assert.equal(getVerifiedTrackerServerCode({ server_code: '259', zone_id: 259 }), '259');
-  assert.equal(getVerifiedTrackerServerCode({ server_code: ' 007 ' }), '007');
-  assert.equal(getVerifiedTrackerServerCode({ zone_id: 259 }), null);
-  assert.equal(getVerifiedTrackerServerCode({ server_code: 259 }), null);
-  assert.equal(getVerifiedTrackerServerCode({ server_code: 'PL1' }), null);
-  assert.equal(getVerifiedTrackerServerCode({ server_code: '25' }), null);
-  assert.equal(getVerifiedTrackerServerCode(null), null);
+test('accepts a tracker server code only when server, platform and exact zone match', () => {
+  const pl1 = {
+    server: 'E4K_PL1',
+    platform: 'E4K',
+    zone: DEFAULT_PL1_ZONE,
+    server_code: '607',
+    zone_id: 259,
+  };
+  assert.equal(getVerifiedTrackerServerCode(pl1, 'E4K_PL1', DEFAULT_PL1_ZONE), '607');
+  assert.equal(getVerifiedTrackerServerCode({ ...pl1, server_code: ' 007 ' }, 'E4K_PL1', DEFAULT_PL1_ZONE), '007');
+
+  assert.equal(getVerifiedTrackerServerCode({ ...pl1, server: 'E4K_PL1_BETA', server_code: '226' }, 'E4K_PL1', DEFAULT_PL1_ZONE), null);
+  assert.equal(getVerifiedTrackerServerCode({ ...pl1, zone: 'EmpirefourkingdomsExGG2_3' }, 'E4K_PL1', DEFAULT_PL1_ZONE), null);
+  assert.equal(getVerifiedTrackerServerCode({ ...pl1, platform: 'EP' }, 'E4K_PL1', DEFAULT_PL1_ZONE), null);
+  assert.equal(getVerifiedTrackerServerCode({ ...pl1, server_code: undefined }, 'E4K_PL1', DEFAULT_PL1_ZONE), null);
+  assert.equal(getVerifiedTrackerServerCode({ ...pl1, server_code: 607 }, 'E4K_PL1', DEFAULT_PL1_ZONE), null);
+  assert.equal(getVerifiedTrackerServerCode({ ...pl1, server_code: 'PL1' }, 'E4K_PL1', DEFAULT_PL1_ZONE), null);
+  assert.equal(getVerifiedTrackerServerCode({ ...pl1, server_code: '25' }, 'E4K_PL1', DEFAULT_PL1_ZONE), null);
+  assert.equal(getVerifiedTrackerServerCode(null, 'E4K_PL1', DEFAULT_PL1_ZONE), null);
+  assert.equal(getVerifiedTrackerServerCode(pl1, 'E4K_PL1', 'wrong-zone'), null);
 });
 
 test('accepts only complete IT1 map-only data', () => {

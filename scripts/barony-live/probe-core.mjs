@@ -536,6 +536,107 @@ export function extractNpcBattleReportEvidence(
 }
 
 
+const MAX_MOVEMENT_REPORT_MATCH_DELTA_SECONDS = 10 * 60;
+
+/**
+ * Link account-visible outbound movements to account-mailbox NPC battle reports.
+ * This is a correlation candidate only: both clocks are local estimates, reports
+ * may be delayed, and no exact attack-start timestamp or global coverage is inferred.
+ */
+export function correlateMovementAndBattleReports(
+  movementEvidence,
+  reportEvidence,
+  maxDeltaSeconds = MAX_MOVEMENT_REPORT_MATCH_DELTA_SECONDS,
+) {
+  if (!Array.isArray(movementEvidence) || !Array.isArray(reportEvidence)) {
+    throw new Error('Movement and report evidence must be arrays.');
+  }
+  if (!Number.isInteger(maxDeltaSeconds) || maxDeltaSeconds < 1 || maxDeltaSeconds > 3600) {
+    throw new Error('Correlation window must be an integer from 1 to 3600 seconds.');
+  }
+
+  const movements = movementEvidence.filter((item) =>
+    item?.evidence_kind === 'live_outbound_npc_attack_movement' &&
+    item?.classification === 'observed_outbound_npc_attack_movement_to_boss_dungeon' &&
+    Number.isSafeInteger(Number(item.movement_id)) && Number(item.movement_id) > 0 &&
+    Number.isSafeInteger(Number(item.attacker_player_id)) && Number(item.attacker_player_id) > 0 &&
+    item.target?.area_type === 11 &&
+    Number.isInteger(item.target?.kid) &&
+    Number.isInteger(item.target?.x) &&
+    Number.isInteger(item.target?.y) &&
+    Number.isInteger(item.target?.owner_id) &&
+    toIsoDate(item.estimated_arrival_at_utc) !== null
+  );
+  const reports = reportEvidence.filter((item) =>
+    item?.evidence_kind === 'mailbox_npc_battle_report' &&
+    item?.classification === 'confirmed_battle_report_target_and_attacker' &&
+    item.message_is_forwarded === false &&
+    Number.isSafeInteger(Number(item.message_id)) && Number(item.message_id) > 0 &&
+    Number.isSafeInteger(Number(item.battle_log_id)) && Number(item.battle_log_id) > 0 &&
+    Number.isSafeInteger(Number(item.attacker_player_id)) && Number(item.attacker_player_id) > 0 &&
+    item.target?.area_type === 11 &&
+    Number.isInteger(item.target?.kid) &&
+    Number.isInteger(item.target?.x) &&
+    Number.isInteger(item.target?.y) &&
+    Number.isInteger(item.target?.owner_id) &&
+    toIsoDate(item.report_delivery_time_estimate_utc) !== null
+  );
+
+  const possiblePairs = [];
+  for (const movement of movements) {
+    for (const report of reports) {
+      const sameTarget = ['kid', 'x', 'y', 'area_type', 'owner_id'].every((key) =>
+        movement.target[key] === report.target[key]
+      );
+      if (!sameTarget || movement.attacker_player_id !== report.attacker_player_id) continue;
+
+      const arrivalMs = Date.parse(movement.estimated_arrival_at_utc);
+      const reportMs = Date.parse(report.report_delivery_time_estimate_utc);
+      const deltaSeconds = (reportMs - arrivalMs) / 1000;
+      if (!Number.isFinite(deltaSeconds) || Math.abs(deltaSeconds) > maxDeltaSeconds) continue;
+
+      possiblePairs.push({ movement, report, deltaSeconds });
+    }
+  }
+
+  const movementPairCounts = new Map();
+  const reportPairCounts = new Map();
+  for (const pair of possiblePairs) {
+    const movementId = String(pair.movement.movement_id);
+    const messageId = String(pair.report.message_id);
+    movementPairCounts.set(movementId, (movementPairCounts.get(movementId) || 0) + 1);
+    reportPairCounts.set(messageId, (reportPairCounts.get(messageId) || 0) + 1);
+  }
+
+  const uniquePairs = possiblePairs.filter((pair) =>
+    movementPairCounts.get(String(pair.movement.movement_id)) === 1 &&
+    reportPairCounts.get(String(pair.report.message_id)) === 1
+  );
+  const correlations = uniquePairs.map(({ movement, report, deltaSeconds }) => ({
+    classification: 'cross_source_movement_report_correlation_candidate',
+    movement_id: movement.movement_id,
+    message_id: report.message_id,
+    battle_log_id: report.battle_log_id,
+    attacker_player_id: movement.attacker_player_id,
+    target: { ...movement.target },
+    movement_estimated_arrival_at_utc: toIsoDate(movement.estimated_arrival_at_utc),
+    report_delivery_time_estimate_utc: toIsoDate(report.report_delivery_time_estimate_utc),
+    report_minus_estimated_arrival_seconds: Math.round(deltaSeconds * 1000) / 1000,
+    correlation_window_seconds: maxDeltaSeconds,
+    attack_time_utc: null,
+    time_semantics: 'One account-visible outbound movement and one original account-mailbox battle report share the exact NPC target and attacker, with estimated arrival/report-delivery times inside the configured window. This is a linkage candidate, not a server-confirmed movement-to-report ID relation; no exact attack start time is inferred.',
+    coverage: 'Both inputs are scoped to the authenticated account; this is not a global PL1 feed.',
+  }));
+
+  return {
+    correlations,
+    possible_pair_count: possiblePairs.length,
+    ambiguous_candidate_pairs: possiblePairs.length - uniquePairs.length,
+    correlation_window_seconds: maxDeltaSeconds,
+  };
+}
+
+
 /**
  * Extract a live outbound NPC attack movement whose exact target is a
  * BossDungeonMapobject (area type 11). This proves an in-flight attack

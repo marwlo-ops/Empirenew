@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {
   buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
+  correlateMovementAndBattleReports,
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
   isNpcBattleReportMessage, isGgejsGamDispatchStack,
   extractParsedOutboundBossDungeonMovementEvidence,
@@ -1052,4 +1053,85 @@ test('validates the committed IT1 snapshot as map-only data', async () => {
   for (const [kingdom, points] of Object.entries(groups)) {
     assert.equal(points.length, snapshot.results[kingdom].fortress_count);
   }
+});
+
+
+test('correlates one account-visible movement and original NPC report only when target and attacker match', () => {
+  const movement = {
+    evidence_kind: 'live_outbound_npc_attack_movement',
+    classification: 'observed_outbound_npc_attack_movement_to_boss_dungeon',
+    movement_id: 77123,
+    attacker_player_id: 1234567,
+    estimated_arrival_at_utc: '2026-11-07T01:00:00.000Z',
+    target: { kid: 1, x: 321, y: 654, area_type: 11, owner_id: -230 },
+  };
+  const report = {
+    evidence_kind: 'mailbox_npc_battle_report',
+    classification: 'confirmed_battle_report_target_and_attacker',
+    message_id: 501,
+    battle_log_id: 9001,
+    attacker_player_id: 1234567,
+    message_is_forwarded: false,
+    report_delivery_time_estimate_utc: '2026-11-07T01:03:00.000Z',
+    target: { kid: 1, x: 321, y: 654, area_type: 11, owner_id: -230 },
+  };
+  const result = correlateMovementAndBattleReports([movement], [report]);
+  assert.equal(result.correlations.length, 1);
+  assert.equal(result.possible_pair_count, 1);
+  assert.equal(result.ambiguous_candidate_pairs, 0);
+  assert.equal(result.correlations[0].report_minus_estimated_arrival_seconds, 180);
+  assert.equal(result.correlations[0].attack_time_utc, null);
+  assert.match(result.correlations[0].time_semantics, /not a server-confirmed/);
+});
+
+test('does not correlate mismatched targets, attackers, forwarded reports or out-of-window times', () => {
+  const movement = {
+    evidence_kind: 'live_outbound_npc_attack_movement',
+    classification: 'observed_outbound_npc_attack_movement_to_boss_dungeon',
+    movement_id: 77123,
+    attacker_player_id: 1234567,
+    estimated_arrival_at_utc: '2026-11-07T01:00:00.000Z',
+    target: { kid: 2, x: 321, y: 654, area_type: 11, owner_id: -231 },
+  };
+  const baseReport = {
+    evidence_kind: 'mailbox_npc_battle_report',
+    classification: 'confirmed_battle_report_target_and_attacker',
+    message_id: 501,
+    battle_log_id: 9001,
+    attacker_player_id: 1234567,
+    message_is_forwarded: false,
+    report_delivery_time_estimate_utc: '2026-11-07T01:03:00.000Z',
+    target: { kid: 2, x: 321, y: 654, area_type: 11, owner_id: -231 },
+  };
+  assert.equal(correlateMovementAndBattleReports([movement], [{ ...baseReport, attacker_player_id: 987 }]).possible_pair_count, 0);
+  assert.equal(correlateMovementAndBattleReports([movement], [{ ...baseReport, target: { ...baseReport.target, x: 322 } }]).possible_pair_count, 0);
+  assert.equal(correlateMovementAndBattleReports([movement], [{ ...baseReport, message_is_forwarded: true }]).possible_pair_count, 0);
+  assert.equal(correlateMovementAndBattleReports([movement], [{ ...baseReport, report_delivery_time_estimate_utc: '2026-11-07T01:20:00.000Z' }]).possible_pair_count, 0);
+  assert.throws(() => correlateMovementAndBattleReports([movement], [baseReport], 0), /Correlation window/);
+});
+
+test('withholds non-unique movement/report pairings as ambiguous', () => {
+  const target = { kid: 3, x: 444, y: 555, area_type: 11, owner_id: -232 };
+  const movements = [77123, 77124].map((movement_id) => ({
+    evidence_kind: 'live_outbound_npc_attack_movement',
+    classification: 'observed_outbound_npc_attack_movement_to_boss_dungeon',
+    movement_id,
+    attacker_player_id: 1234567,
+    estimated_arrival_at_utc: '2026-11-07T01:00:00.000Z',
+    target,
+  }));
+  const report = {
+    evidence_kind: 'mailbox_npc_battle_report',
+    classification: 'confirmed_battle_report_target_and_attacker',
+    message_id: 501,
+    battle_log_id: 9001,
+    attacker_player_id: 1234567,
+    message_is_forwarded: false,
+    report_delivery_time_estimate_utc: '2026-11-07T01:02:00.000Z',
+    target,
+  };
+  const result = correlateMovementAndBattleReports(movements, [report]);
+  assert.equal(result.correlations.length, 0);
+  assert.equal(result.possible_pair_count, 2);
+  assert.equal(result.ambiguous_candidate_pairs, 2);
 });

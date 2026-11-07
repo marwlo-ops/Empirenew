@@ -2954,17 +2954,17 @@ Wywołania `movements._add_or_update` występują w następujących handlerach:
 | `cra.js` | Odpowiedź na utworzenie ruchu ataku przez klienta | Nie; odpowiedź na własną komendę klienta |
 | `crm.js` | Odpowiedź na utworzenie ruchu handlowego | Nie; odpowiedź na własną komendę klienta |
 | `csm.js` | Odpowiedź na utworzenie ruchu szpiegowskiego | Nie; odpowiedź na własną komendę klienta |
-| `mcm.js`, `cds.js`, `cdd.js`, `cat.js` | Inne odpowiedzi komend parsujące pojedynczy ruch | Nie wykazano globalnego strumienia; są to handlery odpowiedzi komend |
+| `mcm.js`, `cds.js`, `cdd.js`, `cat.js` | Pojedynczy ruch przekazywany do MovementManager | Pochodzenie nieustalone w ggejs; brak odpowiadającego nadawcy w repo |
 
-Jedyny znaleziony handler `movements._remove` to `commands/onReceived/mrm.js`; usuwa ruch po `MID`. W katalogu `commands/onReceived` nie znaleziono osobnego handlera dodającego nowe ruchy do `MovementManager`.
+Jedyny znaleziony handler `movements._remove` to `commands/onReceived/mrm.js`; usuwa ruch po `MID`. W katalogu `commands/onReceived` nie znaleziono osobnego handlera dodającego nowe ruchy do `MovementManager`. Moduły `cra.js`, `crm.js` i `csm.js` zawierają jawne funkcje wysyłające odpowiadające im komendy klienta. Dla `mcm.js`, `cds.js`, `cdd.js` i `cat.js` nie znaleziono w przypiętym repozytorium odpowiadających funkcji nadawczych; ich pochodzenia (odpowiedź na zewnętrzną komendę czy push serwera) nie da się rozstrzygnąć wyłącznie z kodu klienta. Nie wolno więc ani uznać ich za globalny feed, ani z góry uznać za ruchy własnego konta — potrzebna jest zredagowana próbka protokołu z autoryzowanej sesji.
 
 `MovementParser.js` mapuje `M.T=11` na `ArmyAttackMovement` jako `MOVEMENTTYPE_NPC_ATTACK`.
 
 ### Wniosek dla #barony
 
 1. W przypiętym `ggejs` jedyną zidentyfikowaną ścieżką zbiorczego odczytu ruchów jest `GAM`.
-2. Pozostałe znalezione wywołania `_add_or_update` są odpowiedziami handlerów komend klienta; nie wolno ich traktować jako niezależnego feedu ruchów PL1.
-3. Filtr `isGgejsGamDispatchStack()` w probe jest zasadny: zapobiega zaliczeniu odpowiedzi `CRA/CRM/CSM/MCM/CDS/CDD/CAT` jako wyniku migawki `GAM`.
+2. Pozostałe znalezione wywołania `_add_or_update` nie przechodzą przez handler `GAM`. Dla `CRA/CRM/CSM` kod zawiera jawne funkcje nadawcze; dla `MCM/CDS/CDD/CAT` pochodzenie wiadomości pozostaje nierozstrzygnięte.
+3. Filtr `isGgejsGamDispatchStack()` w probe jest konserwatywny: nie zalicza aktualizacji z innych handlerów do migawki `GAM`. Może przez to pominąć inne aktualizacje ruchów; nie wolno zatem interpretować wyniku `GAM` jako kompletnego feedu serwera.
 4. Ruch może być dowodem **trwającego ruchu atakującego** wyłącznie po sprawdzeniu `movementType=11`, kierunku wychodzącego, typu celu 11, zgodnego KID, właściciela NPC oraz dokładnego X/Y i dodatniego ID właściciela źródła.
 5. `PT/TT` są przeliczane przez klienta względem lokalnego zegara. Wyliczona chwila wyjścia pozostaje estymacją, nie serwerowym timestampem.
 6. `GAM` jest ograniczony do danych zwróconych bieżącej autoryzowanej sesji. Nie daje globalnej kompletności PL1.
@@ -2972,7 +2972,7 @@ Jedyny znaleziony handler `movements._remove` to `commands/onReceived/mrm.js`; u
 
 ### Test regresyjny
 
-Dodano test, który sprawdza, że stosy handlerów `cra`, `crm`, `csm`, `mcm`, `cds`, `cdd` i `cat` są odrzucane przez `isGgejsGamDispatchStack()`. Istniejący test nadal akceptuje wyłącznie stos `gam.js`.
+Dodano test, który sprawdza, że stosy handlerów `cra`, `crm`, `csm`, `mcm`, `cds`, `cdd` i `cat` nie są mylone ze stosem `gam.js`. Test sprawdza wyłącznie klasyfikację stosu; nie rozstrzyga, czy niektóre z tych wiadomości są pushami serwera.
 
 To jest test offline na kontrolowanych stosach, a nie próbka ruchu PL1.
 

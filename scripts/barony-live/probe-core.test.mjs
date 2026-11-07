@@ -809,7 +809,7 @@ test('marks a disconnected GAM request as not sent instead of as an empty snapsh
   assert.equal(result.summary.timed_out, false);
 });
 
-test('ignores non-GAM command responses that also update MovementManager', () => {
+test('ignores non-GAM MovementManager handlers when classifying GAM dispatch', () => {
   const newline = String.fromCharCode(10);
   const commands = ['cra', 'crm', 'csm', 'mcm', 'cds', 'cdd', 'cat'];
   for (const command of commands) {

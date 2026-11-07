@@ -2763,3 +2763,42 @@ To test jednostkowy na fixture, nie walidacja produkcyjnej próbki PL1. Do walid
 
 Zakres: wyłącznie skrypty i dokumentacja #barony. Bez zmian w Mapie, Szpiegowaniu, Dodatkowych, ich UI, katalogu współrzędnych ani danych dynamicznych IT1/Beta.
 
+
+
+## 67. Rozróżnienie DungeonMapobject/BossDungeonMapobject i fail-closed dla źródła — 2026-11-07 06:29 UTC
+
+### Weryfikacja układu wiersza mapy
+
+Przypięty ggejs (a4980b01404ab01c9b826a267f331ae8c953d237) rozróżnia dwa typy, których nie wolno mieszać:
+
+- MapObjectParser.js: areaType=2 tworzy DungeonMapobject; areaType=11 tworzy BossDungeonMapobject.
+- DungeonMapobject.js (typ 2) odczytuje data[4] jako attackCount, data[5] jako koniec cooldownu i data[6] jako kingdomId. Nie ma pola defeaterPlayerId.
+- BossDungeonMapobject.js (typ 11) odczytuje data[4] jako dungeonLevel, data[5] jako koniec cooldownu, data[6] jako defeaterPlayerId, a data[7] jako kingdomId.
+- WorldMapOwnerInfoData.js mapuje zwykłe dungeon owner ID jako -219-kID (dla KID 1–3: -220…-222), a boss-dungeon owner ID jako -229-kID (dla KID 1–3: -230…-232).
+
+Niezależne potwierdzenie ścieżki GGE Tracker: refreshDungeonSquare() pobiera GAA; collectDungeonCooldowns() filtruje data.content.AI po dungeon[0] == '11', pobiera pozostały globalny cooldown z [5] i ID pokonującego z [6]. Zgadza się to z układem BossDungeonMapobject, nie ze zwykłym typem 2.
+
+Wniosek: etykieta katalogu type: dungeon jest etykietą domenową źródła GGE Tracker, a nie numerem areaType klienta. W Barony dowód z defeaterPlayerId wolno wiązać tylko z dokładnym wierszem areaType=11, właściwym KID/X/Y i właścicielem boss-dungeon -230/-231/-232. Typ 2 musi być odrzucony; istniejący test regresyjny już to sprawdza.
+
+### Poprawka bezpieczeństwa źródła
+
+Audyt wykazał, że eksportowane buildObservation() miało domyślną strefę DEFAULT_PL1_ZONE. Choć bieżący probe.mjs przekazuje a.zone jawnie, przyszły wywołujący bez parametru mógłby niechcący oznaczyć nieznane dane jako PL1.
+
+W tej iteracji:
+- domyślne sourceZone w buildObservation() zmieniono na null;
+- domyślne sourceZone w wewnętrznym serializeExactRow() również zmieniono na null;
+- fixture testów, które mają symulować PL1, przekazuje DEFAULT_PL1_ZONE jawnie;
+- dodano test: bez jawnego źródła wiersz mapy może być opisany jako znaleziony, ale nie powstaje estymacja ani zaufana korelacja; jawne PL1 działa tylko w kontrolowanym fixture;
+- IT1/Beta nadal nie mogą generować estymacji PL1.
+
+To jest poprawka fail-closed, nie nowe źródło ataków i nie test live. Żaden cooldown z IT1/Beta nie jest przenoszony do PL1.
+
+### Źródła
+
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/MapObjectParser.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/mapobjects/DungeonMapobject.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/mapobjects/BossDungeonMapobject.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/WorldMapOwnerInfoData.js
+- https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
+
+Zakres: wyłącznie scripts/barony-live/probe-core.mjs, scripts/barony-live/probe-core.test.mjs i ten dziennik badań. Bez zmian w Mapie, Szpiegowaniu, Dodatkowych, ich UI, katalogu współrzędnych ani snapshotach.

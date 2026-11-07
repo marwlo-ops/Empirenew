@@ -2914,3 +2914,22 @@ Publiczny GGE Tracker rozpoznaje produkcyjny PL1 i jego własny kod `607`, ale n
 Następny test powinien iść przez autoryzowaną sesję mobilnego E4K PL1 i bezpośredni odczyt GAA dla kilku znanych KID/X/Y. Do historii „kto i kiedy” nadal potrzebny będzie osobny dowód z ruchu GAM lub raportu SNE/BLS/BLM; GAA/cooldown sam w sobie nie daje czasu wysłania armii. Nie zapisano żadnego zdarzenia i nie wykorzystano IT1/Beta cooldownów do PL1.
 
 Zakres: wyłącznie #barony (skrypty, testy i dziennik badań). Bez zmian w Mapa, Szpiegowanie, Dodatkowe, katalogu współrzędnych i snapshotach.
+
+## 70. Odrzucona alternatywa: `/server/movements` nie jest feedem ataków — 2026-11-07 06:44 UTC
+
+Sprawdzono kod endpointu GGE Tracker `GET /server/movements` oraz jego trasę w `api/main.ts` i implementację `ApiServer.getMovements()`.
+
+To endpoint historii **przemieszczeń zamków graczy**, a nie marszów armii:
+
+- zapytanie SQL czyta `player_castle_movements_history`;
+- zwracane pola to `movement_type`, `castle_type`, stare i nowe X/Y zamku oraz `created_at`;
+- filtruje graczy/sojusze i typy ruchu zamku;
+- nie odczytuje `GAM`, `army movements`, obiektów mapy typu 11 ani celu ataku NPC.
+
+Wniosek: nie używać `/server/movements` jako dowodu ataku na fortecę. Nie wykonano live requestu, ponieważ audyt kodu rozstrzyga semantykę endpointu i nie ma powodu obciążać API zapytaniem, które nie dostarcza wymaganych danych.
+
+Źródła upstream:
+- `gge-tracker-backend-api/src/api/main.ts` — opis i rejestracja `/server/movements`;
+- `gge-tracker-backend-api/src/api/routes/api-server.ts` — SQL na `player_castle_movements_history` i pola starej/nowej pozycji zamku.
+
+Zakres: audyt źródeł #barony; bez zmian w Mapa, Szpiegowanie, Dodatkowe, katalogu współrzędnych i snapshotach.

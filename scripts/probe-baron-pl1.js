@@ -422,8 +422,9 @@ async function probeProductionPlayerHistoryFromServerPlayers(code) {
       }
     }
 
-    const sampled = validPlayers.slice(0, 20);
+    const sampled = validPlayers.slice(0, 5);
     const results = [];
+    let rateLimited = false;
     for (let index = 0; index < sampled.length; index++) {
       const playerId = String(sampled[index].player_id);
       try {
@@ -432,6 +433,20 @@ async function probeProductionPlayerHistoryFromServerPlayers(code) {
           { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
         );
         const history = await historyResponse.json();
+        if (historyResponse.status === 429) {
+          results.push({
+            sample: index + 1,
+            player_id_suffix_matches_status_code: playerId.slice(-3) === code,
+            history_status: 429,
+            history_error: history.error ?? "rate limited",
+            history_records: 0,
+            map_target_matches: 0,
+            rate_limited: true,
+            sample_target_rows: []
+          });
+          rateLimited = true;
+          break;
+        }
         const rows = Array.isArray(history.dungeons) ? history.dungeons : [];
         const targetRows = rows.filter(row =>
           known.has(Number(row.kid) + "/" + Number(row.position_x) + "/" + Number(row.position_y))
@@ -467,9 +482,11 @@ async function probeProductionPlayerHistoryFromServerPlayers(code) {
       valid_player_ids_for_status_code: validPlayers.length,
       histories_checked: results.length,
       nonempty_histories: results.filter(result => result.history_records > 0).length,
+      rate_limited: rateLimited,
       total_map_target_matches: results.reduce((total, result) => total + Number(result.map_target_matches || 0), 0),
       results,
-      timestamp_warning: "attacked_at is a GGE Tracker database history field. The scraper INSERT omits attacked_at, so its exact game-event-time semantics remain unproven."
+      timestamp_warning: "attacked_at is a GGE Tracker database history field. The scraper INSERT omits attacked_at, so its exact game-event-time semantics remain unproven.",
+      sampling_note: "At most five production PL1 player histories are queried per run to respect the public API rate limit; stop immediately on HTTP 429."
     }));
   } catch (error) {
     console.log(JSON.stringify({

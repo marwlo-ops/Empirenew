@@ -377,6 +377,8 @@ async function probeTrackerServerStatus(server) {
       zone: body.zone ?? null,
       platform: body.platform ?? null,
       data_version: body.data_version ?? null,
+      dataset_players: body.dataset?.players ?? null,
+      dataset_alliances: body.dataset?.alliances ?? null,
       dataset_snapshot_at: body.dataset?.snapshot_at ?? null
     }));
     return serverCode;
@@ -390,19 +392,28 @@ async function probeTrackerServerStatus(server) {
   }
 }
 
-async function probeProductionPlayerHistoryWithStatusCodeSuffix(code) {
+async function probeProductionPlayerHistoryFromServerPlayers(code) {
   try {
     if (!/^\d{3}$/.test(code || "")) {
       console.log(JSON.stringify({
-        probe: "production-pl1-player-history-with-status-code-suffix",
+        probe: "production-pl1-player-history-from-server-player-list",
         skipped: true,
-        reason: "The E4K_PL1 /api/v1/ status response did not provide an explicit numeric three-digit server_code; no suffix was inferred from zoneId, server name, IT1 or Beta.",
-        id_format_contract: "numeric player ID + explicit three-digit GGE Tracker server_code; API extracts the trailing three digits"
+        reason: "E4K_PL1 status did not provide an explicit numeric three-digit server_code; no suffix was inferred from zoneId, alias, IT1 or Beta."
       }));
       return;
     }
 
-    const snapshot = JSON.parse(await readFile(new URL("../data/location-snapshots.json", import.meta.url), "utf8"));
+    const playersResponse = await fetch(base + "/players?page=1&size=20", {
+      headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
+      signal: AbortSignal.timeout(20000)
+    });
+    const playerBody = await playersResponse.json();
+    const players = Array.isArray(playerBody.players) ? playerBody.players : [];
+    const validPlayers = players.filter(player => {
+      const id = String(player?.player_id ?? "");
+      return /^\d{6,}$/.test(id) && id.slice(-3) === code;
+    });
+
     const map = JSON.parse(await readFile(new URL("../data/baron-fortresses.json", import.meta.url), "utf8"));
     const known = new Set();
     for (const data of Object.values(map.results || {})) {
@@ -410,27 +421,14 @@ async function probeProductionPlayerHistoryWithStatusCodeSuffix(code) {
         known.add(Number(fortress.kid) + "/" + Number(fortress.x) + "/" + Number(fortress.y));
       }
     }
-    const members = (snapshot.alliances || []).flatMap(alliance => alliance.members || [])
-      .filter(member => member.name && Number.isInteger(member.member_id) && member.member_id > 999)
-      .slice(0, 3);
-    const results = [];
-    for (let index = 0; index < members.length; index++) {
-      const member = members[index];
-      const candidateId = String(member.member_id) + code;
-      try {
-        const profileResponse = await fetch(
-          base + "/players/" + encodeURIComponent(candidateId) + "/profile?include=none",
-          { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
-        );
-        const profile = await profileResponse.json();
-        const identity = profile?.player || {};
-        const profileMatched = profileResponse.ok &&
-          String(profile.server_code || "") === code &&
-          String(identity.player_id || "") === candidateId &&
-          String(identity.player_name || "").trim().toLocaleLowerCase() === String(member.name).trim().toLocaleLowerCase();
 
+    const sampled = validPlayers.slice(0, 5);
+    const results = [];
+    for (let index = 0; index < sampled.length; index++) {
+      const playerId = String(sampled[index].player_id);
+      try {
         const historyResponse = await fetch(
-          base + "/dungeons/player/" + encodeURIComponent(candidateId) + "?lastDays=365",
+          base + "/dungeons/player/" + encodeURIComponent(playerId) + "?lastDays=365",
           { headers: { Accept: "application/json" }, signal: AbortSignal.timeout(20000) }
         );
         const history = await historyResponse.json();
@@ -440,42 +438,41 @@ async function probeProductionPlayerHistoryWithStatusCodeSuffix(code) {
         );
         results.push({
           sample: index + 1,
-          profile_status: profileResponse.status,
-          profile_server_code: profile.server_code ?? null,
-          profile_identity_matched_to_spy_snapshot: profileMatched,
+          player_id_suffix_matches_status_code: playerId.slice(-3) === code,
           history_status: historyResponse.status,
           history_error: history.error ?? null,
           history_records: rows.length,
-          map_target_matches: profileMatched ? targetRows.length : 0,
-          unverified_target_coordinate_matches: profileMatched ? 0 : targetRows.length,
-          sample_target_rows: profileMatched ? targetRows.slice(0, 3).map(row => ({
+          map_target_matches: targetRows.length,
+          sample_target_rows: targetRows.slice(0, 3).map(row => ({
             kid: Number(row.kid),
             x: Number(row.position_x),
             y: Number(row.position_y),
             attacked_at: row.attacked_at ?? null
-          })) : []
+          }))
         });
       } catch (error) {
         results.push({ sample: index + 1, error_type: error?.constructor?.name || "Error" });
       }
     }
+
     console.log(JSON.stringify({
-      probe: "production-pl1-player-history-with-status-code-suffix",
-      api_route: "/dungeons/player/{playerId}",
-      suffix_source: "GGE Tracker server-scoped /api/v1/ status response for gge-server E4K_PL1",
-      id_format_contract: "numeric player ID + explicit three-digit server_code; e4k-data zoneId is not interchangeable",
+      probe: "production-pl1-player-history-from-server-player-list",
+      server: "E4K_PL1",
       server_code: code,
-      snapshot_members_sampled: members.length,
-      profiles_matched: results.filter(result => result.profile_identity_matched_to_spy_snapshot).length,
+      players_status: playersResponse.status,
+      players_error: playerBody.error ?? null,
+      players_total: playerBody.pagination?.total_items_count ?? null,
+      players_in_page: players.length,
+      valid_player_ids_for_status_code: validPlayers.length,
       histories_checked: results.length,
-      nonempty_matched_histories: results.filter(result => result.profile_identity_matched_to_spy_snapshot && result.history_records > 0).length,
-      total_profile_matched_target_history_rows: results.reduce((total, result) => total + Number(result.map_target_matches || 0), 0),
+      nonempty_histories: results.filter(result => result.history_records > 0).length,
+      total_map_target_matches: results.reduce((total, result) => total + Number(result.map_target_matches || 0), 0),
       results,
-      timestamp_warning: "API attacked_at is not treated as exact attack time: the public scraper INSERT omits attacked_at, so its database timestamp semantics are not proven to be the game event time."
+      timestamp_warning: "attacked_at is a GGE Tracker database history field. The scraper INSERT omits attacked_at, so its exact game-event-time semantics remain unproven."
     }));
   } catch (error) {
     console.log(JSON.stringify({
-      probe: "production-pl1-player-history-with-status-code-suffix",
+      probe: "production-pl1-player-history-from-server-player-list",
       error_type: error?.constructor?.name || "Error"
     }));
   }
@@ -590,7 +587,7 @@ async function probeBridge() {
 await probeBetaPlayerHistoryFromDungeonRows();
 const trackerPl1ServerCode = await probeTrackerServerStatus("E4K_PL1");
 await probeTrackerServerStatus("E4K_PL1_BETA"); // control only; its code is never used for PL1
-await probeProductionPlayerHistoryWithStatusCodeSuffix(trackerPl1ServerCode);
+await probeProductionPlayerHistoryFromServerPlayers(trackerPl1ServerCode);
 await probeTrackerAttackTimestampSemantics("E4K_PL1_BETA");
 await probeTrackerAttackTimestampSemantics("IT1");
 await probeBridge();

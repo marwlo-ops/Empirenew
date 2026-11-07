@@ -5,7 +5,7 @@ import path from 'node:path';
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { DEFAULT_PL1_ZONE, buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
-  extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
+  correlateMovementAndBattleReports, extractNpcBattleReportEvidence, extractParsedOutboundBossDungeonMovementEvidence,
   isGgejsGamDispatchStack, parseGgejsCommandResponseEnvelope, parseGgejsBattleLogShortResponse,
   parseGgejsBattleLogMiddleTimeResponse, requestMailboxMessages,
   selectLatestNpcBattleReportMessages, stateKey } from './probe-core.mjs';
@@ -293,6 +293,8 @@ async function main() {
     try { await client.socketManager.disconnect(); } catch {}
   }
 
+  const movementReportCorrelation=correlateMovementAndBattleReports(movementEvidence,reportEvidence);
+
   if (!a.noState) {
     state.updated_at_utc=new Date().toISOString();
     state.server_zone=a.zone;
@@ -318,14 +320,17 @@ async function main() {
       request_errors:sectorErrors.length,candidate_signals:candidateSignals.length,
       outbound_boss_dungeon_movements:movementEvidence.length,
       npc_battle_report_evidence:reportEvidence.length,
-      npc_battle_report_time_estimates:reportEvidence.filter(item=>item.battle_time_estimate_utc).length
+      npc_battle_report_time_estimates:reportEvidence.filter(item=>item.battle_time_estimate_utc).length,
+      movement_report_correlations:movementReportCorrelation.correlations.length,
+      movement_report_ambiguous_candidate_pairs:movementReportCorrelation.ambiguous_candidate_pairs
     },
     observations,candidate_signals:candidateSignals,sector_errors:sectorErrors,
     movement_probe:movementProbe,movement_evidence:movementEvidence,movement_pre_request_evidence:movementPreRequestEvidence,
     mailbox_report_probe:reportProbe,mailbox_report_evidence:reportEvidence,
+    movement_report_correlation:movementReportCorrelation,
     state_file:a.noState?null:stateFile,
     attack_history_status:'optional_account_scoped_mailbox_and_movement_evidence; BLS_BLM_PS_semantics_unverified; no_global_PL1_history; exact_attack_launch_time_unavailable',
-    warning:'Map rows contain no exact attacked_at. Optional GAM snapshots cover only movements returned to this account; optional NPC battle reports cover only this account mailbox. BLS.PS/BLM.PS semantics are undocumented in pinned ggejs and are not converted into a battle-time estimate; no global PL1 history is persisted.'
+    warning:'Map rows contain no exact attacked_at. Optional GAM snapshots cover only movements returned to this account; optional NPC battle reports cover only this account mailbox. Cross-source movement/report matches are unique-pairing candidates only and do not prove a server-side MID-to-report relation. BLS.PS/BLM.PS semantics are undocumented in pinned ggejs and are not converted into a battle-time estimate; no global PL1 history is persisted.'
   },null,2)+'\n');
   return 0;
 }

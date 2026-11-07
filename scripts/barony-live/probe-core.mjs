@@ -542,6 +542,7 @@ const MAX_MOVEMENT_REPORT_MATCH_DELTA_SECONDS = 10 * 60;
  * Link account-visible outbound movements to account-mailbox NPC battle reports.
  * This is a correlation candidate only: both clocks are local estimates, reports
  * may be delayed, and no exact attack-start timestamp or global coverage is inferred.
+ * A 60-second pre-arrival tolerance handles rounding/skew; older reports are stale candidates.
  */
 export function correlateMovementAndBattleReports(
   movementEvidence,
@@ -593,7 +594,7 @@ export function correlateMovementAndBattleReports(
       const arrivalMs = Date.parse(movement.estimated_arrival_at_utc);
       const reportMs = Date.parse(report.report_delivery_time_estimate_utc);
       const deltaSeconds = (reportMs - arrivalMs) / 1000;
-      if (!Number.isFinite(deltaSeconds) || Math.abs(deltaSeconds) > maxDeltaSeconds) continue;
+      if (!Number.isFinite(deltaSeconds) || deltaSeconds < -60 || deltaSeconds > maxDeltaSeconds) continue;
 
       possiblePairs.push({ movement, report, deltaSeconds });
     }
@@ -622,7 +623,9 @@ export function correlateMovementAndBattleReports(
     movement_estimated_arrival_at_utc: toIsoDate(movement.estimated_arrival_at_utc),
     report_delivery_time_estimate_utc: toIsoDate(report.report_delivery_time_estimate_utc),
     report_minus_estimated_arrival_seconds: Math.round(deltaSeconds * 1000) / 1000,
+    report_after_estimated_arrival: deltaSeconds >= 0,
     correlation_window_seconds: maxDeltaSeconds,
+    pre_arrival_tolerance_seconds: 60,
     attack_time_utc: null,
     time_semantics: 'One account-visible outbound movement and one original account-mailbox battle report share the exact NPC target and attacker, with estimated arrival/report-delivery times inside the configured window. This is a linkage candidate, not a server-confirmed movement-to-report ID relation; no exact attack start time is inferred.',
     coverage: 'Both inputs are scoped to the authenticated account; this is not a global PL1 feed.',

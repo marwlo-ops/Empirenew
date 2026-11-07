@@ -1107,6 +1107,7 @@ test('does not correlate mismatched targets, attackers, forwarded reports or out
   assert.equal(correlateMovementAndBattleReports([movement], [{ ...baseReport, target: { ...baseReport.target, x: 322 } }]).possible_pair_count, 0);
   assert.equal(correlateMovementAndBattleReports([movement], [{ ...baseReport, message_is_forwarded: true }]).possible_pair_count, 0);
   assert.equal(correlateMovementAndBattleReports([movement], [{ ...baseReport, report_delivery_time_estimate_utc: '2026-11-07T01:20:00.000Z' }]).possible_pair_count, 0);
+  assert.equal(correlateMovementAndBattleReports([movement], [{ ...baseReport, report_delivery_time_estimate_utc: '2026-11-07T00:58:00.000Z' }]).possible_pair_count, 0);
   assert.throws(() => correlateMovementAndBattleReports([movement], [baseReport], 0), /Correlation window/);
 });
 

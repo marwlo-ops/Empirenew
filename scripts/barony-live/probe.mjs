@@ -331,8 +331,8 @@ async function main() {
     mailbox_report_probe:reportProbe,mailbox_report_evidence:reportEvidence,
     movement_report_correlation:movementReportCorrelation,
     state_file:a.noState?null:stateFile,
-    attack_history_status:a.zone===DEFAULT_PL1_ZONE?'optional_account_scoped_mailbox_and_movement_evidence; live_PL1_GAA_cooldown_time_is_estimated_only; BLS_BLM_PS_semantics_unverified; no_global_PL1_history; exact_server_attack_time_unavailable':'non_PL1_zone_override; PL1_attack_estimates_disabled; no_global_PL1_history',
-    warning:'Map rows do not provide an exact server attack timestamp. A single verified live PL1 type-11 row with a positive defeaterPlayerId and an active remaining global cooldown <=24h may provide attack_time_estimate_utc = cooldown_until_utc - 86400s; this is based on the local ggejs Date.now clock, whose offset is unmeasured, and attack_time_utc remains null. GAM and mailbox reports are account-scoped; cross-source matches remain linkage candidates. BLS.PS/BLM.PS semantics are unverified; no global PL1 history is persisted.'
+    attack_history_status:a.zone===DEFAULT_PL1_ZONE?'optional_account_scoped_mailbox_and_movement_evidence; live_PL1_GAA_global_cooldown_start_estimate_only; army_launch_time_unavailable; BLS_BLM_PS_semantics_unverified; no_global_PL1_history':'non_PL1_zone_override; PL1_attack_estimates_disabled; no_global_PL1_history',
+    warning:'Map rows do not provide an exact server attack timestamp. A single verified live PL1 type-11 row with a positive defeaterPlayerId and an active remaining global cooldown <=24h may provide attack_time_estimate_utc = cooldown_until_utc - 86400s. This estimates when the 24h cooldown started after the fortress defeat, not when the army was launched or the battle began. It is based on the local ggejs Date.now clock, whose offset is unmeasured, and attack_time_utc remains null. GAM and mailbox reports are account-scoped; cross-source matches remain linkage candidates. BLS.PS/BLM.PS semantics are unverified; no global PL1 history is persisted.'
   },null,2)+'\n');
   return 0;
 }

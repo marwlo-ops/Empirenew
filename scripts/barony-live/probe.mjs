@@ -171,7 +171,7 @@ async function main() {
         const sampledAt=new Date().toISOString();
         const rows=Array.isArray(result?.mapObjects)?result.mapObjects:[];
         for (const target of sector.targets) {
-          const observation=buildObservation(target,rows,sampledAt);
+          const observation=buildObservation(target,rows,sampledAt,a.zone);
           observations.push(observation);
           if (observation.status!=='fortress_row_found') continue;
           const key=stateKey(target);
@@ -299,12 +299,12 @@ async function main() {
     state.updated_at_utc=new Date().toISOString();
     state.server_zone=a.zone;
     state.server_host=instance.server;
-    state.note='Raw verified BossDungeonMapobject type 11 observations only. Candidate signals are not persisted as confirmed attacks.';
+    state.note='Raw verified BossDungeonMapobject type 11 observations only. Cooldown-derived attack times are explicitly labeled estimates; candidate signals are not persisted as confirmed attacks.';
     await writeState(stateFile,state);
   }
   const deployTime=Number(network.deployTime);
   process.stdout.write(JSON.stringify({
-    mode:'live_read_only_map_probe',target_server:'E4K PL1 production',
+    mode:'live_read_only_map_probe',target_server:a.zone===DEFAULT_PL1_ZONE?'E4K PL1 production':'non-PL1 zone override; PL1 attack estimates disabled',
     server_zone:a.zone,server_host:instance.server,server_instance_id:instance.value,server_zone_id:instance.zoneId,instance_loca_id:instance.instanceLocaId,
     network_version_no:network.versionNo??null,
     network_deploy_time_utc:Number.isFinite(deployTime)?new Date(deployTime*1000).toISOString():null,
@@ -316,6 +316,8 @@ async function main() {
       fortress_rows_found:observations.filter(x=>x.status==='fortress_row_found').length,
       defeater_ids_observed:observations.filter(x=>Number.isInteger(x.defeater_player_id)&&x.defeater_player_id>0).length,
       cooldown_active:observations.filter(x=>x.cooldown_active===true).length,
+      live_map_attack_evidence:observations.filter(x=>x.attack_evidence_status==='live_PL1_map_cooldown_and_defeater_evidence').length,
+      live_map_attack_time_estimates:observations.filter(x=>x.attack_time_estimate_utc).length,
       unverified_or_missing:observations.filter(x=>['not_confirmed','coordinate_row_unverified','ambiguous_duplicate_rows'].includes(x.status)).length,
       request_errors:sectorErrors.length,candidate_signals:candidateSignals.length,
       outbound_boss_dungeon_movements:movementEvidence.length,
@@ -329,8 +331,8 @@ async function main() {
     mailbox_report_probe:reportProbe,mailbox_report_evidence:reportEvidence,
     movement_report_correlation:movementReportCorrelation,
     state_file:a.noState?null:stateFile,
-    attack_history_status:'optional_account_scoped_mailbox_and_movement_evidence; BLS_BLM_PS_semantics_unverified; no_global_PL1_history; exact_attack_launch_time_unavailable',
-    warning:'Map rows contain no exact attacked_at. Optional GAM snapshots cover only movements returned to this account; optional NPC battle reports cover only this account mailbox. Cross-source movement/report matches are unique-pairing candidates only and do not prove a server-side MID-to-report relation. BLS.PS/BLM.PS semantics are undocumented in pinned ggejs and are not converted into a battle-time estimate; no global PL1 history is persisted.'
+    attack_history_status:a.zone===DEFAULT_PL1_ZONE?'optional_account_scoped_mailbox_and_movement_evidence; live_PL1_GAA_cooldown_time_is_estimated_only; BLS_BLM_PS_semantics_unverified; no_global_PL1_history; exact_server_attack_time_unavailable':'non_PL1_zone_override; PL1_attack_estimates_disabled; no_global_PL1_history',
+    warning:'Map rows do not provide an exact server attack timestamp. A single verified live PL1 type-11 row with a positive defeaterPlayerId and an active remaining global cooldown <=24h may provide attack_time_estimate_utc = cooldown_until_utc - 86400s; this is based on the local ggejs Date.now clock, whose offset is unmeasured, and attack_time_utc remains null. GAM and mailbox reports are account-scoped; cross-source matches remain linkage candidates. BLS.PS/BLM.PS semantics are unverified; no global PL1 history is persisted.'
   },null,2)+'\n');
   return 0;
 }

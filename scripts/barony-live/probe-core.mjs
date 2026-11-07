@@ -19,6 +19,7 @@ const KINGDOMS = Object.freeze({ sands: 1, ice: 2, fire: 3 });
 const KINGDOM_NAME_BY_KID = Object.freeze({ 1: 'sands', 2: 'ice', 3: 'fire' });
 const FORBIDDEN_CATALOG_KEY = /(attack|cooldown|player|defeater|ready|readiness|available|attacked)/i;
 const ALLOWED_FORTRESS_KEYS = new Set(['id', 'kid', 'kingdom', 'x', 'y', 'type', 'source_server']);
+const BOSS_DUNGEON_GLOBAL_COOLDOWN_SECONDS = 24 * 60 * 60;
 
 /**
  * Explicitly request the authenticated account mailbox through ggejs SNE.
@@ -157,11 +158,28 @@ function toIsoDate(value) {
   return null;
 }
 
-function serializeExactRow(row, sampledAt) {
+function serializeExactRow(row, sampledAt, isVerifiedFortressTarget = false, sourceZone = DEFAULT_PL1_ZONE) {
   const cooldownUntil = toIsoDate(row.attackCooldownEnd);
   const sampledAtMs = Date.parse(sampledAt);
+  const cooldownUntilMs = cooldownUntil ? Date.parse(cooldownUntil) : NaN;
   const cooldownMs = cooldownUntil && Number.isFinite(sampledAtMs)
-    ? Date.parse(cooldownUntil) - sampledAtMs
+    ? cooldownUntilMs - sampledAtMs
+    : null;
+  const cooldownRemainingSeconds = cooldownMs === null
+    ? null
+    : Math.max(0, Math.ceil(cooldownMs / 1000));
+  const defeaterPlayerId = Number.isSafeInteger(row.defeaterPlayerId) && row.defeaterPlayerId > 0
+    ? row.defeaterPlayerId
+    : null;
+  const hasLiveAttackEvidence = isVerifiedFortressTarget &&
+    sourceZone === DEFAULT_PL1_ZONE &&
+    defeaterPlayerId !== null &&
+    cooldownMs !== null &&
+    cooldownMs > 0 &&
+    cooldownRemainingSeconds > 0 &&
+    cooldownRemainingSeconds <= BOSS_DUNGEON_GLOBAL_COOLDOWN_SECONDS;
+  const attackTimeEstimate = hasLiveAttackEvidence
+    ? new Date(cooldownUntilMs - BOSS_DUNGEON_GLOBAL_COOLDOWN_SECONDS * 1000).toISOString()
     : null;
   return {
     x: Number.isInteger(row.position?.X) ? row.position.X : null,
@@ -170,12 +188,14 @@ function serializeExactRow(row, sampledAt) {
     kingdom_id: Number.isInteger(row.kingdomId) ? row.kingdomId : null,
     owner_id: Number.isInteger(row.ownerInfo?.playerId) ? row.ownerInfo.playerId : null,
     dungeon_level: Number.isInteger(row.dungeonLevel) ? row.dungeonLevel : null,
-    defeater_player_id: Number.isSafeInteger(row.defeaterPlayerId) && row.defeaterPlayerId > 0
-      ? row.defeaterPlayerId
-      : null,
+    defeater_player_id: defeaterPlayerId,
     last_spy_at_utc: toIsoDate(row.lastSpyDate),
     cooldown_until_utc: cooldownUntil,
-    cooldown_remaining_seconds_at_sample: cooldownMs === null ? null : Math.max(0, Math.ceil(cooldownMs / 1000)),
+    cooldown_remaining_seconds_at_sample: cooldownRemainingSeconds,
+    attack_time_estimate_utc: attackTimeEstimate,
+    attack_time_estimate_source: attackTimeEstimate
+      ? 'live_PL1_GAA_type11_remaining_24h_global_cooldown_minus_86400s'
+      : null,
   };
 }
 
@@ -198,6 +218,7 @@ function isTrustedFortressObservation(observation) {
   const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[target?.kid];
   if (
     !sampleAt ||
+    observation.source_zone !== DEFAULT_PL1_ZONE ||
     !target ||
     typeof target.catalog_id_it1 !== 'string' || !target.catalog_id_it1.trim() ||
     !Number.isInteger(target.kid) ||
@@ -230,10 +251,20 @@ function isTrustedFortressObservation(observation) {
   const expectedCooldownActive = cooldownUntil === null
     ? null
     : Date.parse(cooldownUntil) > Date.parse(sampleAt);
-  return observation.cooldown_active === expectedCooldownActive;
+  if (observation.cooldown_active !== expectedCooldownActive) return false;
+  if (Object.hasOwn(observation, 'attack_time_estimate_utc')) {
+    const expectedEstimate = row.attack_time_estimate_utc ?? null;
+    const expectedEvidenceStatus = expectedEstimate
+      ? 'live_PL1_map_cooldown_and_defeater_evidence'
+      : 'not_established';
+    if (observation.attack_time_estimate_utc !== expectedEstimate) return false;
+    if (observation.attack_evidence_status !== expectedEvidenceStatus) return false;
+    if (observation.attack_time_utc !== null) return false;
+  }
+  return true;
 }
 
-export function buildObservation(target, mapObjects, sampledAt = new Date().toISOString()) {
+export function buildObservation(target, mapObjects, sampledAt = new Date().toISOString(), sourceZone = DEFAULT_PL1_ZONE) {
   const sampledAtIso = toIsoDate(sampledAt);
   if (!sampledAtIso) throw new Error('Invalid observation timestamp.');
   if (!isValidFortressTarget(target)) throw new Error('Invalid fortress target.');
@@ -256,14 +287,24 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
       expected_area_type: 11, expected_boss_dungeon_owner_id: expectedOwner,
     },
     sampled_at_utc: sampledAtIso,
+    source_zone: sourceZone,
     status,
-    rows: exactRows.map((row) => serializeExactRow(row, sampledAtIso)),
+    rows: exactRows.map((row) => serializeExactRow(
+      row,
+      sampledAtIso,
+      status === 'fortress_row_found' && row === validRows[0],
+      sourceZone,
+    )),
     defeater_player_id: null,
+    attack_evidence_status: 'not_established',
+    attack_time_estimate_utc: null,
+    attack_time_estimate_source: null,
+    attack_time_estimate_clock_basis: null,
     attack_time_utc: null,
-    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. A comparison candidate requires exactly one row at the exact coordinate, type 11 and the expected NPC owner. The row has no exact attack timestamp.',
+    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. A time estimate is emitted only for one exact production-zone PL1 type-11 row with the expected NPC owner, a positive defeaterPlayerId and an active remaining global cooldown no greater than 24h. The estimate is cooldown_until_utc minus 86400 seconds, uses the local client clock and is not an exact server timestamp; attack_time_utc remains null.',
   };
   if (status === 'fortress_row_found') {
-    const row = serializeExactRow(validRows[0], sampledAtIso);
+    const row = serializeExactRow(validRows[0], sampledAtIso, true, sourceZone);
     observation.owner_id = row.owner_id;
     observation.dungeon_level = row.dungeon_level;
     observation.defeater_player_id = row.defeater_player_id;
@@ -273,6 +314,13 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     observation.cooldown_active = row.cooldown_until_utc === null
       ? null
       : Date.parse(row.cooldown_until_utc) > Date.parse(sampledAtIso);
+    observation.attack_time_estimate_utc = row.attack_time_estimate_utc;
+    observation.attack_time_estimate_source = row.attack_time_estimate_source;
+    if (row.attack_time_estimate_utc) {
+      observation.attack_evidence_status = 'live_PL1_map_cooldown_and_defeater_evidence';
+      observation.attack_time_estimate_clock_basis =
+        'ggejs constructs attackCooldownEnd with local Date.now(); local clock offset against the game server is unmeasured';
+    }
   }
   return observation;
 }

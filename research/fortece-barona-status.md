@@ -2802,3 +2802,48 @@ To jest poprawka fail-closed, nie nowe źródło ataków i nie test live. Żaden
 - https://github.com/gge-tracker/gge-tracker/blob/7d620820a76cde4176c752f6972ce6f0c9ad7ab1/gge-tracker-internal-scraping/src/main.ts
 
 Zakres: wyłącznie scripts/barony-live/probe-core.mjs, scripts/barony-live/probe-core.test.mjs i ten dziennik badań. Bez zmian w Mapie, Szpiegowaniu, Dodatkowych, ich UI, katalogu współrzędnych ani snapshotach.
+
+
+## 68. Audyt bieżącego upstream empire-api: dlaczego GAA nie przechodzi przez publiczny most — 2026-11-07 07:12 UTC
+
+### Źródła upstream odczytane bezpośrednio z GitHub
+
+Sprawdzono repozytorium `danadum/empire-api`, domyślną gałąź `main`. Najnowszy commit widoczny podczas audytu:
+
+- upstream commit: `dc2e8c459a87d13a30d423b03bbbd8774f7f7b3d` (2026-04-12 18:45:47 UTC);
+- `app.js` blob: `d93f0f9650ed6168f2efc7d29fb567664f25e008`;
+- `data/commands.json` blob: `233db4dbb98be059809e13463d1a802ff66e0539`;
+- `utils/nestedHeaders.js` blob: `74890d201a5fc986d55aa755c580d26f9a4032d1`;
+- `utils/ws/baseSocket.js` blob: `5b7267e6fae2f4068c73ccac4221be45d979beac`.
+
+### Potwierdzona przyczyna w kodzie
+
+W aktualnym `app.js`:
+1. Dla komendy obecnej w `data/commands.json` most buduje matcher odpowiedzi z jawnie wskazanych ścieżek.
+2. Dla komendy nieobecnej w tym pliku przypisuje `responseHeaders = messageHeaders`.
+3. Następnie czeka przez `waitForJsonResponse(command, responseHeaders, timeout = 1000)`.
+
+Aktualny `data/commands.json` nie zawiera wpisu dla komendy `gaa`. Zawiera wpis `wsp` z mapowaniem `PN -> gaa.OI`; to mapowanie odpowiedzi WSP, a nie matcher dla samej komendy GAA. Funkcja `compareNestedHeaders()` porównuje wszystkie klucze żądania z odpowiedzią. Jeśli odpowiedź GAA nie powtarza pól współrzędnych/obszaru z żądania, matcher nie uzna odpowiedzi za zgodną. Dodatkowo timeout 1000 ms jest krótki dla odpowiedzi mapowej.
+
+To potwierdza przyczynę na poziomie aktualnego kodu upstream. Nie jest to jeszcze dowód, że każda odpowiedź GAA z serwera zawsze ma taki kształt; dlatego nie wysłano GAA przez publiczny most i nie interpretowano timeoutu jako pustej mapy.
+
+### Potwierdzony test runtime publicznego mostu
+
+Ostatni dostępny workflow Empirenew `42343292720` (2026-11-07 05:34:42 UTC) wykazał:
+- `GET /status`: HTTP 200, `EmpirefourkingdomsExGG_3 = true`;
+- GAM: HTTP 200, `return_code = 0`;
+- odpowiedź GAM miała `content_keys = [M,O]`, `movement_count = 0`, `map_row_count = 0`;
+- GAA zostało jawnie pominięte, ponieważ aktualny publiczny matcher nie jest bezpieczny dla zapytania mapowego.
+
+GAM obejmuje tylko ruchy widoczne dla sesji mostu, nie cały serwer. Zero ruchów w tej odpowiedzi nie dowodzi braku ataków PL1.
+
+### Wniosek i bezpieczny następny krok
+
+- Nie wysyłać GAA przez obecny publiczny adapter, dopóki nie zostanie wdrożony matcher po nazwie komendy (bez dopasowywania wszystkich pól żądania) i dłuższy timeout.
+- Przygotowany patch w `patches/empire-api-gaa-fnm-response-matcher.patch.md` nadal jest propozycją dla upstream, a nie zmianą działającego serwisu.
+- Po wdrożeniu patcha wymagany jest test na małym, ograniczonym obszarze: HTTP 200, `return_code=0`, poprawny kształt `content.AI`, następnie niezależna walidacja `areaType=11`, KID/X/Y i owner ID. Sam sukces HTTP nie potwierdza ataku.
+- Uprawnienia połączenia GitHub do repozytorium upstream są tylko do odczytu; nie można bezpośrednio wypchnąć poprawki do `danadum/empire-api`. Draft PR #13 w Empirenew nie jest wdrożeniem upstream i pozostaje osobnym, nieaktualizowanym pakietem mostu.
+
+### Ochrona zakresu
+
+Ta iteracja aktualizuje wyłącznie dziennik badań #barony. Bez zmian w Mapa, Szpiegowanie, Dodatkowe, katalogu współrzędnych, snapshotach ani danych ataków. Nie zapisano żadnego ataku i nie użyto cooldownów IT1/Beta do PL1.

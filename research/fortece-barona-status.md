@@ -2559,7 +2559,7 @@ node scripts/barony-live/probe.mjs --movements --reports --no-state
 
 Poświadczenia pozostają wyłącznie w lokalnych zmiennych środowiskowych; nie umieszczać ich w GitHub Actions, repozytorium ani czacie. Jeśli raport zostanie odczytany, zapis może potwierdzić konkretną fortecę i atakującego w zakresie skrzynki tego konta; czas dostarczenia raportu nadal nie jest dokładnym czasem ataku.
 
-## 63. Rozdzielenie pól `last_attack`, `attacked_at` i cooldownu; naprawa bezpiecznego pomijania radaru Beta — 2026-11-07 03:4x UTC
+## 63. Rozdzielenie pól `last_attack`, `attacked_at` i cooldownu; naprawa bezpiecznego pomijania radaru Beta — 2026-11-07 02:42 UTC
 
 ### 1) Co dokładnie zwraca GGE Tracker jako `last_attack`
 

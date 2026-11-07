@@ -196,6 +196,9 @@ function serializeExactRow(row, sampledAt, isVerifiedFortressTarget = false, sou
     attack_time_estimate_source: attackTimeEstimate
       ? 'live_PL1_GAA_type11_remaining_24h_global_cooldown_minus_86400s'
       : null,
+    attack_time_estimate_semantics: attackTimeEstimate
+      ? 'estimated_global_cooldown_start_after_fortress_defeat_not_army_launch_or_battle_start'
+      : null,
   };
 }
 
@@ -299,9 +302,10 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     attack_evidence_status: 'not_established',
     attack_time_estimate_utc: null,
     attack_time_estimate_source: null,
+    attack_time_estimate_semantics: null,
     attack_time_estimate_clock_basis: null,
     attack_time_utc: null,
-    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. A time estimate is emitted only for one exact production-zone PL1 type-11 row with the expected NPC owner, a positive defeaterPlayerId and an active remaining global cooldown no greater than 24h. The estimate is cooldown_until_utc minus 86400 seconds, uses the local client clock and is not an exact server timestamp; attack_time_utc remains null.',
+    note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. A time estimate is emitted only for one exact production-zone PL1 type-11 row with the expected NPC owner, a positive defeaterPlayerId and an active remaining global cooldown no greater than 24h. It estimates the start of the global cooldown after the fortress defeat, not the army launch or battle start: cooldown_until_utc minus 86400 seconds. It uses the local client clock and is not an exact server timestamp; attack_time_utc remains null.',
   };
   if (status === 'fortress_row_found') {
     const row = serializeExactRow(validRows[0], sampledAtIso, true, sourceZone);
@@ -316,6 +320,7 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
       : Date.parse(row.cooldown_until_utc) > Date.parse(sampledAtIso);
     observation.attack_time_estimate_utc = row.attack_time_estimate_utc;
     observation.attack_time_estimate_source = row.attack_time_estimate_source;
+    observation.attack_time_estimate_semantics = row.attack_time_estimate_semantics;
     if (row.attack_time_estimate_utc) {
       observation.attack_evidence_status = 'live_PL1_map_cooldown_and_defeater_evidence';
       observation.attack_time_estimate_clock_basis =

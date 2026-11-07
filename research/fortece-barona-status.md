@@ -2726,6 +2726,8 @@ W aktualnym kliencie E4K dostępne są dwa pola z tego samego, bieżącego wiers
 
 **attack_time_estimate_utc = cooldown_until_utc - 86400 sekund**
 
+To jest estymacja chwili rozpoczęcia 24-godzinnego globalnego cooldownu po pokonaniu fortecy. Nie jest to czas wysłania armii ani potwierdzony czas rozpoczęcia bitwy. W JSON pole attack_time_estimate_semantics jawnie oznacza tę semantykę; attack_time_utc pozostaje null.
+
 Estymacja jest emitowana tylko wtedy, gdy jednocześnie:
 1. sourceZone jest dokładnie równe DEFAULT_PL1_ZONE = EmpirefourkingdomsExGG_3; jawny override na IT1, Beta lub inną strefę wyłącza estymację;
 2. każde obserwowane zdarzenie zapisuje source_zone, a porównywarka przyjmuje tylko obserwacje z dokładnie tej produkcyjnej strefy; dane Beta/IT1 nie mogą zostać porównane z historią PL1;

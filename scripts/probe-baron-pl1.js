@@ -403,7 +403,7 @@ async function probeProductionPlayerHistoryFromServerPlayers(code) {
       return;
     }
 
-    const playersResponse = await fetch(base + "/players?page=1&size=20", {
+    const playersResponse = await fetch(base + "/players?page=1&size=20&orderBy=might_current&orderType=DESC", {
       headers: { "gge-server": "E4K_PL1", Accept: "application/json" },
       signal: AbortSignal.timeout(20000)
     });
@@ -422,7 +422,7 @@ async function probeProductionPlayerHistoryFromServerPlayers(code) {
       }
     }
 
-    const sampled = validPlayers.slice(0, 5);
+    const sampled = validPlayers.slice(0, 20);
     const results = [];
     for (let index = 0; index < sampled.length; index++) {
       const playerId = String(sampled[index].player_id);
@@ -463,6 +463,7 @@ async function probeProductionPlayerHistoryFromServerPlayers(code) {
       players_error: playerBody.error ?? null,
       players_total: playerBody.pagination?.total_items_count ?? null,
       players_in_page: players.length,
+      player_sort: "might_current DESC",
       valid_player_ids_for_status_code: validPlayers.length,
       histories_checked: results.length,
       nonempty_histories: results.filter(result => result.history_records > 0).length,

@@ -2478,3 +2478,83 @@ Ta aktualizacja zmienia wyłącznie dziennik badań #barony. Nie zmienia parsera
 - E4K parser BLS przypięty w ggejs: https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/bls.js
 - Ostatni probe PL1: https://github.com/marwlo-ops/Empirenew/actions/runs/42306925872
 - Ostatni deployment Pages main: https://github.com/marwlo-ops/Empirenew/actions/runs/42311764316
+
+
+## 62. Zakres GAM/SNE, korekta granicy PS i aktualny stan main — 2026-11-07 00:16 UTC
+
+### 1) GAM nie jest potwierdzonym globalnym feedem PL1
+
+Sprawdzono przypięty `ggejs` `a4980b01404ab01c9b826a267f331ae8c953d237`:
+- `src/commands/gam.js` parsuje rekordy z `params.M` i przekazuje je do `MovementManager`; sam handler nie zawiera mechanizmu enumeracji całego serwera ani dowodu globalnej kompletności.
+- `src/utils/MovementParser.js` mapuje typ ruchu `11` (`MOVEMENTTYPE_NPC_ATTACK`) na `ArmyAttackMovement`.
+- Ekstraktor Barony wymaga typu 11, kierunku outbound, dokładnego celu typu 11, zgodnego KID i właściciela NPC oraz dodatniego ID gracza źródłowego. Dzięki temu może wskazać konkretny cel i atakującego dla ruchu widocznego w danej sesji.
+
+Niezależna implementacja `pygge` (`f0ed456bd7b522f3f33b4f14fbb4856aa54ced64`) opisuje `Movements.get_movements()` jako „Get the movements of the player”; wysyła `gam {}`, zbiera odpowiedzi `gam` i deduplikuje po MID. To dodatkowo wspiera ostrożne traktowanie GAM jako zakresu gracza/sesji, ale nie jest dowodem kompletności ani identycznego zakresu w mobilnym E4K. Nie używamy GAM jako globalnego rejestru wszystkich ataków PL1.
+
+Wartości `PT`/`TT` są przeliczane przez klienta względem lokalnego czasu próbki. `movement_departure_estimate_utc` pozostaje estymatą; `attack_time_utc` pozostaje `null`. Sam ruch w drodze nie potwierdza zakończenia bitwy.
+
+Źródła:
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/gam.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/utils/MovementParser.js
+- https://github.com/danadum/pygge/blob/f0ed456bd7b522f3f33b4f14fbb4856aa54ced64/pygge/map/movements.py
+
+### 2) SNE i PS — nie ma podstaw do przypisania dokładnego czasu bitwy w E4K
+
+W przypiętym `ggejs` `BasicMessage.js` pole `deliveryTime` jest obliczane jako `Date.now() - data[5] * 1000`. Jest to lokalne oszacowanie czasu dostarczenia wiadomości na podstawie jej wieku, a nie serwerowy czas rozpoczęcia ataku.
+
+Parsery `commands/bls.js` i `commands/blm.js` nie mapują `PS` do pola daty. Barony przechwytuje surową wartość wyłącznie jako `ps_value_unverified`. Testy `probe-core.test.mjs` sprawdzają, że nawet zgodne wartości BLS.PS i BLM.PS nie powodują wyliczenia czasu bitwy. Semantyki PS znalezionej w przeglądarkowym kliencie GGE nie przenosimy na mobilne E4K bez próbki referencyjnej z PL1.
+
+Źródła:
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/structures/messages/BasicMessage.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/bls.js
+- https://github.com/476f6f6467616d6553747564696f73/ggejs/blob/a4980b01404ab01c9b826a267f331ae8c953d237/src/commands/blm.js
+- https://github.com/marwlo-ops/Empirenew/blob/main/scripts/barony-live/probe-core.test.mjs
+
+### 3) Aktualny main i separacja katalogu współrzędnych
+
+Zweryfikowany aktualny `main` podczas tej iteracji: `07cc04715a36f5d1a61b386700b5ea5d0621e284` (commit podpisany i zweryfikowany przez GitHub).
+
+Commit usuwa `.github/workflows/import-it1-fortresses.yml` (76 linii harmonogramu importu), zmienia wyłącznie etykiety źródła w `barony.html` i aktualizuje test polityki workflow. Katalog `data/baron-fortresses.json` pozostaje map-only:
+- `server_source=IT1`, `complete=true`;
+- 2021 współrzędne: Piaski 671, Lód 779, Ogień 571;
+- rekord ma wyłącznie ID, KID, krainę, X/Y, typ i źródło;
+- brak cooldownu, gotowości, gracza, defeatera i historii.
+
+W ten sposób IT1 jest wyłącznie katalogiem współrzędnych zgodnym z siatką PL1 według potwierdzenia operatora. Nie ma już zaplanowanego workflow pobierającego IT1 mapę cyklicznie, a żaden cooldown ani historia IT1 nie jest używana jako dane PL1.
+
+### 4) Stan PR i workflow radaru Beta
+
+PR #39 (`feat/barony-player-scan-realms`) pozostaje otwarty:
+- head: `153cc7afd5fbcebd6c010fd825138f42eddd8b54`;
+- względem aktualnego main: 3 commity ahead, 5 behind, status `diverged`;
+- zmienia tylko `barony.html`;
+- dodaje skan po nicku i selektory krain dla radaru jawnie oznaczonego `E4K_PL1_BETA`, a nie produkcyjnego PL1;
+- check `Validate Barony map and mobile UI` — SUCCESS;
+- check `Refresh E4K PL1 beta fortress radar` — FAILURE na kroku pobrania snapshotu; nie powstał potwierdzony snapshot dla tego przebiegu.
+
+PR #39 nie jest scalony i nie należy używać jego danych ani cooldownów Beta jako danych produkcyjnego PL1. Nie aktualizowano go ani nie scalano w tej iteracji.
+
+### 5) Testy, publikacja i wynik wykrywania
+
+Dla aktualnego main SHA `07cc047` potwierdzone są:
+- workflow `42315999989` — Probe PL1 fortress API: SUCCESS; testy offline, walidacja klienta i wykonanie sondy zakończone poprawnie. Sukces workflow oznacza poprawne wykonanie diagnostyki, nie potwierdzenie obsługi produkcyjnego API ani wykrycie ataku;
+- workflow `42315999866` — Validate Barony map and mobile UI: SUCCESS; polityka jednego harmonogramu mapy, mobilny UI i katalog map-only — PASS;
+- workflow `42315999315` — GitHub Pages build, deploy i report-build-status: SUCCESS.
+
+Źródła przebiegów:
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42315999989
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42315999866
+- https://github.com/marwlo-ops/Empirenew/actions/runs/42315999315
+
+W tej iteracji nie było autoryzowanej sesji produkcyjnego PL1. Nie wykonano lokalnego GAM/SNE na koncie operatora, nie zapisano żadnego zdarzenia ataku i nie zmieniono parsera ani danych aplikacji. Potwierdzone nowe ataki PL1: **0**. `attack_time_utc` i `battle_time_estimate_utc` pozostają `null`.
+
+### 6) Następny test rozstrzygający
+
+Brakuje lokalnej, autoryzowanej sesji produkcyjnego PL1 oraz istniejącego raportu NPC dostępnego w skrzynce tego konta albo widocznego ruchu GAM do typu 11. Bez tych danych nie można sprawdzić na żywo KID/X/Y, ID atakującego ani porównać BLS/BLM.PS z czasem bitwy w oficjalnym kliencie mobilnym.
+
+Test pozostaje lokalny i read-only:
+```sh
+node scripts/barony-live/probe.mjs --movements --reports --no-state
+```
+
+Poświadczenia pozostają wyłącznie w lokalnych zmiennych środowiskowych; nie umieszczać ich w GitHub Actions, repozytorium ani czacie. Jeśli raport zostanie odczytany, zapis może potwierdzić konkretną fortecę i atakującego w zakresie skrzynki tego konta; czas dostarczenia raportu nadal nie jest dokładnym czasem ataku.

@@ -158,7 +158,7 @@ function toIsoDate(value) {
   return null;
 }
 
-function serializeExactRow(row, sampledAt, isVerifiedFortressTarget = false, sourceZone = DEFAULT_PL1_ZONE) {
+function serializeExactRow(row, sampledAt, isVerifiedFortressTarget = false, sourceZone = null) {
   const cooldownUntil = toIsoDate(row.attackCooldownEnd);
   const sampledAtMs = Date.parse(sampledAt);
   const cooldownUntilMs = cooldownUntil ? Date.parse(cooldownUntil) : NaN;
@@ -267,7 +267,7 @@ function isTrustedFortressObservation(observation) {
   return true;
 }
 
-export function buildObservation(target, mapObjects, sampledAt = new Date().toISOString(), sourceZone = DEFAULT_PL1_ZONE) {
+export function buildObservation(target, mapObjects, sampledAt = new Date().toISOString(), sourceZone = null) {
   const sampledAtIso = toIsoDate(sampledAt);
   if (!sampledAtIso) throw new Error('Invalid observation timestamp.');
   if (!isValidFortressTarget(target)) throw new Error('Invalid fortress target.');

@@ -2,7 +2,7 @@ import test from 'node:test';
 import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {
-  buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
+  DEFAULT_PL1_ZONE, buildGamProbeSummary, buildObservation, buildScanPlan, compareObservations,
   correlateMovementAndBattleReports,
   extractNpcBattleReportEvidence, extractOutboundBossDungeonMovementEvidence,
   isNpcBattleReportMessage, isGgejsGamDispatchStack,
@@ -47,7 +47,7 @@ function makeObservation({
   if (cooldownUntil !== undefined) {
     row.attackCooldownEnd = cooldownUntil === null ? null : new Date(cooldownUntil);
   }
-  return buildObservation({ id, kid, kingdom, x, y }, [row], sampledAt);
+  return buildObservation({ id, kid, kingdom, x, y }, [row], sampledAt, DEFAULT_PL1_ZONE);
 }
 
 test('encodes empty bridge headers into a non-empty Express route segment', () => {
@@ -144,7 +144,7 @@ test('accepts only a BossDungeonMapobject type 11 row with the expected NPC owne
     attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
     lastSpyDate: new Date('2026-11-05T14:00:00Z'),
   };
-  const observation = buildObservation(target, [row], '2026-11-05T15:00:00Z');
+  const observation = buildObservation(target, [row], '2026-11-05T15:00:00Z', DEFAULT_PL1_ZONE);
   assert.equal(observation.status, 'fortress_row_found');
   assert.equal(observation.owner_id, -230);
   assert.equal(observation.dungeon_level, 72);
@@ -164,7 +164,7 @@ test('derives a labeled live-PL1 attack-time estimate only from a positive defea
     defeaterPlayerId: 123456,
     attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
   };
-  const observed = buildObservation(target, [baseRow], '2026-11-05T15:00:00Z');
+  const observed = buildObservation(target, [baseRow], '2026-11-05T15:00:00Z', DEFAULT_PL1_ZONE);
   assert.equal(observed.attack_evidence_status, 'live_PL1_map_cooldown_and_defeater_evidence');
   assert.equal(observed.attack_time_estimate_utc, '2026-11-04T16:00:00.000Z');
   assert.equal(
@@ -205,6 +205,23 @@ test('derives a labeled live-PL1 attack-time estimate only from a positive defea
   assert.equal(over24hCooldown.attack_time_estimate_utc, null);
 });
 
+test('does not assume production PL1 when the observation source zone is omitted', () => {
+  const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
+  const row = {
+    areaType: 11, kingdomId: 1, position: { X: 10, Y: 20 },
+    ownerInfo: { playerId: -230 }, defeaterPlayerId: 123456,
+    attackCooldownEnd: new Date('2026-11-05T16:00:00Z'),
+  };
+  const unknownSource = buildObservation(target, [row], '2026-11-05T15:00:00Z');
+  const explicitPl1 = buildObservation(target, [row], '2026-11-05T15:00:00Z', DEFAULT_PL1_ZONE);
+
+  assert.equal(unknownSource.source_zone, null);
+  assert.equal(unknownSource.status, 'fortress_row_found');
+  assert.equal(unknownSource.attack_evidence_status, 'not_established');
+  assert.equal(unknownSource.attack_time_estimate_utc, null);
+  assert.equal(explicitPl1.attack_time_estimate_utc, '2026-11-04T16:00:00.000Z');
+  assert.deepEqual(compareObservations(unknownSource, explicitPl1), []);
+});
 test('does not expose cooldown-derived time for an unverified or ambiguous map row', () => {
   const target = { id: 'it1-1-10-20', kid: 1, kingdom: 'sands', x: 10, y: 20 };
   const activeRow = {

@@ -218,6 +218,7 @@ function isTrustedFortressObservation(observation) {
   const expectedOwner = EXPECTED_BOSS_DUNGEON_OWNER_BY_KID[target?.kid];
   if (
     !sampleAt ||
+    observation.source_zone !== DEFAULT_PL1_ZONE ||
     !target ||
     typeof target.catalog_id_it1 !== 'string' || !target.catalog_id_it1.trim() ||
     !Number.isInteger(target.kid) ||
@@ -286,6 +287,7 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
       expected_area_type: 11, expected_boss_dungeon_owner_id: expectedOwner,
     },
     sampled_at_utc: sampledAtIso,
+    source_zone: sourceZone,
     status,
     rows: exactRows.map((row) => serializeExactRow(
       row,

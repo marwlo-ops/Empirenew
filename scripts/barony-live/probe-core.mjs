@@ -158,7 +158,7 @@ function toIsoDate(value) {
   return null;
 }
 
-function serializeExactRow(row, sampledAt) {
+function serializeExactRow(row, sampledAt, isVerifiedFortressTarget = false) {
   const cooldownUntil = toIsoDate(row.attackCooldownEnd);
   const sampledAtMs = Date.parse(sampledAt);
   const cooldownUntilMs = cooldownUntil ? Date.parse(cooldownUntil) : NaN;
@@ -171,7 +171,8 @@ function serializeExactRow(row, sampledAt) {
   const defeaterPlayerId = Number.isSafeInteger(row.defeaterPlayerId) && row.defeaterPlayerId > 0
     ? row.defeaterPlayerId
     : null;
-  const hasLiveAttackEvidence = defeaterPlayerId !== null &&
+  const hasLiveAttackEvidence = isVerifiedFortressTarget &&
+    defeaterPlayerId !== null &&
     cooldownMs !== null &&
     cooldownMs > 0 &&
     cooldownRemainingSeconds > 0 &&
@@ -285,7 +286,11 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     },
     sampled_at_utc: sampledAtIso,
     status,
-    rows: exactRows.map((row) => serializeExactRow(row, sampledAtIso)),
+    rows: exactRows.map((row) => serializeExactRow(
+      row,
+      sampledAtIso,
+      status === 'fortress_row_found' && row === validRows[0],
+    )),
     defeater_player_id: null,
     attack_evidence_status: 'not_established',
     attack_time_estimate_utc: null,
@@ -295,7 +300,7 @@ export function buildObservation(target, mapObjects, sampledAt = new Date().toIS
     note: 'Target catalog rows are BossDungeonMapobject (areaType 11): the client maps data[5] to remaining cooldown, data[6] to defeaterPlayerId and data[7] to kingdomId. A time estimate is emitted only for one exact PL1 type-11 row with the expected NPC owner, a positive defeaterPlayerId and an active remaining global cooldown no greater than 24h. The estimate is cooldown_until_utc minus 86400 seconds, uses the local client clock and is not an exact server timestamp; attack_time_utc remains null.',
   };
   if (status === 'fortress_row_found') {
-    const row = serializeExactRow(validRows[0], sampledAtIso);
+    const row = serializeExactRow(validRows[0], sampledAtIso, true);
     observation.owner_id = row.owner_id;
     observation.dungeon_level = row.dungeon_level;
     observation.defeater_player_id = row.defeater_player_id;

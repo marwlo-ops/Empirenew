@@ -8,11 +8,19 @@ export const MAP_SECTOR_SIZE = 100;
  * decodes to whitespace and makes JSON.parse(`{ }`) return the intended {}.
  */
 /**
- * Accept only an explicit numeric three-digit GGE Tracker server_code from
- * the server-scoped /api/v1/ status response. Never substitute e4k-data zoneId,
- * server names, or Beta/IT1 codes.
+ * Accept a numeric three-digit GGE Tracker server_code only when the status
+ * response identifies the exact requested server and expected zone. This
+ * prevents a Beta/IT1 status payload from being mistaken for production PL1.
  */
-export function getVerifiedTrackerServerCode(statusPayload) {
+export function getVerifiedTrackerServerCode(statusPayload, expectedServer, expectedZone) {
+  if (
+    typeof expectedServer !== 'string' || expectedServer.length === 0 ||
+    statusPayload?.server !== expectedServer ||
+    statusPayload?.platform !== 'E4K' ||
+    typeof expectedZone !== 'string' || expectedZone.length === 0 ||
+    statusPayload?.zone !== expectedZone
+  ) return null;
+
   const code = typeof statusPayload?.server_code === 'string'
     ? statusPayload.server_code.trim()
     : '';

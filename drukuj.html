@@ -25,7 +25,7 @@ const rowsOf=(v,key)=>{if(Array.isArray(v))return v;if(!v||typeof v!=='object')r
 const timeOf=x=>{let raw=x.next_available_at||x.available_at||x.effective_cooldown_until||x.cooldown_until||x.unlock_at||x.respawn_at; if(!raw)return null;let t=Date.parse(raw);return Number.isFinite(t)?t:null};
 const timeText=t=>t===null?'Brak danych':new Date(t).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'});
 const prev=x=>x.last_player_name||x.last_player||x.last_attacker_name||x.previous_owner_name||x.previous_occupier_name||x.occupier_name||x.player_name||'Brak danych';
-const kingdom={1:'Lodowa Kraina',2:'Piaski',3:'Szczyty Ognia'};
+const kingdom={1:'Piaski',2:'Lodowa Kraina',3:'Szczyty Ognia'};
 const isle={1:'Drewno — mała',2:'Kamień — mała',3:'Akwamaryna — duża',4:'Drewno — duża',5:'Kamień — duża',6:'Akwamaryna — mała'};
 async function get(url){const r=await fetch(url);if(!r.ok)throw new Error('API zwróciło HTTP '+r.status);return r.json()}
 async function collect(){

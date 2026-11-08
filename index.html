@@ -44,6 +44,7 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
   if(loaded[view])return;
   if(view==='reference')frame.src='./tracker-rb.html';
   else if(view==='barony')frame.src='./wyspy.html';
+  else if(view==='print')frame.src='./drukuj.html';
   else frame.src='./mapa-rb.html?embed=1#'+(view==='spy'?'intel':'map');
   loaded[view]=true;
  }

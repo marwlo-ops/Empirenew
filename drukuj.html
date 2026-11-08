@@ -25,7 +25,8 @@ const rowsOf=(v,key)=>{if(Array.isArray(v))return v;if(!v||typeof v!=='object')r
 const timeOf=x=>{let raw=x.next_available_at||x.available_at||x.effective_cooldown_until||x.cooldown_until||x.unlock_at||x.respawn_at; if(!raw)return null;let t=Date.parse(raw);return Number.isFinite(t)?t:null};
 const timeText=t=>t===null?'Brak danych':new Date(t).toLocaleString('pl-PL',{dateStyle:'short',timeStyle:'short'});
 const prev=x=>x.last_player_name||x.last_player||x.last_attacker_name||x.previous_owner_name||x.previous_occupier_name||x.occupier_name||x.player_name||'Brak danych';
-const kingdom={1:'Piaski',2:'Lodowa Kraina',3:'Szczyty Ognia'};
+const kingdom={1:'Lodowa Kraina',2:'Piaski',3:'Szczyty Ognia'};
+const kingdomIdOf=x=>{const v=x.kingdom_id??x.kingdomId??x.kid??x.kingdom??x.location_id??x.world_id; if(v==null)return null; const n=Number(v); return Number.isFinite(n)?n:null;};
 const isle={1:'Drewno — mała',2:'Kamień — mała',3:'Akwamaryna — duża',4:'Drewno — duża',5:'Kamień — duża',6:'Akwamaryna — mała'};
 async function get(url){const r=await fetch(url);if(!r.ok)throw new Error('API zwróciło HTTP '+r.status);return r.json()}
 async function collect(){
@@ -34,7 +35,7 @@ async function collect(){
   const selectedK=[...document.querySelectorAll('input[name=kingdom]:checked')].map(x=>Number(x.value));
   const selectedI=[...document.querySelectorAll('input[name=isle]:checked')].map(x=>Number(x.value));
   const tasks=[];
-  if(selectedK.length)tasks.push((async()=>{const p=await get(BASE+'forts?server='+SERVER+'&page=1&size=500&availability=0&min_attacks=0');const d=p.data||p;return rowsOf(d,'forts').filter(x=>selectedK.includes(Number(x.kid))).map(x=>({kind:'fort',time:timeOf(x),type:kingdom[Number(x.kid)]||'Forteca',coords:(x.position_x??'?')+':'+(x.position_y??'?'),previous:prev(x),detail:x.available_in_seconds!=null?'Ponowna dostępność':'Status z API',raw:x}));})());
+  if(selectedK.length)tasks.push((async()=>{const p=await get(BASE+'forts?server='+SERVER+'&page=1&size=500&availability=0&min_attacks=0');const d=p.data||p;const all=rowsOf(d,'forts');return all.filter(x=>{const k=kingdomIdOf(x);return k===null||selectedK.includes(k);}).map(x=>{const k=kingdomIdOf(x);return {kind:'fort',time:timeOf(x),type:kingdom[k]||(k===null?'Forteca — kraina nieustalona':'Forteca'),coords:(x.position_x??x.x??'?')+':'+(x.position_y??x.y??'?'),previous:prev(x),detail:x.available_in_seconds!=null?'Ponowna dostępność':'Status z API',raw:x};});})());
   if(selectedI.length)tasks.push((async()=>{const p=await get(BASE+'isles?server='+SERVER+'&page=1&size=500&state=0&resource=0');const d=p.data||p;return rowsOf(d,'isles').filter(x=>selectedI.includes(Number(x.isle_id))).map(x=>({kind:'isle',time:timeOf(x),type:isle[Number(x.isle_id)]||'Wyspa',coords:(x.position_x??'?')+':'+(x.position_y??'?'),previous:prev(x),detail:Number(x.state)===0?'Wolna':Number(x.state)===1?'Zajęta':'Oczekuje',raw:x}));})());
   report=(await Promise.all(tasks)).flat().sort((a,b)=>(a.time??Infinity)-(b.time??Infinity));
   $('rows').innerHTML=report.length?report.map(x=>'<tr><td>'+esc(timeText(x.time))+'</td><td>'+esc(x.type)+'</td><td>'+esc(x.coords)+'</td><td>'+esc(x.previous)+'</td><td>'+esc(x.detail)+'</td></tr>').join(''):'<tr><td colspan="5">Brak wyników dla wybranych filtrów.</td></tr>';

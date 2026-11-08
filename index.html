@@ -19,11 +19,12 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
 </style>
 </head>
 <body>
-<header><div class="head"><div class="brand">EMPIRENEW</div><nav class="nav" aria-label="Główna nawigacja"><button type="button" data-view="map">🗺️ Mapa</button><button type="button" data-view="spy">🕵️ Szpiegowanie</button><button type="button" data-view="extras">🔗 Dodatkowe</button><button type="button" data-view="reference">🛰️ Tracker RB</button><button type="button" data-view="barony">🏝️ Wyspy sztormowe</button></nav></div></header>
+<header><div class="head"><div class="brand">EMPIRENEW</div><nav class="nav" aria-label="Główna nawigacja"><button type="button" data-view="map">🗺️ Mapa</button><button type="button" data-view="spy">🕵️ Szpiegowanie</button><button type="button" data-view="extras">🔗 Dodatkowe</button><button type="button" data-view="reference">🛰️ Tracker RB</button><button type="button" data-view="barony">🏝️ Wyspy sztormowe</button><button type="button" data-view="print">🖨️ Drukuj PDF</button></nav></div></header>
 <main>
 <section class="view" id="view-map" aria-label="Mapa"><div class="frame-shell"><iframe id="map-frame" title="Empirenew — Mapa RB i MD" loading="lazy"></iframe></div></section>
 <section class="view" id="view-spy" aria-label="Szpiegowanie"><div class="frame-shell"><iframe id="spy-frame" title="Empirenew — Szpiegowanie PL1" loading="lazy"></iframe></div></section>
 <section class="view" id="view-reference" aria-label="Tracker RB"><div class="frame-shell"><iframe id="reference-frame" title="Tracker RB — lista i aktywność graczy RB" loading="lazy"></iframe></div></section><section class="view" id="view-barony" aria-label="Wyspy"><div class="frame-shell"><iframe id="barony-frame" title="Empirenew — Wyspy sztormowe" loading="lazy"></iframe></div></section>
+<section class="view" id="view-print" aria-label="Drukowanie"><div class="frame-shell"><iframe id="print-frame" title="Lista fortec i wysp do druku PDF" loading="lazy"></iframe></div></section>
 <section class="view" id="view-extras" aria-label="Dodatkowe">
 <div class="extras-intro"><div class="eyebrow">Empire tools · community hub</div><h1>Dodatkowe narzędzia</h1><p>Zewnętrzne rankingi, narzędzia społeczności oraz oficjalne informacje o wydarzeniach Goodgame Empire. Jeśli dostawca blokuje osadzanie strony, skorzystaj z przycisku otwarcia w nowej karcie.</p></div>
 <div class="resource-grid">
@@ -36,10 +37,10 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
 </main>
 <script>
 (function(){
- const mapFrame=document.getElementById('map-frame'),spyFrame=document.getElementById('spy-frame'),referenceFrame=document.getElementById('reference-frame'),baronyFrame=document.getElementById('barony-frame');
- const loaded={map:false,spy:false,reference:false,barony:false};
+ const mapFrame=document.getElementById('map-frame'),spyFrame=document.getElementById('spy-frame'),referenceFrame=document.getElementById('reference-frame'),baronyFrame=document.getElementById('barony-frame'),printFrame=document.getElementById('print-frame');
+ const loaded={map:false,spy:false,reference:false,barony:false,print:false};
  function loadView(view){
-  const frame=view==='spy'?spyFrame:view==='reference'?referenceFrame:view==='barony'?baronyFrame:mapFrame;
+  const frame=view==='spy'?spyFrame:view==='reference'?referenceFrame:view==='barony'?baronyFrame:view==='print'?printFrame:mapFrame;
   if(loaded[view])return;
   if(view==='reference')frame.src='./tracker-rb.html';
   else if(view==='barony')frame.src='./wyspy.html';
@@ -47,16 +48,16 @@ footer{padding:22px 4px 32px;color:#71859e;font-size:12px}
   loaded[view]=true;
  }
  function activate(view,writeHash){
-  if(!['map','spy','extras','reference','barony'].includes(view))view='map';
-  if(view==='map'||view==='spy'||view==='reference'||view==='barony')loadView(view);
+  if(!['map','spy','extras','reference','barony','print'].includes(view))view='map';
+  if(view==='map'||view==='spy'||view==='reference'||view==='barony'||view==='print')loadView(view);
   document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='view-'+view));
   document.querySelectorAll('[data-view]').forEach(el=>{const on=el.dataset.view===view;el.classList.toggle('active',on);el.setAttribute('aria-current',on?'page':'false')});
-  const hash=view==='map'?'map':view==='spy'?'intel':view==='reference'?'reference':view==='barony'?'barony':'extras';
+  const hash=view==='map'?'map':view==='spy'?'intel':view==='reference'?'reference':view==='barony'?'barony':view==='print'?'print':'extras';
   if(writeHash&&location.hash!=='#'+hash)history.replaceState(null,'','#'+hash);
-  document.title='Empirenew — '+(view==='map'?'Mapa':view==='spy'?'Szpiegowanie':view==='reference'?'Tracker RB':view==='barony'?'Wyspy':'Dodatkowe');
+  document.title='Empirenew — '+(view==='map'?'Mapa':view==='spy'?'Szpiegowanie':view==='reference'?'Tracker RB':view==='barony'?'Wyspy':view==='print'?'Drukuj PDF':'Dodatkowe');
  }
  document.querySelectorAll('[data-view]').forEach(btn=>btn.addEventListener('click',()=>activate(btn.dataset.view,true)));
- function fromHash(){const h=location.hash.toLowerCase();activate(h==='#extras'?'extras':h==='#intel'||h==='#spy'?'spy':h==='#reference'||h==='#tracker-rb'||h==='#repetytorium'?'reference':h==='#barony'?'barony':'map',false)}
+ function fromHash(){const h=location.hash.toLowerCase();activate(h==='#extras'?'extras':h==='#intel'||h==='#spy'?'spy':h==='#reference'||h==='#tracker-rb'||h==='#repetytorium'?'reference':h==='#barony'?'barony':h==='#print'?'print':'map',false)}
  window.addEventListener('hashchange',fromHash);
  window.addEventListener('pageshow',fromHash);
  fromHash();

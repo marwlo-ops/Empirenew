@@ -9,7 +9,7 @@ Ten katalog zawiera patch i testy dla forka danadum/empire-api. Nie jest wdrożo
 3. Obsługuje CORS Authorization i bezpieczne preflight OPTIONS.
 4. Dla gaa i fnm dopasowuje odpowiedź wyłącznie po nazwie komendy, zamiast wymagać echa parametrów żądania.
 5. Wydłuża timeout odpowiedzi gaa/fnm do 15 sekund; pozostałe komendy zachowują 1 sekundę.
-6. Ogranicza trasę danych do komend `gaa`, `fnm` i `gam`; wszystkie inne polecenia są odrzucane HTTP 403.
+6. Ogranicza trasę danych do komend `gaa`, `fnm`, `gam` i `gpi`; `gpi` służy wyłącznie do odczytu informacji o koncie technicznym mostu. Wszystkie inne polecenia są odrzucane HTTP 403.
 7. Ogranicza zarówno trasę HTTP, jak i tworzone sockety do produkcyjnego `EmpirefourkingdomsExGG_3`. Pozostałe serwery E4K i wszystkie sockety GGE nie są łączone; jeśli nie powstanie dokładnie jeden socket PL1, proces startuje błędem.
 
 Middleware wymaga tokenu o długości co najmniej 32 bajtów, porównuje go przez crypto.timingSafeEqual i działa fail-closed. Patch loguje wyłącznie typ błędu, a nie surowy komunikat upstream. Brak lub zbyt krótki token zwraca HTTP 503 na trasach chronionych; brak/błędny token zwraca HTTP 401.
@@ -19,7 +19,7 @@ Middleware wymaga tokenu o długości co najmniej 32 bajtów, porównuje go prze
 - api-auth-middleware.js — moduł autoryzacji, który należy skopiować do katalogu głównego forka.
 - api-auth-middleware.test.js — testy middleware.
 - map-command-queue.js — kolejka serializująca żądania GAA/FNM dla tego samego serwera i komendy.
-- read-only-commands.js — wąska lista dozwolonych komend mapy/ruchów (`gaa`, `fnm`, `gam`).
+- read-only-commands.js — wąska lista dozwolonych komend mapy/ruchów (`gaa`, `fnm`, `gam`) oraz odczyt informacji konta (`gpi`).
 - read-only-commands.test.js — testy odrzucania komend spoza listy.
 - map-command-queue.test.js — testy kolejności, równoległości różnych komend i odzyskiwania po błędzie.
 - apply-bridge-patch.mjs — guarded script, który modyfikuje dokładnie przypięty wariant upstream `app.js` i `utils/ws/sockets.js`.
@@ -40,7 +40,7 @@ Skrypt jest weryfikowany w CI względem upstream danadum/empire-api przypiętego
    - GET /status bez tokenu — HTTP 401;
    - GET /status z tokenem — HTTP 200;
    - brak/krótki token serwera — HTTP 503 na trasie chronionej;
-   - read-only gaa, fnm i gam z rzeczywistą odpowiedzią gry; każda inna komenda musi zwracać HTTP 403.
+   - read-only gaa, fnm, gam i gpi z rzeczywistą odpowiedzią gry; `lli`, `lre`, `scp` oraz każda inna komenda muszą zwracać HTTP 403.
 7. Potwierdź z wdrożonej usługi wychodzące TCP do hosta PL1 i zachowanie po reconnect/re-login.
 8. Dopiero po tych testach ustaw sekrety E4K_API_BASE i E4K_API_TOKEN w Empirenew Actions.
 

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#091321"><title>Konta graczy — Empirenew</title>
+<style>
+:root{color-scheme:dark;--bg:#091321;--panel:#14243a;--line:#30455f;--text:#edf4ff;--muted:#9fb1c8;--gold:#efc875;--green:#72ddb0;--blue:#91caff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#294a6b 0,transparent 48%),var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:1450px;margin:auto;padding:17px}.hero{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:8px 2px 16px}.eyebrow{color:var(--green);font-size:11px;font-weight:900;letter-spacing:.16em}.hero h1{color:var(--gold);font-size:clamp(26px,4vw,38px);margin:5px 0}.hero p{color:var(--muted);margin:0}.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}button,select,input{font:inherit;color:var(--text);background:#102036;border:1px solid #3a506b;border-radius:9px;padding:10px 12px}button{cursor:pointer;font-weight:750;background:linear-gradient(120deg,#614a25,#29364a);border-color:#98733c;color:#ffe2a0}button:disabled{opacity:.55;cursor:wait}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}.stat,.panel{border:1px solid var(--line);border-radius:13px;background:linear-gradient(145deg,#192d46,#111e30)}.stat{padding:12px}.stat b{display:block;color:var(--gold);font-size:24px}.stat span{font-size:10px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.toolbar{display:grid;grid-template-columns:minmax(180px,1fr) minmax(160px,220px) auto;gap:8px;margin:14px 0}.toolbar input{min-width:0}.layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:12px}.panel{overflow:hidden;min-width:0}.panel-head{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:13px 14px;border-bottom:1px solid var(--line)}.panel-head h2{margin:0;font-size:16px;color:#f0d18f}.list{max-height:65vh;overflow:auto;padding:8px}.player{display:block;width:100%;text-align:left;margin:5px 0;padding:11px 12px;border:1px solid #30465f;border-left:4px solid #718096;border-radius:10px;background:#102036;color:var(--text)}.player.selected{border-color:var(--gold);background:#26364a}.player-top{display:flex;justify-content:space-between;gap:8px}.player strong{overflow-wrap:anywhere}.player small{display:block;color:var(--muted);margin-top:4px}.pill{font-size:10px;border:1px solid #3b536c;border-radius:99px;padding:3px 7px;color:#c9d8e8;white-space:nowrap}.detail{padding:15px}.empty{padding:24px;color:var(--muted);text-align:center}.profile h2{margin:0;color:var(--gold);font-size:24px;overflow-wrap:anywhere}.profile-id{color:var(--muted);font-size:11px}.metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:13px 0}.metric{padding:10px;background:#0d1a2b;border:1px solid #2d4159;border-radius:9px}.metric b{display:block;font-size:18px;color:#f2d28f;overflow-wrap:anywhere}.metric span{font-size:10px;color:var(--muted);text-transform:uppercase}.section{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}.section h3{font-size:14px;margin:0 0 8px}.event{padding:9px 0;border-bottom:1px solid #293e55}.event b{font-size:12px}.event small{display:block;color:var(--muted);margin-top:3px}.notice{margin:12px 0;padding:11px 13px;border-left:3px solid var(--blue);background:#10263a;border-radius:0 8px 8px 0;color:#d5e8fb;font-size:12px}.status{color:var(--muted);font-size:12px;margin:10px 2px}.footer{padding:16px 2px;color:#71859d;font-size:11px}
+@media(max-width:850px){.wrap{padding:11px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.layout{grid-template-columns:1fr}.list{max-height:42vh}.actions{width:100%}.actions button{flex:1}}
+</style></head>
+<body><main class="wrap">
+<header class="hero"><div><div class="eyebrow">EMPIRENEW · PL1 · KATALOG PROFILI</div><h1>👥 Konta graczy</h1><p>Wyszukiwarka publicznych profili i statystyk dostępnych w zweryfikowanym snapshotcie serwera.</p></div><div class="actions"><button id="refresh">Odśwież dane</button><button id="clear">Wyczyść filtr</button></div></header>
+<div class="stats"><div class="stat"><b id="count">—</b><span>Profile w snapshotcie</span></div><div class="stat"><b id="alliances">—</b><span>Sojusze</span></div><div class="stat"><b id="captured">—</b><span>Ostatni odczyt</span></div><div class="stat"><b id="shown">—</b><span>Widoczne wyniki</span></div></div>
+<div class="toolbar"><input id="search" placeholder="Szukaj nicku lub PID…"><select id="alliance"><option value="all">Wszystkie sojusze</option></select><select id="sort"><option value="power">Sortuj: potęga</option><option value="name">Sortuj: nick A–Z</option><option value="level">Sortuj: poziom</option><option value="honor">Sortuj: honor</option></select></div>
+<div class="layout"><section class="panel"><div class="panel-head"><h2>Lista graczy PL1</h2><span class="pill" id="listMeta">Ładowanie</span></div><div class="list" id="players"><div class="empty">Pobieranie zweryfikowanych profili…</div></div></section>
+<section class="panel"><div class="panel-head"><h2>Karta profilu</h2><span class="pill">Dane publiczne</span></div><div class="detail" id="detail"><div class="empty">Wybierz gracza z listy, aby zobaczyć dostępne informacje.</div></div></section></div>
+<div class="status" id="status" role="status" aria-live="polite">Oczekiwanie na dane…</div>
+<div class="notice">Panel pokazuje wyłącznie dane profilu udostępnione przez API gry i zapisane w zweryfikowanym snapshotcie. Nie pobiera ani nie wyświetla haseł, tokenów, ciasteczek, adresów e-mail ani danych logowania. Brak pola w źródle oznacza „brak danych”, a nie wartość zero.</div>
+<div class="footer">Empirenew · Źródło: data/server-intel-snapshot.json oraz data/server-intel-history.json · Serwer PL1.</div>
+</main>
+<script>
+(()=> {
+ const $=id=>document.getElementById(id);
+ const fmt=v=>v===null||v===undefined||v===''||!Number.isFinite(Number(v))?'—':Number(v).toLocaleString('pl-PL');
+ const date=v=>v?new Date(v).toLocaleString('pl-PL'):'—';
+ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const safeFields=['name','player','player_id','member_id','alliance_id','alliance_name','level','power','honor','honor_points','loot','rank','captured_at','updated_at'];
+ let players=[],events=[],selected=null,snapshot=null;
+ function metric(p,keys){for(const k of keys)if(p[k]!==undefined&&p[k]!==null&&p[k]!=='')return p[k];return null}
+ function renderList(){
+  const q=$('search').value.trim().toLocaleLowerCase('pl-PL'),aid=$('alliance').value,sort=$('sort').value;
+  let rows=players.filter(p=>(!q||String(p.name||'').toLocaleLowerCase('pl-PL').includes(q)||String(p.player_id??'').includes(q))&&(aid==='all'||String(p.alliance_id??0)===aid));
+  rows.sort(sort==='name'?(a,b)=>String(a.name||'').localeCompare(String(b.name||''),'pl'):sort==='level'?(a,b)=>Number(b.level||0)-Number(a.level||0):sort==='honor'?(a,b)=>Number(metric(b,['honor','honor_points'])||0)-Number(metric(a,['honor','honor_points'])||0):(a,b)=>Number(b.power||0)-Number(a.power||0));
+  $('shown').textContent=fmt(rows.length);$('listMeta').textContent=rows.length+' / '+players.length;
+  $('players').innerHTML=rows.length?rows.slice(0,1000).map(p=>'<button class="player '+(String(selected)===String(p.player_id)?'selected':'')+'" data-pid="'+esc(p.player_id)+'"><span class="player-top"><strong>'+esc(p.name||'Nieznany gracz')+'</strong><span class="pill">'+esc(p.alliance_name||'Bez sojuszu')+'</span></span><small>PID '+esc(p.player_id??'—')+' · poziom '+fmt(p.level)+' · potęga '+fmt(p.power)+'</small></button>').join(''):'<div class="empty">Brak profili pasujących do filtra.</div>';
+  $('players').querySelectorAll('[data-pid]').forEach(b=>b.onclick=()=>showProfile(b.dataset.pid));
+ }
+ function showProfile(pid){
+  selected=String(pid);const p=players.find(x=>String(x.player_id)===selected);if(!p)return;
+  const relevant=events.filter(e=>String(e.player_id??'')===selected||String(e.player||'')===String(p.name||'')).sort((a,b)=>String(b.detected_at||'').localeCompare(String(a.detected_at||''))).slice(0,30);
+  const honor=metric(p,['honor','honor_points']),loot=metric(p,['loot']);
+  $('detail').innerHTML='<div class="profile"><h2>'+esc(p.name||'Nieznany gracz')+'</h2><div class="profile-id">PID '+esc(p.player_id??'—')+' · AID '+esc(p.alliance_id??'—')+' · '+esc(p.alliance_name||'Bez sojuszu')+'</div><div class="metrics"><div class="metric"><b>'+fmt(p.level)+'</b><span>Poziom</span></div><div class="metric"><b>'+fmt(p.power)+'</b><span>Potęga</span></div><div class="metric"><b>'+fmt(honor)+'</b><span>Honor</span></div><div class="metric"><b>'+fmt(loot)+'</b><span>Łup</span></div><div class="metric"><b>'+fmt(p.rank)+'</b><span>Miejsce w rankingu</span></div><div class="metric"><b>'+esc(date(snapshot?.captured_at))+'</b><span>Snapshot</span></div></div><div class="section"><h3>Ostatnie wykryte zmiany</h3>'+(relevant.length?relevant.map(e=>'<div class="event"><b>'+esc(e.kind||'Zmiana profilu')+'</b><small>'+esc(date(e.detected_at))+' · '+esc(e.description||'Zmiana w danych źródłowych')+'</small></div>').join(''):'<div class="empty">Brak zarejestrowanych zmian dla tego profilu.</div>')+'</div><div class="section"><h3>Zakres danych</h3><div class="notice">To karta publicznego profilu gry, nie panel logowania. Wartości pokazane są wyłącznie wtedy, gdy występują w źródłowym rekordzie.</div></div></div>';
+  renderList();
+ }
+ async function load(){
+  const btn=$('refresh');btn.disabled=true;$('status').textContent='Pobieranie snapshotu i historii…';
+  try{
+   const v=Date.now(),base='./data/';
+   const rs=await Promise.all(['server-intel-history.json','server-intel-snapshot.json'].map(f=>fetch(base+f+'?v='+v,{cache:'no-store'})));
+   const bad=rs.find(r=>!r.ok);if(bad)throw Error('HTTP '+bad.status);
+   const [h,s]=await Promise.all(rs.map(r=>r.json()));
+   if(!Array.isArray(h.events)||!Array.isArray(h.players)||!Array.isArray(s.players))throw Error('Nieprawidłowy format plików snapshotu.');
+   if(s.complete!==true||s.ranking_validated!==true||s.roster_validated!==true||!Number.isInteger(s.total_count)||s.player_count!==s.total_count||s.players.length!==s.total_count)throw Error('Snapshot nie przeszedł walidacji kompletności. Dla bezpieczeństwa nie pokazuję niepełnej listy.');
+   if(h.player_count!==s.player_count||Number(h.snapshot_sequence)!==Number(s.snapshot_sequence))throw Error('Snapshot i historia nie pochodzą z tego samego przebiegu.');
+   snapshot=s;players=s.players.map(p=>{const o={};for(const k of safeFields)if(Object.prototype.hasOwnProperty.call(p,k))o[k]=p[k];return o});events=h.events.filter(e=>e.kind!=='glory_delta');
+   $('count').textContent=fmt(players.length);$('alliances').textContent=fmt(new Set(players.map(p=>p.alliance_id).filter(x=>Number(x)>0)).size);$('captured').textContent=s.captured_at?new Date(s.captured_at).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}):'—';
+   const current=$('alliance').value,all=[...new Map(players.map(p=>[String(p.alliance_id??0),{id:String(p.alliance_id??0),name:p.alliance_name||'Bez sojuszu'}])).values()].sort((a,b)=>a.name.localeCompare(b.name,'pl'));
+   $('alliance').innerHTML='<option value="all">Wszystkie sojusze</option>'+all.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>').join('');if([...$('alliance').options].some(o=>o.value===current))$('alliance').value=current;
+   $('status').textContent='Dane zweryfikowane · '+players.length+' profili · snapshot '+date(s.captured_at)+' · sekwencja '+s.snapshot_sequence;
+   renderList();if(selected&&players.some(p=>String(p.player_id)===String(selected)))showProfile(selected);else $('detail').innerHTML='<div class="empty">Wybierz gracza z listy, aby zobaczyć dostępne informacje.</div>';
+  }catch(e){players=[];events=[];$('count').textContent='—';$('alliances').textContent='—';$('captured').textContent='—';$('shown').textContent='0';$('players').innerHTML='<div class="empty">'+esc(e.message)+'</div>';$('status').textContent='Brak zweryfikowanych danych. Nie pokazuję danych częściowych.'}
+  finally{btn.disabled=false}
+ }
+ ['search','alliance','sort'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',renderList));
+ $('refresh').onclick=load;$('clear').onclick=()=>{$('search').value='';$('alliance').value='all';$('sort').value='power';selected=null;$('detail').innerHTML='<div class="empty">Wybierz gracza z listy, aby zobaczyć dostępne informacje.</div>';renderList()};
+ load();
+})();
+</script></body></html>
